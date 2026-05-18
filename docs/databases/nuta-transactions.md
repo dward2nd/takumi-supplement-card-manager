@@ -1,0 +1,57 @@
+---
+tags: [database, nuta, transactions]
+owner: nuta
+role: transactions
+---
+
+# Nuta — Transactions (`รายการใช้จ่ายผ่านบัตรของนุตา`)
+
+Every purchase Nuta makes on her supplement cards. Schema is the **most feature-rich** of the three transaction databases — only Nuta's tracks cashback.
+
+- **Notion URL**: https://www.notion.so/dward2nd/2a1cb755f0f181ea95d2e8fbec394921
+- **Collection ID**: `2a1cb755-f0f1-8110-9795-000bf7d48b4f`
+- **Parent page**: `💳 รายการใช้จ่ายผ่านบัตรของนุตา` → `Personal Monetary Policy`
+- **Last schema-verified**: 2026-05-19
+
+## Properties
+
+| Name (Notion)       | Type      | Notes |
+|---------------------|-----------|-------|
+| `Name`              | title     |  |
+| `Card`              | relation → [[nuta-cards]] |  |
+| `ยอดชำระ`            | number (baht) |  |
+| `ใช้คะแนน`           | number (int)  |  |
+| `Transaction Datetime` | datetime  |  |
+| `Process Date`      | date          |  |
+| `Bill Cycle Date`   | date          |  |
+| `Due Date`          | date          |  |
+| `Note`              | text          |  |
+| **`% cb`**          | number (percent, 1 decimal) | **Nuta-only.** Cashback percentage applied to this transaction. See [[../concepts/cashback]]. |
+
+### Status checkboxes — see [[../concepts/payment-lifecycle]]
+
+- `Processed`, `ชำระแล้ว`, `Credit Return`
+
+### Point multiplier checkboxes — see [[../concepts/points-and-multipliers]]
+
+- `×0`, `×2`, `×4`, `×5`, `÷4`
+
+(No `×3` — that's Takumi-only.)
+
+### Formulas
+
+- `คะแนนที่ได้จริง` — [[../formulas/points-realized]]
+- `คะแนน unrealized` — [[../formulas/points-unrealized]]
+- **`cashback`** — **Nuta-only.** [[../formulas/cashback]]
+
+### Rollup
+
+- `บาทต่อ 1 คะแนน` — from the related Card.
+
+## What's unique to Nuta
+
+The `% cb` × `cashback` pair lets Nuta track baht-cashback alongside point-rewards in the same row. Baiboon and Takumi only track points; if/when they need cashback later, the schema can be cloned from here.
+
+## Views
+
+Same four "axis" views (by transaction time, process time, card, bill cycle) plus an unfiltered "ไม่จำแนกเลย" table.

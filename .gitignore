@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Obsidian local UI state (keep the rest of .obsidian/ shareable when it exists)
+.obsidian/workspace
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+
+# scripts/typescript (Bun)
+scripts/typescript/node_modules/
+
+# scripts/python (uv)
+scripts/python/__pycache__/
+scripts/python/**/__pycache__/
+scripts/python/.venv/
+scripts/python/*.egg-info/
+scripts/python/.python-version
+
+# Editor noise
+*.swp
+*.swo
