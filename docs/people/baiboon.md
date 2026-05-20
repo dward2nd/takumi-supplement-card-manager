@@ -29,3 +29,7 @@ Three databases — the full [[../concepts/three-database-trinity]]:
 Decoded from `ธนาคาร/บริษัท` select options on the Cards DB: **UOB**, **Shopee**, **บัตรกรุงศรี** (Krungsri), **KTC**.
 
 Card products observed: see [[../cards/_stubs]].
+
+## Phase 2 role
+
+Per [[../future-app/product-shape]], Baiboon signs in with email + password and sees only their own data, **plus** aggregate balances and shared cycle/promo quotas on the underlying `PrimaryAccount`s. No visibility into Nuta's transactions. Takumi (admin) can issue Baiboon a password reset if needed. Baiboon receives notifications for their own bill due-dates, cycle closings, and quota thresholds.

@@ -89,15 +89,20 @@ The future application replaces Notion entirely. This note sketches the target r
 5. **`Category` is universal**, not Takumi-only. Backfill optional but supported.
 6. **Bill ⟷ Transaction relation** is materialised (not just "Bills.วันตัดรอบบิล == Transactions.Bill Cycle Date matches for the same Card") — simplifies reconciliation.
 
-## Open questions for the user
+## Resolved decisions (interview 2026-05-21)
 
-- Should `PrimaryAccount` be exposed at the UI level, or only used internally?
-- Granularity of `RewardRule`: one row per applied rule, or a JSON column on Transaction?
-- Should `Card` carry a per-cycle quota (e.g. "the ×5 promo only applies to first ฿10,000")?
-- Is "Credit Return" a *transition* (transaction → refunded) or an *adjustment row* (a new negative transaction)?
+The open questions previously listed here are pinned in [[product-shape]]. Summary:
 
-These are not blockers for the vault. They'll be resolved at phase-2 planning.
+- **`PrimaryAccount` is exposed in the UI** as its own surface (a dedicated view per credit line). Adds `accountNumberHash` (stored, not displayed) per `PrimaryAccount`.
+- **`RewardRule` is a JSON column** on `Transaction` — embedded array of `{type, ...}` entries.
+- **Per-cycle quotas are first-class on BOTH `Card` and `PrimaryAccount`** — some promotions cap per-card, others cap household-wide across a primary account.
+- **"Credit Return" is modelled as BOTH**: an **adjustment row** (new negative-amount `Transaction`) plus the original `Transaction.status` flipping to `refunded`. **Cross-cycle nuance**: when a refund posts in a cycle later than the original, the adjustment row is credited to the *next* bill as advance payment — banks commonly handle late refunds this way. The `billCycleDate` on an adjustment row can therefore be later than its `swipedAt`.
+- **`Category` is universal** (not Takumi-only, not multi-tag). Required with an `Other / Uncategorized` fallback.
+- **`Transaction` carries four independent dates**: `swipedAt` / `processedDate` (null while pending) / `billCycleDate` / `dueDate`. Surfaced as separate columns in the UI.
+
+For everything else (auth, UI flows, notifications, rewards engine, migration strategy) see [[product-shape]].
 
 ## See also
 
-- [[migration-considerations]] — what we do about existing Notion data.
+- [[product-shape]] — the canonical product spec (interview-derived).
+- [[migration-considerations]] — what we do about existing Notion data (now reframed by the "fresh start" decision).

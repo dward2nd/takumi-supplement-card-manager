@@ -8,6 +8,8 @@ A formula property on every Cards DB. Computes the unpaid balance on this card, 
 
 There's also a `ยอดค้างชำระ rollup` property on each Cards DB that simply `sum`s `ยอดชำระ` from related transactions. The *formula* version likely refines that by subtracting paid amounts or excluding `Credit Return` rows.
 
+> **Phase 2**: this Notion formula is replaced by application code in the new app — see [[../future-app/product-shape#Rewards & computation]]. The body below is retained for reference and as a one-time decode target during phase-2 setup of the outstanding-balance engine.
+
 ## Where to find the body
 
 - Takumi: `formulaCode://1aacb755-f0f1-818a-a284-000b17d155de/OjtEcQ`

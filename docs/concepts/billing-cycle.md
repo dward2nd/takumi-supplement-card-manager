@@ -39,6 +39,20 @@ Two ways a transaction is tied to a billing period:
 
 These are linked *by convention*, not by a Notion relation (Bills' `Card` is a SELECT, not a relation — see [[known-divergences]]). A reconciliation script could verify "for each Bill, the sum of unpaid Transactions in the matching cycle equals `ยอดชำระ`". Such a script would belong in `scripts/`.
 
+## Phase 2 model (resolved 2026-05-21)
+
+[[../future-app/product-shape]] preserves the four-date model. The new field names align with phase-2 conventions:
+
+| Notion (today)          | Phase-2 field      | Notes                                                          |
+|-------------------------|--------------------|----------------------------------------------------------------|
+| `Transaction Datetime`  | `swipedAt`         | unchanged semantics                                            |
+| `Process Date`          | `processedDate`    | `null` while `status = pending`                                |
+| `Bill Cycle Date`       | `billCycleDate`    | may be the *next* cycle for cross-cycle refund adjustment rows |
+| `Due Date`              | `dueDate`          | unchanged semantics                                            |
+
+All four are first-class columns in the UI (not buried behind tabs as in Notion's view layer). The reconciliation script described above also lives natively in the new app as the "tx-sum vs. bill-amount delta" prompt on each bill — see [[../future-app/product-shape#Bills & reconciliation]].
+
 ## See also
 
 - [[payment-lifecycle]] — the orthogonal status axis.
+- [[../future-app/product-shape]] — phase-2 product spec.

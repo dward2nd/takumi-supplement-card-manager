@@ -6,6 +6,8 @@ tags: [formula, nuta-only]
 
 A formula property exclusive to [[../databases/nuta-transactions]]. Computes the baht-value cashback for this transaction based on `% cb` and `ยอดชำระ`.
 
+> **Phase 2**: this Notion formula is replaced by application code in the new app — see [[../future-app/product-shape#Rewards & computation]]. The body below is retained for reference and as a one-time decode target during phase-2 setup of the cashback engine.
+
 ## Where to find the body
 
 `formulaCode://2a1cb755-f0f1-8110-9795-000bf7d48b4f/TVZkPw`

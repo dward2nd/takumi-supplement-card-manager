@@ -28,3 +28,7 @@ Three databases — the full [[../concepts/three-database-trinity]]:
 Decoded from `ธนาคาร/บริษัท`: **UOB**, **Shopee**, **บัตรกรุงศรี** (Krungsri), **KTC** — same set as Baiboon.
 
 Card products observed: see [[../cards/_stubs]]. Notably, Nuta has some cards Baiboon doesn't (e.g. `AEON UnionPay`, `CardX JCB`) and vice versa.
+
+## Phase 2 role
+
+Per [[../future-app/product-shape]], Nuta signs in with email + password and sees only their own data, **plus** aggregate balances and shared cycle/promo quotas on the underlying `PrimaryAccount`s. No visibility into Baiboon's transactions. Takumi (admin) can issue Nuta a password reset if needed. Nuta's cashback tracking (Nuta-only in Notion) becomes universal in the new app — cashback joins multipliers inside `Transaction.rewardRules` and any holder can carry cashback rules.

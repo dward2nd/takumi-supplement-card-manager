@@ -13,14 +13,21 @@
       <p class="tagline">phase-2 POC — static demo, mock data, no backend</p>
     </div>
 
-    <nav class="holder-switcher" aria-label="View as">
-      <span class="holder-switcher__label">View as:</span>
-      <div class="holder-switcher__buttons" role="tablist">
-        <button type="button" class="holder-btn" data-person-id="p-takumi"  role="tab" aria-selected="true">Takumi <small>เว็บ</small></button>
-        <button type="button" class="holder-btn" data-person-id="p-baiboon" role="tab" aria-selected="false">Baiboon <small>ใบบุญ</small></button>
-        <button type="button" class="holder-btn" data-person-id="p-nuta"    role="tab" aria-selected="false">Nuta <small>นุตา</small></button>
-      </div>
-    </nav>
+    <div class="header-controls">
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle light / dark theme">
+        <span data-theme-icon>🌗</span>
+        <span data-theme-label>System</span>
+      </button>
+
+      <nav class="holder-switcher" aria-label="View as">
+        <span class="holder-switcher__label">View as:</span>
+        <div class="holder-switcher__buttons" role="tablist">
+          <button type="button" class="holder-btn" data-person-id="p-takumi"  role="tab" aria-selected="true">Takumi <small>เว็บ</small></button>
+          <button type="button" class="holder-btn" data-person-id="p-baiboon" role="tab" aria-selected="false">Baiboon <small>ใบบุญ</small></button>
+          <button type="button" class="holder-btn" data-person-id="p-nuta"    role="tab" aria-selected="false">Nuta <small>นุตา</small></button>
+        </div>
+      </nav>
+    </div>
   </header>
 
   <main>
@@ -41,6 +48,7 @@
 
     <nav class="tabs" aria-label="Sections">
       <button type="button" class="tab" data-tab="cards"        aria-selected="true">Cards</button>
+      <button type="button" class="tab" data-tab="accounts"     aria-selected="false">Primary accounts</button>
       <button type="button" class="tab" data-tab="transactions" aria-selected="false">Transactions</button>
       <button type="button" class="tab" data-tab="bills"        aria-selected="false">Bills</button>
     </nav>
@@ -65,14 +73,58 @@
       </div>
     </section>
 
+    <section class="panel" data-panel="accounts" hidden>
+      <h2>Primary accounts</h2>
+      <p class="panel__hint">The underlying credit lines. Takumi is the account holder; supplement cards share these limits. Shared cycle quotas (e.g. promo caps that count household-wide) are surfaced here so Baiboon and Nuta can see remaining headroom without seeing each other's transactions.</p>
+      <div class="accounts" data-rows="accounts"></div>
+    </section>
+
     <section class="panel" data-panel="transactions" hidden>
       <h2>Transactions</h2>
-      <p class="panel__hint">Reward rules (multiplier / cashback) replace the per-column checkboxes from Notion. <code>%cb</code> is no longer Nuta-only.</p>
+      <p class="panel__hint">Reward rules (multiplier / cashback) replace the per-column checkboxes from Notion. <code>%cb</code> is no longer Nuta-only. Each transaction tracks four independent dates — swiped, processed, bill cycle, due — per <code>docs/concepts/billing-cycle.md</code>.</p>
+
+      <details class="entry-form" data-entry-form>
+        <summary class="entry-form__toggle">+ Add transaction</summary>
+        <form class="entry-form__body" data-entry-form-body>
+          <div class="entry-form__grid">
+            <label>
+              <span>Card</span>
+              <select name="cardId" required data-entry-card></select>
+            </label>
+            <label>
+              <span>Merchant (verbatim)</span>
+              <input type="text" name="merchant" placeholder="e.g. Agoda - Bangkok Hotel" required data-entry-merchant />
+            </label>
+            <label>
+              <span>Amount (฿)</span>
+              <input type="number" name="amount" step="0.01" min="0" required />
+            </label>
+            <label>
+              <span>Category</span>
+              <select name="categoryId" data-entry-category></select>
+            </label>
+            <label class="entry-form__wide">
+              <span>Note (optional)</span>
+              <input type="text" name="note" placeholder="extra detail" />
+            </label>
+          </div>
+          <p class="entry-form__alias" data-entry-alias hidden></p>
+          <div class="entry-form__actions">
+            <button type="submit" class="btn btn--primary">Add</button>
+            <button type="reset" class="btn">Clear</button>
+          </div>
+          <p class="entry-form__hint">Demo only — adds to in-memory state for this session. The verbatim merchant string is preserved; if it matches an alias rule, the category auto-fills.</p>
+        </form>
+      </details>
+
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Swiped at</th>
+              <th>Swiped</th>
+              <th>Processed</th>
+              <th>Bill cycle</th>
+              <th>Due</th>
               <th>Card</th>
               <th>Category</th>
               <th>Note</th>
@@ -95,7 +147,9 @@
             <tr>
               <th>Cycle date</th>
               <th>Card</th>
+              <th>Network</th>
               <th class="num">Amount (฿)</th>
+              <th>Reconciliation</th>
               <th>Paid</th>
               <th>Payment evidence</th>
             </tr>
@@ -103,7 +157,7 @@
           <tbody data-rows="bills"></tbody>
         </table>
       </div>
-      <p class="empty-state" data-empty="bills" hidden>No bills for this person. (Takumi is the primary holder and the Notion-as-built model intentionally has no Bills DB for the primary.)</p>
+      <p class="empty-state" data-empty="bills" hidden>No bills for this person yet.</p>
     </section>
   </main>
 

@@ -11,6 +11,8 @@ A formula property on every Transactions DB. Computes how many reward points thi
 - Multiplier checkboxes — see [[../concepts/points-and-multipliers]]
 - Possibly status flags from [[../concepts/payment-lifecycle]] (e.g. zero out if `Credit Return = true` or `Processed = false`)
 
+> **Phase 2**: this Notion formula is replaced by application code in the new app — see [[../future-app/product-shape#Rewards & computation]]. The body below is retained for reference and as a one-time decode target during phase-2 setup of the points engine.
+
 ## Where to find the body
 
 Each Transactions DB stores its own copy of this formula at a `formulaCode://` URL:

@@ -27,19 +27,27 @@ Why it's like this (inferred): Notion's relation UI is heavier than a select for
 
 Why (inferred): Takumi is also the primary holder receiving the bank's actual statements, so the per-cycle reconciliation surface that Bills provides is less useful for him. Or simply: he built his system first, and Bills came later.
 
+**Resolved in phase 2**: every cardholder gets a Bills view; the asymmetry disappears. See [[../future-app/product-shape#Bills & reconciliation]].
+
 ## 3. `หมวดหมู่` (categories) is Takumi-only
 
 Only [[../databases/takumi-transactions]] has a category relation. Baiboon and Nuta have nothing equivalent.
 
 If categories become useful for transparency to the friends (e.g. "you spent ฿X on food this month"), promote this to the supplement schemas.
 
+**Resolved in phase 2**: `Category` is universal across all three holders, single-tag, required (with an `Other / Uncategorized` fallback). See [[../future-app/product-shape#Categories]].
+
 ## 4. Point multipliers diverge
 
 Takumi has `×3`; supplement holders have `÷4`. See [[points-and-multipliers]] for the full matrix.
 
+**Resolved in phase 2**: `Transaction.rewardRules` is a polymorphic JSON array (`{type: "multiplier", value: 5}`, etc.); any holder can carry any rule type. The Takumi-`×3` / supplement-`÷4` asymmetry collapses.
+
 ## 5. Cashback is Nuta-only
 
 Only [[../databases/nuta-transactions]] has `% cb` and `cashback`. See [[cashback]].
+
+**Resolved in phase 2**: cashback joins multipliers inside `Transaction.rewardRules` (`{type: "cashback", percent: 5}`). Any holder's transaction can carry zero or more rules of either kind. The Nuta-only divergence disappears.
 
 ## 6. Cards-DB property labels lag
 

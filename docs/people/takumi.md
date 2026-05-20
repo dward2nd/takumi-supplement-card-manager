@@ -14,7 +14,7 @@ Two databases under parent page **Personal Monetary Policy**:
 - [[../databases/takumi-cards]] — `สรุปบัตรและสินเชื่อของเว็บ`
 - [[../databases/takumi-transactions]] — `รายการใช้จ่ายผ่านบัตรของเว็บ`
 
-There is **no Bills database** for Takumi — unlike Baiboon and Nuta. See [[../concepts/known-divergences]].
+There is **no Bills database** for Takumi — unlike Baiboon and Nuta. See [[../concepts/known-divergences]]. (**Phase 2**: this asymmetry disappears — Takumi gains a symmetric Bills view in the new app per [[../future-app/product-shape#Bills & reconciliation]].)
 
 ## Distinguishing features vs supplement holders
 
@@ -27,3 +27,7 @@ There is **no Bills database** for Takumi — unlike Baiboon and Nuta. See [[../
 ## Why the structure differs
 
 Takumi's own setup predates the supplement-card model. Baiboon's and Nuta's databases were built later, refined the schema (added Bills, added `ธนาคาร/บริษัท`), and one (Nuta) layered cashback tracking on top. The migration target in [[../future-app/data-model-target]] should reconcile these.
+
+## Phase 2 role
+
+Per [[../future-app/product-shape]], Takumi takes on an **admin role** in the new app. On launch, Takumi sees a cross-holder aggregated overview (own + Baiboon + Nuta), can issue password resets for the supplement holders, and receives notifications for everyone's bill / cycle / quota events.

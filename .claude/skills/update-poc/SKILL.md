@@ -60,13 +60,15 @@ If `since_commit` is `null`, the envelope carries a `note` asking the user to co
 
 ## Procedure
 
-1. **Run the script.** Read the JSON envelope. If `since_commit` is `null` the POC has never been committed — there's no baseline against which to compute a delta. Stop and surface the CLI's `note` to the user, then suggest the bootstrap command verbatim:
+1. **Run the script.** Read the JSON envelope.
+   - If `since_commit` is `null` the POC has never been committed — there's no baseline against which to compute a delta. Stop and surface the CLI's `note` to the user, then suggest the bootstrap command verbatim:
 
-   ```sh
-   git add poc/ && git commit -m "Bootstrap POC baseline"
-   ```
+     ```sh
+     git add poc/ && git commit -m "Bootstrap POC baseline"
+     ```
 
-   After they commit, the next `/update-poc` run will compute changes since that commit. Do **not** auto-commit on their behalf — that would violate the "user reviews the diff" rule below.
+     After they commit, the next `/update-poc` run will compute changes since that commit. Do **not** auto-commit on their behalf — that would violate the "user reviews the diff" rule below.
+   - If `change_count` is `0`, the POC is already in sync with every watched doc as of `since_commit`. Report "POC is in sync (baseline `<since_commit-short>`); nothing to apply" and stop. Don't read any docs, don't smoke-test — there's nothing to verify. This is the common case right after a release that bundled both the POC and its source docs.
 2. **Triage the change list.** For each entry, `Read` the file and decide: does this change affect what the POC demonstrates? Apply these heuristics:
 
    | Change                                                                  | Likely action on POC                                                                 |

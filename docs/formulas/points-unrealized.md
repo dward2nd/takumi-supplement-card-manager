@@ -8,6 +8,8 @@ A formula property on every Transactions DB. Likely captures points that *will* 
 
 The complementary formula is [[points-realized]] (`คะแนนที่ได้จริง`). Together they cover the full "earnable points" surface per transaction.
 
+> **Phase 2**: this Notion formula is replaced by application code in the new app — see [[../future-app/product-shape#Rewards & computation]]. The body below is retained for reference and as a one-time decode target during phase-2 setup of the points engine.
+
 ## Where to find the body
 
 - Takumi: `formulaCode://1aacb755-f0f1-81dc-8e9f-000b20891025/YW93ZA`

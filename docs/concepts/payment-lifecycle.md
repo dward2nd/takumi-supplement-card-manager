@@ -35,6 +35,14 @@ Plus `Bill Cycle Date` ties a transaction to the statement it lands on (see [[bi
 
 A `Credit Return = true` transaction is left in the database — it isn't deleted. Its `ยอดชำระ` may stay positive (the original charge) with `Credit Return` acting as the offset signal, or it may be entered as a negative refund row depending on the user's habit. (Worth confirming with the user as a separate clarification.)
 
+## Phase 2 model (resolved 2026-05-21)
+
+[[../future-app/product-shape]] pins the future shape:
+
+- The three boolean flags collapse into one `Transaction.status` enum: `pending` → `processed` → `paid`, or terminal `refunded`. The `Bill.paid` flag and per-transaction "paid" signal unify too.
+- **A refund creates a new negative-amount `Transaction` row** (the "adjustment row") **and** flips the original transaction's status to `refunded`. Both representations co-exist deliberately — the negative row preserves bank-statement reality; the status flip lets reporting find "transactions that were refunded" without re-joining.
+- **Cross-cycle refunds** — when the refund posts in a bill cycle later than the original transaction's cycle, the adjustment row's `billCycleDate` is set to the **next** cycle, treating it as an advance payment that reduces the next bill. Banks commonly handle late refunds this way; the model expresses it directly.
+
 ## How the flags interact with rollups
 
 - `คะแนนสะสม` on a Card sums `คะแนนที่ได้จริง` from related transactions. Whether `Credit Return = true` rows contribute to that sum is determined by the formula body of `คะแนนที่ได้จริง` (see [[../formulas/points-realized]]) — decode when needed.

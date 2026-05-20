@@ -17,6 +17,42 @@
   --shadow:      0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
 }
 
+/* Dark theme — manual override (data-theme="dark") or system pref default. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:          #14161b;
+    --panel:       #1c1f26;
+    --ink:         #e6e7eb;
+    --ink-soft:    #9ea3ad;
+    --line:        #2a2e37;
+    --accent:      #7eb3e4;
+    --accent-soft: #1d2e44;
+    --good:        #6dcb95;
+    --good-soft:   #142b1f;
+    --warn:        #ea9a6d;
+    --warn-soft:   #2d1d12;
+    --neutral:     #8b94a4;
+    --neutral-soft:#23262e;
+    --shadow:      0 1px 2px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+}
+:root[data-theme="dark"] {
+  --bg:          #14161b;
+  --panel:       #1c1f26;
+  --ink:         #e6e7eb;
+  --ink-soft:    #9ea3ad;
+  --line:        #2a2e37;
+  --accent:      #7eb3e4;
+  --accent-soft: #1d2e44;
+  --good:        #6dcb95;
+  --good-soft:   #142b1f;
+  --warn:        #ea9a6d;
+  --warn-soft:   #2d1d12;
+  --neutral:     #8b94a4;
+  --neutral-soft:#23262e;
+  --shadow:      0 1px 2px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -261,8 +297,10 @@ tbody tr:hover {
   color: var(--neutral);
 }
 
-.chip--multiplier { background: var(--accent-soft); color: var(--accent); }
-.chip--cashback   { background: var(--good-soft);   color: var(--good);   }
+.chip--multiplier  { background: var(--accent-soft); color: var(--accent); }
+.chip--cashback    { background: var(--good-soft);   color: var(--good);   }
+.chip--alias       { background: var(--warn-soft);   color: var(--warn);   }
+.chip--adjustment  { background: var(--neutral-soft); color: var(--neutral); font-style: italic; }
 
 .status {
   display: inline-block;
@@ -304,4 +342,232 @@ tbody tr:hover {
   background: var(--neutral-soft);
   padding: 1px 6px;
   border-radius: 4px;
+}
+
+/* Header controls (theme toggle + holder switcher) ------------------------ */
+
+.header-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.theme-toggle {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: var(--shadow);
+}
+
+.theme-toggle [data-theme-label] { font-size: 12px; color: var(--ink-soft); }
+
+/* Primary accounts surface ------------------------------------------------ */
+
+.accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.account {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+}
+
+.account__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.account__title { margin: 0; font-size: 16px; }
+.account__limit { font-size: 12px; color: var(--ink-soft); }
+
+.account__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.account__stats > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat__label { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+.stat__value { font-size: 16px; font-weight: 600; margin-top: 2px; }
+
+/* Progress bar ------------------------------------------------------------ */
+
+.progress {
+  margin-top: 10px;
+}
+
+.progress__label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+
+.progress__num { font-variant-numeric: tabular-nums; }
+
+.progress__track {
+  background: var(--neutral-soft);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progress__fill {
+  background: var(--accent);
+  height: 100%;
+  transition: width 0.2s ease-out;
+}
+
+.progress__fill--high { background: var(--warn); }
+
+/* Transaction rows: negative-amount adjustment rows look distinct ---------- */
+
+.tx-row--adjustment td {
+  font-style: italic;
+  color: var(--ink-soft);
+  background: var(--neutral-soft);
+}
+
+.tx-row--adjustment td.num {
+  color: var(--good);
+  font-weight: 600;
+}
+
+/* Reconciliation chip on bills -------------------------------------------- */
+
+.recon {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.recon--ok   { background: var(--good-soft); color: var(--good); }
+.recon--diff { background: var(--warn-soft); color: var(--warn); cursor: help; }
+
+/* Clickable paid pill (toggle demo) --------------------------------------- */
+
+.pill--clickable {
+  appearance: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  text-transform: lowercase;
+}
+
+/* Entry form (Add transaction) -------------------------------------------- */
+
+.entry-form {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0;
+  margin: 12px 0 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.entry-form__toggle {
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 16px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.entry-form__toggle::-webkit-details-marker { display: none; }
+
+.entry-form__body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.entry-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.entry-form__grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.entry-form__grid input,
+.entry-form__grid select {
+  appearance: none;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font: inherit;
+  color: var(--ink);
+}
+
+.entry-form__wide { grid-column: 1 / -1; }
+
+.entry-form__alias {
+  margin: 0;
+  font-size: 12px;
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.entry-form__hint {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.entry-form__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }

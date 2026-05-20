@@ -4,54 +4,54 @@ tags: [future, migration]
 
 # Migration considerations: Notion → custom app
 
-When phase 2 begins, the eight Notion databases described in this vault need to flow into the data model in [[data-model-target]]. This note captures what's likely to be tricky.
+When phase 2 begins, the new app **does not import** the Notion vault. Decision pinned in [[product-shape]] (interview 2026-05-21): **fresh start**. This note captures what that means in practice and what remaining work the cut-over needs.
 
-## Extraction shape
+## Strategy: fresh start
 
-Notion's API yields each database as a paginated list of pages, each page being a `properties` dict. Per database:
+The new app launches with an empty database.
 
-- [[../databases/takumi-cards]] → `CardProduct` rows + `Card` rows (split per card-product)
-- [[../databases/takumi-transactions]] → `Transaction` rows + populate `Category` from `หมวดหมู่`
-- [[../databases/baiboon-cards]] / [[../databases/nuta-cards]] → `CardProduct` (dedup by name across the three universes) + `Card` rows
-- [[../databases/baiboon-transactions]] / [[../databases/nuta-transactions]] → `Transaction` rows
-- [[../databases/baiboon-bills]] / [[../databases/nuta-bills]] → `Bill` rows, but the `Card` SELECT must resolve to the corresponding `Card.id` by name-matching
+- **No bulk import** of historical Notion data.
+- **Historical depth at launch**: only the in-progress (current) bill cycle is recreated by hand if needed. Anything older stays in Notion.
+- **Attachments** (statement PDFs in Bills, payment-evidence photos) are **not** migrated. They remain accessible in the Notion archive.
+- **Notion lifecycle**: Notion becomes a **read-only archive** after launch. No new writes; lookups still work for historical questions. No dual-write window, no live mirror.
 
-## Hard problems
+This skips most of the integration risk a full migration would carry (rate-limited Notion exports, expiring file URLs, schema-difference reconciliation, dual-write conflict resolution). The trade-off is intentional: rebuild config at launch, accept that years of recorded rewards don't carry over.
 
-### 1. `PrimaryAccount` is not in Notion
+## What gets re-entered by hand at setup
 
-No database represents the underlying primary account that a supplement card hangs off. The migration must **invent** primary accounts, probably by grouping cards: every `UOB Premier` card (Takumi's, Baiboon's, Nuta's) belongs to one underlying UOB Premier account.
+Structural data only — not transactions. Estimated ~1 evening of typing for the three-user household:
 
-Heuristic: if two `Card` rows in different people's universes share the same `Name`, they probably share an underlying primary account. Confirm with the user during migration.
+1. **People**: Takumi (เว็บ), Baiboon (ใบบุญ), Nuta (นุตา). Roles assigned per [[product-shape#Users & access model]].
+2. **Issuers & networks**: UOB, KTC, Krungsri, etc. The current `ธนาคาร/บริษัท` SELECT values are the seed list.
+3. **CardProducts**: each card product the household uses (e.g. UOB Premier, UOB One, KTC Forest, Krungsri Visa Platinum).
+4. **PrimaryAccounts**: one per credit line, with `accountNumberHash` (a private mocked value at first — the real hash is filled in only when needed for reconciliation).
+5. **Cards**: each plastic card the three holders carry, with `holderPersonId`, `productId`, `premiumTier`, `bahtPerPoint`, `pointsPerCycle`, `allocatedLimit`, last-4-digits, nickname.
+6. **Per-cycle quotas**: the promotional caps that exist today (e.g. UOB One's tiers, any card-level ×5 cap). Authored once, then per-cycle progress accumulates from transactions.
+7. **Categories**: seed from current Notion list (`อาหาร`, `เดินทาง`, `ออนไลน์`, `ค่าใช้จ่ายประจำ`, …). Universal across holders.
+8. **Alias rules**: pattern → canonical merchant + auto-category. Authored as the user notices repeats (e.g. `contains "Agoda"` → "Agoda" + Travel). Lazy — doesn't all need to happen at launch.
+9. **Bill cycle / due date patterns** per card. Used for default-filling new transactions and for cycle-close reminders.
 
-### 2. Bills' `Card` is a SELECT — name-match resolution
+## What gets dropped
 
-Need a deterministic name-to-card-id lookup for each Bill row. The SELECT options are clean (no typos seen as of 2026-05-19), but verify before importing. A reconciliation script can pre-check that every `Bills.Card` SELECT value matches a `Cards.Name` row in the same person's universe.
+By choosing fresh start, the household accepts losing:
 
-### 3. Three formula triplets
+- Historical transaction-level reward earnings (the `คะแนนสะสม` rollups don't carry over). Going forward, the new app's computed-rewards engine builds new totals from launch day.
+- Historical bills and the paid/unpaid history of past cycles.
+- Statement PDFs and payment-evidence photos (these remain in Notion archive, just not accessible from the new app).
+- Notion-specific metadata: page IDs, last-edited timestamps, etc.
 
-`คะแนนที่ได้จริง`, `คะแนน unrealized`, `ยอดค้างชำระ` each exist in three databases. The bodies *might* be identical but probably aren't (Takumi has `×3` and no `÷4`; supplements have `÷4` and no `×3`). Decode all three sets ([[../formulas/points-realized]], [[../formulas/points-unrealized]], [[../formulas/outstanding-balance]]) and decide:
+## What stays the same as Notion
 
-- **Option A**: replicate three engines in the app (one per person).
-- **Option B**: unify into one engine driven by per-card config (multiplier table, gating rules).
+- The **verbatim merchant-string rule** survives unchanged — every `Transaction.merchant` is stored character-for-character.
+- The **four-date model** (`swipedAt` / `processedDate` / `billCycleDate` / `dueDate`) is preserved and now surfaced as first-class columns in the UI (see [[../concepts/billing-cycle]]).
+- The reward-rule **semantics** carry over (×0..×5, ÷4, cashback %), but the **storage shape** changes — JSON array on Transaction instead of parallel checkbox columns (resolves [[../concepts/known-divergences|divergences #4 and #5]]).
 
-Option B is the right end-state but requires confirming that the rules **can** be unified — i.e. that the differences are intentional UI conveniences rather than genuinely different reward maths.
+## When does Notion go away?
 
-### 4. Photos & PDFs
+It doesn't, formally. Notion stays **forever as a read-only archive**. No subscription cancellation pressure on day one — historical lookups still need it. If access becomes a problem later, the data can be exported to JSON and stored alongside the new app's backups.
 
-The Bills DB stores `ใบแจ้งยอด (PDF)` and `หลักฐานการชำระ` as Notion `file` properties. These are S3-backed URLs Notion serves. Migration must download and re-host (Notion file URLs expire).
+## See also
 
-### 5. The `Credit Return` semantic ambiguity
-
-Open question (see [[data-model-target]] open questions): is a refunded transaction a *transition* or an *adjustment row*? Different answers imply different migration scripts. Ask the user.
-
-### 6. Discontinued Takumi data
-
-Takumi's own activity has reportedly been discontinued for some time — the data may be partial or stale. Decide with the user whether to migrate it as historical record or skip.
-
-## Migration script characteristics
-
-- One-shot, not deterministic-by-rerun (data lands in target DB with new IDs).
-- Lives in `scripts/typescript/` or `scripts/python/` per the sandbox rules in `../../scripts/README.md` (outside this vault).
-- Should produce an audit report: rows extracted per DB, rows loaded per target table, mismatches flagged.
-- Should run against a **read-only** copy of Notion first (use the Notion API; don't mutate source).
+- [[product-shape]] — full product spec.
+- [[data-model-target]] — entity shape the structural data lands in.
+- [[../concepts/known-divergences]] — which divergences are resolved by phase 2 (most of them) and which remain (none).

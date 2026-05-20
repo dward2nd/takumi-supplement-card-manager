@@ -26,3 +26,11 @@ If Baiboon ever picks up a cashback card, the schema can be cloned from Nuta —
 ## Migration consideration
 
 In the [[../future-app/data-model-target|future app]], cashback and points should likely be modelled as polymorphic "rewards" per transaction rather than as parallel column families.
+
+## Phase 2 model (resolved 2026-05-21)
+
+Confirmed in [[../future-app/product-shape]]:
+
+- Cashback is **no longer Nuta-only** — it joins multipliers inside `Transaction.rewardRules` (a JSON array on `Transaction`). Any holder's transaction can carry `{type: "cashback", percent: 5}` alongside or instead of a multiplier.
+- The cashback `formula` field disappears — the new app **computes** the cashback baht in code on read, replacing the Notion formula (see [[../formulas/cashback]] for the historical formula body).
+- **Auto-classify with override** — per-card cashback-tier rules (e.g. UOB One's 10% / 5% / 1%) get applied automatically when a transaction is added, based on the merchant string. The user can override per row when the auto-tier is wrong.

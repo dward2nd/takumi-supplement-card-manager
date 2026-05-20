@@ -6,7 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repo is **phase 1: observation & research**. There is no application source code, no build system, and no runnable program. Do **not** scaffold any framework at the repo root — no `npm init`, no `pip install` at root, no `package.json`/`requirements.txt`/`tsconfig.json` at the repo root.
 
-The point of this phase is to document Takumi's existing Notion-based system for managing supplement credit cards so that, when phase 2 begins, the target data model and behavioural rules are already well-specified. Phase 2 will be a custom full-stack application that **replaces Notion entirely** as the system of record. The stack for phase 2 is deferred — keep the documentation stack-agnostic.
+The point of this phase is to document Takumi's existing Notion-based system for managing supplement credit cards so that, when phase 2 begins, the target data model and behavioural rules are already well-specified. Phase 2 will be a custom full-stack application that **replaces Notion entirely** as the system of record.
+
+**Canonical phase-2 spec**: [`docs/future-app/product-shape.md`](docs/future-app/product-shape.md). Pinned 2026-05-21 from a structured interview — covers users/roles, platform, entry flow, data-model decisions, rewards, categories, bills, notifications, migration, privacy, auth, audit log, theming, recurring transactions, and tech constraints. Every other doc in `docs/future-app/` and `docs/concepts/` cross-references it; treat it as the source of truth when reconciling.
 
 ## The three cardholders
 
@@ -75,7 +77,7 @@ Full schema is documented in `docs/databases/`.
 │   ├── concepts/            # cross-cutting concepts (multipliers, billing cycle, etc.)
 │   ├── cards/               # stub list now; individual notes promoted lazily
 │   ├── formulas/            # Notion formula decodings
-│   └── future-app/          # stack-agnostic migration target
+│   └── future-app/          # phase-2 target: product-shape.md (canonical) + data-model + migration
 └── scripts/                 # sandboxed deterministic automation
     ├── typescript/          # Bun runtime
     └── python/              # uv runtime
@@ -93,7 +95,7 @@ Rules:
 1. **Never** place a dependency manifest at the repo root.
 2. Each language folder has exactly one manifest, shared across all scripts in that language.
 3. Scripts target the Notion HTTP API directly (the MCP server is a Claude-side integration, not importable by standalone scripts).
-4. Isolate Notion access in one client file per language: `scripts/typescript/_notion-client.ts`, `scripts/python/_notion_client.py`. Business logic must remain portable to the future app.
+4. Isolate Notion access in one client module per language. Python: `scripts/python/lib/notion_client.py`. If TypeScript is ever introduced, mirror the pattern under `scripts/typescript/lib/`. Business logic must remain portable to the future app.
 5. Mark each script's header with a one-line declaration of what it does and that it is deterministic + idempotent.
 
 ## Working conventions
@@ -109,6 +111,6 @@ Rules:
 
 - Don't add `package.json`/`pyproject.toml`/`tsconfig.json`/`requirements.txt` at the repo root. (Inside `scripts/typescript/` or `scripts/python/` is fine.)
 - Don't introduce a build system or framework at root.
-- Don't commit to a future tech stack in writing — `docs/future-app/` stays stack-agnostic.
+- Stack decisions are captured in `docs/future-app/product-shape.md` (Rust backend + JS/TS PWA frontend, self-hosted on a VPS, minimal setup for ~3 users). Other docs — `docs/concepts/`, `docs/databases/`, `docs/formulas/`, `docs/people/` — stay framework-agnostic: they describe the Notion-as-built world and the abstract phase-2 shape, not the implementation.
 - Don't "fix" the Bills SELECT-vs-relation divergence in Notion. Document it in `docs/concepts/known-divergences.md`.
 - Don't generate one-note-per-card upfront. Promote a card from `docs/cards/_stubs.md` to its own note only when you and the user have discussed that card's specific rules.
