@@ -9,29 +9,29 @@ The future application replaces Notion entirely. This note sketches the target r
 ## Entities
 
 ```
-┌──────────────┐         ┌────────────────────┐
-│   Person     │1───*   │  PrimaryAccount    │
-│  - id        │         │  - id              │
-│  - displayName │       │  - issuerId        │
-│  - role:      │         │  - accountNumberHash│
-│    primary    │         │  - creditLimit     │
-│   |supplement │         │  - holderPersonId  │  → Person
-└──────┬───────┘         └─────────┬──────────┘
-       │                            │
-       │                       1    │   *
-       │                            ▼
-       │                  ┌────────────────────┐
-       │                  │  Card              │     supplement card
-       │      *           │  - id              │     (or primary card)
-       └──────────────────│  - primaryAccountId│
-                          │  - holderPersonId  │  → Person
-                          │  - productNameId   │  → CardProduct
-                          │  - networkId       │  → CardNetwork
-                          │  - premiumTier     │
-                          │  - bahtPerPoint    │
-                          │  - pointsPerCycle  │ (boolean)
-                          │  - allocatedLimit  │ (per-holder share)
-                          └─────────┬──────────┘
+┌────────────────┐         ┌──────────────────────┐
+│   Person       │ 1─────* │  PrimaryAccount      │
+│  - id          │         │  - id                │
+│  - displayName │         │  - issuerId          │
+│  - role:       │         │  - accountNumberHash │
+│    primary     │         │  - creditLimit       │
+│   |supplement  │         │  - holderPersonId    │ → Person
+└──────┬─────────┘         └─────────┬────────────┘
+       │                             │
+       │                        1    │   *
+       │                             ▼
+       │                  ┌─────────────────────┐
+       │                  │  Card               │     supplement card
+       │      *           │  - id               │     (or primary card)
+       └──────────────────│  - primaryAccountId │
+                          │  - holderPersonId   │  → Person
+                          │  - productNameId    │  → CardProduct
+                          │  - networkId        │  → CardNetwork
+                          │  - premiumTier      │
+                          │  - bahtPerPoint     │
+                          │  - pointsPerCycle   │ (boolean)
+                          │  - allocatedLimit   │ (per-holder share)
+                          └─────────┬───────────┘
                                     │
                               1     │    *
                                     ▼

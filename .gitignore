@@ -1,11 +1,21 @@
+# Secrets — Notion integration token, etc. Keep .env.example committed.
+.env
+.env.local
+.env.*.local
+
+# Claude Code local-only state (machine-specific MCP toggles, permissions, etc.)
+.claude/settings.local.json
+.claude/**/settings.local.json
+
 # macOS
 .DS_Store
 
-# Obsidian local UI state (keep the rest of .obsidian/ shareable when it exists)
-.obsidian/workspace
-.obsidian/workspace.json
-.obsidian/workspace-mobile.json
-.obsidian/cache
+# Obsidian local UI state (keep the rest of .obsidian/ shareable). The `**/`
+# prefix is what makes these patterns match the vault at docs/.obsidian/.
+**/.obsidian/workspace
+**/.obsidian/workspace.json
+**/.obsidian/workspace-mobile.json
+**/.obsidian/cache
 
 # scripts/typescript (Bun)
 scripts/typescript/node_modules/
