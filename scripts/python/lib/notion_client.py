@@ -80,6 +80,12 @@ def archive_page(page_id: str) -> dict:
     return client.pages.update(page_id=page_id, archived=True)
 
 
+def update_page_properties(page_id: str, properties: dict) -> dict:
+    """Patch one or more property values on an existing page."""
+    client = get_client()
+    return client.pages.update(page_id=page_id, properties=properties)
+
+
 def get_page(page_id: str) -> dict:
     client = get_client()
     return client.pages.retrieve(page_id=page_id)

@@ -26,12 +26,20 @@ Input schema:
     "bill_cycle":  "2026-05-29",                    // ISO date, applied to whole batch
     "due_date":    "2026-06-15",                    // ISO date, applied to whole batch
     "processed":   true,                            // optional, default true
+    "multiplier":  "×0",                            // optional, batch-level default;
+                                                    //   one of ×0/×2/×3/×4/×5/÷4 or null
+    "cashback_percent": 0.01,                       // optional, batch-level default;
+                                                    //   Nuta-only (% cb does not exist
+                                                    //   on Baiboon/Takumi DBs); raw
+                                                    //   fraction (0.05 == 5%)
     "transactions": [                                // required, non-empty
       {
-        "date":   "2026-05-13",                     // ISO date
-        "name":   "TMN 7-11 BANGKOK TH",            // verbatim merchant string
-        "amount": 89.0,                             // baht
-        "note":   "..."                             // optional
+        "date":              "2026-05-13",          // ISO date
+        "name":              "TMN 7-11 BANGKOK TH", // verbatim merchant string
+        "amount":            89.0,                  // baht
+        "note":              "...",                 // optional
+        "multiplier":        "×2",                  // optional, overrides batch
+        "cashback_percent":  0.05                   // optional, overrides batch
       }
     ]
   }
@@ -41,6 +49,8 @@ Hard rules enforced here:
   2. Holder routes to the correct transactions DS; never cross-write.
   3. Card relation must resolve to exactly one card; otherwise abort.
   4. `Processed` defaults to true unless the spec says otherwise.
+  5. At most one multiplier checkbox is set per page. Absence ⇒ ×1.
+  6. cashback_percent is Nuta-only; rejected for other holders at spec-validation.
 
 --dry-run builds the payload and reports it without calling Notion.
 """
@@ -71,6 +81,8 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     bill_cycle = spec["bill_cycle"]
     due_date = spec["due_date"]
     processed = spec.get("processed", True)
+    batch_multiplier = spec.get("multiplier")
+    batch_cashback = spec.get("cashback_percent")
 
     created: list[dict] = []
     for tx in spec["transactions"]:
@@ -83,6 +95,8 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             card_page_id=card_page_id,
             processed=processed,
             note=tx.get("note"),
+            multiplier=tx.get("multiplier", batch_multiplier),
+            cashback_percent=tx.get("cashback_percent", batch_cashback),
         )
         if dry_run:
             created.append({"dry_run": True, "properties": props})

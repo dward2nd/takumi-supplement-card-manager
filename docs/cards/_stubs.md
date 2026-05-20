@@ -27,7 +27,7 @@ Sources:
 | SPayLater        | Shopee            | ✓        | ✓     |  ?      |
 | ttb so smart     | ttb               | ✓        |       |  ?      |
 | UOB Makro        | UOB               | ✓        | ✓     |  ?      |
-| UOB One          | UOB               | ✓        | ✓     |  ?      |
+| [[uob-one\|UOB One]] | UOB           | ✓        | ✓     |  ?      |
 | UOB Premier      | UOB               | ✓        | ✓     |  ?      |
 | UOB World        | UOB               | ✓        | ✓     |  ?      |
 

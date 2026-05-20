@@ -10,7 +10,13 @@ than a 400 from the API.
 from __future__ import annotations
 
 import datetime as _dt
+import sys
+from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from lib.transaction_write import VALID_MULTIPLIERS
 
 
 class SpecError(ValueError):
@@ -19,6 +25,26 @@ class SpecError(ValueError):
 
 _REQUIRED_TOP = ("holder", "card", "bill_cycle", "due_date", "transactions")
 _REQUIRED_TX = ("date", "name", "amount")
+
+
+def _check_multiplier(value: Any, field: str) -> None:
+    if value is None:
+        return
+    if not isinstance(value, str) or value not in VALID_MULTIPLIERS:
+        raise SpecError(
+            f"{field}={value!r} must be one of {sorted(VALID_MULTIPLIERS)} or null"
+        )
+
+
+def _check_cashback_percent(value: Any, field: str) -> None:
+    if value is None:
+        return
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        raise SpecError(f"{field}={value!r} must be a number (raw fraction, 0.05 = 5%)")
+    if not (0 <= value <= 1):
+        raise SpecError(
+            f"{field}={value!r} must be in [0, 1] — pass 0.05 for 5%, not 5"
+        )
 
 
 def _iso_date(s: Any, field: str) -> str:
@@ -45,6 +71,12 @@ def validate_spec(spec: dict[str, Any]) -> None:
     if "processed" in spec and not isinstance(spec["processed"], bool):
         raise SpecError("processed must be a boolean")
 
+    _check_multiplier(spec.get("multiplier"), "multiplier")
+    _check_cashback_percent(spec.get("cashback_percent"), "cashback_percent")
+
+    holder = spec["holder"]
+    has_batch_cb = spec.get("cashback_percent") is not None
+
     txs = spec["transactions"]
     if not isinstance(txs, list) or not txs:
         raise SpecError("transactions must be a non-empty list")
@@ -62,3 +94,12 @@ def validate_spec(spec: dict[str, Any]) -> None:
             raise SpecError(f"transactions[{i}].amount must be a number")
         if "note" in tx and tx["note"] is not None and not isinstance(tx["note"], str):
             raise SpecError(f"transactions[{i}].note must be a string if present")
+        _check_multiplier(tx.get("multiplier"), f"transactions[{i}].multiplier")
+        _check_cashback_percent(
+            tx.get("cashback_percent"), f"transactions[{i}].cashback_percent"
+        )
+        if (has_batch_cb or tx.get("cashback_percent") is not None) and holder != "nuta":
+            raise SpecError(
+                f"cashback_percent (`% cb`) only exists on Nuta's Transactions DS; "
+                f"holder is {holder!r}"
+            )

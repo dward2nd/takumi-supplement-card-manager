@@ -29,11 +29,14 @@ JSON spec:
   "bill_cycle": "2026-05-29",
   "due_date": "2026-06-15",
   "processed": true,
+  "multiplier": "×0",
   "transactions": [
-    { "date": "2026-05-13", "name": "TMN 7-11 BANGKOK TH", "amount": 89.0, "note": "optional" }
+    { "date": "2026-05-13", "name": "TMN 7-11 BANGKOK TH", "amount": 89.0, "note": "optional", "multiplier": "×2" }
   ]
 }
 ```
+
+`multiplier` is optional. At top level it applies to every transaction in the batch; per-transaction it overrides the batch default. Valid values: `"×0"`, `"×2"`, `"×3"` (Takumi only), `"×4"`, `"×5"`, `"÷4"`. **At most one** multiplier checkbox is set per page — that's a hard rule on the Notion side; if you tried to set two, the formulas would double-count. Omitting `multiplier` leaves all checkboxes false, which Notion's formula treats as **×1** (the default earning rate).
 
 Output: a JSON envelope `{holder, card, card_page_id, bill_cycle, due_date, processed, count, created: [{id, url, name, amount, date}, ...]}`. Surface the count + a compact list back to the user. Don't dump full URLs unless asked.
 
@@ -43,12 +46,13 @@ Output: a JSON envelope `{holder, card, card_page_id, bill_cycle, due_date, proc
 
 1. **Cardholder** — one of `Takumi` (เว็บ) / `Baiboon` (ใบบุญ) / `Nuta` (นุตา). Determines which Transactions DB you write to and which Cards DB you query for the relation.
 2. **Card name** — e.g. `First Choice`, `UOB World`. Must match an existing row in that holder's Cards DB by `Name`.
-3. **Billing window for the batch** — `Bill Cycle Date` and `Due Date`, both single ISO dates. Applied uniformly to every transaction in the batch unless the user splits the batch.
+3. **Billing window for the batch** — `Bill Cycle Date` and `Due Date`, both single ISO dates. Applied uniformly to every transaction in the batch unless the user splits the batch. These two dates **must be consistent for the same card** — a bill cycle has exactly one due date on each card, set by the bank. If the user gives you a `bill_cycle` you've already seen paired with a different `due_date` on the same card, stop and confirm before writing.
 4. **The transaction list** — one or more entries, each carrying:
    - **Transaction date** (`Transaction Datetime`) — ISO date.
    - **Merchant string** — the *full*, *verbatim* merchant name as supplied.
    - **Amount in baht** (`ยอดชำระ`).
    - Optional **Note**.
+5. **Point multiplier** (optional) — see `multiplier` in the JSON spec above. For cards that **never** earn points (e.g. UOB One), the user expects `×0` set on every transaction; ask once per session and then apply for the whole batch.
 
 The user often bundles entries under date headings ("## 13 May") — split them out into one Notion page per amount, all sharing that date.
 
@@ -97,6 +101,31 @@ Before creating any pages:
 
 Always set `"Processed": "__YES__"`, regardless of the real processing status. This is current user policy — only override if the user explicitly says "leave Processed false" for a batch.
 
+### 4a. Multipliers are mutually exclusive
+
+Only **one** of `×0` / `×2` / `×3` / `×4` / `×5` / `÷4` can be checked per transaction page. If a card's policy says it always earns at a particular tier (e.g. UOB One = `×0`), pass `multiplier` once at the batch level and the CLI applies it to every entry. A page with **no** multiplier checkbox set is treated as `×1` (default earning) by Notion's `คะแนนที่ได้จริง` formula — never set `×1` manually because that field does not exist.
+
+### 4b. Cashback rate (`% cb`) on Nuta's transactions
+
+Nuta's Transactions DS is the only one with a `% cb` field (number, percent display). The CLI accepts `cashback_percent` at batch and per-tx level; the value is the **raw fraction** (e.g. `0.05` for 5%). For Baiboon and Takumi, omit it — the field doesn't exist and the validator rejects the spec to prevent a 400 from Notion.
+
+When the user supplies tier rules per card (see *Card-specific earning policies* below), classify each transaction's merchant against the tier table and pass the resulting `cashback_percent` per tx. Don't ask the user to compute the fraction — apply the policy yourself, but surface ambiguity (e.g. an aggregator merchant that could bundle several tiers).
+
+### 4c. Note explains exclusion reasons
+
+If a transaction earns **no** cashback / points for a reason that is **not** the card's default policy, write the reason into `Note`. Examples that need a Note:
+
+- A foreign merchant (country suffix like `US`, `USA`, `JP`, `SG` in the merchant string) charged in THB → `"Foreign merchant (<country>) charged in THB — no points/cashback on Thai-issued cards."`
+- A UOB-card petrol-station charge → `"Petrol station — UOB cards earn no points/cashback at fuel merchants."`
+
+Examples that **don't** need a Note:
+
+- A UOB One transaction at `×0` — that's the card's default policy, already obvious from the card relation.
+- A UOB One transaction at 1% cashback (the "everything else" tier) — that's normal tiering, not an exclusion.
+- A Nuta UOB One `TMN 7-11` row at 1% (not 5%) — the cashback tier table already documents that `TMN 7-11` is the "else" tier; no per-row Note required.
+
+The Note exists so a future reviewer of the transactions can immediately see *why* a row diverges from the card's normal earning rate without having to consult the card's policy doc.
+
 ### 5. Properties to set on each page
 
 | Notion property                          | Value                                                                |
@@ -117,11 +146,39 @@ Always set `"Processed": "__YES__"`, regardless of the real processing status. T
 
 - `Process Date` — bank-side; we don't know it at write time.
 - `Credit Return`, `ชำระแล้ว` — payment-lifecycle flags.
-- All point-multiplier checkboxes (`×0` `×2` `×4` `×5` `÷4`, plus Takumi-only `×3`). Defaults are false; the realized-points formula will compute correctly.
 - `ใช้คะแนน` — points-redemption is rare and explicit.
 - Takumi-only `หมวดหมู่` (category) relation.
 
-Nuta-only `% cb` / `cashback` are formulas — not writable anyway.
+Point-multiplier checkboxes (`×0` `×2` `×4` `×5` `÷4`, plus Takumi-only `×3`) are set explicitly via the spec's `multiplier` field — see *Rule 4a* and the card-specific policies below.
+
+**Nuta-only `% cb`** is a writable `number` property displayed as a percent — storage is the raw fraction, so `0.05` shows as `5%` in the Notion UI. The CLI accepts it as `cashback_percent` at batch level or per-tx. **Nuta-only `cashback`** is a read-only formula = `% cb` × `ยอดชำระ` — never write to it.
+
+## Card-specific earning policies
+
+When the user gives you a card name, apply that card's known policy before sending the spec. Ask once if the user hasn't already confirmed it for the session.
+
+### UOB One
+
+- **Points**: this card **does not earn points**. Always pass `"multiplier": "×0"` at the batch level. No exceptions — if the user lists a transaction that looks like it "should" earn points, it still doesn't on UOB One.
+- **Cashback tiers** (the `cashback` formula reads from the card and the merchant string; we don't write a `% cb` field — Notion does):
+  - **10%** on BTS / MRT / AMZ merchants.
+  - **5%** on 7-11 (**but not** `TMN 7-11` — that's a TrueMoney top-up at 7-Eleven, treated separately), WATSON, and GRAB *from Thailand only* (`WWW.GRAB.COM` and `GRABTAXI`).
+  - **1%** on everything else.
+- Subject to the [general earning exclusions](#general-earning-exclusions) below.
+
+When in doubt about whether a particular merchant string falls into a tier, leave the spec as-is and surface the ambiguity to the user — don't try to re-classify by editing the merchant name (that would violate Rule 1).
+
+## General earning exclusions
+
+These apply across **every** card we manage (Takumi, Baiboon, Nuta) unless a card's own page documents an exception:
+
+1. **Foreign merchants billed in THB earn neither points nor cashback**, even when the card would normally earn at a higher tier. Examples in the data: `X CORP. PAID FEATURES BASTROP US`, `Google YouTubePremium Mountain View USA`. Country suffix tells you the merchant is foreign even when the amount is in baht.
+2. **UOB cards: petrol stations earn neither points nor cashback.** Watch for merchant strings containing PT, BCP, ESSO, SHELL, CALTEX, PTT — when in doubt, surface to the user.
+3. The card-level **cashback formula** on Nuta's transactions and the **realized-points formula** on every transaction already encode these rules where they can; but the formulas can't tell "foreign-merchant-in-THB" apart from a regular domestic THB charge, so a separate flag may be needed in future — for now, just **be aware** that the computed cashback/points on such transactions may overstate reality. Flag it when the user asks for a cashback total.
+
+### A note on Notion percentage fields
+
+Notion's `number` property type with a "percent" format displays as `1%` while the underlying stored value is `0.01`. If you ever read a `% cb` value via the API and want to render it, multiply by 100. When writing via the API, pass the raw fraction (`0.01`), not `1`. We don't currently write percentage fields directly — this caveat is documented so future formula work doesn't trip on it.
 
 ## Procedure
 
@@ -137,7 +194,7 @@ If anything in the API response looks off (a `Card` field that didn't resolve, a
 
 ## What this skill does NOT do
 
-- Does **not** edit existing transactions. Updates go through `mcp__notion__notion-update-page`, by direct user instruction.
+- Does **not** edit existing transactions. For property patches on already-created rows (filling `% cb` after tier classification, adding a `Note`, fixing a missed multiplier), use [[../update-notion-transaction/SKILL.md|/update-notion-transaction]].
 - Does **not** create bills (`บิลเรียกเก็บค่าบัตรเครดิต`). Bills are separate DBs and out of scope.
 - Does **not** add cards. The card must already exist in the holder's Cards DB.
 - Does **not** translate Thai labels. Property names stay verbatim in code-spans, per project doc conventions.

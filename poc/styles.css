@@ -1,0 +1,307 @@
+/* POC styles — no framework, no external fonts. System stack with Thai fallback. */
+
+:root {
+  --bg:          #f7f7f8;
+  --panel:       #ffffff;
+  --ink:         #1a1a1f;
+  --ink-soft:    #5a5a66;
+  --line:        #e3e3e8;
+  --accent:      #2b6cb0;
+  --accent-soft: #e6f0fa;
+  --good:        #1e7d4f;
+  --good-soft:   #e3f4ec;
+  --warn:        #b8541d;
+  --warn-soft:   #fbeadd;
+  --neutral:     #525a6b;
+  --neutral-soft:#eceef2;
+  --shadow:      0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Sukhumvit Set", "Noto Sans Thai", "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+main, .app-header, .app-footer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Header ------------------------------------------------------------------ */
+
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-top: 32px;
+  padding-bottom: 12px;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+.brand .tagline {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.holder-switcher {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.holder-switcher__label {
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.holder-switcher__buttons {
+  display: inline-flex;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 3px;
+  box-shadow: var(--shadow);
+}
+
+.holder-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 6px 12px;
+  border-radius: 7px;
+  font: inherit;
+  color: var(--ink-soft);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.holder-btn small {
+  color: inherit;
+  opacity: 0.75;
+  font-size: 11px;
+}
+
+.holder-btn[aria-selected="true"] {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.holder-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Summary cards ----------------------------------------------------------- */
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 20px 0 24px;
+}
+
+.summary__card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--shadow);
+}
+
+.summary__label {
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.summary__value {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Tabs -------------------------------------------------------------------- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+
+.tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 10px 14px;
+  font: inherit;
+  color: var(--ink-soft);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tab[aria-selected="true"] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+.tab[hidden] {
+  display: none;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Panels ------------------------------------------------------------------ */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+}
+
+.panel h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.panel__hint {
+  margin: 0 0 14px;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+th {
+  background: #fafafc;
+  font-weight: 600;
+  color: var(--ink-soft);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+td.num, th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+tbody tr:hover {
+  background: #fbfbfd;
+}
+
+.empty-row, .empty-state {
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.empty-state {
+  margin: 12px 0 0;
+  font-size: 12px;
+}
+
+/* Chips / pills / status -------------------------------------------------- */
+
+.chips {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--neutral-soft);
+  color: var(--neutral);
+}
+
+.chip--multiplier { background: var(--accent-soft); color: var(--accent); }
+.chip--cashback   { background: var(--good-soft);   color: var(--good);   }
+
+.status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--neutral-soft);
+  color: var(--neutral);
+  text-transform: lowercase;
+}
+
+.status--paid      { background: var(--good-soft);    color: var(--good);    }
+.status--processed { background: var(--accent-soft);  color: var(--accent);  }
+.status--pending   { background: var(--warn-soft);    color: var(--warn);    }
+.status--refunded  { background: var(--neutral-soft); color: var(--neutral); }
+
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.pill--paid   { background: var(--good-soft); color: var(--good); }
+.pill--unpaid { background: var(--warn-soft); color: var(--warn); }
+
+/* Footer ------------------------------------------------------------------ */
+
+.app-footer {
+  margin-top: 32px;
+  padding-bottom: 32px;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.app-footer code {
+  background: var(--neutral-soft);
+  padding: 1px 6px;
+  border-radius: 4px;
+}

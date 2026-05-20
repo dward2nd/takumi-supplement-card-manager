@@ -27,6 +27,10 @@ scripts/python/.venv/
 scripts/python/*.egg-info/
 scripts/python/.python-version
 
+# Regenerated artifacts (not source-of-truth)
+# /update-docs rewrites this file on every run; the queue is local-only.
+docs/_stale-review.md
+
 # Editor noise
 *.swp
 *.swo

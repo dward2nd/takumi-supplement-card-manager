@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Takumi Supplement Card Manager — POC</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <h1>Supplement Card Manager</h1>
+      <p class="tagline">phase-2 POC — static demo, mock data, no backend</p>
+    </div>
+
+    <nav class="holder-switcher" aria-label="View as">
+      <span class="holder-switcher__label">View as:</span>
+      <div class="holder-switcher__buttons" role="tablist">
+        <button type="button" class="holder-btn" data-person-id="p-takumi"  role="tab" aria-selected="true">Takumi <small>เว็บ</small></button>
+        <button type="button" class="holder-btn" data-person-id="p-baiboon" role="tab" aria-selected="false">Baiboon <small>ใบบุญ</small></button>
+        <button type="button" class="holder-btn" data-person-id="p-nuta"    role="tab" aria-selected="false">Nuta <small>นุตา</small></button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="summary" aria-live="polite">
+      <div class="summary__card">
+        <span class="summary__label">Cards held</span>
+        <span class="summary__value" data-summary="card-count">–</span>
+      </div>
+      <div class="summary__card">
+        <span class="summary__label">Transactions (all time)</span>
+        <span class="summary__value" data-summary="tx-count">–</span>
+      </div>
+      <div class="summary__card">
+        <span class="summary__label">Outstanding (unpaid bills)</span>
+        <span class="summary__value" data-summary="outstanding">–</span>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="Sections">
+      <button type="button" class="tab" data-tab="cards"        aria-selected="true">Cards</button>
+      <button type="button" class="tab" data-tab="transactions" aria-selected="false">Transactions</button>
+      <button type="button" class="tab" data-tab="bills"        aria-selected="false">Bills</button>
+    </nav>
+
+    <section class="panel" data-panel="cards">
+      <h2>Cards</h2>
+      <p class="panel__hint">Plastic this person carries. Supplement cards inherit the credit line from the primary account holder.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Issuer</th>
+              <th>Network</th>
+              <th>Tier</th>
+              <th class="num">Allocated limit</th>
+              <th>Primary account holder</th>
+            </tr>
+          </thead>
+          <tbody data-rows="cards"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="transactions" hidden>
+      <h2>Transactions</h2>
+      <p class="panel__hint">Reward rules (multiplier / cashback) replace the per-column checkboxes from Notion. <code>%cb</code> is no longer Nuta-only.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Swiped at</th>
+              <th>Card</th>
+              <th>Category</th>
+              <th>Note</th>
+              <th class="num">Amount (฿)</th>
+              <th>Reward rules</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody data-rows="transactions"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="bills" hidden>
+      <h2>Bills</h2>
+      <p class="panel__hint">Bills only exist for supplement holders. Takumi (primary) does not have a Bills view because the original Notion design has no Bills database for the primary holder.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cycle date</th>
+              <th>Card</th>
+              <th class="num">Amount (฿)</th>
+              <th>Paid</th>
+              <th>Payment evidence</th>
+            </tr>
+          </thead>
+          <tbody data-rows="bills"></tbody>
+        </table>
+      </div>
+      <p class="empty-state" data-empty="bills" hidden>No bills for this person. (Takumi is the primary holder and the Notion-as-built model intentionally has no Bills DB for the primary.)</p>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>
+      Reference: <code>docs/future-app/data-model-target.md</code>.
+      This POC is a read-only static demo — it does not write to Notion or any backend.
+    </p>
+  </footer>
+
+  <script src="./data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
