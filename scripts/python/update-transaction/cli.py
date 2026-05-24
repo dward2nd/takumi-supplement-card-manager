@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""update-notion-transaction — patch existing transaction pages with new property values.
+"""update-transaction — patch existing transaction pages with new property values.
 
 deterministic + idempotent — re-running with the same input writes the
 same values; safe to retry on partial failure (Notion's pages.update is
 itself idempotent for property writes).
 
-Companion to `scripts/python/add-notion-transaction/cli.py` (which only
+Companion to `scripts/python/add-transaction/cli.py` (which only
 creates). Use this when an earlier write omitted a field that's now
 required by policy — typical case is filling `% cb` on Nuta transactions
 after merchant-tier classification.

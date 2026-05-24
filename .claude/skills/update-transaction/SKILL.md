@@ -1,30 +1,30 @@
 ---
-name: update-notion-transaction
-description: Patch property values on one or more existing transaction pages in Notion (e.g. fill `% cb` after merchant-tier classification, add a `Note`, set a multiplier checkbox that was missed at write time). Use when the user says "update / patch / fix / amend transaction <id>", "set cashback on this row", or otherwise wants to mutate fields on already-created transactions. The write counterpart to [[../add-notion-transaction/SKILL.md|add-notion-transaction]].
+name: update-transaction
+description: Patch property values on one or more existing transaction pages in Notion (e.g. fill `% cb` after merchant-tier classification, add a `Note`, set a multiplier checkbox that was missed at write time). Use when the user says "update / patch / fix / amend transaction <id>", "set cashback on this row", or otherwise wants to mutate fields on already-created transactions. The write counterpart to [[../add-transaction/SKILL.md|add-transaction]].
 ---
 
-# update-notion-transaction
+# update-transaction
 
 Patches existing transaction pages without re-creating them. This is the only sanctioned **update** path for transactions — it overrides the project's general "don't mutate Notion without explicit instruction" rule because the user invoked this skill explicitly.
 
 Use this when:
 
 - A transaction was created without `% cb` and the cashback tier is now known (typical for Nuta after merchant-tier classification).
-- A `Note` needs to be added retroactively to explain an exclusion (see [[../add-notion-transaction/SKILL.md|add-notion-transaction]] Rule 4c).
+- A `Note` needs to be added retroactively to explain an exclusion (see [[../add-transaction/SKILL.md|add-transaction]] Rule 4c).
 - A multiplier checkbox was omitted at write time and the card's earning policy says one should be set.
 - Any other policy-required field is missing from already-written rows.
 
-For creating brand-new transactions, use [[../add-notion-transaction/SKILL.md|/add-notion-transaction]]. For rolling back accidental writes, use that skill's `archive.py`. For reading rows, use [[../fetch-notion-transactions/SKILL.md|/fetch-notion-transactions]].
+For creating brand-new transactions, use [[../add-transaction/SKILL.md|/add-transaction]]. For rolling back accidental writes, use that skill's `archive.py`. For reading rows, use [[../fetch-transactions/SKILL.md|/fetch-transactions]].
 
 ## Primary execution path — the deterministic CLI
 
-`scripts/python/update-notion-transaction/cli.py` is the only mechanical step. The CLI enforces input validation and idempotency in code, so the agent's job is to build the right JSON spec and hand it off.
+`scripts/python/update-transaction/cli.py` is the only mechanical step. The CLI enforces input validation and idempotency in code, so the agent's job is to build the right JSON spec and hand it off.
 
 Invocation (run from `scripts/python/` so `uv` picks up the project env):
 
 ```sh
 cd scripts/python
-echo '<JSON-spec>' | uv run update-notion-transaction/cli.py
+echo '<JSON-spec>' | uv run update-transaction/cli.py
 # add --dry-run to preview the resolved Notion properties payload without writing
 ```
 
@@ -54,7 +54,7 @@ Output: `{ "count": N, "updated": [ { "id": "<page-id>", "fields": [<prop names 
 
 ## What the user supplies
 
-1. **One or more transaction page IDs** — UUIDs (or full Notion URLs the agent strips to UUIDs). The user typically obtains these from a prior `/add-notion-transaction` or `/fetch-notion-transactions` run.
+1. **One or more transaction page IDs** — UUIDs (or full Notion URLs the agent strips to UUIDs). The user typically obtains these from a prior `/add-transaction` or `/fetch-transactions` run.
 2. **Which fields to set** — and what values. If the user describes a tier ("5% cashback on this row") rather than the raw fraction, *you* do the conversion (5% → `0.05`); don't push the math back to the user.
 3. *Optionally* the cardholder, if context isn't clear — used only to validate that `cashback_percent` is being written to a Nuta page (the field exists nowhere else).
 
@@ -81,22 +81,22 @@ The CLI sets the named checkbox to `true` but does **not** unset other multiplie
 
 ### 5. Don't second-guess the original merchant string
 
-This skill does **not** edit `Name` (the merchant string). If a page has the wrong merchant name, that's a re-create case (archive + re-add), not an update — the verbatim rule from [[../add-notion-transaction/SKILL.md|add-notion-transaction]] Rule 1 is what reconciles against bank statements, and rewriting it after the fact defeats the purpose.
+This skill does **not** edit `Name` (the merchant string). If a page has the wrong merchant name, that's a re-create case (archive + re-add), not an update — the verbatim rule from [[../add-transaction/SKILL.md|add-transaction]] Rule 1 is what reconciles against bank statements, and rewriting it after the fact defeats the purpose.
 
 If the user explicitly asks to edit `Name` anyway, surface the rationale ("this'll break statement reconciliation — sure?") before reaching for the `properties` escape hatch.
 
 ## Procedure
 
-1. **Resolve page IDs.** If the user pasted URLs, extract the UUIDs. If they referenced "the last batch", look at the most recent `/add-notion-transaction` envelope in the conversation.
-2. **Apply policy if classifying tiers.** If the user dropped a batch like "set these to 5%, these to 1%", you do the tier classification (see [[../add-notion-transaction/SKILL.md|add-notion-transaction]] *Card-specific earning policies*) and produce the raw fractions yourself.
+1. **Resolve page IDs.** If the user pasted URLs, extract the UUIDs. If they referenced "the last batch", look at the most recent `/add-transaction` envelope in the conversation.
+2. **Apply policy if classifying tiers.** If the user dropped a batch like "set these to 5%, these to 1%", you do the tier classification (see [[../add-transaction/SKILL.md|add-transaction]] *Card-specific earning policies*) and produce the raw fractions yourself.
 3. **Build the JSON spec.** One entry per page.
 4. **Run with `--dry-run` first** if the batch is large (≥ 5 entries) or if any entry uses the `properties` escape hatch. Show the resolved payload to the user, then re-run without `--dry-run`.
 5. **Report back** with the count and a compact list `{id → fields_set}`. Don't dump full URLs unless asked.
 
 ## What this skill does NOT do
 
-- Does **not** create new transactions. Use [[../add-notion-transaction/SKILL.md|/add-notion-transaction]].
-- Does **not** archive / delete transactions. Use `scripts/python/add-notion-transaction/archive.py`.
-- Does **not** read rows. Use [[../fetch-notion-transactions/SKILL.md|/fetch-notion-transactions]].
+- Does **not** create new transactions. Use [[../add-transaction/SKILL.md|/add-transaction]].
+- Does **not** archive / delete transactions. Use `scripts/python/add-transaction/archive.py`.
+- Does **not** read rows. Use [[../fetch-transactions/SKILL.md|/fetch-transactions]].
 - Does **not** edit cards or bills. Cards changes go through Notion directly; bills are out of scope.
 - Does **not** translate Thai property names. `% cb`, `ยอดชำระ`, `Note` stay verbatim.

@@ -58,6 +58,9 @@ def build_filter(spec: dict[str, Any], card_page_id: str | None) -> dict | None:
     if (q := spec.get("note_contains")):
         clauses.append({"property": "Note", "rich_text": {"contains": q}})
 
+    if (q := spec.get("name_contains")):
+        clauses.append({"property": "Name", "title": {"contains": q}})
+
     if not clauses:
         return None
     if len(clauses) == 1:

@@ -37,14 +37,14 @@ The tiers, in priority order (first match wins):
 
 These apply on top of the tier table — they override the tier with `0%`:
 
-1. **Foreign merchants billed in THB.** Country suffix in the merchant string (`US`, `USA`, `JP`, `SG`, etc.) is the tell. Example in the data: `X CORP. PAID FEATURES BASTROP US`. Whenever this rule fires on a UOB One row, the matching transaction page **must** carry a `Note` explaining "foreign merchant in THB — no cashback" (see [[../../.claude/skills/add-notion-transaction/SKILL]] rule 4c).
+1. **Foreign merchants billed in THB.** Country suffix in the merchant string (`US`, `USA`, `JP`, `SG`, etc.) is the tell. Example in the data: `X CORP. PAID FEATURES BASTROP US`. Whenever this rule fires on a UOB One row, the matching transaction page **must** carry a `Note` explaining "foreign merchant in THB — no cashback" (see [[../../.claude/skills/add-transaction/SKILL]] rule 4c).
 2. **UOB cards at petrol stations.** Strings containing `PT`, `BCP`, `ESSO`, `SHELL`, `CALTEX`, `PTT` typically fall here — confirm against the actual fuel merchant when in doubt. Same Note requirement.
 
 The Notion formulas can't distinguish these cases from regular domestic THB charges, so the explicit `% cb = 0` and `Note` are how the data stays honest.
 
 ## Writing UOB One transactions
 
-Always go through the [[../../.claude/skills/add-notion-transaction/SKILL|add-notion-transaction]] skill. The relevant fields:
+Always go through the [[../../.claude/skills/add-transaction/SKILL|add-transaction]] skill. The relevant fields:
 
 - `multiplier: "×0"` — at batch level for the whole UOB One batch.
 - `cashback_percent: <fraction>` — per-tx for Nuta (Baiboon/Takumi omit it). The CLI accepts raw fractions; pass `0.05` for 5%, not `5`.

@@ -1,4 +1,4 @@
-"""Input-spec validation for add-notion-transaction.
+"""Input-spec validation for add-transaction.
 
 deterministic + idempotent — safe to re-run.
 
@@ -23,7 +23,7 @@ class SpecError(ValueError):
     pass
 
 
-_REQUIRED_TOP = ("holder", "card", "bill_cycle", "due_date", "transactions")
+_REQUIRED_TOP = ("holder", "card", "transactions")
 _REQUIRED_TX = ("date", "name", "amount")
 
 
@@ -65,8 +65,21 @@ def validate_spec(spec: dict[str, Any]) -> None:
     if missing:
         raise SpecError(f"missing required keys: {missing}")
 
-    _iso_date(spec["bill_cycle"], "bill_cycle")
-    _iso_date(spec["due_date"], "due_date")
+    if "bill_cycle" in spec and spec["bill_cycle"] is not None:
+        _iso_date(spec["bill_cycle"], "bill_cycle")
+    if "due_date" in spec and spec["due_date"] is not None:
+        _iso_date(spec["due_date"], "due_date")
+    # bill_cycle / due_date are optional: when omitted, the CLI infers
+    # them from the card's bank pattern (see lib/bill_cycle.py). When
+    # the user supplies one, they must supply the other — a half-spec
+    # would mix inference and user intent in confusing ways.
+    has_bc = bool(spec.get("bill_cycle"))
+    has_dd = bool(spec.get("due_date"))
+    if has_bc ^ has_dd:
+        raise SpecError(
+            "bill_cycle and due_date must be provided together or both omitted "
+            "(omit both to auto-infer from the card's bank pattern)"
+        )
 
     if "processed" in spec and not isinstance(spec["processed"], bool):
         raise SpecError("processed must be a boolean")

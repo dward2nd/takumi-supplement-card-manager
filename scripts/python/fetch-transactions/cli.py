@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""fetch-notion-transactions — read-only Notion transaction query.
+"""fetch-transactions — read-only Notion transaction query.
 
 deterministic + idempotent — safe to re-run.
 
@@ -10,7 +10,9 @@ envelope to stdout:
     "holder": "nuta",
     "card": "First Choice" | null,
     "count": 3,
-    "results": [ { id, url, name, amount, transaction_date, ... }, ... ]
+    "results": [ { id, url, name, amount, transaction_date, ... }, ... ],
+    "summary": { "count": 3, "total_amount": 22217.0, "total_cashback": 0.0 }
+      // only present when spec.summary == true
   }
 
 Input schema (all keys optional except `holder`):
@@ -27,8 +29,10 @@ Input schema (all keys optional except `holder`):
     "paid":                   false,
     "credit_return":          false,
     "note_contains":          "uber",
+    "name_contains":          "MAKRO",                   // merchant substring (case-sensitive)
     "sort":                   "date_desc",               // see filters.SORT_MAP
-    "limit":                  5
+    "limit":                  5,
+    "summary":                true                       // also emit count/total_amount/total_cashback
   }
 """
 
@@ -79,12 +83,24 @@ def run(spec: dict) -> dict:
         if isinstance(limit, int) and limit > 0:
             pages = pages[:limit]
 
-    return {
+    results = [project_transaction(p) for p in pages]
+    out: dict = {
         "holder": holder.key,
         "card": card_title,
-        "count": len(pages),
-        "results": [project_transaction(p) for p in pages],
+        "count": len(results),
+        "results": results,
     }
+
+    if spec.get("summary"):
+        total_amount = sum(r["amount"] or 0 for r in results)
+        total_cashback = sum(r["cashback"] or 0 for r in results)
+        out["summary"] = {
+            "count": len(results),
+            "total_amount": round(total_amount, 2),
+            "total_cashback": round(total_cashback, 4),
+        }
+
+    return out
 
 
 def main(argv: list[str] | None = None) -> int:

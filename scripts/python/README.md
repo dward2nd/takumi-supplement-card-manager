@@ -39,7 +39,7 @@ These shape every script under this directory:
 
 ## Conventions
 
-- Every script header starts with: a one-line description and the marker `deterministic + idempotent — safe to re-run.` (Or, when re-running is *not* safe, an explicit note saying so — see `add-notion-transaction/cli.py`.)
+- Every script header starts with: a one-line description and the marker `deterministic + idempotent — safe to re-run.` (Or, when re-running is *not* safe, an explicit note saying so — see `add-transaction/cli.py`.)
 - Notion access goes through `lib/notion_client.py`. Don't instantiate `notion_client.Client` inline anywhere else.
 - The integration token is read from `NOTION_TOKEN` (loaded from the repo-root `.env` automatically). Never hardcode it. Never commit it.
 - CLIs take a JSON spec on **stdin** (or via `--input <file>`) and write a JSON envelope to **stdout**. This makes them composable from Claude, from shell, or from a future application. (A tiny script with a single argument may use a positional CLI arg instead — see `release/cli.py`. Pick whichever is more ergonomic for the *caller*.)
@@ -51,20 +51,20 @@ These shape every script under this directory:
 ```sh
 # From any directory:
 echo '{"holder":"nuta","card":"First Choice","limit":5}' \
-  | uv run --project scripts/python scripts/python/fetch-notion-transactions/cli.py
+  | uv run --project scripts/python scripts/python/fetch-transactions/cli.py
 
 # From scripts/python/:
 echo '{"holder":"nuta","card":"First Choice","limit":5}' \
-  | uv run fetch-notion-transactions/cli.py
+  | uv run fetch-transactions/cli.py
 ```
 
 ## Current scripts
 
 | Skill | Entry point | Reads | Writes |
 |---|---|---|---|
-| `fetch-notion-transactions` | `fetch-notion-transactions/cli.py` | filter spec on stdin | JSON results to stdout |
-| `add-notion-transaction` | `add-notion-transaction/cli.py` | write spec on stdin | created-page envelope to stdout |
-| `add-notion-transaction` (rollback) | `add-notion-transaction/archive.py` | page IDs via `--ids` or stdin | archive confirmations |
+| `fetch-transactions` | `fetch-transactions/cli.py` | filter spec on stdin | JSON results to stdout |
+| `add-transaction` | `add-transaction/cli.py` | write spec on stdin | created-page envelope to stdout |
+| `add-transaction` (rollback) | `add-transaction/archive.py` | page IDs via `--ids` or stdin | archive confirmations |
 | `release` | `release/cli.py` | positional `type` arg (`major\|minor\|patch`) | bumps VERSION, commits, tags, pushes; JSON envelope to stdout |
 
 ## Why uv

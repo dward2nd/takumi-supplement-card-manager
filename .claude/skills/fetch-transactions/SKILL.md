@@ -1,22 +1,22 @@
 ---
-name: fetch-notion-transactions
-description: Query a cardholder's Notion Transactions database with structured conditions (card, date range, amount, flags) and return matched rows. Use when the user asks "what are the recent / last N / biggest / unpaid / etc. transactions on …" or otherwise wants to read transaction data filtered by some property. Read-only.
+name: fetch-transactions
+description: Query a cardholder's Notion Transactions database with structured conditions (card, date range, amount, merchant substring, flags) and return matched rows. Optionally aggregate with `summary: true` to get count / Σ ยอดชำระ / Σ cashback. Use when the user asks "what are the recent / last N / biggest / unpaid / etc. transactions on …" or aggregate questions like "total spend at <merchant> this cycle" or "cumulative cashback this cycle". Read-only.
 ---
 
-# fetch-notion-transactions
+# fetch-transactions
 
 Reads transaction pages from **one** cardholder's Transactions database under user-specified conditions, then returns a summary sorted to the user's request.
 
-This skill is **read-only**. It never creates, updates, or deletes Notion content. For writes, see [[add-notion-transaction]].
+This skill is **read-only**. It never creates, updates, or deletes Notion content. For writes, see [[add-transaction]].
 
 ## Primary execution path — the deterministic script
 
-This skill is backed by a Python CLI at `scripts/python/fetch-notion-transactions/cli.py`. Use it; do not reinvent the query with MCP calls when the script is available. It hits Notion's native `data_sources/{id}/query` endpoint (filter + sort + limit in one round trip), which the MCP cannot.
+This skill is backed by a Python CLI at `scripts/python/fetch-transactions/cli.py`. Use it; do not reinvent the query with MCP calls when the script is available. It hits Notion's native `data_sources/{id}/query` endpoint (filter + sort + limit in one round trip), which the MCP cannot.
 
 Invocation:
 
 ```sh
-echo '<JSON-spec>' | uv run scripts/python/fetch-notion-transactions/cli.py
+echo '<JSON-spec>' | uv run scripts/python/fetch-transactions/cli.py
 ```
 
 JSON spec — all keys optional except `holder`:
@@ -34,12 +34,18 @@ JSON spec — all keys optional except `holder`:
   "paid": false,
   "credit_return": false,
   "note_contains": "uber",
+  "name_contains": "MAKRO",
   "sort": "date_desc | date_asc | amount_desc | amount_asc | bill_cycle_desc | bill_cycle_asc",
-  "limit": 5
+  "limit": 5,
+  "summary": true
 }
 ```
 
-Output: a JSON envelope `{holder, card, count, results: [...]}`. Each result has `id`, `url`, `name` (verbatim), `amount`, `transaction_date`, `bill_cycle_date`, `due_date`, `processed`, `paid`, `credit_return`, `note`, `card_ids`.
+`name_contains` is a case-sensitive substring match on the merchant title — use it for "spending at X" questions. Notion's `title.contains` is the native predicate, so the filter runs server-side.
+
+`summary: true` adds a `summary` block to the envelope with `{count, total_amount, total_cashback}` computed from the returned rows. Use it for aggregate questions like "what's my Makro spend this cycle?" or "cumulative cashback this cycle?". Drop `limit` when you want the aggregate over the full filtered set — `limit` truncates *before* the summation. For "summary only" (no per-row dump), just ignore the `results` array client-side; we don't have a dedicated summary-only mode.
+
+Output: a JSON envelope `{holder, card, count, results: [...], summary?: {...}}`. Each result row has `id`, `url`, `name` (verbatim), `amount`, `transaction_date`, `bill_cycle_date`, `due_date`, `processed`, `paid`, `credit_return`, `note`, `card_ids`, `cashback_percent`, `cashback`. The last two are Nuta-only — they come back `null` for Baiboon and Takumi (the properties don't exist on their DSes), and `total_cashback` in the summary will be `0` for those holders.
 
 Translate the user's request into the spec, run the script, then format the JSON into the markdown table described in *Output shape* below. Don't summarize or paraphrase merchant names — pass them through verbatim.
 
@@ -49,6 +55,8 @@ Translate the user's request into the spec, run the script, then format the JSON
 - "Show me Baiboon's transactions between 2026-04-01 and 2026-04-30."
 - "What's the largest charge on Takumi's UOB World this cycle?"
 - "Which of Nuta's transactions in this bill cycle are not yet `ชำระแล้ว`?"
+- "Total Makro spend on Baiboon's First Choice this cycle?" → `name_contains: "MAKRO"` + `summary: true`.
+- "Cumulative cashback on Nuta's UOB One this cycle?" → `bill_cycle` + `summary: true` (no limit).
 
 ## MCP fallback (no script available)
 
@@ -58,7 +66,7 @@ If you're in an environment without the Python sandbox (e.g. a different repo), 
 
 ### 1. Correct holder → correct database
 
-Same routing table as [[add-notion-transaction]]:
+Same routing table as [[add-transaction]]:
 
 | Holder   | Transactions data source ID                | Cards data source ID                       |
 |----------|--------------------------------------------|--------------------------------------------|
@@ -147,6 +155,6 @@ If the user asks for the raw page URLs, include them as a trailing list — don'
 
 ## What this skill does NOT do
 
-- Does **not** mutate Notion. Use [[add-notion-transaction]] for writes.
+- Does **not** mutate Notion. Use [[add-transaction]] for writes.
 - Does **not** translate Thai labels.
 - Does **not** fabricate filters — if a property the user references doesn't exist on this holder's DB (e.g. `% cb` on Baiboon), say so.

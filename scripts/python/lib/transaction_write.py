@@ -2,7 +2,7 @@
 
 deterministic + idempotent — same input produces the same payload.
 (The act of POSTing the payload to Notion is *not* idempotent — that
-caveat lives in add-notion-transaction/cli.py.)
+caveat lives in add-transaction/cli.py.)
 
 Pairs with `lib.transaction_read` (read side). They are split so a
 reviewer can examine one side without scrolling past the other.

@@ -41,8 +41,17 @@ def _relation_ids(props: dict, name: str) -> list[str]:
     return [r.get("id") for r in props.get(name, {}).get("relation", []) or []]
 
 
+def _formula_number(props: dict, name: str) -> float | None:
+    f = props.get(name, {}).get("formula") or {}
+    return f.get("number") if f.get("type") == "number" else None
+
+
 def project_transaction(page: dict) -> dict[str, Any]:
-    """Flatten a Notion transaction page into a small JSON-friendly dict."""
+    """Flatten a Notion transaction page into a small JSON-friendly dict.
+
+    `cashback_percent` and `cashback` only exist on Nuta's DS; for Baiboon
+    and Takumi those keys come back as None (property absent from the page).
+    """
     props = page.get("properties", {})
     return {
         "id": page.get("id"),
@@ -58,4 +67,6 @@ def project_transaction(page: dict) -> dict[str, Any]:
         "credit_return": _checkbox(props, "Credit Return"),
         "note": _rich_text(props, "Note"),
         "card_ids": _relation_ids(props, "Card"),
+        "cashback_percent": _number(props, "% cb"),
+        "cashback": _formula_number(props, "cashback"),
     }

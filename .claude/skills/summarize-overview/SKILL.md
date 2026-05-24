@@ -7,7 +7,7 @@ description: Produce the cardholder's overview table — "สรุปบัต�
 
 Reads a cardholder's Cards data source and reproduces, in the conversation, the same overview the user sees in Notion under "สรุปบัตรและสินเชื่อที่<name>ถือ". One holder per invocation — that's how the user typically asks, even if they sometimes batch (e.g. "both Nuta and Baiboon's"). For batch requests, run the script once per holder and produce one table per holder.
 
-This skill is **read-only**. For writes, see [[add-notion-transaction]]. For querying individual transactions, see [[fetch-notion-transactions]]. For any *other* form of summary (transaction totals, category breakdowns, monthly burn rate, etc.), a separate skill should be created — this one is intentionally narrow.
+This skill is **read-only**. For writes, see [[add-transaction]]. For querying individual transactions, see [[fetch-transactions]]. For any *other* form of summary (transaction totals, category breakdowns, monthly burn rate, etc.), a separate skill should be created — this one is intentionally narrow.
 
 ## Why this skill exists separately
 
@@ -106,6 +106,6 @@ If the user asks for a fundamentally different breakdown — by transaction cate
 ## What this skill does NOT do
 
 - Does **not** mutate Notion.
-- Does **not** show per-transaction detail. For that, use [[fetch-notion-transactions]].
+- Does **not** show per-transaction detail. For that, use [[fetch-transactions]].
 - Does **not** show bills. The Bills DBs are separate (Baiboon and Nuta only) and out of scope here.
 - Does **not** translate Thai labels.

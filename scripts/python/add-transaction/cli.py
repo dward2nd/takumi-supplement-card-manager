@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""add-notion-transaction — write transactions to Notion.
+"""add-transaction — write transactions to Notion.
 
 deterministic + idempotent — re-running creates new pages, so callers
 should not retry on success. (No upsert: Notion has no natural key on
@@ -23,8 +23,14 @@ Input schema:
   {
     "holder":      "takumi" | "baiboon" | "nuta",   // required
     "card":        "First Choice",                  // required, exact title match
-    "bill_cycle":  "2026-05-29",                    // ISO date, applied to whole batch
-    "due_date":    "2026-06-15",                    // ISO date, applied to whole batch
+    "bill_cycle":  "2026-05-29",                    // optional ISO date, applied to
+                                                    //   the whole batch; if omitted
+                                                    //   (together with due_date),
+                                                    //   inferred from the card's
+                                                    //   bank pattern — see
+                                                    //   lib/bill_cycle.py
+    "due_date":    "2026-06-15",                    // optional ISO date, paired with
+                                                    //   bill_cycle (both or neither)
     "processed":   true,                            // optional, default true
     "multiplier":  "×0",                            // optional, batch-level default;
                                                     //   one of ×0/×2/×3/×4/×5/÷4 or null
@@ -58,6 +64,7 @@ Hard rules enforced here:
 from __future__ import annotations
 
 import argparse
+import datetime as _dt
 import json
 import sys
 from pathlib import Path
@@ -65,6 +72,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib import notion_client
+from lib.bill_cycle import active_cycle
 from lib.cards import find_card
 from lib.holders import resolve_holder
 from lib.transaction_write import build_transaction_properties
@@ -78,8 +86,15 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     card = find_card(holder.cards_ds, spec["card"])
     card_page_id = card["id"]
 
-    bill_cycle = spec["bill_cycle"]
-    due_date = spec["due_date"]
+    bill_cycle = spec.get("bill_cycle")
+    due_date = spec.get("due_date")
+    if not bill_cycle or not due_date:
+        # Validation guarantees both-or-neither; only the neither path
+        # reaches here. Infer from the card's bank pattern.
+        bc, dd = active_cycle(spec["card"], _dt.date.today())
+        bill_cycle = bc.isoformat()
+        due_date = dd.isoformat()
+
     processed = spec.get("processed", True)
     batch_multiplier = spec.get("multiplier")
     batch_cashback = spec.get("cashback_percent")

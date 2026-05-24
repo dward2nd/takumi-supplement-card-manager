@@ -77,4 +77,4 @@ If it has already been pushed, undo is invasive (force-push to rewrite history, 
 
 - The version in `scripts/python/pyproject.toml` is the Python sandbox's own version and is **independent** of the repo's release version. This skill does not touch it.
 - If a CHANGELOG.md is added to the repo later, extend this skill to stamp it. Right now the only artifact is VERSION + the tag.
-- All hard rules from the project ([[../add-notion-transaction/SKILL.md]] style — verbatim, no normalization, no skipping hooks) apply by extension.
+- All hard rules from the project ([[../add-transaction/SKILL.md]] style — verbatim, no normalization, no skipping hooks) apply by extension.

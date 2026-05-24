@@ -1,9 +1,9 @@
 ---
-name: add-notion-transaction
+name: add-transaction
 description: Add one or more transaction records to a cardholder's Notion Transactions database. Use when the user lists spending (merchant name + amount, optionally a date and card) and asks to record it in Notion. Enforces verbatim merchant names, correct holder→database routing, correct Card relation, and Processed=true as the default.
 ---
 
-# add-notion-transaction
+# add-transaction
 
 Adds transaction page rows to **one** cardholder's Notion Transactions database, all mapped to **one** of that holder's supplement cards.
 
@@ -11,12 +11,12 @@ This is the only sanctioned write path for transactions. It overrides the projec
 
 ## Primary execution path — the deterministic script
 
-This skill is backed by a Python CLI at `scripts/python/add-notion-transaction/cli.py`. Use it; do not reinvent the write with raw MCP calls when the script is available. The script enforces every "hard rule" below in code — verbatim merchant name, holder → DS routing, exact card-title resolution, `Processed=true` default, leaving non-policy fields alone — so cooperation is "build the JSON, hand it off".
+This skill is backed by a Python CLI at `scripts/python/add-transaction/cli.py`. Use it; do not reinvent the write with raw MCP calls when the script is available. The script enforces every "hard rule" below in code — verbatim merchant name, holder → DS routing, exact card-title resolution, `Processed=true` default, leaving non-policy fields alone — so cooperation is "build the JSON, hand it off".
 
 Invocation:
 
 ```sh
-echo '<JSON-spec>' | uv run scripts/python/add-notion-transaction/cli.py
+echo '<JSON-spec>' | uv run scripts/python/add-transaction/cli.py
 # add --dry-run to preview the payload without writing
 ```
 
@@ -36,17 +36,19 @@ JSON spec:
 }
 ```
 
+**`bill_cycle` and `due_date` are optional.** Omit them and the CLI infers both from the card's bank pattern (see [[../../../docs/concepts/bill-cycle-patterns|bill-cycle-patterns]]): today is compared against this month's bill cycle date for the card, and the active cycle is this-month-or-next accordingly. Pass them explicitly only when the user is back-filling an older cycle (e.g. transactions that posted late to a closed statement). They're "both or neither" — supplying only one is a spec error.
+
 `multiplier` is optional. At top level it applies to every transaction in the batch; per-transaction it overrides the batch default. Valid values: `"×0"`, `"×2"`, `"×3"` (Takumi only), `"×4"`, `"×5"`, `"÷4"`. **At most one** multiplier checkbox is set per page — that's a hard rule on the Notion side; if you tried to set two, the formulas would double-count. Omitting `multiplier` leaves all checkboxes false, which Notion's formula treats as **×1** (the default earning rate).
 
 Output: a JSON envelope `{holder, card, card_page_id, bill_cycle, due_date, processed, count, created: [{id, url, name, amount, date}, ...]}`. Surface the count + a compact list back to the user. Don't dump full URLs unless asked.
 
-**Rollback** (cleanup or mistakes): `uv run scripts/python/add-notion-transaction/archive.py --ids <page-id>[,<page-id>...]`. Archiving is idempotent.
+**Rollback** (cleanup or mistakes): `uv run scripts/python/add-transaction/archive.py --ids <page-id>[,<page-id>...]`. Archiving is idempotent.
 
 ## What the user supplies
 
 1. **Cardholder** — one of `Takumi` (เว็บ) / `Baiboon` (ใบบุญ) / `Nuta` (นุตา). Determines which Transactions DB you write to and which Cards DB you query for the relation.
 2. **Card name** — e.g. `First Choice`, `UOB World`. Must match an existing row in that holder's Cards DB by `Name`.
-3. **Billing window for the batch** — `Bill Cycle Date` and `Due Date`, both single ISO dates. Applied uniformly to every transaction in the batch unless the user splits the batch. These two dates **must be consistent for the same card** — a bill cycle has exactly one due date on each card, set by the bank. If the user gives you a `bill_cycle` you've already seen paired with a different `due_date` on the same card, stop and confirm before writing.
+3. **Billing window for the batch** — `Bill Cycle Date` and `Due Date`, both single ISO dates, applied uniformly to every transaction in the batch unless the user splits the batch. Almost always **leave these out of the spec**: the CLI infers them from the card's bank pattern using today's date (see [[../../../docs/concepts/bill-cycle-patterns|bill-cycle-patterns]] for the per-issuer rules and the cut-off behaviour). Supply them explicitly only when back-filling a closed cycle or when the user names a non-default cycle. The two dates **must be consistent for the same card** — a bill cycle has exactly one due date on each card, set by the bank. If the user gives you a `bill_cycle` you've already seen paired with a different `due_date` on the same card, stop and confirm before writing.
 4. **The transaction list** — one or more entries, each carrying:
    - **Transaction date** (`Transaction Datetime`) — ISO date.
    - **Merchant string** — the *full*, *verbatim* merchant name as supplied.
@@ -111,6 +113,8 @@ Nuta's Transactions DS is the only one with a `% cb` field (number, percent disp
 
 When the user supplies tier rules per card (see *Card-specific earning policies* below), classify each transaction's merchant against the tier table and pass the resulting `cashback_percent` per tx. Don't ask the user to compute the fraction — apply the policy yourself, but surface ambiguity (e.g. an aggregator merchant that could bundle several tiers).
 
+**Zero-cashback rows: leave `% cb` unset.** When the tier classification yields 0% (a row that earns no cashback under the card's policy), **omit** `cashback_percent` entirely rather than passing `0`. The Notion field stays empty, which is how the user wants ineligible rows represented. Only pass a numeric `cashback_percent` when the row actually earns something.
+
 ### 4c. Note explains exclusion reasons
 
 If a transaction earns **no** cashback / points for a reason that is **not** the card's default policy, write the reason into `Note`. Examples that need a Note:
@@ -168,6 +172,14 @@ When the user gives you a card name, apply that card's known policy before sendi
 
 When in doubt about whether a particular merchant string falls into a tier, leave the spec as-is and surface the ambiguity to the user — don't try to re-classify by editing the merchant name (that would violate Rule 1).
 
+### CardX JCB
+
+- **Cashback**:
+  - **3%** on **in-store** transactions billed in the **local currency** of **Japan, South Korea, Hong Kong, Singapore, or Taiwan** (e.g. a JPY purchase at a Tokyo shop, a HKD purchase in Hong Kong). Online purchases are excluded; assume in-store unless the merchant string clearly indicates online (`HTTPS://…`, `*.COM`, etc.).
+  - **No cashback** everywhere else — including domestic Thai (`… BANGKOK TH`), foreign merchants billed in THB, and any of the five eligible countries when the bill is in THB instead of local currency.
+- **Points**: no special multiplier; default earning (no `multiplier` field set).
+- Pass `cashback_percent: 0.03` for eligible rows; **omit** `cashback_percent` entirely for ineligible ones (see Rule 4b on leaving 0% rows unset).
+
 ## General earning exclusions
 
 These apply across **every** card we manage (Takumi, Baiboon, Nuta) unless a card's own page documents an exception:
@@ -194,7 +206,7 @@ If anything in the API response looks off (a `Card` field that didn't resolve, a
 
 ## What this skill does NOT do
 
-- Does **not** edit existing transactions. For property patches on already-created rows (filling `% cb` after tier classification, adding a `Note`, fixing a missed multiplier), use [[../update-notion-transaction/SKILL.md|/update-notion-transaction]].
+- Does **not** edit existing transactions. For property patches on already-created rows (filling `% cb` after tier classification, adding a `Note`, fixing a missed multiplier), use [[../update-transaction/SKILL.md|/update-transaction]].
 - Does **not** create bills (`บิลเรียกเก็บค่าบัตรเครดิต`). Bills are separate DBs and out of scope.
 - Does **not** add cards. The card must already exist in the holder's Cards DB.
 - Does **not** translate Thai labels. Property names stay verbatim in code-spans, per project doc conventions.

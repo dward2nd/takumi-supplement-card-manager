@@ -36,7 +36,7 @@ Action-first. Big **Add transaction** button at the top of the home screen with 
 
 Three distinct flows feed into one mini-table entry surface:
 
-1. **New merchant** — user types the merchant string **verbatim** (character-for-character, no normalization, no abbreviation expansion). Same hard rule as [[../../.claude/skills/add-notion-transaction/SKILL.md|/add-notion-transaction]] Rule 1.
+1. **New merchant** — user types the merchant string **verbatim** (character-for-character, no normalization, no abbreviation expansion). Same hard rule as [[../../.claude/skills/add-transaction/SKILL.md|/add-transaction]] Rule 1.
 2. **Alias-matched** — if the typed string matches a saved alias rule (e.g. `contains "Agoda"` → canonical merchant "Agoda" + category "Travel"), the alias auto-fills the canonical name and category. The original verbatim string is still stored.
 3. **Tap-to-reuse** — pick an existing merchant from history; the app autofills merchant + card + bill cycle + due date + category. Only the amount needs editing.
 
@@ -220,4 +220,4 @@ These were considered and rejected during the interview:
 - [[migration-considerations]] — what to do about existing Notion data (now reframed by the "fresh start" decision).
 - [[../concepts/payment-lifecycle]] — `Transaction.status` enum transitions.
 - [[../concepts/billing-cycle]] — the four independent date axes.
-- [[../../.claude/skills/add-notion-transaction/SKILL.md|/add-notion-transaction]] — verbatim-merchant rule the new app inherits.
+- [[../../.claude/skills/add-transaction/SKILL.md|/add-transaction]] — verbatim-merchant rule the new app inherits.
