@@ -37,3 +37,13 @@ Two reasons inferred from the structure:
 - `บาทต่อ 1 คะแนน` (baht per point) is the per-card base rate, rolled up into each transaction.
 - `คะแนนสะสม` rolls up `คะแนนที่ได้จริง` across transactions.
 - `ให้คะแนนตามรอบบิล` is a per-card checkbox: true if the bank awards points per billing cycle rather than per transaction (changes when "realized" happens).
+
+## Approximation caveat
+
+The `×0/×2/×3/×4/×5/÷4` set is **not** the issuer's real earning rule — it's a **convenience approximation** chosen to be fast to click in Notion's fixed-checkbox UI and to cover the common Thai-credit-card promotional shapes. Real earning rules can be richer:
+
+- **Fractional points** (a transaction earns `0.25 pts` per 50 ฿, not an integer multiple of a base rate). The Notion checkbox enum literally cannot express this. See [[../cards/lotuss-beyond]].
+- **Per-merchant bonus tiers within a card** — the issuer awards different rates depending on the merchant string, not just on whether a promo checkbox is set. See [[../cards/lotuss-beyond]] (general vs at-Lotus) and [[../cards/uob-makro]] (general vs in-store Makro, with the `÷4` checkbox standing in for "this was an in-store-Makro swipe").
+- **Conditional fall-back via the merchant string** — UOB Makro's `÷4` only applies when the transaction was physically read by Makro's in-store reader. TrueMoney intermediation (`TMN*…`) breaks that condition and reverts to the base rate. The checkbox alone doesn't encode the "TrueMoney breaks it" rule; the human entering the row has to know.
+
+So the multiplier set is a **lossy projection** of the underlying rules. Where the gap matters, the per-card narrative note is the source of truth (`docs/cards/<card>.md`), not the Notion checkbox. The phase-2 app models the underlying rules directly as `RewardRule` JSON entries on `Transaction` — see [[../future-app/data-model-target]] and [[promotions]].

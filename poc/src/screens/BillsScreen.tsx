@@ -38,7 +38,7 @@ export const BillsScreen = () => {
   }
 
   return (
-    <div>
+    <div className="mx-auto max-w-md md:max-w-3xl lg:max-w-6xl">
       <PageHeader
         title="Bills"
         eyebrow="statements & payment evidence"
@@ -46,7 +46,7 @@ export const BillsScreen = () => {
 
       {/* Headline panel */}
       <section className="mx-5 mb-8 overflow-hidden rounded-3xl border border-paper-line bg-paper-raised/60 p-5">
-        <div className="text-[10px] uppercase tracking-[0.22em] text-ink-faint">
+        <div className="text-[12px] uppercase tracking-[0.22em] text-ink-faint">
           due across all draft bills
         </div>
         <Amount value={totalDue} size="xl" signed={false} className="mt-2 text-ink" />
@@ -91,7 +91,7 @@ const BillGroup = ({
 }) => (
   <section className="px-5 pb-8">
     <SectionLabel number={number} trailing={`${items.length}`}>{title}</SectionLabel>
-    <div className="mt-3 space-y-2">
+    <div className="mt-3 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
       {items.map((b, i) => {
         const card = CARDS[b.cardId];
         const today = new Date("2026-05-26");
@@ -116,13 +116,13 @@ const BillGroup = ({
               />
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-display text-[15px] font-light truncate text-ink">
+                  <span className="font-display text-[15px] font-normal truncate text-ink">
                     {card.name}
                   </span>
                   {b.isDraft && <Pill tone="amber" uppercase>draft</Pill>}
                   {paid && <Pill tone="teal" uppercase>paid</Pill>}
                 </div>
-                <div className="text-[10px] uppercase tracking-[0.16em] text-ink-faint">
+                <div className="text-[12px] uppercase tracking-[0.16em] text-ink-faint">
                   cycle {b.billCycleDate}{" "}
                   {b.isDraft ? (
                     <>· due in <span className="num text-ink-dim">{days}</span> days</>
@@ -130,7 +130,7 @@ const BillGroup = ({
                     <>· paid {b.paidAt}</>
                   ) : null}
                 </div>
-                <div className="text-[10px] uppercase tracking-[0.16em] text-ink-ghost">
+                <div className="text-[12px] uppercase tracking-[0.16em] text-ink-ghost">
                   {HOLDERS[b.holder].englishName} · {HOLDERS[b.holder].thaiName}
                 </div>
               </div>

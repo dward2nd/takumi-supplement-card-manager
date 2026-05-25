@@ -64,3 +64,13 @@ The hardcoded option lists in the two Bills DBs aren't identical — Baiboon's i
 ## 9. Takumi's Cards DB omits `ธนาคาร/บริษัท`
 
 [[../databases/takumi-cards]] has no issuer column. Baiboon's and Nuta's do. Probably an oversight or "I know my own cards' issuers without a column".
+
+## 10. Notion does not support fractional points
+
+The point-earning side of the schema is integer-only. `บาทต่อ 1 คะแนน` (baht per 1 point) on Cards is a plain integer; the multiplier checkboxes (`×0 / ×2 / ×3 / ×4 / ×5 / ÷4`) only scale integers; the realised-points formula `คะแนนที่ได้จริง` rounds to an integer. There is no per-row field that encodes "this row earned 0.25 pts".
+
+This bites exactly one card in the current household — [[../cards/lotuss-beyond|Lotus's Beyond]], whose real rate is **50 ฿ → 0.25 pts** (general) and **50 ฿ → 1.5 pts** (at Lotus stores). The Notion-side realised-points formula will perpetually under-report this card's accumulation. The user reconciles Lotus's Beyond's point balance against the bank statement directly, not against the formula.
+
+There is no point fixing this in Notion — the multiplier-checkbox shape can't be coaxed into representing 0.25× per row, and inventing a new fractional column would compound the divergence between Takumi / Baiboon / Nuta. See the broader framing in [[points-and-multipliers#approximation-caveat]].
+
+**Resolved in phase 2**: `RewardRule.value` is a plain number (no integer constraint). See [[../future-app/data-model-target]] and the `RewardRule` shape in [[../future-app/product-shape]].

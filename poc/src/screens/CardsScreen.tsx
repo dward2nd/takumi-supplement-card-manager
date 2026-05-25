@@ -2,76 +2,112 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useApp } from "../data/state";
-import { CARDS, cardsForHolder } from "../data/cards";
-import { TRANSACTIONS } from "../data/transactions";
+import { CARDS } from "../data/cards";
+import { HOLDERS } from "../data/holders";
+import { visibleInstances } from "../data/card-instances";
 import { CardFace } from "../components/CardFace";
 import { PageHeader } from "../components/PageHeader";
 import { Pill } from "../components/Pill";
 import { activePromotionsFor } from "../data/promotions";
+import type { HolderKey } from "../data/types";
 
 export const CardsScreen = () => {
-  const { holderKey } = useApp();
+  const { holderKey: viewerKey } = useApp();
   const nav = useNavigate();
-  if (!holderKey) return null;
+  if (!viewerKey) return null;
 
-  const cards = useMemo(() => {
-    if (holderKey === "takumi") {
-      // Admin: union of all distinct cards across holders
-      return Object.values(CARDS);
+  // Per-instance list — one entry per (card, holder) pair. Admin sees them all.
+  const instances = useMemo(() => visibleInstances(viewerKey), [viewerKey]);
+
+  // Group by holder so Takumi's admin view stays scannable.
+  const byHolder = useMemo(() => {
+    const groups: { holder: HolderKey; instances: typeof instances }[] = [];
+    for (const i of instances) {
+      let g = groups.find((x) => x.holder === i.holder);
+      if (!g) {
+        g = { holder: i.holder, instances: [] };
+        groups.push(g);
+      }
+      g.instances.push(i);
     }
-    return cardsForHolder(holderKey);
-  }, [holderKey]);
+    // For admin Takumi: own cards first.
+    return groups.sort((a, b) => {
+      if (viewerKey === "takumi") {
+        if (a.holder === "takumi" && b.holder !== "takumi") return -1;
+        if (b.holder === "takumi" && a.holder !== "takumi") return 1;
+      }
+      return a.holder.localeCompare(b.holder);
+    });
+  }, [instances, viewerKey]);
 
   return (
-    <div>
+    <div className="mx-auto max-w-md md:max-w-3xl lg:max-w-6xl">
       <PageHeader
         title="The wallet"
-        eyebrow={`${cards.length} cards · current cycle`}
+        eyebrow={`${instances.length} card supplements · current cycle`}
       />
 
-      <div className="px-5 pb-12 space-y-3">
-        {cards.map((c, i) => {
-          const outstanding = TRANSACTIONS.filter(
-            (t) =>
-              t.cardId === c.id &&
-              t.billCycleDate === currentBcFor(c.id) &&
-              (holderKey === "takumi" || t.holder === holderKey),
-          ).reduce((s, t) => s + t.amount, 0);
-          const promos = activePromotionsFor(c.id, "2026-05-26");
+      <div className="px-5 pb-12 space-y-8">
+        {byHolder.map(({ holder, instances }) => {
+          const h = HOLDERS[holder];
+          const showHolderHeader = viewerKey === "takumi";
           return (
-            <motion.div
-              key={c.id}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.04 * i, duration: 0.5, ease: [0.2, 0.7, 0.1, 1] }}
-            >
-              <button
-                onClick={() => nav(`/cards/${c.id}`)}
-                className="tap block w-full text-left"
-              >
-                <CardFace card={c} outstanding={outstanding > 0 ? outstanding : 0} />
-                {promos.length > 0 && (
-                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    {promos.map((p) => (
-                      <Pill key={p.id} tone="amber" uppercase={false}>
-                        active promo · {p.name}
-                      </Pill>
-                    ))}
+            <section key={holder}>
+              {showHolderHeader && (
+                <div className="mb-3 flex items-baseline justify-between">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="h-3 w-3 rounded-full"
+                      style={{ background: h.accent }}
+                    />
+                    <span className="text-[12px] uppercase tracking-[0.28em] text-ink-faint">
+                      {h.englishName} · {h.thaiName}
+                    </span>
                   </div>
-                )}
-              </button>
-            </motion.div>
+                  <span className="num text-[12px] text-ink-faint">
+                    {instances.length}
+                  </span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {instances.map((i, idx) => {
+                  const card = CARDS[i.cardId];
+                  const promos = activePromotionsFor(card.id, "2026-05-26");
+                  return (
+                    <motion.div
+                      key={`${i.cardId}#${i.holder}`}
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.04 * idx, duration: 0.5, ease: [0.2, 0.7, 0.1, 1] }}
+                    >
+                      <button
+                        onClick={() => nav(`/cards/${i.cardId}?holder=${i.holder}`)}
+                        className="tap block w-full text-left"
+                      >
+                        <CardFace
+                          card={card}
+                          holder={i.holder}
+                          showOverall
+                        />
+                        {promos.length > 0 && (
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                            {promos.map((p) => (
+                              <Pill key={p.id} tone="amber" uppercase={false}>
+                                active promo · {p.name}
+                              </Pill>
+                            ))}
+                          </div>
+                        )}
+                      </button>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </section>
           );
         })}
       </div>
     </div>
   );
-};
-
-const currentBcFor = (cardId: string): string => {
-  // Simplification: UOB cards = 2026-05-25; Krungsri (First Choice et al) = 2026-06-05
-  const c = CARDS[cardId as keyof typeof CARDS];
-  if (c.issuer === "UOB") return "2026-05-25";
-  if (c.issuer === "Krungsri" || c.issuer === "CardX") return "2026-06-05";
-  return "2026-05-25";
 };

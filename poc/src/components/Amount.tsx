@@ -34,7 +34,7 @@ export const Amount = ({
         size === "sm" && "text-sm",
         size === "md" && "text-base",
         size === "lg" && "text-2xl",
-        size === "xl" && "font-display text-display-lg font-light tracking-tight",
+        size === "xl" && "font-display text-display-lg font-normal tracking-tight",
         auto === "credit" && "text-teal-400",
         auto === "debit" && "text-coral-400",
         auto === "muted" && "text-ink-faint",

@@ -23,10 +23,10 @@ Sources:
 | Krungsri NOW     | Krungsri          | ✓        |       |  ?      |
 | Krungsri Visa    | Krungsri          | ✓        | ✓     |  ?      |
 | KTC UnionPay     | KTC               | ✓        | ✓     |  ?      |
-| Lotus's Beyond   | Lotus             | ✓        |       |  ?      |
+| [[lotuss-beyond\|Lotus's Beyond]] | Lotus    | ✓        |       |  ?      |
 | SPayLater        | Shopee            | ✓        | ✓     |  ?      |
 | ttb so smart     | ttb               | ✓        |       |  ?      |
-| UOB Makro        | UOB               | ✓        | ✓     |  ?      |
+| [[uob-makro\|UOB Makro]] | UOB        | ✓        | ✓     |  ?      |
 | [[uob-one\|UOB One]] | UOB           | ✓        | ✓     |  ?      |
 | UOB Premier      | UOB               | ✓        | ✓     |  ?      |
 | UOB World        | UOB               | ✓        | ✓     |  ?      |

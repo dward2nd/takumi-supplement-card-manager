@@ -2,7 +2,6 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useApp } from "../data/state";
 import { TabBar, FAB } from "./TabBar";
-import { HOLDERS } from "../data/holders";
 
 export const Layout = () => {
   const { holderKey } = useApp();
@@ -15,7 +14,14 @@ export const Layout = () => {
   const canBills = holderKey !== null && holderKey !== "takumi" ? true : holderKey === "takumi";
 
   return (
-    <div className="relative mx-auto flex min-h-dvh max-w-md flex-col overflow-x-hidden">
+    // Mobile-first: the container has no max-width at the outer level. Each
+    // screen clamps its own content (max-w-md by default, expanding to
+    // md:max-w-3xl / lg:max-w-6xl where the screen benefits from extra width).
+    // The editorial line-length feel is preserved on phones; desktops spread
+    // into purposeful multi-column layouts at lg+. The "logged in as <holder>"
+    // affordance lives in the bottom TabBar's right-most tab, not a separate
+    // top-right badge.
+    <div className="relative flex min-h-dvh flex-col overflow-x-hidden">
       <span className="grain-overlay" aria-hidden />
       <AnimatePresence mode="wait">
         <motion.main
@@ -34,33 +40,8 @@ export const Layout = () => {
         <>
           <FAB onClick={() => nav("/add")} />
           <TabBar canBills={canBills} />
-          {holderKey && <PresenceBadge />}
         </>
       )}
     </div>
-  );
-};
-
-const PresenceBadge = () => {
-  const { holderKey } = useApp();
-  const nav = useNavigate();
-  if (!holderKey) return null;
-  const h = HOLDERS[holderKey];
-  return (
-    <button
-      onClick={() => nav("/settings")}
-      className="tap top-safe fixed right-4 z-30 flex h-9 items-center gap-2 rounded-full border border-paper-line/80 bg-paper/70 pl-1 pr-3 backdrop-blur-md"
-      aria-label={`logged in as ${h.englishName}`}
-    >
-      <span
-        className="flex h-7 w-7 items-center justify-center rounded-full text-sm font-medium text-paper"
-        style={{ background: h.accent }}
-      >
-        {h.initial}
-      </span>
-      <span className="text-[10px] uppercase tracking-[0.18em] text-ink-dim">
-        {h.englishName}
-      </span>
-    </button>
   );
 };

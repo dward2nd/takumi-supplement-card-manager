@@ -1,7 +1,16 @@
-import type { Card, CardId } from "./types";
+import type { Card, CardId, HolderKey } from "./types";
 
-// Mirror of scripts/repositories/cards/*.yaml — same data, with brand colours
-// and synthetic last-4 added so the cards look "real" in the UI.
+/**
+ * Per-card metadata. Mirrors `scripts/repositories/cards/*.yaml` for the
+ * shared facts (issuer, network, points-default, etc.) and adds POC-only
+ * brand colours + per-holder last-4, lifetime points, and current balance
+ * for the demo.
+ *
+ * `holderLast4`, `holderLifetimePoints`, `holderCurrentBalance` are keyed
+ * by the holder who actually holds a supplement of the card. Each holder
+ * has a distinct physical card number even though the product name is
+ * shared (Notion models this as one Cards-DB row per holder).
+ */
 export const CARDS: Record<CardId, Card> = {
   "uob-one": {
     id: "uob-one",
@@ -9,11 +18,14 @@ export const CARDS: Record<CardId, Card> = {
     issuer: "UOB",
     network: "Mastercard",
     premiumTier: "Standard",
-    last4: "4421",
+    holderLast4: { takumi: "0011", baiboon: "4421", nuta: "9988" },
     pointsDefault: "×0",
     petrolExclusion: true,
     holders: ["takumi", "baiboon", "nuta"],
     creditLimit: 250_000,
+    // No points on this card — lifetime is zero everywhere.
+    holderLifetimePoints: { takumi: 0, baiboon: 0, nuta: 0 },
+    holderCurrentBalance: { takumi: 1_240, baiboon: 558.57, nuta: 8_041.39 },
     brandColors: ["#1a3a8e", "#0d245c"],
     blurb: "Daily-spend cashback workhorse · ×0 points",
   },
@@ -23,10 +35,13 @@ export const CARDS: Record<CardId, Card> = {
     issuer: "UOB",
     network: "Mastercard",
     premiumTier: "Signature",
-    last4: "1872",
+    holderLast4: { takumi: "0220", baiboon: "1872" },
+    bahtPer1Point: 20,
     petrolExclusion: true,
     holders: ["takumi", "baiboon"],
     creditLimit: 250_000,
+    holderLifetimePoints: { takumi: 18_420, baiboon: 12_310 },
+    holderCurrentBalance: { takumi: 195, baiboon: 1_802 },
     brandColors: ["#3f2a76", "#1a124a"],
     blurb: "Global Mastercard for travel + dining",
   },
@@ -36,10 +51,13 @@ export const CARDS: Record<CardId, Card> = {
     issuer: "UOB",
     network: "VISA",
     premiumTier: "Platinum",
-    last4: "0934",
+    holderLast4: { takumi: "0934" },
+    bahtPer1Point: 20,
     petrolExclusion: true,
     holders: ["takumi"],
     creditLimit: 250_000,
+    holderLifetimePoints: { takumi: 36_780 },
+    holderCurrentBalance: { takumi: 26_350 },
     brandColors: ["#4d3a1e", "#241a0c"],
   },
   "uob-makro": {
@@ -47,10 +65,13 @@ export const CARDS: Record<CardId, Card> = {
     name: "UOB Makro",
     issuer: "UOB",
     network: "Mastercard",
-    last4: "5510",
+    holderLast4: { takumi: "5510", baiboon: "8044" },
+    bahtPer1Point: 25,
     petrolExclusion: true,
     holders: ["takumi", "baiboon"],
     creditLimit: 250_000,
+    holderLifetimePoints: { takumi: 4_120, baiboon: 6_345 },
+    holderCurrentBalance: { takumi: 7_240, baiboon: 0 },
     brandColors: ["#1f5c3c", "#0f2e1d"],
     blurb: "Makro-only earner · stockup card",
   },
@@ -59,19 +80,25 @@ export const CARDS: Record<CardId, Card> = {
     name: "First Choice",
     issuer: "Krungsri",
     network: "VISA",
-    last4: "7390",
+    holderLast4: { takumi: "7390", baiboon: "2188" },
+    bahtPer1Point: 25,
     holders: ["takumi", "baiboon"],
     creditLimit: 80_000,
+    holderLifetimePoints: { takumi: 8_240, baiboon: 14_980 },
+    holderCurrentBalance: { takumi: 0, baiboon: 74_748.1 },
     brandColors: ["#7a1d2a", "#3a0d13"],
-    blurb: "Krungsri group · ad-hoc cashback promos",
+    blurb: "Krungsri group · earns points + ad-hoc cashback promos",
   },
   "krungsri-jcb": {
     id: "krungsri-jcb",
     name: "Krungsri JCB",
     issuer: "Krungsri",
     network: "JCB",
-    last4: "2218",
+    holderLast4: { takumi: "2218", baiboon: "8809" },
+    bahtPer1Point: 25,
     holders: ["takumi", "baiboon"],
+    holderLifetimePoints: { takumi: 5_120, baiboon: 2_840 },
+    holderCurrentBalance: { takumi: 0, baiboon: 0 },
     brandColors: ["#7d2730", "#3b1116"],
   },
   "krungsri-now": {
@@ -79,8 +106,11 @@ export const CARDS: Record<CardId, Card> = {
     name: "Krungsri NOW",
     issuer: "Krungsri",
     network: "Mastercard",
-    last4: "9601",
+    holderLast4: { baiboon: "9601" },
+    bahtPer1Point: 25,
     holders: ["baiboon"],
+    holderLifetimePoints: { baiboon: 1_230 },
+    holderCurrentBalance: { baiboon: 0 },
     brandColors: ["#9a3b1e", "#4a1c0d"],
   },
   "krungsri-visa": {
@@ -88,8 +118,11 @@ export const CARDS: Record<CardId, Card> = {
     name: "Krungsri Visa",
     issuer: "Krungsri",
     network: "VISA",
-    last4: "3140",
+    holderLast4: { takumi: "3140" },
+    bahtPer1Point: 25,
     holders: ["takumi"],
+    holderLifetimePoints: { takumi: 3_410 },
+    holderCurrentBalance: { takumi: 0 },
     brandColors: ["#7a3b1a", "#3a1c0c"],
   },
   "cardx-jcb": {
@@ -97,8 +130,11 @@ export const CARDS: Record<CardId, Card> = {
     name: "CardX JCB",
     issuer: "CardX",
     network: "JCB",
-    last4: "0006",
+    holderLast4: { takumi: "0006", nuta: "5512" },
+    bahtPer1Point: 25,
     holders: ["takumi", "nuta"],
+    holderLifetimePoints: { takumi: 1_020, nuta: 980 },
+    holderCurrentBalance: { takumi: 0, nuta: 0 },
     brandColors: ["#0a3a3a", "#04201e"],
     blurb: "3% cashback in JP/KR/HK/SG/TW · local currency only",
   },
@@ -107,8 +143,11 @@ export const CARDS: Record<CardId, Card> = {
     name: "KTC UnionPay",
     issuer: "KTC",
     network: "UnionPay",
-    last4: "6711",
+    holderLast4: { takumi: "6711", baiboon: "3320" },
+    bahtPer1Point: 25,
     holders: ["takumi", "baiboon"],
+    holderLifetimePoints: { takumi: 2_140, baiboon: 5_280 },
+    holderCurrentBalance: { takumi: 0, baiboon: 1_240 },
     brandColors: ["#5a1818", "#280808"],
   },
   "ttb-so-smart": {
@@ -116,8 +155,11 @@ export const CARDS: Record<CardId, Card> = {
     name: "ttb so smart",
     issuer: "ttb",
     network: "Mastercard",
-    last4: "8210",
+    holderLast4: { baiboon: "8210" },
+    bahtPer1Point: 25,
     holders: ["baiboon"],
+    holderLifetimePoints: { baiboon: 4_530 },
+    holderCurrentBalance: { baiboon: 0 },
     brandColors: ["#1a4a7a", "#0a2240"],
   },
   "aeon-primo": {
@@ -125,8 +167,11 @@ export const CARDS: Record<CardId, Card> = {
     name: "AEON Primo",
     issuer: "AEON",
     network: "JCB",
-    last4: "4002",
+    holderLast4: { baiboon: "4002" },
+    bahtPer1Point: 25,
     holders: ["baiboon"],
+    holderLifetimePoints: { baiboon: 1_120 },
+    holderCurrentBalance: { baiboon: 0 },
     brandColors: ["#a83232", "#4d1212"],
   },
   "aeon-next-gen": {
@@ -134,8 +179,11 @@ export const CARDS: Record<CardId, Card> = {
     name: "AEON Next Gen",
     issuer: "AEON",
     network: "Mastercard",
-    last4: "7755",
+    holderLast4: { baiboon: "7755" },
+    bahtPer1Point: 25,
     holders: ["baiboon"],
+    holderLifetimePoints: { baiboon: 980 },
+    holderCurrentBalance: { baiboon: 0 },
     brandColors: ["#7a1c2a", "#380c14"],
   },
   "lotuss-beyond": {
@@ -143,16 +191,21 @@ export const CARDS: Record<CardId, Card> = {
     name: "Lotus's Beyond",
     issuer: "Lotus",
     network: "Mastercard",
-    last4: "8484",
+    holderLast4: { baiboon: "8484" },
+    bahtPer1Point: 25,
     holders: ["baiboon"],
+    holderLifetimePoints: { baiboon: 348 },
+    holderCurrentBalance: { baiboon: 0 },
     brandColors: ["#1a5a2f", "#0a2814"],
   },
   spaylater: {
     id: "spaylater",
     name: "SPayLater",
     issuer: "Shopee",
-    last4: "—",
+    holderLast4: { baiboon: "—" },
+    // No point-earning; BNPL line.
     holders: ["baiboon"],
+    holderCurrentBalance: { baiboon: 0 },
     brandColors: ["#7a3018", "#3a160a"],
     blurb: "Shopee BNPL · no card; treated like a card line",
   },
@@ -160,5 +213,9 @@ export const CARDS: Record<CardId, Card> = {
 
 export const CARD_LIST = Object.values(CARDS);
 
-export const cardsForHolder = (holder: import("./types").HolderKey) =>
+export const cardsForHolder = (holder: HolderKey) =>
   CARD_LIST.filter((c) => c.holders.includes(holder));
+
+/** Convenience: get the holder's specific last-4 on a card. */
+export const last4For = (card: Card, holder: HolderKey): string =>
+  card.holderLast4[holder] ?? "—";

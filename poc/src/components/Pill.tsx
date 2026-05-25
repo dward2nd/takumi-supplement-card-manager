@@ -13,11 +13,13 @@ interface Props {
 export const Pill = ({ children, tone = "neutral", className, uppercase = true }: Props) => (
   <span
     className={clsx(
-      "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] leading-none",
+      "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] leading-none",
       uppercase && "uppercase tracking-[0.14em]",
-      tone === "amber" && "border-amber-300/30 bg-amber-300/10 text-amber-100",
-      tone === "teal" && "border-teal-400/30 bg-teal-400/10 text-teal-400",
-      tone === "coral" && "border-coral-400/30 bg-coral-400/10 text-coral-400",
+      // Accent text uses the theme-aware `--amber-glow / --teal-400 / --coral-400`
+      // variables so the text darkens enough on the cream paper of light mode.
+      tone === "amber" && "border-amber-300/40 bg-amber-300/15 text-amber-glow",
+      tone === "teal" && "border-teal-400/40 bg-teal-400/15 text-teal-400",
+      tone === "coral" && "border-coral-400/40 bg-coral-400/15 text-coral-400",
       tone === "neutral" && "border-paper-line bg-paper-raised text-ink-dim",
       tone === "ghost" && "border-transparent text-ink-faint",
       className,

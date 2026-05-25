@@ -5,12 +5,18 @@ import { ArrowLeft } from "lucide-react";
 interface Props {
   title: string;
   eyebrow?: string;
+  /**
+   * Subordinate possessive tag to render *before* the title, smaller and lower-
+   * contrast — e.g. "Baiboon's". The card name (title) stays the visual lead;
+   * this just gives possessive context when admin views someone else's instance.
+   */
+  ownershipTag?: { label: string; accent?: string };
   trailing?: ReactNode;
   back?: boolean | string;
 }
 
 /** Editorial top — a kicker line, a serif title, optional right slot. */
-export const PageHeader = ({ title, eyebrow, trailing, back }: Props) => {
+export const PageHeader = ({ title, eyebrow, ownershipTag, trailing, back }: Props) => {
   const nav = useNavigate();
   return (
     <header className="top-safe px-5 pb-4">
@@ -31,11 +37,21 @@ export const PageHeader = ({ title, eyebrow, trailing, back }: Props) => {
       </div>
       <div className="mt-3">
         {eyebrow && (
-          <div className="text-[10px] uppercase tracking-[0.28em] text-amber-glow/90">
+          <div className="text-[12px] uppercase tracking-[0.28em] text-amber-glow/90">
             {eyebrow}
           </div>
         )}
-        <h1 className="font-display text-3xl font-light leading-[1.02] tracking-tight text-ink">
+        {ownershipTag && (
+          // Separate line above the title — subordinate weight, italic, holder
+          // accent. Aligns cleanly with the title's left edge.
+          <div
+            className="font-display text-lg italic font-normal leading-tight text-ink-dim"
+            style={ownershipTag.accent ? { color: ownershipTag.accent + "cc" } : undefined}
+          >
+            {ownershipTag.label}
+          </div>
+        )}
+        <h1 className="font-display text-3xl font-normal leading-[1.02] tracking-tight text-ink">
           {title}
         </h1>
       </div>

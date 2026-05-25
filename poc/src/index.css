@@ -3,45 +3,103 @@
 @tailwind utilities;
 
 @layer base {
+  /*
+   * Theme tokens live as CSS variables. Default (`:root`) is the warm-dark
+   * editorial palette. `.theme-light` swaps the neutral scales to a warm
+   * cream-on-ink mirror; the amber/teal/coral accents stay the same.
+   *
+   * Toggled by the ThemeProvider which adds/removes `.theme-light` on <html>.
+   */
   :root {
     color-scheme: dark;
+
+    /*
+     * Tokens are space-separated RGB triplets, not hex. This is the
+     * only form that lets Tailwind's `bg-paper/85` opacity modifier
+     * resolve correctly when colours are defined via `var(--xxx)`
+     * (Tailwind composes `rgb(var(--paper) / 0.85)` at runtime).
+     */
+    --paper: 13 11 8;
+    --paper-raised: 30 26 21;
+    --paper-high: 44 38 30;
+    --paper-line: 66 56 42;
+    --ink: 242 235 221;
+    --ink-dim: 212 204 186;
+    --ink-faint: 170 162 142;
+    --ink-ghost: 122 116 100;
+
+    --amber-glow: 247 196 99;
+    --teal-400: 126 200 181;
+    --coral-400: 240 137 119;
+
+    /* Atmosphere — radial gradient overlays on body */
+    --bg-glow-1: rgba(247, 196, 99, 0.06);
+    --bg-glow-2: rgba(86, 169, 145, 0.05);
+
+    /* Grain overlay opacity (slightly lower on light) */
+    --grain-opacity: 0.035;
+    --grain-blend: overlay;
+
     /* All amounts use tabular figures so column alignment is perfect. */
     font-variant-numeric: tabular-nums;
-    /* Mobile-friendly defaults */
     -webkit-tap-highlight-color: transparent;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    /*
+     * Don't force antialiased — on macOS the default subpixel-antialiased
+     * rendering keeps glyphs noticeably heavier and more legible. The earlier
+     * `antialiased` override made Fraunces at `font-light` look paper-thin.
+     */
     text-rendering: optimizeLegibility;
+  }
+
+  .theme-light {
+    color-scheme: light;
+
+    /* Warm cream paper + deep-ink text. Inverts contrast without going pure white. */
+    --paper: 248 244 234;
+    --paper-raised: 230 220 198;
+    --paper-high: 215 200 168;
+    --paper-line: 188 170 130;
+    --ink: 26 24 20;
+    --ink-dim: 58 52 42;
+    --ink-faint: 96 87 71;
+    --ink-ghost: 138 128 108;
+
+    /* Slightly darker accent variants on light to maintain contrast */
+    --amber-glow: 184 117 16;
+    --teal-400: 60 135 117;
+    --coral-400: 177 74 55;
+
+    --bg-glow-1: rgba(184, 117, 16, 0.05);
+    --bg-glow-2: rgba(60, 135, 117, 0.04);
+
+    --grain-opacity: 0.022;
+    --grain-blend: multiply;
   }
 
   html,
   body,
   #root {
     height: 100%;
-    background: #0d0b08;
-    color: #f2ebdd;
+    background: rgb(var(--paper));
+    color: rgb(var(--ink));
   }
 
   body {
     font-family: theme("fontFamily.sans");
     overscroll-behavior-y: none;
-    /* Account for iOS safe areas without breaking the warm-dark background */
     background:
-      radial-gradient(1200px 600px at 10% -10%, rgba(247, 196, 99, 0.06), transparent 55%),
-      radial-gradient(900px 600px at 100% 110%, rgba(86, 169, 145, 0.05), transparent 55%),
-      #0d0b08;
-    /* Subtle grain texture */
+      radial-gradient(1200px 600px at 10% -10%, var(--bg-glow-1), transparent 55%),
+      radial-gradient(900px 600px at 100% 110%, var(--bg-glow-2), transparent 55%),
+      rgb(var(--paper));
     background-attachment: fixed;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
-
-  /* Sticky header / bottom tab share this subtle gradient with the background. */
 
   ::selection {
     background: rgba(247, 196, 99, 0.3);
-    color: #fff;
+    color: var(--ink);
   }
 
-  /* Typography defaults */
   h1, h2, h3, h4 {
     font-family: theme("fontFamily.display");
     font-feature-settings: "ss01" on, "ss03" on;
@@ -64,8 +122,8 @@
     inset: 0;
     pointer-events: none;
     z-index: 1;
-    opacity: 0.035;
-    mix-blend-mode: overlay;
+    opacity: var(--grain-opacity);
+    mix-blend-mode: var(--grain-blend);
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 

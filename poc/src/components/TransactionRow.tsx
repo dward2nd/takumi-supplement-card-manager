@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { CARDS } from "../data/cards";
 import { Amount } from "./Amount";
 import { Pill } from "./Pill";
-import { fmtRate, fmtShort, splitMerchant } from "../data/format";
+import { fmtShort, splitMerchant } from "../data/format";
+import { earnedCashback, earnedPoints } from "../data/earnings";
 import type { Transaction } from "../data/types";
 
 interface Props {
@@ -19,6 +20,11 @@ export const TransactionRow = ({ tx, hideCardChip, onTap, index = 0 }: Props) =>
   const { headline, tail } = splitMerchant(tx.name);
   const isCredit = tx.amount < 0;
   const isCashbackRow = /cashback/i.test(tx.name);
+
+  // Per-row earnings — same axes whether the row earned points, cashback, or both.
+  // null means "this axis doesn't apply" (e.g. UOB One has no points line).
+  const pts = isCashbackRow ? null : earnedPoints(tx, card);
+  const cb = isCashbackRow ? null : earnedCashback(tx);
 
   return (
     <motion.button
@@ -36,16 +42,20 @@ export const TransactionRow = ({ tx, hideCardChip, onTap, index = 0 }: Props) =>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="num text-[10px] tracking-[0.14em] text-ink-faint">
+            <span className="num text-[12px] tracking-[0.14em] text-ink-faint">
               {fmtShort(tx.transactionDate)}
             </span>
             {!hideCardChip && (
+              // The chip background is a very translucent brand-colour
+              // gradient. Text uses the theme-aware `text-ink-dim` so it
+              // reads against either cream (light mode) or warm-dark
+              // (dark mode) page background — without that, the
+              // hardcoded cream we used to set would vanish on light.
               <span
-                className="rounded-full px-2 py-0.5 text-[9px] uppercase tracking-[0.16em]"
+                className="rounded-full px-2 py-0.5 text-[11px] uppercase tracking-[0.16em] text-ink-dim"
                 style={{
                   borderTop: `1px solid ${card.brandColors[0]}55`,
-                  background: `linear-gradient(90deg, ${card.brandColors[0]}1f, ${card.brandColors[1]}0f)`,
-                  color: "#f2ebdd",
+                  background: `linear-gradient(90deg, ${card.brandColors[0]}33, ${card.brandColors[1]}1a)`,
                 }}
               >
                 {card.name}
@@ -57,37 +67,71 @@ export const TransactionRow = ({ tx, hideCardChip, onTap, index = 0 }: Props) =>
             {headline}
           </div>
           {tail && (
-            <div className="text-[10px] uppercase tracking-[0.18em] text-ink-faint">
+            <div className="text-[12px] uppercase tracking-[0.18em] text-ink-faint">
               {tail}
             </div>
           )}
           {tx.note && (
-            <div className="mt-1 line-clamp-2 max-w-[26ch] text-[11px] leading-snug text-ink-faint">
+            <div className="mt-1 line-clamp-2 max-w-[26ch] text-[13px] leading-snug text-ink-faint">
               {tx.note}
             </div>
           )}
         </div>
 
-        <div className="flex shrink-0 flex-col items-end gap-1">
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
           <Amount
             value={tx.amount}
             tone={isCredit ? "credit" : "default"}
             className={clsx(isCashbackRow && "font-medium", "text-base")}
           />
-          <div className="flex items-center gap-1">
-            {tx.cashbackPercent !== undefined && (
-              <Pill tone="amber" uppercase={false}>
-                {fmtRate(tx.cashbackPercent)} cb
-              </Pill>
-            )}
-            {tx.multiplier === "×0" && !isCashbackRow && (
-              <Pill tone="ghost" uppercase={false}>
-                ×0
-              </Pill>
-            )}
-          </div>
+
+          {/* Per-row earnings — only render axes that apply to this card/row. */}
+          {(pts !== null || cb !== null) && (
+            <div className="flex items-center gap-3">
+              {pts !== null && (
+                <Earned
+                  label="pts"
+                  value={pts > 0 ? pts.toLocaleString("en-US") : "—"}
+                  tone={pts > 0 ? "default" : "muted"}
+                />
+              )}
+              {cb !== null && cb > 0 && (
+                <Earned
+                  label="cb"
+                  value={`฿${cb.toFixed(2)}`}
+                  tone="credit"
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </motion.button>
   );
 };
+
+const Earned = ({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: "default" | "credit" | "muted";
+}) => (
+  <div className="flex flex-col items-end leading-none">
+    <span
+      className={clsx(
+        "num text-[12px]",
+        tone === "default" && "text-ink",
+        tone === "credit" && "text-teal-400",
+        tone === "muted" && "text-ink-ghost",
+      )}
+    >
+      {value}
+    </span>
+    <span className="mt-0.5 text-[10.5px] uppercase tracking-[0.22em] text-ink-faint">
+      {label}
+    </span>
+  </div>
+);

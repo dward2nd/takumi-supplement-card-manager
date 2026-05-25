@@ -13,23 +13,34 @@ export default {
         mono: ['"IBM Plex Mono"', "ui-monospace", "Menlo", "monospace"],
       },
       colors: {
-        // The palette is intentionally narrow.
-        // Background = warm near-black; surface = a touch lifted; ink = warm cream;
-        // amber = primary accent; teal = paid/done; coral = due/danger.
+        // Palette is intentionally narrow. The neutral scales (ink / paper)
+        // come from CSS variables so the same `text-ink-dim` / `bg-paper`
+        // classes resolve to the correct value under either theme. The
+        // accents (amber / teal / coral) are kept as fixed hues — brand
+        // colour identity stays consistent across modes.
+        //
+        // Variable definitions live in src/index.css under :root (dark) and
+        // .theme-light. Toggle by adding/removing `.theme-light` on <html>.
+        /*
+         * `rgb(var(--xxx) / <alpha-value>)` is the form Tailwind v3 understands
+         * for opacity modifiers — `bg-paper/85` becomes `rgb(var(--paper) / 0.85)`.
+         * Variables in index.css must be space-separated RGB triplets for this
+         * to compose correctly.
+         */
         ink: {
-          // The text-on-dark layer. Warm cream → not pure white.
-          DEFAULT: "#F2EBDD",
-          dim: "#C7BFAD",
-          faint: "#8A8472",
-          ghost: "#5A5547",
+          DEFAULT: "rgb(var(--ink) / <alpha-value>)",
+          dim: "rgb(var(--ink-dim) / <alpha-value>)",
+          faint: "rgb(var(--ink-faint) / <alpha-value>)",
+          ghost: "rgb(var(--ink-ghost) / <alpha-value>)",
         },
         paper: {
-          // Background layers, warm dark.
-          DEFAULT: "#0d0b08",
-          raised: "#161310",
-          high: "#1f1a14",
-          line: "#2a241c",
+          DEFAULT: "rgb(var(--paper) / <alpha-value>)",
+          raised: "rgb(var(--paper-raised) / <alpha-value>)",
+          high: "rgb(var(--paper-high) / <alpha-value>)",
+          line: "rgb(var(--paper-line) / <alpha-value>)",
         },
+        /** Stable dark token for text on amber/teal/coral surfaces in any theme. */
+        "on-accent": "#0d0b08",
         amber: {
           50: "#fcf3df",
           100: "#f7e3b1",
@@ -38,15 +49,15 @@ export default {
           400: "#d99316",
           500: "#b87510",
           600: "#8e570a",
-          glow: "#f7c463",
+          glow: "rgb(var(--amber-glow) / <alpha-value>)",
         },
         teal: {
-          400: "#7ec8b5",
+          400: "rgb(var(--teal-400) / <alpha-value>)",
           500: "#56a991",
           600: "#3c8775",
         },
         coral: {
-          400: "#f08977",
+          400: "rgb(var(--coral-400) / <alpha-value>)",
           500: "#d96650",
           600: "#b14a37",
         },

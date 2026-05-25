@@ -50,18 +50,45 @@ export interface Card {
   issuer: IssuerKey;
   network?: "VISA" | "Mastercard" | "JCB" | "UnionPay" | "American Express";
   premiumTier?: "Signature" | "Platinum" | "Infinite" | "Standard";
-  /** Synthetic 4-digit "card last 4" for the POC, since real PANs aren't tracked. */
-  last4: string;
+  /**
+   * Per-holder physical card last-4. Each holder's supplement has a distinct
+   * card number even though the product name is shared. Mirrors Notion: each
+   * holder has their own Cards DB row for "UOB One" / "First Choice" / etc.
+   */
+  holderLast4: Partial<Record<HolderKey, string>>;
   pointsDefault?: "×0" | "×2" | "×3" | "×4" | "×5" | "÷4";
+  /** Baht spent to earn 1 base point. Mirrors Notion's `บาทต่อ 1 คะแนน`. Undefined = no point-earning. */
+  bahtPer1Point?: number;
   petrolExclusion?: boolean;
   /** Per-holder presence: who has a supplement of this card. */
   holders: HolderKey[];
-  /** Approximate credit limit, household-wide. ฿ */
+  /**
+   * Cumulative lifetime points per holder. Mock-only — in the real app this
+   * is a rollup over every processed transaction on that holder's card.
+   */
+  holderLifetimePoints?: Partial<Record<HolderKey, number>>;
+  /**
+   * Current outstanding balance per holder across all unpaid + processed-but-
+   * unbilled cycles. Different from "this cycle's outstanding" — that's a
+   * cycle-window slice. This is the live debt on the card right now.
+   */
+  holderCurrentBalance?: Partial<Record<HolderKey, number>>;
+  /** Credit limit on the underlying credit line. Shared across all holders' supplements of the same card. ฿ */
   creditLimit?: number;
   /** Brand colour pair: [from, to] used for the card gradient. */
   brandColors: [string, string];
   /** One-liner the user has internalised about this card. */
   blurb?: string;
+}
+
+/**
+ * A specific holder's supplement of a card — what the user actually swipes.
+ * Two holders may share the same `cardId` but have distinct `last4`s.
+ */
+export interface CardInstance {
+  cardId: CardId;
+  holder: HolderKey;
+  last4: string;
 }
 
 export interface PromotionTier {
