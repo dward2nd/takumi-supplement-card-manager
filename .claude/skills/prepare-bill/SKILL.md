@@ -58,9 +58,11 @@ JSON spec:
 
 The bill total is "balance including cashback". The skill itself does **no** cashback arithmetic — that's deliberate. Cashback offsets must already be encoded in the cycle's transactions as **negative-amount rows** (e.g. `UOB ONE CASHBACK 5%` with `ยอดชำระ = -22.77`). A flat sum then yields the net amount due.
 
-For cards in the `CASHBACK_CREDIT_CARDS` set (currently `UOB One`), running this skill before the credit rows exist is a footgun — the bill would overstate the balance. The CLI guards against this: it scans the cycle's transactions for any title containing `CASHBACK` (case-insensitive) and refuses to draft if none is present. Run [[../post-cashback-credits/SKILL.md|/post-cashback-credits]] first to write the tier-split credit rows, then come back here.
+For cards in the `CASHBACK_CREDIT_CARDS` set (currently `UOB One`, whose active promotion is [[../../docs/promotions/uob-one-2026|UOB One 2026]]), running this skill before the credit rows exist is a footgun — the bill would overstate the balance. The CLI guards against this: it scans the cycle's transactions for any title containing `CASHBACK` (case-insensitive) and refuses to draft if none is present. Run [[../post-cashback-credits/SKILL.md|/post-cashback-credits]] first to write the tier-split credit rows, then come back here.
 
-For cards that don't pay cashback (e.g. UOB World, KTC, First Choice without an active promo, etc.), no preparation is needed — there are no cashback rows to sum and the bill total is the raw `ยอดชำระ` total of the cycle's transactions. The safety check does not apply.
+For cards without an active cashback promotion at the cycle's date (e.g. UOB World, KTC, First Choice between promos), no preparation is needed — there are no cashback rows to sum and the bill total is the raw `ยอดชำระ` total of the cycle's transactions. The safety check does not apply.
+
+For First Choice **during** an active promotion: the user currently manages those cashback adjustments manually (no per-promo credit-row workflow is documented yet). Until First Choice promos get their own promo notes + credit-row convention, `/prepare-bill` won't trigger the safety check for First Choice — confirm with the user that promo cashback has been applied per-row before drafting.
 
 ## Hard rules
 

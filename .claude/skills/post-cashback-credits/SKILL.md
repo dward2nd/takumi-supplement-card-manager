@@ -5,9 +5,9 @@ description: Auto-create UOB One cashback credit rows for a cycle by summing per
 
 # post-cashback-credits
 
-Writes the UOB One cashback credit rows for **one** cycle of **one** holder's UOB One supplement, so [[../prepare-bill/SKILL.md|/prepare-bill]] can then sum the cycle to a correct net balance.
+Writes the cashback credit rows for **one** cycle of **one** holder's card, materializing the active promotion's payout into negative-amount transactions so [[../prepare-bill/SKILL.md|/prepare-bill]] can then sum the cycle to a correct net balance.
 
-Currently supports `UOB One` only — per-card credit conventions differ. To add another card, extend `SUPPORTED_CARDS` and `_classify_tier_date` in `scripts/python/post-cashback-credits/cli.py`.
+Currently supports `UOB One` only — it implements the [[../../docs/promotions/uob-one-2026|UOB One 2026 promotion]]'s crediting workflow (1% at BC, higher tiers at first weekday of next month). Per-promotion credit conventions differ; to support another card's active promotion, extend `SUPPORTED_CARDS` and `_classify_tier_date` in `scripts/python/post-cashback-credits/cli.py` and reference the new promotion note.
 
 ## Primary execution path — the deterministic script
 
@@ -51,7 +51,9 @@ JSON spec:
 
 ### 1. UOB One only (for now)
 
-The date-by-tier convention (1% at BC, others at first weekday of next month) is the user's UOB One workflow established 2026-05-25. Other issuers' workflows differ; adding cards is a deliberate extension, not an automatic generalization.
+The date-by-tier convention (1% at BC, others at first weekday of next month) is the [[../../docs/promotions/uob-one-2026|UOB One 2026 promotion]]'s crediting workflow as confirmed by the user 2026-05-25. Other promotions and other cards' workflows differ; adding support is a deliberate extension (update `SUPPORTED_CARDS` + `_classify_tier_date` + reference the new promo note), not an automatic generalization.
+
+When the UOB One promotion renews for 2027 with a different crediting cadence, branch the promo note and revisit the `_classify_tier_date` function.
 
 ### 2. Zero-tier rows are skipped
 

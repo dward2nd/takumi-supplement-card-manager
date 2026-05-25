@@ -1,0 +1,47 @@
+id: uob-one-2026
+name: UOB One 2026 cashback promotion
+card: UOB One
+effective_start: 2026-01-01
+effective_end: 2026-12-31
+status: active
+points_default: "×0"
+
+# Default rule: foreign-in-THB rows earn nothing.
+# No per-merchant overrides on this promo.
+foreign_in_thb_policy:
+  default: exclude
+  overrides: []
+
+# Tier classification — first match wins. Order matters.
+tiers:
+  - rate: 0.10
+    label: bonus
+    patterns:
+      - BTS
+      - MRT
+      - AMZ            # Café Amazon (also matches RMAMZ in observed data)
+  - rate: 0.05
+    label: bonus
+    patterns:
+      - "7-11"
+      - WATSON
+      - WWW.GRAB.COM
+      - GRABTAXI
+    exclude_patterns:
+      - "TMN 7-11"     # TrueMoney top-up at 7-Eleven — falls through to 1%
+  - rate: 0.01
+    label: base
+    patterns: ["*"]
+
+# UOB One installment treatment: 1% per installment row, credited per installment
+# (contrast with First Choice, which credits at purchase time).
+installment_rule:
+  rate: 0.01
+  credited: per_installment
+
+# When the issuer credits cashback per cycle.
+# Keys are rate-as-string; values are date conventions used by /post-cashback-credits.
+crediting_schedule:
+  "0.01": bc_date
+  "0.05": first_weekday_next_month
+  "0.10": first_weekday_next_month

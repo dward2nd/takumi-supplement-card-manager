@@ -1,13 +1,16 @@
 ---
 name: update-poc
-description: Sync the static POC at `poc/` to significant project changes (data model, concepts, schemas, formulas) since the POC was last committed. Use when the user runs `/update-poc`, asks to "refresh the POC", "sync the demo", or says "the docs changed — update the POC".
+description: Sync the phase-2 PWA under `poc/` to significant project changes (data model, concepts, schemas, formulas, repositories, promotions) since the POC was last committed. The skill prepares a structured **context brief** describing what the ideal POC should look like and then hands off to [[../frontend-design/SKILL.md|/frontend-design]] for the visual + code work. Use when the user runs `/update-poc`, asks to "refresh the POC", "sync the demo", or says "the docs changed — update the POC".
 ---
 
 # update-poc
 
-Walks the project's documented changes since the last commit that touched `poc/` and applies the *relevant* ones to the POC's data, HTML, and JS. The POC is a living visual checkpoint of the future app — not a real product — so the bar for "should this drive a POC change" is **does it alter what the future app does or shows**.
+`/update-poc` is a **two-phase** skill:
 
-The POC is governed by [[feedback-poc-charter]]: minimal static SPA, vanilla JS, no build step, mock data only. Do not violate that charter during an update.
+1. **Phase A — survey**: figure out which project changes since the last `poc/` commit are meaningful enough to ripple into the PWA, and synthesise a brief that describes the ideal target state.
+2. **Phase B — design**: hand the brief to [[../frontend-design/SKILL.md|/frontend-design]] (with the project's POC constraints attached) and let it execute the visual + code changes inside `poc/` only.
+
+The POC is the **phase-2 PWA**: a Vite + React + TypeScript app inside `poc/`, bun-managed, mobile-first, mock data only. It is a daily-use spend journal for three people — see [[../../docs/future-app/product-shape]] for the canonical product spec.
 
 ## Argument
 
@@ -15,99 +18,128 @@ None.
 
 Invocation shape: `/update-poc`.
 
-## Primary execution path — the deterministic change-detector script
+## Phase A — surveying changes
 
-`scripts/python/update-poc/cli.py` is the only mechanical step:
+`scripts/python/update-poc/cli.py` enumerates "potentially significant" changes since the last commit that touched `poc/`:
 
 ```sh
 uv run scripts/python/update-poc/cli.py
 ```
 
-What it does:
+Output: a JSON envelope `{since_commit, poc_dir_exists, watched_paths, change_count, changes: [...]}`. If `since_commit` is `null`, the POC has never been committed — stop and ask the user to bootstrap with:
 
-1. Finds the most recent commit that touched `poc/` (`since`).
-2. Runs `git log <since>..HEAD --name-status` restricted to watched paths.
-3. Returns a JSON envelope:
+```sh
+git add poc/ && git commit -m "Bootstrap POC baseline"
+```
 
-   ```
-   {
-     "since_commit": "<sha or null>",
-     "poc_dir_exists": true,
-     "watched_paths": ["docs/future-app", "docs/databases", ...],
-     "change_count": N,
-     "changes": [
-       {"path": "docs/future-app/data-model-target.md", "status": "M",
-        "last_commit": "<sha>", "last_subject": "..."}
-     ]
-   }
-   ```
+Do not auto-commit. After they commit, the next run computes a real delta.
 
-If `since_commit` is `null`, the envelope carries a `note` asking the user to commit the current POC state first. Stop and surface that note; do not try to scan harder.
+If `change_count` is `0`, the POC is in sync; report "POC is in sync (baseline `<sha-short>`)" and stop — don't read docs, don't hand off to /frontend-design.
 
-### Watched paths (changes here may justify a POC update)
+### Watched paths
 
-- `docs/future-app/` — the canonical phase-2 target. Almost any change here matters.
-- `docs/databases/` — Notion schema descriptions. New fields / new SELECT values.
-- `docs/concepts/` — cross-cutting rules (multipliers, billing cycle, payment lifecycle, premium tier, network).
-- `docs/formulas/` — Notion formula decodings.
-- `docs/people/` — cardholder facts.
-- `CLAUDE.md` — top-level conventions.
-- `.mcp.json` — Notion endpoint config (rarely relevant to the POC, included for completeness).
+| Path                              | Why it can ripple into the POC                                                          |
+|-----------------------------------|------------------------------------------------------------------------------------------|
+| `docs/future-app/`                | Canonical phase-2 product spec — anything here can reshape the UI.                       |
+| `docs/databases/`                 | Notion schema. New fields / SELECT values that the POC must surface.                     |
+| `docs/concepts/`                  | Cross-cutting rules (multipliers, billing cycle, payment lifecycle, promotions, etc.).   |
+| `docs/promotions/`                | Per-promo narrative; structured data lives in `scripts/repositories/promotions/`.         |
+| `docs/formulas/`                  | Notion formula decodings. Rarely UI-relevant on its own.                                 |
+| `docs/people/`                    | Cardholder facts — names, roles, visibility rules.                                       |
+| `docs/cards/`                     | Per-card narrative.                                                                      |
+| `scripts/repositories/`           | Structured cards + promotions YAML. Drives the POC's mock data + classification preview. |
+| `CLAUDE.md`                       | Top-level conventions.                                                                   |
+| `.mcp.json`                       | Notion endpoint config (offline POC ⇒ rarely relevant; included for completeness).       |
 
-### Flags
+### Triage heuristics
 
-- `--path <p>` (repeatable): override the watched-path list. Defaults to the set above. Use when sweeping a non-standard directory like `docs/cards/` after card-by-card promotion.
+| Change                                                                  | Likely action on POC                                                                                                       |
+|-------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| New entity / field in `docs/future-app/data-model-target.md`            | Add to the POC's `src/data/types.ts` and any seed-data file. Surface in a screen if user-visible.                            |
+| New SELECT value in `docs/databases/*`                                  | Extend the seed in `src/data/` only if it materially affects display or the classification preview.                          |
+| New rule in `docs/concepts/*` (e.g. a new payment-lifecycle state)      | Update the corresponding component — status pill, chip, tab, etc.                                                            |
+| New promotion YAML in `scripts/repositories/promotions/`                | Mirror the promo into `src/data/promotions.ts` so the classification preview on Add Transaction stays current.               |
+| New card YAML in `scripts/repositories/cards/`                          | Mirror the card into `src/data/cards.ts` with brand colours and a synthetic last-4.                                          |
+| Formula change in `docs/formulas/*`                                     | Usually skip; the POC doesn't compute realized points. Apply only if the *inputs* (data model) shifted.                       |
+| `CLAUDE.md` / `.mcp.json` change                                        | Almost always skip for the POC. Re-check the charter section below instead.                                                  |
+
+## Phase B — handing off to `/frontend-design`
+
+After triage, **invoke [[../frontend-design/SKILL.md|/frontend-design]]** with a structured brief. The brief is what makes the design skill effective in this codebase — it doesn't get to re-invent the world; it executes the project's conventions.
+
+### The brief — what to pass
+
+Always include these sections, written tersely:
+
+1. **Project + audience** (one sentence). Pin from [[../../docs/future-app/product-shape]]:
+   > A daily-use spend journal PWA for three people — Takumi (admin/primary), Baiboon, Nuta (supplement-card holders). Mobile-first, installable. Mock data only inside `poc/`.
+
+2. **Phase-2 spec excerpts** that are load-bearing for this update. Cite the relevant section headings from [[../../docs/future-app/product-shape]] verbatim — don't paraphrase. Typical ones:
+   - *Daily-use workflow* (action-first home, FAB to add transactions, mini-table entry, three flows: new / alias-matched / tap-to-reuse).
+   - *Users & access model* (Takumi sees all; supplements see own + `PrimaryAccount` aggregates).
+   - *Data model decisions* (`RewardRule` as JSON on `Transaction`, `PrimaryAccount` quotas, refund adjustment rows).
+
+3. **What changed since `since_commit`** — the triaged list from Phase A, each entry annotated with "screen + component to touch".
+
+4. **POC charter (non-negotiable)** — paste this block verbatim into the brief so /frontend-design doesn't drift:
+   - Stack is fixed: **Vite + React + TypeScript + Tailwind v3 + Framer Motion + lucide-react + vite-plugin-pwa + bun**. No framework swaps in an update.
+   - Everything stays inside `poc/`. No edits outside.
+   - **Mock data only.** No network calls, no backend hits, no real card numbers or merchant strings. Illustrative values only.
+   - The mobile container clamps to `max-w-md` (~448px) and centers on desktop — design is portrait-phone first.
+   - **44px minimum touch targets** (use the `.tap` utility).
+   - Safe-area-inset everywhere (use `.top-safe` / `.bottom-safe`).
+   - **Typography is locked**: Fraunces (display, with italic), IBM Plex Sans Thai Looped (body), IBM Plex Mono (numerals, tabular figures). Don't introduce new fonts in a sync; that's a re-design, not an update.
+   - **Colour palette is locked**: warm-dark default (`#0d0b08`), amber primary, teal for done, coral for danger. Don't introduce a new accent in a sync.
+   - **Verbatim merchant strings** stay verbatim across the UI — never normalise.
+   - **Thai field names** stay verbatim wherever shown (`ยอดชำระ`, `วันตัดรอบบิล`, `จ่ายแล้ว`).
+
+5. **Aesthetic direction (already-committed)** — paste this one-liner so /frontend-design extends the look rather than reinventing it:
+   > "Editorial journal" — typography-led, restrained colour, hero numerals in mono, generous spacing, asymmetric overlap on the display layer. Not a banking dashboard.
+
+6. **Deliverables** — what the design skill should produce, file-by-file. Tie each change to a file in `poc/src/`. Examples:
+   - "New `RewardRule` field → extend `src/data/types.ts` Transaction interface; surface in `TransactionRow` as a stacked-pill row."
+   - "New 'rejected' payment-lifecycle state → add a `Pill` tone, render in `BillRow`."
+
+### Invocation
+
+Call the `frontend-design` skill via the Skill tool with the brief above as the argument. The handoff is the natural end of `/update-poc` — once /frontend-design returns, surface its summary back to the user and suggest [[../show-poc/SKILL.md|/show-poc]] to view the result.
 
 ## Procedure
 
-1. **Run the script.** Read the JSON envelope.
-   - If `since_commit` is `null` the POC has never been committed — there's no baseline against which to compute a delta. Stop and surface the CLI's `note` to the user, then suggest the bootstrap command verbatim:
-
-     ```sh
-     git add poc/ && git commit -m "Bootstrap POC baseline"
-     ```
-
-     After they commit, the next `/update-poc` run will compute changes since that commit. Do **not** auto-commit on their behalf — that would violate the "user reviews the diff" rule below.
-   - If `change_count` is `0`, the POC is already in sync with every watched doc as of `since_commit`. Report "POC is in sync (baseline `<since_commit-short>`); nothing to apply" and stop. Don't read any docs, don't smoke-test — there's nothing to verify. This is the common case right after a release that bundled both the POC and its source docs.
-2. **Triage the change list.** For each entry, `Read` the file and decide: does this change affect what the POC demonstrates? Apply these heuristics:
-
-   | Change                                                                  | Likely action on POC                                                                 |
-   |-------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
-   | New entity / property in `docs/future-app/data-model-target.md`        | Add to `poc/data.js`. Surface in `index.html`/`app.js` if user-visible.              |
-   | New SELECT value in a `docs/databases/*` note                          | Add to mock data only if the value materially affects display or logic.              |
-   | New rule in `docs/concepts/*` (e.g. a new payment lifecycle state)     | Update the corresponding render — status pill, chip, conditional view, etc.          |
-   | Formula change in `docs/formulas/*`                                    | Usually skip. The POC does not compute realized points/cashback. Apply only if the *inputs* (i.e. the doc-side data model) changed. |
-   | `CLAUDE.md` convention change                                          | Almost always skip for the POC itself. Re-check the charter and skill instructions instead. |
-   | `.mcp.json` change                                                     | Skip. POC is offline.                                                                |
-
-3. **Cross-check Notion when the docs are ambiguous.** Use `mcp__notion__notion-fetch` (read-only) to verify a property or SELECT exists in the live schema before adding it to mock data. The vault can drift; Notion is the source of truth for data.
-4. **Apply edits to `poc/`.** Touch the minimum set of files:
-   - `poc/data.js` — mock data.
-   - `poc/index.html` — table columns, panel hints, summary cards.
-   - `poc/app.js` — rendering and filtering logic.
-   - `poc/styles.css` — only if a new chip/pill/status colour is introduced.
-   Extend in place; do not restructure.
-5. **Smoke-test via chrome-devtools MCP.** Open `file://<repo>/poc/index.html`, click through Takumi / Baiboon / Nuta, verify the new behaviour renders, capture `list_console_messages` for errors. Take a screenshot of any new visible affordance.
-6. **Report back** with three sections:
+1. **Run the survey script.** Read the JSON envelope.
+2. **Handle the trivial cases** (no `since_commit` → bootstrap nudge; `change_count: 0` → "in sync" and stop).
+3. **Triage**. For each watched-path change, `Read` the file, decide screen-impact per the heuristics above, and assemble a notes list keyed by "screen + component to touch".
+4. **Cross-check structured data** when narrative docs are ambiguous. The structured source of truth lives in:
+   - `scripts/repositories/cards/<slug>.yaml`
+   - `scripts/repositories/promotions/<id>.yaml`
+   - Live Notion via `mcp__notion__notion-fetch` (read-only) — only when neither narrative nor YAML answers the question.
+5. **Compose the brief** with the six sections above.
+6. **Invoke `/frontend-design`** with the brief. Wait for it to apply edits.
+7. **Smoke-test via chrome-devtools-mcp**: launch `bun run dev` in `poc/`, navigate to the affected screen on a phone viewport (390×844), take a screenshot, check `list_console_messages` for errors. Stop the dev server when done.
+8. **Report back** with three sections:
    - **Applied** — file + one-line reason per change.
-   - **Skipped** — change + one-line reason why the POC doesn't need it.
-   - **Verified** — what you smoke-tested and the outcome.
+   - **Skipped** — change + one-line reason the POC doesn't need it.
+   - **Verified** — what was smoke-tested and the outcome (with screenshot path under `poc/.screenshots/`).
    Do **not** commit unless the user explicitly asks.
 
 ## Charter guardrails (non-negotiable, even when a doc change pulls toward them)
 
-- **No build step inside `poc/`.** No `package.json`, no bundler, no transpiler.
-- **No network calls.** All data stays in `poc/data.js`. The POC must never call Notion or any backend.
-- **`file://` must keep working.** No server-side dependencies, no paths that break under `file://`.
-- **Mock data only.** Never paste real card numbers, real bank statement merchant strings, or real bill amounts. Illustrative values only.
+Pasted into the /frontend-design brief, repeated here for the agent's own awareness:
 
-If a doc change would force a charter violation (e.g. "add a real Notion fetch to the POC"), surface the conflict to the user instead of complying silently.
+- **No framework swaps in a sync.** Stack changes are a re-build, not an update — discuss with the user first.
+- **Mock data only.** No real PANs, no real bank-statement merchant strings, no real bill amounts.
+- **No backend.** The PWA must work standalone in `bun run dev` / `bun run build`.
+- **`poc/` is the boundary.** Don't edit anything outside it.
+- **Service-worker hygiene.** Don't introduce data fetches inside the SW; the POC is offline by design.
+- **Typography + palette are locked** (see *POC charter* in the brief).
+
+If a doc change would force a charter violation (e.g. "add a real Notion fetch"), surface the conflict to the user instead of complying silently.
 
 ## What this skill does NOT do
 
 - Does **not** invent features the docs don't justify.
 - Does **not** auto-commit. The user reviews the diff. (Use [[../release/SKILL.md|/release]] when they're ready.)
 - Does **not** update Notion. POC is read-only.
-- Does **not** add a README to `poc/`. CLAUDE.md policy — docs go in `docs/`, not `poc/`.
+- Does **not** re-design from scratch. For ground-up re-builds (new aesthetic, new framework), invoke [[../frontend-design/SKILL.md|/frontend-design]] directly with a fresh brief.
 
-Cross-reference [[../show-poc/SKILL.md|/show-poc]] — once updates are applied and smoke-tested, suggest `/show-poc` so the user can see the result in a real browser window.
+Cross-reference [[../show-poc/SKILL.md|/show-poc]] — once updates are applied, suggest `/show-poc` to view the result in an isolated Chrome window.

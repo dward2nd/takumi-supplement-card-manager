@@ -38,6 +38,16 @@ Input schema:
                                                     //   Baiboon + Nuta only (% cb does
                                                     //   not exist on Takumi's DS);
                                                     //   raw fraction (0.05 == 5%)
+    "auto_classify": true,                          // optional, default false. When true,
+                                                    //   each row is classified by
+                                                    //   lib.promotions against the active
+                                                    //   promo for (card, tx date) and the
+                                                    //   resulting cashback_percent /
+                                                    //   multiplier / note are filled in
+                                                    //   for any field the spec didn't set.
+                                                    //   Per-tx and batch-level values
+                                                    //   still win over auto-classified
+                                                    //   values. Rejected for holder=takumi.
     "transactions": [                                // required, non-empty
       {
         "date":              "2026-05-13",          // ISO date
@@ -72,7 +82,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib import notion_client
+from lib import notion_client, promotions
 from lib.bill_cycle import active_cycle
 from lib.cards import find_card
 from lib.holders import resolve_holder
@@ -99,9 +109,40 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     processed = spec.get("processed", True)
     batch_multiplier = spec.get("multiplier")
     batch_cashback = spec.get("cashback_percent")
+    auto_classify = bool(spec.get("auto_classify", False))
+    if auto_classify and spec["holder"] == "takumi":
+        # Takumi's Transactions DS has no `% cb` field; classification can't write to it.
+        # Refuse rather than silently dropping the result.
+        raise ValueError(
+            "auto_classify is not supported for holder='takumi' "
+            "(Takumi's Transactions DS has no `% cb` field)"
+        )
 
     created: list[dict] = []
+    classifications: list[dict] = []
     for tx in spec["transactions"]:
+        # Per-transaction spec wins over batch defaults wins over auto-classified values.
+        tx_multiplier = tx.get("multiplier", batch_multiplier)
+        tx_cashback = tx.get("cashback_percent", batch_cashback)
+        tx_note = tx.get("note")
+
+        classification_info: dict | None = None
+        if auto_classify:
+            cls = promotions.classify(spec["card"], _dt.date.fromisoformat(tx["date"]), tx["name"])
+            classification_info = {
+                "promotion_id": cls.promotion_id,
+                "reason": cls.reason,
+                "cashback_percent": cls.cashback_percent,
+                "points_override": cls.points_override,
+            }
+            # Only fill in fields the user didn't already specify.
+            if tx_cashback is None and tx.get("cashback_percent") is None and batch_cashback is None:
+                tx_cashback = cls.cashback_percent
+            if tx_multiplier is None and tx.get("multiplier") is None and batch_multiplier is None:
+                tx_multiplier = cls.points_override
+            if tx_note is None and cls.note:
+                tx_note = cls.note
+
         props = build_transaction_properties(
             name=tx["name"],
             amount=float(tx["amount"]),
@@ -110,23 +151,29 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             due_date=due_date,
             card_page_id=card_page_id,
             processed=processed,
-            note=tx.get("note"),
-            multiplier=tx.get("multiplier", batch_multiplier),
-            cashback_percent=tx.get("cashback_percent", batch_cashback),
+            note=tx_note,
+            multiplier=tx_multiplier,
+            cashback_percent=tx_cashback,
         )
-        if dry_run:
-            created.append({"dry_run": True, "properties": props})
-            continue
-        page = notion_client.create_page(holder.transactions_ds, props)
-        created.append({
-            "id": page["id"],
-            "url": page.get("url"),
-            "name": tx["name"],
-            "amount": float(tx["amount"]),
-            "date": tx["date"],
-        })
 
-    return {
+        entry: dict = {}
+        if dry_run:
+            entry = {"dry_run": True, "properties": props}
+        else:
+            page = notion_client.create_page(holder.transactions_ds, props)
+            entry = {
+                "id": page["id"],
+                "url": page.get("url"),
+                "name": tx["name"],
+                "amount": float(tx["amount"]),
+                "date": tx["date"],
+            }
+        if classification_info is not None:
+            entry["classification"] = classification_info
+            classifications.append({"name": tx["name"], **classification_info})
+        created.append(entry)
+
+    out: dict = {
         "holder": holder.key,
         "card": spec["card"],
         "card_page_id": card_page_id,
@@ -136,6 +183,10 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         "count": len(created),
         "created": created,
     }
+    if auto_classify:
+        out["auto_classified"] = True
+        out["classifications"] = classifications
+    return out
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -43,6 +43,7 @@ Each note opens with a live Notion URL, collection ID, and the full property sch
 - [[concepts/billing-cycle]] — four date axes on every transaction
 - [[concepts/points-and-multipliers]] — `×0` `×2` `×3` `×4` `×5` `÷4`
 - [[concepts/cashback]] — `% cb` on Baiboon and Nuta (not Takumi)
+- [[concepts/promotions]] — cashback is promotion-driven; effective dates, tier rules, and how general rules (foreign-in-THB, etc.) interact with promos
 - [[concepts/premium-tier]] — Signature / Platinum / none
 - [[concepts/card-network]] — JCB / Mastercard / VISA / UnionPay
 - [[concepts/known-divergences]] — schema inconsistencies worth knowing
@@ -59,6 +60,10 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 ## Cards
 
 - [[cards/_stubs]] — list of all card products observed in SELECT options; individual notes are promoted lazily as we discuss each card's rules.
+
+## Promotions
+
+- [[promotions/uob-one-2026]] — UOB One 2026 cashback promotion (effective `2026-01-01` → `2026-12-31`).
 
 ## Future application
 

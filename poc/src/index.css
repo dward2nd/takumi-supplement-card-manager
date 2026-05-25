@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    /* All amounts use tabular figures so column alignment is perfect. */
+    font-variant-numeric: tabular-nums;
+    /* Mobile-friendly defaults */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    background: #0d0b08;
+    color: #f2ebdd;
+  }
+
+  body {
+    font-family: theme("fontFamily.sans");
+    overscroll-behavior-y: none;
+    /* Account for iOS safe areas without breaking the warm-dark background */
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(247, 196, 99, 0.06), transparent 55%),
+      radial-gradient(900px 600px at 100% 110%, rgba(86, 169, 145, 0.05), transparent 55%),
+      #0d0b08;
+    /* Subtle grain texture */
+    background-attachment: fixed;
+  }
+
+  /* Sticky header / bottom tab share this subtle gradient with the background. */
+
+  ::selection {
+    background: rgba(247, 196, 99, 0.3);
+    color: #fff;
+  }
+
+  /* Typography defaults */
+  h1, h2, h3, h4 {
+    font-family: theme("fontFamily.display");
+    font-feature-settings: "ss01" on, "ss03" on;
+  }
+}
+
+@layer components {
+  /* Editorial divider — single hairline with a tiny tick */
+  .rule {
+    @apply relative h-px w-full bg-paper-line;
+  }
+  .rule::after {
+    content: "";
+    @apply absolute -top-px right-0 h-[3px] w-3 bg-amber-glow opacity-70;
+  }
+
+  /* Subtle moving grain — only on a small layer for perf */
+  .grain-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Safe-area aware sticky bottom tab */
+  .bottom-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+  }
+  .top-safe {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
+  }
+
+  /* Touch target: never smaller than 44px (Apple HIG) */
+  .tap {
+    min-height: 44px;
+    min-width: 44px;
+    @apply touch-manipulation select-none;
+  }
+
+  .num {
+    font-family: theme("fontFamily.mono");
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "ss01", "zero";
+    letter-spacing: -0.01em;
+  }
+}

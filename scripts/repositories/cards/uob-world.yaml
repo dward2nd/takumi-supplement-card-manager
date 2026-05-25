@@ -1,0 +1,4 @@
+name: UOB World
+issuer: UOB
+bill_cycle_pattern: uob
+petrol_exclusion: true

@@ -1,0 +1,4 @@
+name: UOB Makro
+issuer: UOB
+bill_cycle_pattern: uob
+petrol_exclusion: true

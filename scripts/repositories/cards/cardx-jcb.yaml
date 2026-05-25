@@ -1,0 +1,3 @@
+name: CardX JCB
+issuer: CardX
+bill_cycle_pattern: krungsri      # CardX is a Krungsri spinoff; same BC/DD shape

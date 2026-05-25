@@ -13,6 +13,12 @@ tags: [concept, rewards]
 
 [[../people/takumi|Takumi]]'s Transactions DS does not have these fields. The decoded formula body lives in [[../formulas/cashback]].
 
+## Cashback values come from promotions
+
+The `% cb` value on a transaction is the *output* of applying an active **promotion** to that transaction — not a permanent property of the card. The card's note links to the currently-active promo, which defines tier rules, merchant exclusions, installment treatment, and the cashback-crediting workflow. See [[promotions]] for the cross-cutting model and per-card promotion notes under [[../promotions/]].
+
+When a row earns no cashback (no active promo, or the active promo excludes the row), **leave `% cb` unset** — never write an explicit `0`. Use `Note` to record the reason when it's beyond the card/promo's headline rule (foreign-in-THB, petrol-on-UOB, primary-card-swipe, etc.).
+
 ## Why Takumi doesn't have this (yet)
 
 Takumi's setup predates the supplement-card model. Nuta's DS introduced cashback tracking; Baiboon's DS was extended to match on 2026-05-25. Takumi's can be cloned the same way if it ever needs it — both columns are additive (don't affect existing rows when added).

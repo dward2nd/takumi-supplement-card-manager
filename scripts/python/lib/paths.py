@@ -16,3 +16,9 @@ REPO_ROOT: Path = Path(__file__).resolve().parents[3]
 
 ENV_FILE: Path = REPO_ROOT / ".env"
 VERSION_FILE: Path = REPO_ROOT / "VERSION"
+
+# Repositories: lightweight script-side database.
+# See scripts/repositories/README.md for the schema.
+REPOSITORIES_DIR: Path = REPO_ROOT / "scripts" / "repositories"
+CARDS_REPO_DIR: Path = REPOSITORIES_DIR / "cards"
+PROMOTIONS_REPO_DIR: Path = REPOSITORIES_DIR / "promotions"

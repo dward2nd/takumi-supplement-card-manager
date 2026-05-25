@@ -1,0 +1,5 @@
+name: UOB One
+issuer: UOB
+bill_cycle_pattern: uob
+points_default: "×0"
+petrol_exclusion: true

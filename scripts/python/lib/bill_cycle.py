@@ -27,6 +27,8 @@ from typing import Callable
 
 import holidays
 
+from . import card_repo
+
 
 _TH_HOLIDAYS = holidays.country_holidays("TH")
 
@@ -134,21 +136,6 @@ PATTERNS: dict[str, BillCyclePattern] = {
 }
 
 
-# Case-insensitive card-name-prefix → pattern key.
-# Matched in declaration order; the first match wins.
-_CARD_PATTERN_PREFIXES: list[tuple[str, str]] = [
-    ("krungsri", "krungsri"),
-    ("first choice", "krungsri"),
-    ("cardx", "krungsri"),
-    ("ktc", "ktc"),
-    ("ttb", "ttb"),
-    ("aeon", "aeon"),
-    ("lotus", "lotus"),
-    ("spaylater", "spaylater"),
-    ("uob", "uob"),
-]
-
-
 class PatternNotFoundError(LookupError):
     pass
 
@@ -156,20 +143,30 @@ class PatternNotFoundError(LookupError):
 def pattern_for_card(card_name: str) -> BillCyclePattern:
     """Return the bill-cycle pattern that applies to the given card name.
 
-    Matching is by case-insensitive prefix on the card's title. Raises
-    PatternNotFoundError if no known issuer prefix matches.
+    The card must be registered in `scripts/repositories/cards/<slug>.yaml`
+    with a `bill_cycle_pattern` field naming one of `PATTERNS`. To add a
+    new card or change its pattern, edit the card's YAML file (no Python
+    change needed).
     """
-    lc = card_name.strip().lower()
-    if not lc:
+    if not card_name or not card_name.strip():
         raise PatternNotFoundError("card name is required")
-    for prefix, key in _CARD_PATTERN_PREFIXES:
-        if lc.startswith(prefix):
-            return PATTERNS[key]
-    raise PatternNotFoundError(
-        f"no known bill-cycle pattern for card {card_name!r}. "
-        f"Document the issuer in docs/concepts/bill-cycle-patterns.md "
-        f"or pass bill_cycle/due_date explicitly in the spec."
-    )
+    try:
+        card = card_repo.by_name(card_name)
+    except card_repo.CardRepoNotFoundError as e:
+        raise PatternNotFoundError(
+            f"no card registered for {card_name!r}. {e}. Add the card to "
+            f"scripts/repositories/cards/ (or pass bill_cycle/due_date "
+            f"explicitly in the spec)."
+        ) from None
+
+    key = card.bill_cycle_pattern
+    if key not in PATTERNS:
+        raise PatternNotFoundError(
+            f"card {card_name!r} declares bill_cycle_pattern={key!r}, "
+            f"which is not in lib.bill_cycle.PATTERNS "
+            f"({sorted(PATTERNS)}). Fix the YAML or extend PATTERNS."
+        )
+    return PATTERNS[key]
 
 
 def cycle_for_month(

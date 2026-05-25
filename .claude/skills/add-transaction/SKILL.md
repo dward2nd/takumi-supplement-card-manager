@@ -30,11 +30,14 @@ JSON spec:
   "due_date": "2026-06-15",
   "processed": true,
   "multiplier": "×0",
+  "auto_classify": true,
   "transactions": [
     { "date": "2026-05-13", "name": "TMN 7-11 BANGKOK TH", "amount": 89.0, "note": "optional", "multiplier": "×2" }
   ]
 }
 ```
+
+**`auto_classify: true`** runs `lib.promotions.classify(card, tx_date, name)` for each row and fills in `cashback_percent`, `multiplier`, and `note` from the active promotion's tier rules + foreign-in-THB policy + installment rule + petrol exclusion. Per-row spec values still win, then batch-level values, then auto-classified values; the explicit precedence keeps user overrides authoritative. Rejected for `holder: "takumi"` (no `% cb` field on that DS). The response gains an `auto_classified: true` flag and a `classifications` array showing the reason per row (`tier`, `foreign-default-exclude`, `foreign-override`, `installment`, `petrol-exclusion`, `no-promo`, `no-tier-match`).
 
 **`bill_cycle` and `due_date` are optional.** Omit them and the CLI infers both from the card's bank pattern (see [[../../../docs/concepts/bill-cycle-patterns|bill-cycle-patterns]]): today is compared against this month's bill cycle date for the card, and the active cycle is this-month-or-next accordingly. Pass them explicitly only when the user is back-filling an older cycle (e.g. transactions that posted late to a closed statement). They're "both or neither" — supplying only one is a spec error.
 
@@ -157,36 +160,50 @@ Point-multiplier checkboxes (`×0` `×2` `×4` `×5` `÷4`, plus Takumi-only `×
 
 **`% cb`** (Baiboon + Nuta) is a writable `number` property displayed as a percent — storage is the raw fraction, so `0.05` shows as `5%` in the Notion UI. The CLI accepts it as `cashback_percent` at batch level or per-tx. **`cashback`** (Baiboon + Nuta) is a read-only formula = `% cb` × `ยอดชำระ` — never write to it. Takumi's DS has neither.
 
-## Card-specific earning policies
+## Active promotions (apply per card, per transaction date)
 
-When the user gives you a card name, apply that card's known policy before sending the spec. Ask once if the user hasn't already confirmed it for the session.
+Cashback rates are **promotion-driven**, not permanent card properties. Active promotions live as structured YAML at `scripts/repositories/promotions/<id>.yaml` (see [[../../scripts/repositories/README|repositories/README]] for the schema and [[../../docs/concepts/promotions|docs/concepts/promotions.md]] for the cross-cutting model). When you classify a transaction, the **easiest path is `"auto_classify": true`** in the spec — the CLI runs the lib for you, fills `% cb` / multiplier / Note per the active promo, and surfaces the reason for each row.
 
-### UOB One
+If you want to classify by hand (e.g. to override a heuristic the lib can't yet make), use the per-promo rules documented in `scripts/repositories/promotions/<id>.yaml` and set `cashback_percent` per row explicitly.
 
-- **Points**: this card **does not earn points**. Always pass `"multiplier": "×0"` at the batch level. No exceptions — if the user lists a transaction that looks like it "should" earn points, it still doesn't on UOB One.
-- **Cashback tiers** (the `cashback` formula reads from the card and the merchant string; we don't write a `% cb` field — Notion does):
-  - **10%** on BTS / MRT / AMZ merchants.
-  - **5%** on 7-11 (**but not** `TMN 7-11` — that's a TrueMoney top-up at 7-Eleven, treated separately), WATSON, and GRAB *from Thailand only* (`WWW.GRAB.COM` and `GRABTAXI`).
-  - **1%** on everything else.
-- Subject to the [general earning exclusions](#general-earning-exclusions) below.
+### UOB One — [[../../docs/promotions/uob-one-2026|UOB One 2026 promotion]] (effective `2026-01-01` → `2026-12-31`)
 
-When in doubt about whether a particular merchant string falls into a tier, leave the spec as-is and surface the ambiguity to the user — don't try to re-classify by editing the merchant name (that would violate Rule 1).
+- **Points**: this card **does not earn points** — card-level rule, not promo-driven. Always pass `"multiplier": "×0"` at the batch level. No exceptions.
+- **Cashback tiers**:
+  - **10%** on BTS / MRT / AMZ (Café Amazon).
+  - **5%** on 7-11 (**not** `TMN 7-11` — that's a TrueMoney top-up at 7-Eleven, falls through to 1%), WATSON, GRAB Thailand-only (`WWW.GRAB.COM` and `GRABTAXI`).
+  - **1%** on everything else not excluded.
+- **Installment rule**: rows whose merchant name ends `NN/NN` get **1% per installment row**, regardless of merchant tier. The cashback is *not* given all at once at purchase time — it accrues per installment.
+- Subject to the [general earning exclusions](#general-earning-exclusions) below; the promo does not override either default exclusion.
 
-### CardX JCB
+When in doubt about whether a particular merchant string falls into a tier, surface the ambiguity to the user — don't try to re-classify by editing the merchant name (that would violate Rule 1).
+
+### CardX JCB — ongoing card-level policy (not yet framed as a dated promotion)
 
 - **Cashback**:
   - **3%** on **in-store** transactions billed in the **local currency** of **Japan, South Korea, Hong Kong, Singapore, or Taiwan** (e.g. a JPY purchase at a Tokyo shop, a HKD purchase in Hong Kong). Online purchases are excluded; assume in-store unless the merchant string clearly indicates online (`HTTPS://…`, `*.COM`, etc.).
   - **No cashback** everywhere else — including domestic Thai (`… BANGKOK TH`), foreign merchants billed in THB, and any of the five eligible countries when the bill is in THB instead of local currency.
 - **Points**: no special multiplier; default earning (no `multiplier` field set).
 - Pass `cashback_percent: 0.03` for eligible rows; **omit** `cashback_percent` entirely for ineligible ones (see Rule 4b on leaving 0% rows unset).
+- If/when the issuer publishes a dated CardX promotion, promote this section into `docs/promotions/cardx-jcb-<year>.md` and link from here.
+
+### First Choice — ad-hoc promotions (not yet documented)
+
+The user runs First Choice cashback as short-duration promos and patches rows manually as they're announced. **Don't infer** a cashback rate on First Choice — wait for the user's instruction. When the user is ready to document a First Choice promo at the promotion level, create `docs/promotions/first-choice-<period>.md` and link from this skill.
+
+**Installment exception on First Choice**: don't apply per-row cashback on installment rows (merchant name `NN/NN`) without explicit user confirmation — First Choice may credit installment cashback at purchase time only.
+
+### Foreign-merchant-in-THB → promotion overrides
+
+By default, foreign-merchant-in-THB earns neither cashback nor points. An active promo can grant **cashback** if it explicitly names the merchant; **points** are almost never overridden — set `×0` on the row to encode "no points despite the cashback exception". Document the override in the promo's note (`docs/promotions/<…>.md`) and reference it in the row's `Note`.
 
 ## General earning exclusions
 
-These apply across **every** card we manage (Takumi, Baiboon, Nuta) unless a card's own page documents an exception:
+These apply across **every** card we manage (Takumi, Baiboon, Nuta) by **default**. An active promotion can override the cashback side of rule 1 with an explicit merchant inclusion, but the points side almost never moves:
 
-1. **Foreign merchants billed in THB earn neither points nor cashback**, even when the card would normally earn at a higher tier. Examples in the data: `X CORP. PAID FEATURES BASTROP US`, `Google YouTubePremium Mountain View USA`. Country suffix tells you the merchant is foreign even when the amount is in baht.
-2. **UOB cards: petrol stations earn neither points nor cashback.** Watch for merchant strings containing PT, BCP, ESSO, SHELL, CALTEX, PTT — when in doubt, surface to the user.
-3. The card-level **cashback formula** on Nuta's transactions and the **realized-points formula** on every transaction already encode these rules where they can; but the formulas can't tell "foreign-merchant-in-THB" apart from a regular domestic THB charge, so a separate flag may be needed in future — for now, just **be aware** that the computed cashback/points on such transactions may overstate reality. Flag it when the user asks for a cashback total.
+1. **Foreign merchants billed in THB earn neither points nor cashback** by default, even when the card would normally earn at a higher tier. Examples in the data: `X CORP. PAID FEATURES BASTROP US`, `Google YouTubePremium Mountain View USA`, `AGODA.COM THE QUARTE Internet SG`. Country suffix tells you the merchant is foreign even when the amount is in baht. Promotion overrides for cashback are possible (e.g. First Choice May 2026 → 1.5% on Agoda); promotion overrides for points are almost never seen — set `×0` on the row.
+2. **UOB cards: petrol stations earn neither points nor cashback.** Watch for merchant strings containing PT, BCP, ESSO, SHELL, CALTEX, PTT — when in doubt, surface to the user. No promo has been seen to override.
+3. The Notion **cashback formula** on Baiboon's and Nuta's transactions and the **realized-points formula** on every transaction already encode these rules where they can; but the formulas can't tell "foreign-merchant-in-THB" apart from a regular domestic THB charge, so the computed cashback/points on such transactions may overstate reality. Flag it when the user asks for a cashback total.
 
 ### A note on Notion percentage fields
 

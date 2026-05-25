@@ -84,6 +84,9 @@ def validate_spec(spec: dict[str, Any]) -> None:
     if "processed" in spec and not isinstance(spec["processed"], bool):
         raise SpecError("processed must be a boolean")
 
+    if "auto_classify" in spec and not isinstance(spec["auto_classify"], bool):
+        raise SpecError("auto_classify must be a boolean")
+
     _check_multiplier(spec.get("multiplier"), "multiplier")
     _check_cashback_percent(spec.get("cashback_percent"), "cashback_percent")
 

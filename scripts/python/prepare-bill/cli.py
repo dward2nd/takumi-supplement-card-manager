@@ -52,7 +52,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib import notion_client
+from lib import notion_client, promotions
 from lib.bill_cycle import active_cycle
 from lib.bills import require_bills_ds
 from lib.cards import find_card
@@ -60,11 +60,18 @@ from lib.holders import resolve_holder
 
 DRAFT_PREFIX = "[DRAFT] "
 
-# Cards whose cashback policy is tier-credit-row based: the cycle must
-# already contain explicit `*CASHBACK*` credit rows before the bill is
-# drafted, otherwise the sum will overstate the balance. Keep this list
-# narrow — only add a card when we've documented its credit-row workflow.
-CASHBACK_CREDIT_CARDS: frozenset[str] = frozenset({"UOB One"})
+
+def _cards_with_crediting_schedule() -> frozenset[str]:
+    """Cards whose active promo declares a crediting_schedule.
+
+    Such cards need explicit `*CASHBACK*` credit rows in the cycle before
+    the bill is drafted, otherwise the flat sum overstates the balance.
+    Derived from the promotions repository, so adding a new cashback-tier
+    card is a YAML edit, not a Python edit.
+    """
+    return frozenset(
+        p.card for p in promotions.load_all() if p.crediting_schedule
+    )
 
 
 class PrepareBillError(RuntimeError):
@@ -164,12 +171,13 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             f"— nothing to bill. Did you mean a different cycle date?"
         )
 
-    if card_name in CASHBACK_CREDIT_CARDS and not spec.get("skip_cashback_check"):
+    if card_name in _cards_with_crediting_schedule() and not spec.get("skip_cashback_check"):
         if not _has_cashback_credit_rows(rows):
             raise PrepareBillError(
                 f"{card_name} requires cashback credit rows before drafting the bill — "
-                f"the cycle has no `*CASHBACK*` transactions, so the sum would overstate "
-                f"the balance owed. Run /post-cashback-credits first (or pass "
+                f"its active promotion declares a crediting_schedule but the cycle has no "
+                f"`*CASHBACK*` transactions, so the sum would overstate the balance owed. "
+                f"Run /post-cashback-credits first (or pass "
                 f'`"skip_cashback_check": true` in the spec to override).'
             )
 

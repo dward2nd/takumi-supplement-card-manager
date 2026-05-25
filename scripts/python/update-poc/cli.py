@@ -25,6 +25,9 @@ Watched paths — changes here may justify a POC update:
   - docs/concepts/
   - docs/formulas/
   - docs/people/
+  - docs/cards/
+  - docs/promotions/
+  - scripts/repositories/
   - CLAUDE.md
   - .mcp.json
 
@@ -52,6 +55,9 @@ DEFAULT_WATCHED: list[str] = [
     "docs/concepts",
     "docs/formulas",
     "docs/people",
+    "docs/cards",
+    "docs/promotions",
+    "scripts/repositories",
     "CLAUDE.md",
     ".mcp.json",
 ]

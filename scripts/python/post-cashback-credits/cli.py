@@ -69,14 +69,20 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib import notion_client
+from lib import notion_client, promotions
 from lib.bill_cycle import active_cycle, pattern_for_card, cycle_for_month
 from lib.cards import find_card
 from lib.holders import resolve_holder
 from lib.transaction_write import build_transaction_properties
 
 
-SUPPORTED_CARDS: frozenset[str] = frozenset({"UOB One"})
+# Cards we know how to write cashback credit rows for: any card whose
+# active promotion declares a `crediting_schedule` block. The schedule
+# itself drives per-tier date placement (see _classify_tier_date), so
+# adding a new card is purely a YAML edit in scripts/repositories/.
+def _supported_promotions() -> dict[str, promotions.Promotion]:
+    """Return {card_name: promotion} for promos that declare a crediting_schedule."""
+    return {p.card: p for p in promotions.load_all() if p.crediting_schedule}
 
 
 class PostCashbackError(RuntimeError):
@@ -95,9 +101,19 @@ def _first_weekday_of_next_month(bc: _dt.date) -> _dt.date:
     return first
 
 
-def _classify_tier_date(rate: float, bc: _dt.date) -> _dt.date:
-    """UOB One convention: 1% credited at BC; higher tiers at start of next month."""
-    if abs(rate - 0.01) < 1e-9:
+def _classify_tier_date(rate: float, bc: _dt.date, schedule: dict[str, str]) -> _dt.date:
+    """Resolve the credit-row date for a tier rate from the promo's crediting_schedule.
+
+    Schedule keys are rate-as-strings (e.g. "0.01"); values are:
+      - `bc_date` — the bill-cycle date itself
+      - `first_weekday_next_month` — first Mon-Fri of the following calendar month
+    Unrecognised values fall back to first_weekday_next_month with a warning
+    only at the dictionary level (we don't surface to stdout — caller's job).
+    """
+    key = f"{rate:.4f}".rstrip("0").rstrip(".")  # "0.01" / "0.05" / "0.1"
+    # Schedule may store either "0.1" or "0.10"; try both forms.
+    convention = schedule.get(key) or schedule.get(f"{rate:.2f}")
+    if convention == "bc_date":
         return bc
     return _first_weekday_of_next_month(bc)
 
@@ -160,12 +176,16 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             raise PostCashbackError(f"missing required field: {key!r}")
 
     card_name = spec["card"]
-    if card_name not in SUPPORTED_CARDS:
+    supported = _supported_promotions()
+    if card_name not in supported:
+        known = sorted(supported)
         raise PostCashbackError(
-            f"card {card_name!r} is not in the supported set {sorted(SUPPORTED_CARDS)}. "
-            f"Per-card credit-row conventions vary; extend SUPPORTED_CARDS and "
-            f"`_classify_tier_date` when adding support for a new issuer's workflow."
+            f"card {card_name!r} has no active promotion with a `crediting_schedule` "
+            f"in scripts/repositories/promotions/. Supported cards (derived from "
+            f"the repo): {known}. Add a crediting_schedule to the card's active "
+            f"promotion YAML to enable this skill for it."
         )
+    promo = supported[card_name]
 
     holder = resolve_holder(spec["holder"])
     card = find_card(holder.cards_ds, card_name)
@@ -203,13 +223,16 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         if credit <= 0:
             continue
         rate_pct = int(round(rate * 100))
+        # Credit-row title format keys off the card's name + rate.
+        # Verbatim, statement-style: e.g. "UOB ONE CASHBACK 5%".
+        cb_name = f"{card_name.upper()} CASHBACK {rate_pct}%"
         plan.append(
             {
                 "rate": rate,
                 "tier_sum": round(total, 2),
                 "amount": -credit,
-                "date": _classify_tier_date(rate, bc).isoformat(),
-                "name": f"UOB ONE CASHBACK {rate_pct}%",
+                "date": _classify_tier_date(rate, bc, promo.crediting_schedule).isoformat(),
+                "name": cb_name,
                 "note": (
                     f"Cycle {bill_cycle} cashback credit: "
                     f"{rate_pct}% × {round(total, 2):.2f} = {credit:.2f}."
@@ -228,6 +251,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             "plan": plan,
         }
 
+    multiplier = promo.points_default  # may be None for cards that earn points normally
     created: list[dict] = []
     for row in plan:
         props = build_transaction_properties(
@@ -239,7 +263,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             card_page_id=card["id"],
             processed=True,
             note=row["note"],
-            multiplier="×0",
+            multiplier=multiplier,
         )
         page = notion_client.create_page(holder.transactions_ds, props)
         created.append({

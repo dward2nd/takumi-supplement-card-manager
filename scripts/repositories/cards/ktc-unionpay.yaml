@@ -1,0 +1,3 @@
+name: KTC UnionPay
+issuer: KTC
+bill_cycle_pattern: ktc
