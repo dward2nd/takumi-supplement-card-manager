@@ -62,7 +62,7 @@ In the new app ([[../future-app/product-shape]]):
 - The UOB One tier table above becomes the seed for the card's **auto-classifier rules**. When a user adds a transaction on UOB One, the app matches the merchant string against the tier patterns and pre-fills the cashback `RewardRule` (e.g. `{type: "cashback", percent: 5}` for a `7-11` charge that isn't `TMN 7-11`).
 - The user can **override per row** when the auto-classification is wrong — the override stays as the row's reward rule; no fight with the engine.
 - The carve-outs (TMN 7-11, GRAB cross-border, foreign-in-THB, petrol stations) are encoded as **exclusion patterns** that force the row to `{type: "cashback", percent: 0}` with the explanation auto-filled into `Note`.
-- Cashback is **universal** in phase 2 (not Nuta-only) — Baiboon and Takumi UOB One transactions also carry the `{type: "cashback", percent: N}` rule; the doc-side asymmetry where Baiboon/Takumi "record the tier mentally" disappears.
+- Cashback is **universal** in phase 2 — Takumi's UOB One transactions also carry the `{type: "cashback", percent: N}` rule (Baiboon and Nuta already track `% cb` per row in Notion as of 2026-05-25; phase 2 closes the gap for Takumi).
 - The monthly cashback cap (one of the open questions below) becomes a **`PrimaryAccount`-level shared quota** if it's account-wide, or a **`Card`-level quota** if per-card — see [[../concepts/cashback]] and [[../future-app/data-model-target]].
 
 ## See also

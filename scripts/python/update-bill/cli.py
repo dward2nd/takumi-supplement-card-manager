@@ -20,6 +20,8 @@ Reads a JSON spec from stdin (or --input <file>):
     "slips":         ["/abs/a.jpg", ...],     // appends many
     "statement_pdf": "/abs/path.pdf",         // appends one to ใบแจ้งยอด (PDF)
     "statement_pdfs":["/abs/a.pdf", ...],     // appends many
+    "finalize":      true,                    // strips a leading `[DRAFT] ` from the
+                                              //   title (no-op if already finalized)
     "properties":    { "<raw notion prop>": ... }   // escape hatch (replace semantics)
   }
 
@@ -59,6 +61,15 @@ from lib.holders import resolve_holder
 
 _SLIP_PROP = "หลักฐานการชำระ"
 _STATEMENT_PROP = "ใบแจ้งยอด (PDF)"
+_DRAFT_PREFIX = "[DRAFT] "
+
+
+def _current_title(page_id: str) -> str:
+    page = notion_client.get_page(page_id)
+    for prop in page.get("properties", {}).values():
+        if prop.get("type") == "title":
+            return "".join(t.get("plain_text", "") for t in prop.get("title", []))
+    return ""
 
 
 def _resolve_bill(spec: dict) -> tuple[str, str | None, str | None, str | None]:
@@ -115,6 +126,21 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             raise ValueError("properties escape-hatch must be an object")
         simple_props.update(raw)
         actions.extend(k for k in raw if k not in actions)
+
+    finalize = spec.get("finalize")
+    if finalize is not None and not isinstance(finalize, bool):
+        raise ValueError(f"finalize must be a boolean; got {type(finalize).__name__}")
+    finalized_title: str | None = None
+    if finalize:
+        current = _current_title(page_id)
+        if current.startswith(_DRAFT_PREFIX):
+            finalized_title = current[len(_DRAFT_PREFIX):]
+            simple_props["title"] = {"title": [{"text": {"content": finalized_title}}]}
+            actions.append("title (finalized)")
+        else:
+            # Idempotent: if the prefix is already gone, finalize is a no-op
+            # rather than an error. Surfaces in the response so caller can see.
+            actions.append("title (already finalized)")
 
     slips = _collect_files(spec, "slip", "slips")
     statements = _collect_files(spec, "statement_pdf", "statement_pdfs")

@@ -6,7 +6,7 @@ role: transactions
 
 # Nuta — Transactions (`รายการใช้จ่ายผ่านบัตรของนุตา`)
 
-Every purchase Nuta makes on her supplement cards. Schema is the **most feature-rich** of the three transaction databases — only Nuta's tracks cashback.
+Every purchase Nuta makes on her supplement cards. Schema mirrors Baiboon's — both track cashback via `% cb` + `cashback` formula. Takumi's DS has neither.
 
 - **Notion URL**: https://www.notion.so/dward2nd/2a1cb755f0f181ea95d2e8fbec394921
 - **Collection ID**: `2a1cb755-f0f1-8110-9795-000bf7d48b4f`
@@ -26,7 +26,7 @@ Every purchase Nuta makes on her supplement cards. Schema is the **most feature-
 | `Bill Cycle Date`   | date          |  |
 | `Due Date`          | date          |  |
 | `Note`              | text          |  |
-| **`% cb`**          | number (percent, 1 decimal) | **Nuta-only.** Cashback percentage applied to this transaction. See [[../concepts/cashback]]. |
+| **`% cb`**          | number (percent, 1 decimal) | Cashback percentage applied to this transaction. Also exists on Baiboon's DS; absent on Takumi's. See [[../concepts/cashback]]. |
 
 ### Status checkboxes — see [[../concepts/payment-lifecycle]]
 
@@ -42,15 +42,15 @@ Every purchase Nuta makes on her supplement cards. Schema is the **most feature-
 
 - `คะแนนที่ได้จริง` — [[../formulas/points-realized]]
 - `คะแนน unrealized` — [[../formulas/points-unrealized]]
-- **`cashback`** — **Nuta-only.** [[../formulas/cashback]]
+- **`cashback`** — also on Baiboon's DS; absent on Takumi's. See [[../formulas/cashback]].
 
 ### Rollup
 
 - `บาทต่อ 1 คะแนน` — from the related Card.
 
-## What's unique to Nuta
+## Cashback parity with Baiboon
 
-The `% cb` × `cashback` pair lets Nuta track baht-cashback alongside point-rewards in the same row. Baiboon and Takumi only track points; if/when they need cashback later, the schema can be cloned from here.
+The `% cb` × `cashback` pair lets Nuta track baht-cashback alongside point-rewards in the same row. Baiboon's DS now mirrors this (added 2026-05-25 from this template). Only Takumi's DS still lacks cashback.
 
 ## Views
 

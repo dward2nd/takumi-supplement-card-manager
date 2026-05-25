@@ -33,13 +33,16 @@ JSON spec:
   "slips":         ["/abs/a.jpg", "/abs/b.jpg"],
   "statement_pdf": "/abs/path.pdf",
   "statement_pdfs":["/abs/a.pdf", "/abs/b.pdf"],
+  "finalize":      true,
   "properties":    { "<raw notion prop>": ... }
 }
 ```
 
+`finalize: true` strips a leading `[DRAFT] ` from the bill's title — pairs with /prepare-bill which writes the draft prefix. Idempotent: if the prefix is already gone the action is a no-op (still surfaced in the response so you can see it was checked).
+
 **Identify the bill row** either by `(holder, card, bill_cycle)` *or* by `id`. If `id` is set, the lookup keys are optional (used only for the response echo). Otherwise all three lookup keys are required and must match a unique row.
 
-**At least one update field is required** (`paid`, `note`, `slip`/`slips`, `statement_pdf`/`statement_pdfs`, or `properties`). The script errors out on an empty update so a typo doesn't silently no-op.
+**At least one update field is required** (`paid`, `note`, `slip`/`slips`, `statement_pdf`/`statement_pdfs`, `finalize`, or `properties`). The script errors out on an empty update so a typo doesn't silently no-op.
 
 ## What the user typically asks
 

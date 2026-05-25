@@ -78,7 +78,9 @@ def _card_name_map(cards_ds: str) -> dict[str, str]:
 
 
 def _to_date(s: str | None) -> dt.date | None:
-    return dt.date.fromisoformat(s) if s else None
+    if not s:
+        return None
+    return dt.date.fromisoformat(s[:10])
 
 
 def run(spec: dict) -> dict:

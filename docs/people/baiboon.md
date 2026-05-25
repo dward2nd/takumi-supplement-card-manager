@@ -20,7 +20,7 @@ Three databases — the full [[../concepts/three-database-trinity]]:
 ## Distinguishing features
 
 - Has the full trinity (Cards + Transactions + Bills), unlike [[takumi|Takumi]].
-- No cashback tracking, unlike [[nuta|Nuta]]. No `% cb` or `cashback` formula.
+- Tracks cashback via `% cb` + `cashback` formula (added 2026-05-25, mirroring [[nuta|Nuta]]).
 - No `×3` multiplier (Takumi-only); multipliers are `×0` `×2` `×4` `×5` `÷4`.
 - Cards include the `ธนาคาร/บริษัท` issuer select.
 

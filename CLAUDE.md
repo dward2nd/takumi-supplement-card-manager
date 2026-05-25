@@ -58,7 +58,7 @@ Notable schema quirks worth knowing before you touch the data:
 
 - Takumi has **no Bills database** — only Baiboon and Nuta do.
 - Bills' `Card` field is a **SELECT (text)**, not a relation to the Cards DB. Deliberate denormalization. Don't try to "fix" it in Notion; document it.
-- Nuta uniquely has `% cb` (writable `number`, percent display — raw fraction in storage so `0.05` shows as `5%`) and `cashback` (read-only formula = `% cb` × `ยอดชำระ`) on transactions.
+- Baiboon and Nuta both have `% cb` (writable `number`, percent display — raw fraction in storage so `0.05` shows as `5%`) and `cashback` (read-only formula = `% cb` × `ยอดชำระ`) on transactions. Takumi does not.
 - Takumi's transactions uniquely include a `หมวดหมู่` (category) relation and a `×3` multiplier checkbox.
 
 Full schema is documented in `docs/databases/`.

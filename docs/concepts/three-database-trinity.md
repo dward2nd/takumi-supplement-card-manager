@@ -38,7 +38,7 @@ Standalone. Its `Card` field is a **`select`** (a hardcoded text list), not a re
 ## Variants
 
 - [[../people/takumi|Takumi]] doesn't have a Bills DB at all — only Cards + Transactions.
-- All three holders have Cards + Transactions with the same overall shape, modulo person-specific extras: `หมวดหมู่` (Takumi), `% cb` + `cashback` formula (Nuta).
+- All three holders have Cards + Transactions with the same overall shape, modulo person-specific extras: `หมวดหมู่` (Takumi-only), `% cb` + `cashback` formula (Baiboon + Nuta, not Takumi).
 
 ## Why a trinity and not one big DB?
 

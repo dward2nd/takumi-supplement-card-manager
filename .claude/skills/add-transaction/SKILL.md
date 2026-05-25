@@ -107,9 +107,9 @@ Always set `"Processed": "__YES__"`, regardless of the real processing status. T
 
 Only **one** of `×0` / `×2` / `×3` / `×4` / `×5` / `÷4` can be checked per transaction page. If a card's policy says it always earns at a particular tier (e.g. UOB One = `×0`), pass `multiplier` once at the batch level and the CLI applies it to every entry. A page with **no** multiplier checkbox set is treated as `×1` (default earning) by Notion's `คะแนนที่ได้จริง` formula — never set `×1` manually because that field does not exist.
 
-### 4b. Cashback rate (`% cb`) on Nuta's transactions
+### 4b. Cashback rate (`% cb`) on Baiboon's and Nuta's transactions
 
-Nuta's Transactions DS is the only one with a `% cb` field (number, percent display). The CLI accepts `cashback_percent` at batch and per-tx level; the value is the **raw fraction** (e.g. `0.05` for 5%). For Baiboon and Takumi, omit it — the field doesn't exist and the validator rejects the spec to prevent a 400 from Notion.
+Baiboon's and Nuta's Transactions DSes both have a `% cb` field (number, percent display); Takumi's does not. The CLI accepts `cashback_percent` at batch and per-tx level; the value is the **raw fraction** (e.g. `0.05` for 5%). For Takumi, omit it — the field doesn't exist and the validator rejects the spec to prevent a 400 from Notion.
 
 When the user supplies tier rules per card (see *Card-specific earning policies* below), classify each transaction's merchant against the tier table and pass the resulting `cashback_percent` per tx. Don't ask the user to compute the fraction — apply the policy yourself, but surface ambiguity (e.g. an aggregator merchant that could bundle several tiers).
 
@@ -155,7 +155,7 @@ The Note exists so a future reviewer of the transactions can immediately see *wh
 
 Point-multiplier checkboxes (`×0` `×2` `×4` `×5` `÷4`, plus Takumi-only `×3`) are set explicitly via the spec's `multiplier` field — see *Rule 4a* and the card-specific policies below.
 
-**Nuta-only `% cb`** is a writable `number` property displayed as a percent — storage is the raw fraction, so `0.05` shows as `5%` in the Notion UI. The CLI accepts it as `cashback_percent` at batch level or per-tx. **Nuta-only `cashback`** is a read-only formula = `% cb` × `ยอดชำระ` — never write to it.
+**`% cb`** (Baiboon + Nuta) is a writable `number` property displayed as a percent — storage is the raw fraction, so `0.05` shows as `5%` in the Notion UI. The CLI accepts it as `cashback_percent` at batch level or per-tx. **`cashback`** (Baiboon + Nuta) is a read-only formula = `% cb` × `ยอดชำระ` — never write to it. Takumi's DS has neither.
 
 ## Card-specific earning policies
 

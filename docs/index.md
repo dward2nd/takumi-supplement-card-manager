@@ -42,7 +42,7 @@ Each note opens with a live Notion URL, collection ID, and the full property sch
 - [[concepts/payment-lifecycle]] — `Processed` → `ชำระแล้ว` → `Credit Return`
 - [[concepts/billing-cycle]] — four date axes on every transaction
 - [[concepts/points-and-multipliers]] — `×0` `×2` `×3` `×4` `×5` `÷4`
-- [[concepts/cashback]] — Nuta-only `% cb`
+- [[concepts/cashback]] — `% cb` on Baiboon and Nuta (not Takumi)
 - [[concepts/premium-tier]] — Signature / Platinum / none
 - [[concepts/card-network]] — JCB / Mastercard / VISA / UnionPay
 - [[concepts/known-divergences]] — schema inconsistencies worth knowing
@@ -54,7 +54,7 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 - [[formulas/points-realized]] — `คะแนนที่ได้จริง`
 - [[formulas/points-unrealized]] — `คะแนน unrealized`
 - [[formulas/outstanding-balance]] — `ยอดค้างชำระ`
-- [[formulas/cashback]] — `cashback` (Nuta only)
+- [[formulas/cashback]] — `cashback` (Baiboon + Nuta, not Takumi)
 
 ## Cards
 

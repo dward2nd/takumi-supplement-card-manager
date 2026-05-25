@@ -31,4 +31,4 @@ Card products observed: see [[../cards/_stubs]]. Notably, Nuta has some cards Ba
 
 ## Phase 2 role
 
-Per [[../future-app/product-shape]], Nuta signs in with email + password and sees only their own data, **plus** aggregate balances and shared cycle/promo quotas on the underlying `PrimaryAccount`s. No visibility into Baiboon's transactions. Takumi (admin) can issue Nuta a password reset if needed. Nuta's cashback tracking (Nuta-only in Notion) becomes universal in the new app — cashback joins multipliers inside `Transaction.rewardRules` and any holder can carry cashback rules.
+Per [[../future-app/product-shape]], Nuta signs in with email + password and sees only their own data, **plus** aggregate balances and shared cycle/promo quotas on the underlying `PrimaryAccount`s. No visibility into Baiboon's transactions. Takumi (admin) can issue Nuta a password reset if needed. Cashback tracking (originally only on Nuta's DS; Baiboon's DS gained parity on 2026-05-25) becomes universal in the new app — cashback joins multipliers inside `Transaction.rewardRules` and any holder, including Takumi, can carry cashback rules.

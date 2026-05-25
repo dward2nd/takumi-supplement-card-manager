@@ -40,9 +40,9 @@ def build_transaction_properties(
 
     `cashback_percent`, if given, is a raw fraction in [0, 1]. Notion
     stores percent-formatted numbers as the raw fraction (0.05 displays
-    as 5%). The destination property is `% cb`, which only exists on
-    Nuta's Transactions DS — the caller is responsible for not passing
-    this for other holders.
+    as 5%). The destination property is `% cb`, which exists on
+    Baiboon's and Nuta's Transactions DSes but not Takumi's — the
+    caller is responsible for not passing this for Takumi.
     """
     props: dict = {
         "Name": {"title": [{"text": {"content": name}}]},

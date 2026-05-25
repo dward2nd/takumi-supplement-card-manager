@@ -1,30 +1,18 @@
 ---
-tags: [formula, nuta-only]
+tags: [formula]
 ---
 
-# `cashback` — baht cashback earned per transaction (Nuta only)
+# `cashback` — baht cashback earned per transaction
 
-A formula property exclusive to [[../databases/nuta-transactions]]. Computes the baht-value cashback for this transaction based on `% cb` and `ยอดชำระ`.
+A formula property on [[../databases/baiboon-transactions]] and [[../databases/nuta-transactions]]. Computes the baht-value cashback for this transaction as `% cb × ยอดชำระ`. [[../databases/takumi-transactions|Takumi]]'s DS does not have it.
 
-> **Phase 2**: this Notion formula is replaced by application code in the new app — see [[../future-app/product-shape#Rewards & computation]]. The body below is retained for reference and as a one-time decode target during phase-2 setup of the cashback engine.
+> **Phase 2**: this Notion formula is replaced by application code in the new app — see [[../future-app/product-shape#Rewards & computation]]. The body below is retained for reference.
 
-## Where to find the body
+## Body
 
-`formulaCode://2a1cb755-f0f1-8110-9795-000bf7d48b4f/TVZkPw`
+`prop("% cb") * prop("ยอดชำระ")` — straight multiplication, with no gating on `Processed` or `Credit Return`. Cashback continues to "accumulate" on those rows; consumers must filter when computing what the bank actually credits.
 
-## Decoded body
-
-_TBD — fetch from Notion when reconciling cashback claims with the bank._
-
-## Likely shape (hypothesis)
-
-```
-if Credit Return then 0
-else if Processed = false then 0
-else ยอดชำระ × (% cb / 100)
-```
-
-Verify before quoting — the gating on `Processed` / `Credit Return` is conventional but not certain.
+The original Nuta formula was authored via Notion's UI as property references (block-id tokens); Baiboon's was added 2026-05-25 with the equivalent plain-expression form. Both evaluate identically.
 
 ## See also
 

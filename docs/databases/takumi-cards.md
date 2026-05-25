@@ -43,7 +43,7 @@ The catalogue of every credit card and loan product that lists [[../people/takum
 ## What's NOT here (vs supplement holders)
 
 - **No `ธนาคาร/บริษัท`** select. Baiboon's and Nuta's Cards DBs do have an issuer column. See [[../concepts/known-divergences]].
-- No `% cb` or cashback model. (Nuta has these.)
+- No `% cb` or cashback model. (Baiboon and Nuta have these on their Transactions DSes.)
 
 ## Views
 

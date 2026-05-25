@@ -26,6 +26,7 @@ Every purchase Baiboon makes on his/her supplement cards.
 | `Bill Cycle Date`   | date          |  |
 | `Due Date`          | date          |  |
 | `Note`              | text          |  |
+| `% cb`              | number (percent) | Cashback percentage applied to this transaction. Added 2026-05-25 — Baiboon's DS now mirrors Nuta's cashback setup. See [[../concepts/cashback]]. |
 
 ### Status checkboxes — see [[../concepts/payment-lifecycle]]
 
@@ -41,6 +42,7 @@ Notably absent: `×3` (Takumi-only).
 
 - `คะแนนที่ได้จริง` — [[../formulas/points-realized]]
 - `คะแนน unrealized` — [[../formulas/points-unrealized]]
+- `cashback` — `% cb` × `ยอดชำระ`. Added 2026-05-25; see [[../formulas/cashback]].
 
 ### Rollup
 
@@ -49,7 +51,6 @@ Notably absent: `×3` (Takumi-only).
 ## Notable absences
 
 - **No `หมวดหมู่` (category)** — that's Takumi-only.
-- **No `% cb` / `cashback`** — those are Nuta-only.
 
 ## Views
 

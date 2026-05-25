@@ -35,9 +35,9 @@ Input schema:
     "multiplier":  "×0",                            // optional, batch-level default;
                                                     //   one of ×0/×2/×3/×4/×5/÷4 or null
     "cashback_percent": 0.01,                       // optional, batch-level default;
-                                                    //   Nuta-only (% cb does not exist
-                                                    //   on Baiboon/Takumi DBs); raw
-                                                    //   fraction (0.05 == 5%)
+                                                    //   Baiboon + Nuta only (% cb does
+                                                    //   not exist on Takumi's DS);
+                                                    //   raw fraction (0.05 == 5%)
     "transactions": [                                // required, non-empty
       {
         "date":              "2026-05-13",          // ISO date
@@ -56,7 +56,8 @@ Hard rules enforced here:
   3. Card relation must resolve to exactly one card; otherwise abort.
   4. `Processed` defaults to true unless the spec says otherwise.
   5. At most one multiplier checkbox is set per page. Absence ⇒ ×1.
-  6. cashback_percent is Nuta-only; rejected for other holders at spec-validation.
+  6. cashback_percent is Baiboon + Nuta only; rejected for Takumi at spec-validation
+     (the `% cb` property does not exist on Takumi's Transactions DS).
 
 --dry-run builds the payload and reports it without calling Notion.
 """

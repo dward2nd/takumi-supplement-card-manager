@@ -29,7 +29,8 @@ For UOB this comparison uses the *shifted* bill-cycle date (see UOB below), not 
 | Issuer family             | Bill cycle day  | Due date                          | Notes                          |
 |---------------------------|-----------------|-----------------------------------|--------------------------------|
 | Krungsri / First Choice / CardX | day **5**   | bill cycle **+ 20 days**          | consistent, no shifts          |
-| KTC / ttb                 | day **27**      | bill cycle **+ 15 days**          | consistent, no shifts          |
+| KTC                       | day **27**      | bill cycle **+ 15 days**          | consistent, no shifts          |
+| ttb                       | day **27**      | bill cycle **+ 20 days**          | same BC day as KTC, longer grace |
 | AEON                      | day **10**      | day **2** of the **next** month   | consistent, no shifts          |
 | Lotus                     | day **28**      | bill cycle **+ 20 days**          | consistent, no shifts          |
 | SPayLater                 | day **15**      | bill cycle **+ 10 days**          | consistent, no shifts          |
@@ -42,8 +43,8 @@ For UOB this comparison uses the *shifted* bill-cycle date (see UOB below), not 
 | `Krungsri …`         | Krungsri/etc   |
 | `First Choice`       | Krungsri/etc   |
 | `CardX …`            | Krungsri/etc   |
-| `KTC …`              | KTC/ttb        |
-| `ttb …`              | KTC/ttb        |
+| `KTC …`              | KTC            |
+| `ttb …`              | ttb            |
 | `AEON …`             | AEON           |
 | `Lotus …`            | Lotus          |
 | `SPayLater`          | SPayLater      |
@@ -71,7 +72,8 @@ Today is **2026-05-21** (the date this note was written). Active cycle by patter
 | Pattern        | Day | This month's date | Today vs. that date | Active bill cycle | Active due date |
 |----------------|----:|-------------------|---------------------|-------------------|-----------------|
 | Krungsri/etc   |   5 | 2026-05-05        | after → advance     | 2026-06-05        | 2026-06-25      |
-| KTC/ttb        |  27 | 2026-05-27        | before → keep       | 2026-05-27        | 2026-06-11      |
+| KTC            |  27 | 2026-05-27        | before → keep       | 2026-05-27        | 2026-06-11      |
+| ttb            |  27 | 2026-05-27        | before → keep       | 2026-05-27        | 2026-06-16      |
 | AEON           |  10 | 2026-05-10        | after → advance     | 2026-06-10        | 2026-07-02      |
 | Lotus          |  28 | 2026-05-28        | before → keep       | 2026-05-28        | 2026-06-17      |
 | SPayLater      |  15 | 2026-05-15        | after → advance     | 2026-06-15        | 2026-06-25      |

@@ -90,11 +90,17 @@ PATTERNS: dict[str, BillCyclePattern] = {
         bill_day=5,
         due_from_nominal_bc=_due_plus(20),
     ),
-    "ktc_ttb": BillCyclePattern(
-        key="ktc_ttb",
-        description="KTC / ttb — bill cycle day 27, due +15 days",
+    "ktc": BillCyclePattern(
+        key="ktc",
+        description="KTC — bill cycle day 27, due +15 days",
         bill_day=27,
         due_from_nominal_bc=_due_plus(15),
+    ),
+    "ttb": BillCyclePattern(
+        key="ttb",
+        description="ttb — bill cycle day 27, due +20 days",
+        bill_day=27,
+        due_from_nominal_bc=_due_plus(20),
     ),
     "aeon": BillCyclePattern(
         key="aeon",
@@ -134,8 +140,8 @@ _CARD_PATTERN_PREFIXES: list[tuple[str, str]] = [
     ("krungsri", "krungsri"),
     ("first choice", "krungsri"),
     ("cardx", "krungsri"),
-    ("ktc", "ktc_ttb"),
-    ("ttb", "ktc_ttb"),
+    ("ktc", "ktc"),
+    ("ttb", "ttb"),
     ("aeon", "aeon"),
     ("lotus", "lotus"),
     ("spaylater", "spaylater"),

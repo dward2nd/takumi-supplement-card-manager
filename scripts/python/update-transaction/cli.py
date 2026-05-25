@@ -7,8 +7,8 @@ itself idempotent for property writes).
 
 Companion to `scripts/python/add-transaction/cli.py` (which only
 creates). Use this when an earlier write omitted a field that's now
-required by policy — typical case is filling `% cb` on Nuta transactions
-after merchant-tier classification.
+required by policy — typical case is filling `% cb` on Baiboon's or
+Nuta's transactions after merchant-tier classification.
 
 Reads a JSON spec from stdin (or --input <file>):
 
@@ -21,7 +21,7 @@ Reads a JSON spec from stdin (or --input <file>):
   }
 
 Recognized convenience keys per update:
-  - cashback_percent → writes Notion `% cb` (raw fraction)
+  - cashback_percent → writes Notion `% cb` (raw fraction); `null` clears
   - note            → writes Notion `Note`
   - multiplier      → writes one of `×0`/`×2`/`×3`/`×4`/`×5`/`÷4` to true
   - properties      → escape hatch: raw Notion properties payload, merged
@@ -46,13 +46,23 @@ from lib import notion_client
 from lib.transaction_write import VALID_MULTIPLIERS
 
 
+_CLEAR_CASHBACK = object()
+
+
 def _build_properties(update: dict) -> dict:
     props: dict = {}
 
-    if (cb := update.get("cashback_percent")) is not None:
+    # `cashback_percent: null` is a sentinel for "clear the `% cb` field"
+    # (writes JSON null to Notion, leaving the cell empty). Distinguishes
+    # "user wants to clear" from "user didn't mention this field" — the
+    # latter is the absence of the key.
+    cb = update.get("cashback_percent", _CLEAR_CASHBACK)
+    if cb is None:
+        props["% cb"] = {"number": None}
+    elif cb is not _CLEAR_CASHBACK:
         if not isinstance(cb, (int, float)) or isinstance(cb, bool) or not (0 <= cb <= 1):
             raise ValueError(
-                f"cashback_percent must be a raw fraction in [0, 1]; got {cb!r}"
+                f"cashback_percent must be a raw fraction in [0, 1] (or null to clear); got {cb!r}"
             )
         props["% cb"] = {"number": float(cb)}
 

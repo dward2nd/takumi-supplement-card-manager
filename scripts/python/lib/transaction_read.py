@@ -49,8 +49,9 @@ def _formula_number(props: dict, name: str) -> float | None:
 def project_transaction(page: dict) -> dict[str, Any]:
     """Flatten a Notion transaction page into a small JSON-friendly dict.
 
-    `cashback_percent` and `cashback` only exist on Nuta's DS; for Baiboon
-    and Takumi those keys come back as None (property absent from the page).
+    `cashback_percent` and `cashback` exist on Baiboon's and Nuta's DSes
+    but not Takumi's; for Takumi those keys come back as None (property
+    absent from the page).
     """
     props = page.get("properties", {})
     return {

@@ -43,11 +43,11 @@ Takumi has `×3`; supplement holders have `÷4`. See [[points-and-multipliers]] 
 
 **Resolved in phase 2**: `Transaction.rewardRules` is a polymorphic JSON array (`{type: "multiplier", value: 5}`, etc.); any holder can carry any rule type. The Takumi-`×3` / supplement-`÷4` asymmetry collapses.
 
-## 5. Cashback is Nuta-only
+## 5. Cashback is Baiboon + Nuta, not Takumi
 
-Only [[../databases/nuta-transactions]] has `% cb` and `cashback`. See [[cashback]].
+[[../databases/baiboon-transactions]] and [[../databases/nuta-transactions]] both have `% cb` and `cashback`; [[../databases/takumi-transactions]] does not. Baiboon's DS was extended to match Nuta's on 2026-05-25 (originally only Nuta's had cashback). See [[cashback]].
 
-**Resolved in phase 2**: cashback joins multipliers inside `Transaction.rewardRules` (`{type: "cashback", percent: 5}`). Any holder's transaction can carry zero or more rules of either kind. The Nuta-only divergence disappears.
+**Resolved in phase 2**: cashback joins multipliers inside `Transaction.rewardRules` (`{type: "cashback", percent: 5}`). Any holder's transaction can carry zero or more rules of either kind. The remaining Takumi gap disappears.
 
 ## 6. Cards-DB property labels lag
 

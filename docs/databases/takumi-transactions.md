@@ -55,5 +55,5 @@ Five views: by transaction datetime, by process date, by card (relation grouping
 
 ## Notable absences
 
-- No `% cb` / `cashback` formula (Nuta-only).
+- No `% cb` / `cashback` formula — both Baiboon and Nuta have them; Takumi does not.
 - No `÷4` multiplier.

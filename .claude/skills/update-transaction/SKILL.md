@@ -45,7 +45,7 @@ Recognized convenience keys per update entry:
 
 | Key                 | Notion property | Notes                                                                 |
 |---------------------|-----------------|-----------------------------------------------------------------------|
-| `cashback_percent`  | `% cb`          | Raw fraction in `[0, 1]`. `0.05` → displays as `5%`. **Nuta only** — the field doesn't exist on Baiboon/Takumi. |
+| `cashback_percent`  | `% cb`          | Raw fraction in `[0, 1]`. `0.05` → displays as `5%`. Pass `null` to **clear** an existing value. **Baiboon + Nuta** — the field doesn't exist on Takumi. |
 | `note`              | `Note`          | Free-form string. Replaces the existing `Note`.                       |
 | `multiplier`        | one of `×0`/`×2`/`×3`/`×4`/`×5`/`÷4` | Sets the named checkbox to `true`. **Mutually exclusive** — only one multiplier per page; the CLI will not unset other multipliers, so don't use this to flip from one tier to another without first thinking about which checkbox is currently on. `×3` is Takumi-only. |
 | `properties`        | (raw)           | Escape hatch: merge an arbitrary Notion `properties` payload. Use sparingly — prefer a convenience key. |
@@ -56,7 +56,7 @@ Output: `{ "count": N, "updated": [ { "id": "<page-id>", "fields": [<prop names 
 
 1. **One or more transaction page IDs** — UUIDs (or full Notion URLs the agent strips to UUIDs). The user typically obtains these from a prior `/add-transaction` or `/fetch-transactions` run.
 2. **Which fields to set** — and what values. If the user describes a tier ("5% cashback on this row") rather than the raw fraction, *you* do the conversion (5% → `0.05`); don't push the math back to the user.
-3. *Optionally* the cardholder, if context isn't clear — used only to validate that `cashback_percent` is being written to a Nuta page (the field exists nowhere else).
+3. *Optionally* the cardholder, if context isn't clear — used only to validate that `cashback_percent` is being written to a Baiboon or Nuta page (the field doesn't exist on Takumi's DS).
 
 ## Hard rules
 
@@ -64,9 +64,9 @@ Output: `{ "count": N, "updated": [ { "id": "<page-id>", "fields": [<prop names 
 
 The CLI takes Notion page UUIDs. If the user pastes a full URL, strip it down to the UUID before sending. Never write to a page whose UUID you haven't been given — the script has no "search by merchant" fallback, on purpose.
 
-### 2. `% cb` is Nuta-only
+### 2. `% cb` is Baiboon + Nuta only
 
-`% cb` exists only on Nuta's Transactions data source. Setting it on a Baiboon or Takumi page returns a 400 from Notion. The CLI doesn't pre-check the page's parent DS — *you* must. When in doubt, fetch the page first with `mcp__notion__notion-fetch` and verify the parent collection.
+`% cb` exists on Baiboon's and Nuta's Transactions data sources but not Takumi's. Setting it on a Takumi page returns a 400 from Notion. The CLI doesn't pre-check the page's parent DS — *you* must. When in doubt, fetch the page first with `mcp__notion__notion-fetch` and verify the parent collection.
 
 ### 3. Multipliers stay mutually exclusive
 

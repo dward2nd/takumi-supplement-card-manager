@@ -45,7 +45,7 @@ JSON spec — all keys optional except `holder`:
 
 `summary: true` adds a `summary` block to the envelope with `{count, total_amount, total_cashback}` computed from the returned rows. Use it for aggregate questions like "what's my Makro spend this cycle?" or "cumulative cashback this cycle?". Drop `limit` when you want the aggregate over the full filtered set — `limit` truncates *before* the summation. For "summary only" (no per-row dump), just ignore the `results` array client-side; we don't have a dedicated summary-only mode.
 
-Output: a JSON envelope `{holder, card, count, results: [...], summary?: {...}}`. Each result row has `id`, `url`, `name` (verbatim), `amount`, `transaction_date`, `bill_cycle_date`, `due_date`, `processed`, `paid`, `credit_return`, `note`, `card_ids`, `cashback_percent`, `cashback`. The last two are Nuta-only — they come back `null` for Baiboon and Takumi (the properties don't exist on their DSes), and `total_cashback` in the summary will be `0` for those holders.
+Output: a JSON envelope `{holder, card, count, results: [...], summary?: {...}}`. Each result row has `id`, `url`, `name` (verbatim), `amount`, `transaction_date`, `bill_cycle_date`, `due_date`, `processed`, `paid`, `credit_return`, `note`, `card_ids`, `cashback_percent`, `cashback`. The last two are populated for Baiboon and Nuta but come back `null` for Takumi (the properties don't exist on Takumi's DS), and `total_cashback` in the summary will be `0` for Takumi.
 
 Translate the user's request into the spec, run the script, then format the JSON into the markdown table described in *Output shape* below. Don't summarize or paraphrase merchant names — pass them through verbatim.
 

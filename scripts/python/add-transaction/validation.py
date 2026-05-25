@@ -111,8 +111,9 @@ def validate_spec(spec: dict[str, Any]) -> None:
         _check_cashback_percent(
             tx.get("cashback_percent"), f"transactions[{i}].cashback_percent"
         )
-        if (has_batch_cb or tx.get("cashback_percent") is not None) and holder != "nuta":
+        # `% cb` exists on Baiboon's and Nuta's Transactions DSes; Takumi's DS
+        # does not carry it (and Notion will 400 on the property name).
+        if (has_batch_cb or tx.get("cashback_percent") is not None) and holder == "takumi":
             raise SpecError(
-                f"cashback_percent (`% cb`) only exists on Nuta's Transactions DS; "
-                f"holder is {holder!r}"
+                f"cashback_percent (`% cb`) does not exist on Takumi's Transactions DS"
             )
