@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useApp } from "../data/state";
 import { CARDS, last4For } from "../data/cards";
@@ -11,6 +11,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Amount } from "../components/Amount";
 import { SectionLabel } from "../components/SectionLabel";
 import { TransactionRow } from "../components/TransactionRow";
+import { DateGroupedTransactions } from "../components/DateGroupedTransactions";
 import { fmtLong, fmtRate } from "../data/format";
 import { sumCashback, sumPoints } from "../data/earnings";
 import type { CardId, HolderKey, Transaction } from "../data/types";
@@ -19,6 +20,7 @@ const TODAY = "2026-05-26"; // POC reference date
 
 export const CardDetailScreen = () => {
   const { holderKey: viewerKey } = useApp();
+  const nav = useNavigate();
   const { id } = useParams();
   const [params] = useSearchParams();
   const card = id ? CARDS[id as CardId] : undefined;
@@ -241,16 +243,23 @@ export const CardDetailScreen = () => {
           <SectionLabel number={txNum} trailing={`${todayOrPast.length} rows`}>
             Transactions
           </SectionLabel>
-          <div className="mt-2 overflow-hidden rounded-2xl border border-paper-line/60 bg-paper-raised/30">
-            {todayOrPast.length === 0 && (
-              <div className="px-5 py-10 text-center text-sm text-ink-faint">
-                No transactions on this card yet.
-              </div>
-            )}
-            {todayOrPast.map((t, i) => (
-              <TransactionRow key={t.id} tx={t} hideCardChip index={i} />
-            ))}
-          </div>
+          <DateGroupedTransactions
+            transactions={todayOrPast}
+            cap={8}
+            emptyLabel="No transactions on this card yet."
+            footer={
+              todayOrPast.length > 8 ? (
+                <button
+                  onClick={() =>
+                    nav(`/cards/${card.id}/history?holder=${instanceHolder}`)
+                  }
+                  className="tap mt-2 flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] uppercase tracking-[0.22em] text-amber-glow/90 transition-colors hover:text-amber-glow"
+                >
+                  see all <span className="num">{todayOrPast.length}</span> transactions →
+                </button>
+              ) : null
+            }
+          />
         </section>
 
         {upcoming.length > 0 && upcomingNum && (

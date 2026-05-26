@@ -67,9 +67,19 @@ export const BillsScreen = () => {
         <BillGroup
           title="Paid · history"
           number={drafts.length || issued.length ? "03" : "01"}
-          items={paid}
+          items={paid.slice(0, 6)}
           nav={nav}
           paid
+          footer={
+            paid.length > 6 ? (
+              <button
+                onClick={() => nav("/bills/history")}
+                className="tap mt-3 ml-auto flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] uppercase tracking-[0.22em] text-amber-glow/90 transition-colors hover:text-amber-glow"
+              >
+                see all <span className="num">{paid.length}</span> paid bills →
+              </button>
+            ) : null
+          }
         />
       )}
     </div>
@@ -82,12 +92,14 @@ const BillGroup = ({
   items,
   nav,
   paid = false,
+  footer,
 }: {
   title: string;
   number: string;
   items: import("../data/types").Bill[];
   nav: (path: string) => void;
   paid?: boolean;
+  footer?: React.ReactNode;
 }) => (
   <section className="px-5 pb-8">
     <SectionLabel number={number} trailing={`${items.length}`}>{title}</SectionLabel>
@@ -140,5 +152,6 @@ const BillGroup = ({
         );
       })}
     </div>
+    {footer && <div className="flex justify-end">{footer}</div>}
   </section>
 );

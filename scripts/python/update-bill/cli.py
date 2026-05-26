@@ -22,6 +22,13 @@ Reads a JSON spec from stdin (or --input <file>):
     "statement_pdfs":["/abs/a.pdf", ...],     // appends many
     "finalize":      true,                    // strips a leading `[DRAFT] ` from the
                                               //   title (no-op if already finalized)
+    "refresh_from_transactions": true,        // recompute ยอดชำระ from cycle's
+                                              //   transactions; if no explicit `note`
+                                              //   was supplied, also regenerate the
+                                              //   Note explaining special rows
+                                              //   (cashback, installments, manual
+                                              //   adjustments). Requires (holder, card,
+                                              //   bill_cycle) to be resolvable.
     "properties":    { "<raw notion prop>": ... }   // escape hatch (replace semantics)
   }
 
@@ -54,9 +61,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib import notion_client, notion_files
-from lib.bills import find_bill
-from lib.holders import resolve_holder
+from lib import installments, notion_client, notion_files
+from lib.bills import explain_cycle, find_bill
+from lib.cards import CardNotFoundError, find_card
+from lib.holders import HOLDERS, resolve_holder
+from lib.transaction_read import project_transaction
 
 
 _SLIP_PROP = "หลักฐานการชำระ"
@@ -85,6 +94,58 @@ def _resolve_bill(spec: dict) -> tuple[str, str | None, str | None, str | None]:
     holder = resolve_holder(spec["holder"])
     bill = find_bill(holder, spec["card"], spec["bill_cycle"])
     return bill["id"], holder.key, spec["card"], spec["bill_cycle"]
+
+
+def _in_progress_for(holder_key: str | None, card_name: str | None) -> list[dict] | None:
+    """Return in-progress installment plans on the bill's card, if resolvable.
+
+    Read-only — does not write. When the bill was resolved by `id` alone
+    (no holder/card echo), we can't look up the Cards DS, so we just
+    return None and let the caller skip the section.
+    """
+    if not holder_key or not card_name:
+        return None
+    holder = HOLDERS.get(holder_key.strip().lower())
+    if holder is None:
+        return None
+    try:
+        card = find_card(holder.cards_ds, card_name)
+    except CardNotFoundError:
+        return None
+    return installments.in_progress_summary(holder.transactions_ds, card["id"])
+
+
+def _refresh_from_transactions(
+    holder_key: str, card_name: str, bill_cycle: str
+) -> tuple[float, int, str | None] | None:
+    """Recompute (total, tx_count, auto_note) from the cycle's transactions.
+
+    Returns None when the (holder, card, bill_cycle) trio can't resolve a
+    card page (e.g. user passed only `id`). Otherwise scans every row on
+    that (Card relation, Bill Cycle Date) and returns the recomputed sum,
+    the row count, and the explanation Note (or None if nothing special).
+    """
+    holder = HOLDERS.get((holder_key or "").strip().lower())
+    if holder is None:
+        return None
+    try:
+        card = find_card(holder.cards_ds, card_name)
+    except CardNotFoundError:
+        return None
+
+    raw_rows = notion_client.query_all(
+        holder.transactions_ds,
+        filter={
+            "and": [
+                {"property": "Card", "relation": {"contains": card["id"]}},
+                {"property": "Bill Cycle Date", "date": {"equals": bill_cycle}},
+            ]
+        },
+    )
+    projected = [project_transaction(r) for r in raw_rows]
+    total = round(sum(float(r.get("amount") or 0.0) for r in projected), 2)
+    note = explain_cycle(projected)
+    return total, len(projected), note
 
 
 def _collect_files(spec: dict, single_key: str, plural_key: str) -> list[str]:
@@ -142,14 +203,46 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             # rather than an error. Surfaces in the response so caller can see.
             actions.append("title (already finalized)")
 
+    # `refresh_from_transactions` recomputes the bill's `ยอดชำระ` from every
+    # transaction in the cycle, and (unless the spec also passes an explicit
+    # `note`) regenerates the explanation Note. Use this after adding /
+    # populating installment rows in the cycle so the bill total stays in
+    # sync with what the user will see on the bank statement.
+    refresh = bool(spec.get("refresh_from_transactions"))
+    refreshed: dict | None = None
+    if refresh:
+        if not (holder_key and card and bill_cycle):
+            raise ValueError(
+                "refresh_from_transactions requires the bill to be resolvable "
+                "by (holder, card, bill_cycle); pass those alongside `id` if "
+                "you used the id form"
+            )
+        rf = _refresh_from_transactions(holder_key, card, bill_cycle)
+        if rf is None:
+            raise ValueError(
+                f"refresh_from_transactions: could not resolve "
+                f"holder={holder_key!r}/card={card!r}/cycle={bill_cycle!r}"
+            )
+        total, tx_count, auto_note = rf
+        simple_props["ยอดชำระ"] = {"number": total}
+        actions.append("ยอดชำระ (refreshed)")
+        # Auto-generated Note loses to a user-supplied `note` — that's already
+        # in simple_props from the earlier branch; only fill in when blank.
+        if auto_note and "Note" not in simple_props:
+            simple_props["Note"] = {"rich_text": [{"text": {"content": auto_note}}]}
+            actions.append("Note (auto)")
+        refreshed = {"ยอดชำระ": total, "tx_count": tx_count, "auto_note": auto_note}
+
     slips = _collect_files(spec, "slip", "slips")
     statements = _collect_files(spec, "statement_pdf", "statement_pdfs")
 
     if not (simple_props or slips or statements):
         raise ValueError("nothing to do: spec must include at least one update field")
 
+    in_progress = _in_progress_for(holder_key, card)
+
     if dry_run:
-        return {
+        out = {
             "id": page_id,
             "holder": holder_key,
             "card": card,
@@ -159,6 +252,11 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             "would_append_slips": slips,
             "would_append_statements": statements,
         }
+        if in_progress is not None:
+            out["in_progress_installments"] = in_progress
+        if refreshed is not None:
+            out["refreshed"] = refreshed
+        return out
 
     if simple_props:
         notion_client.update_page_properties(page_id, simple_props)
@@ -171,13 +269,18 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         notion_files.append_files_to_page(page_id, _STATEMENT_PROP, statements)
         actions.append(_STATEMENT_PROP)
 
-    return {
+    out = {
         "id": page_id,
         "holder": holder_key,
         "card": card,
         "bill_cycle": bill_cycle,
         "fields": actions,
     }
+    if in_progress is not None:
+        out["in_progress_installments"] = in_progress
+    if refreshed is not None:
+        out["refreshed"] = refreshed
+    return out
 
 
 def main(argv: list[str] | None = None) -> int:

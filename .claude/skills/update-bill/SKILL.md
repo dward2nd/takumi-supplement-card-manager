@@ -40,9 +40,28 @@ JSON spec:
 
 `finalize: true` strips a leading `[DRAFT] ` from the bill's title — pairs with /prepare-bill which writes the draft prefix. Idempotent: if the prefix is already gone the action is a no-op (still surfaced in the response so you can see it was checked).
 
+`refresh_from_transactions: true` re-derives the bill's `ยอดชำระ` from every transaction in the cycle and (unless the spec also passes an explicit `note`) regenerates the explanation Note via the same `lib.bills.explain_cycle` function [[../prepare-bill/SKILL.md|/prepare-bill]] uses on draft. Use this after appending installment terms or cashback credits to a cycle whose bill was already drafted — without it, the bill row's amount would silently drift from the underlying transactions. Requires the bill to be resolvable by `(holder, card, bill_cycle)`; the `id`-only form needs those echo fields supplied alongside.
+
 **Identify the bill row** either by `(holder, card, bill_cycle)` *or* by `id`. If `id` is set, the lookup keys are optional (used only for the response echo). Otherwise all three lookup keys are required and must match a unique row.
 
 **At least one update field is required** (`paid`, `note`, `slip`/`slips`, `statement_pdf`/`statement_pdfs`, `finalize`, or `properties`). The script errors out on an empty update so a typo doesn't silently no-op.
+
+### Response includes `in_progress_installments`
+
+When the bill was resolved by `(holder, card, bill_cycle)` (or by `id` with the echo fields supplied), the script also computes the set of in-progress installment plans on the bill's card and returns them under `in_progress_installments`:
+
+```json
+{
+  "id": "...",
+  "fields": ["จ่ายแล้ว"],
+  "in_progress_installments": [
+    { "base": "2C2P *SHOPEE", "total_terms": 10, "max_term": 3, "remaining_terms": 7, "per_term_amount": 1079.20 },
+    { "base": "COM7-ID175-BN-CT-CHO", "total_terms": 10, "max_term": 5, "remaining_terms": 5, "per_term_amount": 959.00 }
+  ]
+}
+```
+
+Surface this to the user when marking a bill paid — it shows what installment commitments will appear on the next several statements. Read-only side effect: no plan rows are added by this skill. To advance the cycle, use [[../populate-installment/SKILL.md|/populate-installment]] (or let [[../prepare-bill/SKILL.md|/prepare-bill]] handle it on the next bill).
 
 ## What the user typically asks
 

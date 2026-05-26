@@ -25,13 +25,16 @@ JSON spec:
   "holder":              "baiboon | nuta",
   "card":                "UOB One",
   "bill_cycle":          "2026-05-25",
-  "skip_cashback_check": false
+  "skip_cashback_check": false,
+  "skip_populate_installments": false
 }
 ```
 
 - `holder` and `card` are required.
 - `bill_cycle` is optional. Omit it and the CLI infers the **active cycle** from the card's bank pattern (see [[../../docs/concepts/bill-cycle-patterns|bill-cycle-patterns]]). Pass it explicitly only to back-fill a non-current cycle.
 - `skip_cashback_check` is optional, default `false`. For cards listed in `CASHBACK_CREDIT_CARDS` (currently `UOB One`), the CLI refuses to draft if no `*CASHBACK*`-named transaction exists in the cycle — that pattern means the cashback credit rows haven't been written yet and the sum would overstate the balance. Set this to `true` only when you've verified the card doesn't need credit rows this cycle.
+- `skip_populate_installments` is optional, default `false`. Before summing, the CLI calls [[../populate-installment/SKILL.md|/populate-installment]] internally for this (holder, card, bill_cycle), so the cycle's installment-term rows are present before the sum is taken. The call is idempotent — plans whose next term already lives in the cycle are skipped — and uses the same library function the standalone skill calls. Disable only when re-drafting a historical cycle whose installment rows shouldn't be touched.
+- `skip_auto_note` is optional, default `false`. When the cycle contains special rows (cashback credits, installment terms, manual adjustments), the drafted bill's `Note` is set to a human-readable summary listing what's in the cycle. Pass `true` to leave Note blank — the user can then write their own via [[../update-bill/SKILL.md|/update-bill]] later.
 
 ## What the user typically asks
 
@@ -45,14 +48,42 @@ JSON spec:
 2. Verifies the card name is a valid SELECT option on the Bills DS's `Card` field (no fuzzy matching).
 3. Resolves the bill cycle date — from `bill_cycle` if given, otherwise via `lib.bill_cycle.active_cycle(card_name, today)`.
 4. Checks the Bills DS for an existing row with that `(Card, วันตัดรอบบิล)` pair. If one exists (draft or final), **aborts** — never silently overwrites.
-5. Queries the Transactions DS for every row whose `Bill Cycle Date` matches and whose `Card` relates to the resolved card.
-6. Sums `ยอดชำระ` across those rows (a flat sum — see *Cashback handling* below).
-7. Creates the Bills row with:
+5. **Populates in-progress installments** into this cycle (unless `skip_populate_installments: true`) — same idempotent logic as the standalone [[../populate-installment/SKILL.md|/populate-installment]] skill. The result is echoed back under `installments` in the response so the user can see which plans were extended.
+6. Queries the Transactions DS for every row whose `Bill Cycle Date` matches and whose `Card` relates to the resolved card.
+7. Sums `ยอดชำระ` across those rows (a flat sum — see *Cashback handling* below).
+8. Creates the Bills row with:
    - **Title**: `[DRAFT] <Card> <YYYY-MM>` (YYYY-MM derived from the BC date).
    - `Card`: SELECT, the verbatim card name.
    - `วันตัดรอบบิล`: BC date.
    - `ยอดชำระ`: the computed sum, rounded to 2dp.
    - `จ่ายแล้ว`: unchecked.
+
+## Installment handling
+
+In-progress installments would otherwise silently shrink the bill total — a 10-month plan whose next term hasn't been written yet would miss its row in this cycle's sum. To prevent that, the CLI calls `lib.installments.populate_for_cycle` (the same function backing the standalone [[../populate-installment/SKILL.md|/populate-installment]] skill) before computing the total. Plans whose next term already sits in the target cycle are skipped — so re-running `/prepare-bill` on the same cycle doesn't double-write.
+
+The response's `installments` block shows the per-plan disposition. When you surface the bill summary to the user, mention any plans the skill appended so they know to expect those rows on the bank statement.
+
+## Auto-generated Note
+
+When the cycle contains rows that aren't straightforward purchases — cashback credits, installment terms, manual adjustments — the bill's `Note` field is filled in automatically with a brief explanation listing those rows. The structure:
+
+```
+This cycle includes:
+- N new installment plan(s): <name> (฿<amt>/term × <total>), ...
+- N ongoing installment term(s): <name> ฿<amt>, ...
+- N cashback credit(s): <name> ±฿<amt>, ...
+- N manual adjustment(s): <name> ±฿<amt> — <note>, ...
+```
+
+Lines are omitted when their bucket is empty; if a bucket has many rows, only the first six are listed and the rest are folded into `(+N more)`. The detection is heuristic:
+
+- **Cashback**: name contains `CASHBACK` (case-insensitive).
+- **Installment**: name parses as `<base> NN/NN`.
+- **Manual adjustment**: name starts with `[` (e.g. `[เว็บรับหนี้ไปบริหารต่อ]`), or `Credit Return` is checked, or the amount is negative and the row isn't already cashback / installment.
+- Everything else is a regular purchase and doesn't appear in the Note.
+
+Pass `skip_auto_note: true` to opt out. The `auto_note` field in the response shows whatever was written (or absent when no special rows existed).
 
 ## Cashback handling
 

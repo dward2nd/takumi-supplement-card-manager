@@ -199,3 +199,26 @@ def active_cycle(
         return bc, dd
     y, m = _add_months(today.year, today.month, 1)
     return cycle_for_month(pattern, y, m)
+
+
+def most_recent_closed_cycle(
+    card_name: str, today: dt.date | None = None
+) -> tuple[dt.date, dt.date]:
+    """Return (bill_cycle_date, due_date) for the most recently closed cycle.
+
+    Closed = the largest BC date strictly less than today. If today > this
+    month's BC, that BC is the most recently closed; otherwise step back
+    to last month. On the BC date itself the cycle is still active, so we
+    step back to the previous month (mirrors `active_cycle`'s "≤" rule).
+
+    Used by installment skills, since banks post installment terms onto
+    the cycle that just closed rather than the one currently accumulating.
+    """
+    if today is None:
+        today = dt.date.today()
+    pattern = pattern_for_card(card_name)
+    bc, dd = cycle_for_month(pattern, today.year, today.month)
+    if today > bc:
+        return bc, dd
+    y, m = _add_months(today.year, today.month, -1)
+    return cycle_for_month(pattern, y, m)

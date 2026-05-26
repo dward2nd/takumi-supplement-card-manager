@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useApp } from "../data/state";
@@ -8,21 +8,37 @@ import { visibleInstances } from "../data/card-instances";
 import { CardFace } from "../components/CardFace";
 import { PageHeader } from "../components/PageHeader";
 import { Pill } from "../components/Pill";
+import { HolderChipRow, type HolderFilter } from "../components/HolderChips";
 import { activePromotionsFor } from "../data/promotions";
 import type { HolderKey } from "../data/types";
 
 export const CardsScreen = () => {
   const { holderKey: viewerKey } = useApp();
   const nav = useNavigate();
+  const [holderFilter, setHolderFilter] = useState<HolderFilter>("all");
   if (!viewerKey) return null;
 
   // Per-instance list — one entry per (card, holder) pair. Admin sees them all.
   const instances = useMemo(() => visibleInstances(viewerKey), [viewerKey]);
 
+  // Stable per-holder counts (independent of the chip filter) for the chip
+  // row badges. Supplements only see their own row, so for them the counts
+  // collapse to a single entry — used to decide whether to show chips at all.
+  const holderCounts = useMemo(() => {
+    const counts: Record<HolderKey, number> = { takumi: 0, baiboon: 0, nuta: 0 };
+    for (const i of instances) counts[i.holder]++;
+    return counts;
+  }, [instances]);
+
+  const filteredInstances = useMemo(() => {
+    if (holderFilter === "all") return instances;
+    return instances.filter((i) => i.holder === holderFilter);
+  }, [instances, holderFilter]);
+
   // Group by holder so Takumi's admin view stays scannable.
   const byHolder = useMemo(() => {
-    const groups: { holder: HolderKey; instances: typeof instances }[] = [];
-    for (const i of instances) {
+    const groups: { holder: HolderKey; instances: typeof filteredInstances }[] = [];
+    for (const i of filteredInstances) {
       let g = groups.find((x) => x.holder === i.holder);
       if (!g) {
         g = { holder: i.holder, instances: [] };
@@ -38,7 +54,9 @@ export const CardsScreen = () => {
       }
       return a.holder.localeCompare(b.holder);
     });
-  }, [instances, viewerKey]);
+  }, [filteredInstances, viewerKey]);
+
+  const isAdmin = viewerKey === "takumi";
 
   return (
     <div className="mx-auto max-w-md md:max-w-3xl lg:max-w-6xl">
@@ -47,10 +65,23 @@ export const CardsScreen = () => {
         eyebrow={`${instances.length} card supplements · current cycle`}
       />
 
+      {isAdmin && (
+        <div className="px-5 pb-4">
+          <HolderChipRow
+            counts={holderCounts}
+            total={instances.length}
+            active={holderFilter}
+            onChange={setHolderFilter}
+          />
+        </div>
+      )}
+
       <div className="px-5 pb-12 space-y-8">
         {byHolder.map(({ holder, instances }) => {
           const h = HOLDERS[holder];
-          const showHolderHeader = viewerKey === "takumi";
+          // Hide the per-holder section header when a single holder is
+          // narrowed via the chip — the chip itself is the scope label.
+          const showHolderHeader = isAdmin && holderFilter === "all";
           return (
             <section key={holder}>
               {showHolderHeader && (
@@ -107,6 +138,11 @@ export const CardsScreen = () => {
             </section>
           );
         })}
+        {byHolder.length === 0 && (
+          <div className="py-12 text-center text-sm text-ink-faint">
+            No cards in this scope.
+          </div>
+        )}
       </div>
     </div>
   );

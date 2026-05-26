@@ -3,11 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Search, X } from "lucide-react";
 import clsx from "clsx";
 import { CARDS } from "../data/cards";
-import { HOLDERS, HOLDER_LIST } from "../data/holders";
+import { HOLDERS } from "../data/holders";
 import { instanceKey } from "../data/card-instances";
+import { HolderChipRow, type HolderFilter } from "./HolderChips";
 import type { CardInstance, HolderKey } from "../data/types";
-
-type HolderFilter = HolderKey | "all";
 
 interface Props {
   selected: CardInstance | null;
@@ -232,27 +231,13 @@ const CardSheet = ({
           </button>
         </header>
 
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-5 pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <HolderChip
-            label="All"
-            count={instances.length}
-            dot="rgb(var(--amber-glow))"
-            active={holderFilter === "all"}
-            accent={null}
-            onClick={() => setHolderFilter("all")}
-          />
-          {HOLDER_LIST.map((h) => (
-            <HolderChip
-              key={h.key}
-              label={h.englishName}
-              count={holderCounts[h.key]}
-              dot={h.accent}
-              accent={h.accent}
-              active={holderFilter === h.key}
-              onClick={() => setHolderFilter(h.key)}
-            />
-          ))}
-        </div>
+        <HolderChipRow
+          counts={holderCounts}
+          total={instances.length}
+          active={holderFilter}
+          onChange={setHolderFilter}
+          className="px-5 pb-3"
+        />
 
         <div className="px-5 pb-3">
           <label className="flex items-center gap-2 rounded-xl border border-paper-line bg-paper px-3 py-2.5 focus-within:border-amber-200/60">
@@ -299,51 +284,6 @@ const CardSheet = ({
         </div>
       </motion.div>
     </motion.div>
-  );
-};
-
-const HolderChip = ({
-  label,
-  count,
-  dot,
-  accent,
-  active,
-  onClick,
-}: {
-  label: string;
-  count: number;
-  dot: string;
-  /** Holder's accent — null for the "All" chip (uses amber). */
-  accent: string | null;
-  active: boolean;
-  onClick: () => void;
-}) => {
-  const activeStyle =
-    active && accent
-      ? { borderColor: `${accent}66`, background: `${accent}1a` }
-      : undefined;
-  return (
-    <button
-      onClick={onClick}
-      aria-pressed={active}
-      className={clsx(
-        "tap shrink-0 flex items-center gap-2 rounded-full border px-3.5 transition-colors",
-        active
-          ? accent
-            ? "text-ink"
-            : "border-amber-200/40 bg-amber-300/[0.08] text-ink"
-          : "border-paper-line bg-paper-raised/40 text-ink-dim hover:bg-paper-raised hover:text-ink",
-      )}
-      style={activeStyle}
-    >
-      <span
-        aria-hidden
-        className="h-1.5 w-1.5 shrink-0 rounded-full"
-        style={{ background: dot }}
-      />
-      <span className="text-[12.5px] uppercase tracking-[0.2em]">{label}</span>
-      <span className="num text-[12px] text-ink-faint">{count}</span>
-    </button>
   );
 };
 

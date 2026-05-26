@@ -23,7 +23,17 @@ Reads a JSON spec from stdin (or --input <file>):
   {
     "holder":     "baiboon" | "nuta",          // required (takumi has no Bills DB)
     "card":       "UOB One",                   // required, must match a SELECT option
-    "bill_cycle": "2026-05-25"                 // optional ISO date; inferred if omitted
+    "bill_cycle": "2026-05-25",                // optional ISO date; inferred if omitted
+    "skip_populate_installments": false,       // optional; default false. When false,
+                                               //   in-progress installments on this card
+                                               //   are auto-populated into the cycle
+                                               //   BEFORE the sum is computed, so the
+                                               //   drafted balance reflects them.
+    "skip_auto_note": false                    // optional; default false. When false,
+                                               //   the bill's Note is auto-generated to
+                                               //   explain special rows (cashback credits,
+                                               //   installment terms, manual adjustments).
+                                               //   Set true to leave Note blank.
   }
 
 Writes a JSON envelope to stdout:
@@ -52,11 +62,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib import notion_client, promotions
-from lib.bill_cycle import active_cycle
-from lib.bills import require_bills_ds
+from lib import installments, notion_client, promotions
+from lib.bill_cycle import active_cycle, pattern_for_card, cycle_for_month
+from lib.bills import explain_cycle, require_bills_ds
 from lib.cards import find_card
 from lib.holders import resolve_holder
+from lib.transaction_read import project_transaction
 
 DRAFT_PREFIX = "[DRAFT] "
 
@@ -164,6 +175,35 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             f"{bill_cycle} (id={existing['id']}). Refusing to create a duplicate."
         )
 
+    # Auto-populate in-progress installments into this cycle before summing.
+    # Without this, a 10-month plan whose next term hasn't been written yet
+    # would silently shrink the bill total. The populate call is idempotent —
+    # plans whose next term already lives in this cycle are skipped — and
+    # uses the same library function /populate-installment calls, so the two
+    # skills can't disagree. The user can disable this for back-fills where
+    # they're recreating a historical bill snapshot.
+    installments_summary: dict | None = None
+    if not spec.get("skip_populate_installments"):
+        # Derive the cycle's due date from the card's bank pattern so
+        # appended rows carry the correct DD without depending on the
+        # Bills DB which doesn't store DD on its own.
+        bc_date = _dt.date.fromisoformat(bill_cycle)
+        pattern = pattern_for_card(card_name)
+        cand_bc, cand_dd = cycle_for_month(pattern, bc_date.year, bc_date.month)
+        if cand_bc != bc_date:
+            cand_dd = pattern.due_date_shift(pattern.due_from_nominal_bc(bc_date))
+        installments_summary = installments.populate_for_cycle(
+            holder_key=holder.key,
+            transactions_ds=holder.transactions_ds,
+            card_name=card_name,
+            card_page_id=card["id"],
+            bill_cycle=bill_cycle,
+            due_date=cand_dd.isoformat(),
+            auto_classify=True,
+            exclude=set(),
+            dry_run=dry_run,
+        )
+
     total, tx_count, rows = _sum_cycle(holder.transactions_ds, card["id"], bill_cycle)
     if tx_count == 0:
         raise PrepareBillError(
@@ -184,6 +224,15 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     bc_date = _dt.date.fromisoformat(bill_cycle)
     title = f"{DRAFT_PREFIX}{card_name} {bc_date.strftime('%Y-%m')}"
 
+    # Auto-generate the Note explaining special rows in this cycle (cashback
+    # credits, manual adjustments, installment terms). Skip when the user
+    # passes `skip_auto_note: true` — they may want to leave Note blank or
+    # supply their own text via /update-bill afterwards.
+    auto_note: str | None = None
+    if not spec.get("skip_auto_note"):
+        projected = [project_transaction(r) for r in rows]
+        auto_note = explain_cycle(projected)
+
     properties = {
         "title": {"title": [{"text": {"content": title}}]},
         "Card": {"select": {"name": card_name}},
@@ -191,9 +240,11 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         "ยอดชำระ": {"number": total},
         "จ่ายแล้ว": {"checkbox": False},
     }
+    if auto_note:
+        properties["Note"] = {"rich_text": [{"text": {"content": auto_note}}]}
 
     if dry_run:
-        return {
+        out: dict = {
             "dry_run": True,
             "holder": holder.key,
             "card": card_name,
@@ -202,9 +253,14 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             "ยอดชำระ": total,
             "tx_count": tx_count,
         }
+        if installments_summary is not None:
+            out["installments"] = installments_summary
+        if auto_note:
+            out["auto_note"] = auto_note
+        return out
 
     page = notion_client.create_page(bills_ds, properties)
-    return {
+    out = {
         "id": page["id"],
         "url": page.get("url"),
         "holder": holder.key,
@@ -214,6 +270,11 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         "ยอดชำระ": total,
         "tx_count": tx_count,
     }
+    if installments_summary is not None:
+        out["installments"] = installments_summary
+    if auto_note:
+        out["auto_note"] = auto_note
+    return out
 
 
 def main(argv: list[str] | None = None) -> int:

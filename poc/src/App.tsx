@@ -5,7 +5,9 @@ import { LoginScreen } from "./screens/LoginScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { CardsScreen } from "./screens/CardsScreen";
 import { CardDetailScreen } from "./screens/CardDetailScreen";
+import { TransactionsHistoryScreen } from "./screens/TransactionsHistoryScreen";
 import { BillsScreen } from "./screens/BillsScreen";
+import { BillsHistoryScreen } from "./screens/BillsHistoryScreen";
 import { BillDetailScreen } from "./screens/BillDetailScreen";
 import { AddTransactionScreen } from "./screens/AddTransactionScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
@@ -43,10 +45,26 @@ function App() {
             }
           />
           <Route
+            path="/cards/:id/history"
+            element={
+              <Guard>
+                <TransactionsHistoryScreen />
+              </Guard>
+            }
+          />
+          <Route
             path="/bills"
             element={
               <Guard>
                 <BillsScreen />
+              </Guard>
+            }
+          />
+          <Route
+            path="/bills/history"
+            element={
+              <Guard>
+                <BillsHistoryScreen />
               </Guard>
             }
           />
