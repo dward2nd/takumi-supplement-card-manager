@@ -27,13 +27,15 @@ Invocation shape:
 
 ### Doc-drift trigger (no args)
 
-`scripts/python/update-poc/cli.py` enumerates "potentially significant" changes since the last commit that touched `poc/`:
+`scripts/python/update-poc/cli.py` enumerates "potentially significant" changes since the last commit that touched `poc/` **plus** any working-tree changes (modified, staged, untracked) on the watched paths. The working-tree pass is what makes `/update-poc` useful in front of `/release` — the survey can see the work that's about to ship, not just what already shipped.
 
 ```sh
 uv run scripts/python/update-poc/cli.py
 ```
 
-Output: a JSON envelope `{since_commit, poc_dir_exists, watched_paths, change_count, changes: [...]}`. If `since_commit` is `null`, the POC has never been committed — stop and ask the user to bootstrap with:
+Output: a JSON envelope `{since_commit, poc_dir_exists, watched_paths, change_count, committed_count, uncommitted_count, changes: [...]}`. Each entry in `changes` carries a `status` (`A`/`M`/`D`/`R…` for committed; `??`/`M`/`A`/`MM` etc. for uncommitted), a `last_commit` (commit hash for committed entries, `null` for uncommitted), and `last_subject` (commit message or the sentinel `"(uncommitted)"`). When a path appears in both, the uncommitted state wins (it's strictly newer).
+
+If `since_commit` is `null`, the POC has never been committed — stop and ask the user to bootstrap with:
 
 ```sh
 git add poc/ && git commit -m "Bootstrap POC baseline"

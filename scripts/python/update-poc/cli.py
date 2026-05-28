@@ -11,9 +11,17 @@ Full flow on `uv run scripts/python/update-poc/cli.py`:
   1. `git log -1 --format=%H -- poc` → the most recent commit that
      touched poc/. Call this `since`.
   2. `git log <since>..HEAD --name-status --format='__commit__ %H %s'
-     -- <watched-paths>` → which watched files changed in which commit.
-  3. Deduplicate by path (keeping the newest commit's status/subject)
-     and emit a JSON envelope.
+     -- <watched-paths>` → which watched files changed in which commit
+     since `since`.
+  3. `git status --porcelain --untracked-files=all -- <watched-paths>`
+     → working-tree changes (modified + staged + untracked) on watched
+     paths. This is critical because the documented workflow is
+     `/update-poc` BEFORE `/release` — the sync needs to see the work
+     about to be committed, not just what's already in history.
+  4. Merge: uncommitted entries override committed ones for the same
+     path (working-tree status is "more recent"). Untracked entries
+     surface with `last_commit: null`, `last_subject: "(uncommitted)"`.
+  5. Emit a JSON envelope.
 
 `since` may be `null` when poc/ has no commits yet. In that case the
 envelope advises the user to commit the current POC state first.
@@ -105,6 +113,50 @@ def _last_poc_commit() -> str | None:
     return out or None
 
 
+def _uncommitted_files(watched: list[str]) -> list[dict]:
+    """Working-tree changes (modified, staged, untracked) on watched paths.
+
+    `--untracked-files=all` expands new directories to individual files
+    so a fresh skill directory shows up as `.claude/skills/<name>/SKILL.md`
+    rather than just `.claude/skills/<name>/` — the triage heuristics in
+    the skill body key off the SKILL.md path.
+    """
+    raw = _git(
+        [
+            "status",
+            "--porcelain",
+            "--untracked-files=all",
+            "--",
+            *watched,
+        ]
+    )
+    if not raw:
+        return []
+
+    out: list[dict] = []
+    for line in raw.splitlines():
+        if not line:
+            continue
+        # Format: "XY <path>" where X=index status, Y=worktree status.
+        # Renames look like "R  <old> -> <new>" — keep the new path.
+        status_raw = line[:2]
+        payload = line[3:]
+        if " -> " in payload:
+            payload = payload.split(" -> ", 1)[1]
+        path = payload.strip()
+        # Compact "M ", " M", "A ", " A" → "M" / "A"; preserve "??", "AM", "MM", etc.
+        status_compact = status_raw.strip() or status_raw
+        out.append(
+            {
+                "path": path,
+                "status": status_compact,
+                "last_commit": None,
+                "last_subject": "(uncommitted)",
+            }
+        )
+    return out
+
+
 def _changed_files(since: str, watched: list[str]) -> list[dict]:
     raw = _git(
         [
@@ -168,12 +220,23 @@ def run(*, watched: list[str]) -> dict:
             ),
         }
 
-    changes = _changed_files(since, watched)
+    committed = _changed_files(since, watched)
+    uncommitted = _uncommitted_files(watched)
+
+    # Merge by path: uncommitted overrides committed (working tree is newer).
+    merged: dict[str, dict] = {c["path"]: c for c in committed}
+    for u in uncommitted:
+        merged[u["path"]] = u
+
+    changes = sorted(merged.values(), key=lambda r: r["path"])
+
     return {
         "since_commit": since,
         "poc_dir_exists": poc_dir_exists,
         "watched_paths": watched,
         "change_count": len(changes),
+        "committed_count": len(committed),
+        "uncommitted_count": len(uncommitted),
         "changes": changes,
     }
 
