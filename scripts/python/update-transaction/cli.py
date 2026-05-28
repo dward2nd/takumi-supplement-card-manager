@@ -22,8 +22,15 @@ Reads a JSON spec from stdin (or --input <file>):
 
 Recognized convenience keys per update:
   - cashback_percent → writes Notion `% cb` (raw fraction); `null` clears
-  - note            → writes Notion `Note`
+  - note            → writes Notion `Note`; `""` (empty string) clears
   - multiplier      → writes one of `×0`/`×2`/`×3`/`×4`/`×5`/`÷4` to true
+  - points_redeemed → writes Notion `ใช้คะแนน`; `null` clears.
+                      Positive = deduct from lifetime, negative = add back.
+  - bill_cycle      → writes `Bill Cycle Date` (ISO date). Re-cycle a row
+                      (backdate to a closed cycle, or foredate to next).
+                      Must be paired with `due_date` so the pair stays
+                      consistent for that card's bank pattern.
+  - due_date        → writes `Due Date` (ISO date). Pair with bill_cycle.
   - properties      → escape hatch: raw Notion properties payload, merged
 
 Writes a JSON envelope to stdout:
@@ -46,20 +53,21 @@ from lib import notion_client
 from lib.transaction_write import VALID_MULTIPLIERS
 
 
-_CLEAR_CASHBACK = object()
+# Sentinel for "key was absent from the update", distinguishing it from
+# "user explicitly passed null to clear the underlying Notion field".
+_MISSING = object()
 
 
 def _build_properties(update: dict) -> dict:
     props: dict = {}
 
-    # `cashback_percent: null` is a sentinel for "clear the `% cb` field"
-    # (writes JSON null to Notion, leaving the cell empty). Distinguishes
-    # "user wants to clear" from "user didn't mention this field" — the
-    # latter is the absence of the key.
-    cb = update.get("cashback_percent", _CLEAR_CASHBACK)
+    # `cashback_percent: null` clears `% cb` (writes JSON null → empty cell).
+    # Distinguishes "user wants to clear" from "user didn't mention this
+    # field" — the latter is the absence of the key.
+    cb = update.get("cashback_percent", _MISSING)
     if cb is None:
         props["% cb"] = {"number": None}
-    elif cb is not _CLEAR_CASHBACK:
+    elif cb is not _MISSING:
         if not isinstance(cb, (int, float)) or isinstance(cb, bool) or not (0 <= cb <= 1):
             raise ValueError(
                 f"cashback_percent must be a raw fraction in [0, 1] (or null to clear); got {cb!r}"
@@ -77,6 +85,52 @@ def _build_properties(update: dict) -> dict:
                 f"multiplier must be one of {sorted(VALID_MULTIPLIERS)}; got {mult!r}"
             )
         props[mult] = {"checkbox": True}
+
+    # `points_redeemed: null` clears `ใช้คะแนน` (mirrors cashback_percent's
+    # sentinel semantics). Positive = deduct from lifetime balance, negative
+    # = add back. The field exists on all three holders' Transactions DSes.
+    pts = update.get("points_redeemed", _MISSING)
+    if pts is None:
+        props["ใช้คะแนน"] = {"number": None}
+    elif pts is not _MISSING:
+        if not isinstance(pts, (int, float)) or isinstance(pts, bool):
+            raise ValueError(
+                f"points_redeemed must be a number (or null to clear); got {pts!r}"
+            )
+        props["ใช้คะแนน"] = {"number": float(pts)}
+
+    # bill_cycle / due_date: re-cycle a row (backdate or foredate). The two
+    # dates form a pair on a given card — passing one without the other
+    # leaves the row half-updated, which we refuse. Use the issuer's bill
+    # cycle pattern (docs/concepts/bill-cycle-patterns) to pick a
+    # consistent pair if you're not sure.
+    has_bc = "bill_cycle" in update
+    has_dd = "due_date" in update
+    if has_bc ^ has_dd:
+        raise ValueError(
+            "bill_cycle and due_date must be provided together "
+            "(both move the row to a different cycle); got one without the other"
+        )
+    if has_bc and has_dd:
+        bc = update["bill_cycle"]
+        dd = update["due_date"]
+        if not isinstance(bc, str) or not isinstance(dd, str):
+            raise ValueError(
+                f"bill_cycle / due_date must be ISO date strings; got {bc!r} / {dd!r}"
+            )
+        # Best-effort ISO parse to fail loud on typos. Don't enforce the
+        # bank's per-issuer cycle math here — the caller might be writing
+        # an adjustment row outside the normal pattern.
+        import datetime as _dt
+        try:
+            _dt.date.fromisoformat(bc)
+            _dt.date.fromisoformat(dd)
+        except ValueError as e:
+            raise ValueError(
+                f"bill_cycle / due_date must be valid ISO dates: {e}"
+            ) from None
+        props["Bill Cycle Date"] = {"date": {"start": bc}}
+        props["Due Date"] = {"date": {"start": dd}}
 
     if (raw := update.get("properties")) is not None:
         if not isinstance(raw, dict):

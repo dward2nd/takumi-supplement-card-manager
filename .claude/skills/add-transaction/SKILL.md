@@ -31,15 +31,16 @@ JSON spec:
   "processed": true,
   "multiplier": "×0",
   "auto_classify": true,
+  "points_redeemed": 1400,
   "transactions": [
-    { "date": "2026-05-13", "name": "TMN 7-11 BANGKOK TH", "amount": 89.0, "note": "optional", "multiplier": "×2" }
+    { "date": "2026-05-13", "name": "TMN 7-11 BANGKOK TH", "amount": 89.0, "note": "optional", "multiplier": "×2", "points_redeemed": 1400 }
   ]
 }
 ```
 
 **`auto_classify: true`** runs `lib.promotions.classify(card, tx_date, name)` for each row and fills in `cashback_percent`, `multiplier`, and `note` from the active promotion's tier rules + foreign-in-THB policy + installment rule + petrol exclusion. Per-row spec values still win, then batch-level values, then auto-classified values; the explicit precedence keeps user overrides authoritative. Rejected for `holder: "takumi"` (no `% cb` field on that DS). The response gains an `auto_classified: true` flag and a `classifications` array showing the reason per row (`tier`, `foreign-default-exclude`, `foreign-override`, `installment`, `petrol-exclusion`, `no-promo`, `no-tier-match`).
 
-**`bill_cycle` and `due_date` are optional.** Omit them and the CLI infers both from the card's bank pattern (see [[../../../docs/concepts/bill-cycle-patterns|bill-cycle-patterns]]): today is compared against this month's bill cycle date for the card, and the active cycle is this-month-or-next accordingly. Pass them explicitly only when the user is back-filling an older cycle (e.g. transactions that posted late to a closed statement). They're "both or neither" — supplying only one is a spec error.
+**`bill_cycle` and `due_date` are optional.** Omit them and the CLI infers both from the card's bank pattern (see [[../../../docs/concepts/bill-cycle-patterns|bill-cycle-patterns]]): today is compared against this month's bill cycle date for the card, and the active cycle is this-month-or-next accordingly. Pass them explicitly whenever the transaction's cycle isn't today's active one — that covers both **backdating** (a row that belongs to a closed statement, e.g. a late-posted purchase) and **foredating** (a row scheduled into a future cycle, e.g. an installment term, a prepayment, or a row dated next month). They're "both or neither" — supplying only one is a spec error.
 
 `multiplier` is optional. At top level it applies to every transaction in the batch; per-transaction it overrides the batch default. Valid values: `"×0"`, `"×2"`, `"×3"` (Takumi only), `"×4"`, `"×5"`, `"÷4"`. **At most one** multiplier checkbox is set per page — that's a hard rule on the Notion side; if you tried to set two, the formulas would double-count. Omitting `multiplier` leaves all checkboxes false, which Notion's formula treats as **×1** (the default earning rate).
 
@@ -51,7 +52,7 @@ Output: a JSON envelope `{holder, card, card_page_id, bill_cycle, due_date, proc
 
 1. **Cardholder** — one of `Takumi` (เว็บ) / `Baiboon` (ใบบุญ) / `Nuta` (นุตา). Determines which Transactions DB you write to and which Cards DB you query for the relation.
 2. **Card name** — e.g. `First Choice`, `UOB World`. Must match an existing row in that holder's Cards DB by `Name`.
-3. **Billing window for the batch** — `Bill Cycle Date` and `Due Date`, both single ISO dates, applied uniformly to every transaction in the batch unless the user splits the batch. Almost always **leave these out of the spec**: the CLI infers them from the card's bank pattern using today's date (see [[../../../docs/concepts/bill-cycle-patterns|bill-cycle-patterns]] for the per-issuer rules and the cut-off behaviour). Supply them explicitly only when back-filling a closed cycle or when the user names a non-default cycle. The two dates **must be consistent for the same card** — a bill cycle has exactly one due date on each card, set by the bank. If the user gives you a `bill_cycle` you've already seen paired with a different `due_date` on the same card, stop and confirm before writing.
+3. **Billing window for the batch** — `Bill Cycle Date` and `Due Date`, both single ISO dates, applied uniformly to every transaction in the batch unless the user splits the batch. Almost always **leave these out of the spec**: the CLI infers them from the card's bank pattern using today's date (see [[../../../docs/concepts/bill-cycle-patterns|bill-cycle-patterns]] for the per-issuer rules and the cut-off behaviour). Supply them explicitly whenever the transaction's cycle isn't today's active one — backdating to a closed statement *or* foredating to an upcoming one. The two dates **must be consistent for the same card** — a bill cycle has exactly one due date on each card, set by the bank. If the user gives you a `bill_cycle` you've already seen paired with a different `due_date` on the same card, stop and confirm before writing.
 4. **The transaction list** — one or more entries, each carrying:
    - **Transaction date** (`Transaction Datetime`) — ISO date.
    - **Merchant string** — the *full*, *verbatim* merchant name as supplied.
@@ -153,8 +154,14 @@ The Note exists so a future reviewer of the transactions can immediately see *wh
 
 - `Process Date` — bank-side; we don't know it at write time.
 - `Credit Return`, `ชำระแล้ว` — payment-lifecycle flags.
-- `ใช้คะแนน` — points-redemption is rare and explicit.
 - Takumi-only `หมวดหมู่` (category) relation.
+
+**`ใช้คะแนน`** (points-redemption) IS supported via the `points_redeemed` spec field — positive deducts from the lifetime balance (e.g. `1400` for "Major Combo set 1 ชุด redeemed for 1,400 points"), negative adds back (manual adjustment / refund of a prior redemption). The field exists on all three holders' Transactions DSes. Two conventions for a clean redemption row:
+
+- Pair with **`amount: 0`** (zero baht — the bank doesn't deduct baht on a redemption).
+- Pair with **`multiplier: "×0"`** so the realized-points formula doesn't accidentally earn anything on a 0-baht row.
+
+**Off-cycle dating — backdate *and* foredate are both supported.** The CLI's default `bill_cycle` / `due_date` inference uses *today*, so whenever the transaction date sits in a cycle other than today's active one — a row dated three weeks ago that belongs to a closed statement (backdate), or a row dated for next month that should land in the upcoming cycle (foredate) — pass `bill_cycle` and `due_date` explicitly so the pair stays consistent with the card's bank pattern (see [[../../docs/concepts/bill-cycle-patterns]]). They're "both or neither". Same rule whether you're shifting earlier or later — the inference is just a default, never a constraint.
 
 Point-multiplier checkboxes (`×0` `×2` `×4` `×5` `÷4`, plus Takumi-only `×3`) are set explicitly via the spec's `multiplier` field — see *Rule 4a* and the card-specific policies below.
 
@@ -202,7 +209,7 @@ By default, foreign-merchant-in-THB earns neither cashback nor points. An active
 These apply across **every** card we manage (Takumi, Baiboon, Nuta) by **default**. An active promotion can override the cashback side of rule 1 with an explicit merchant inclusion, but the points side almost never moves:
 
 1. **Foreign merchants billed in THB earn neither points nor cashback** by default, even when the card would normally earn at a higher tier. Examples in the data: `X CORP. PAID FEATURES BASTROP US`, `Google YouTubePremium Mountain View USA`, `AGODA.COM THE QUARTE Internet SG`. Country suffix tells you the merchant is foreign even when the amount is in baht. Promotion overrides for cashback are possible (e.g. First Choice May 2026 → 1.5% on Agoda); promotion overrides for points are almost never seen — set `×0` on the row.
-2. **UOB cards: petrol stations earn neither points nor cashback.** Watch for merchant strings containing PT, BCP, ESSO, SHELL, CALTEX, PTT — when in doubt, surface to the user. No promo has been seen to override.
+2. **UOB cards: petrol stations earn neither points nor cashback.** Watch for merchant strings containing PT, BCP, ESSO, SHELL, CALTEX, PTT. The exclusion is **issuer-specific to UOB** — **First Choice** (Krungsri) does *not* exclude petrol; SHELL / PTT rows on First Choice earn at the card's normal rate (confirmed by user 2026-05-28). For other issuers (CardX / KTC / ttb / AEON / Lotus / SPayLater) the behaviour is unknown — surface to the user before applying or denying cashback.
 3. The Notion **cashback formula** on Baiboon's and Nuta's transactions and the **realized-points formula** on every transaction already encode these rules where they can; but the formulas can't tell "foreign-merchant-in-THB" apart from a regular domestic THB charge, so the computed cashback/points on such transactions may overstate reality. Flag it when the user asks for a cashback total.
 
 ### A note on Notion percentage fields

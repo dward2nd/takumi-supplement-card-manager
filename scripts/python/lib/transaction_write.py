@@ -28,6 +28,7 @@ def build_transaction_properties(
     note: str | None = None,
     multiplier: str | None = None,
     cashback_percent: float | None = None,
+    points_redeemed: float | None = None,
 ) -> dict:
     """Assemble the Notion `properties` payload for one transaction page.
 
@@ -43,6 +44,15 @@ def build_transaction_properties(
     as 5%). The destination property is `% cb`, which exists on
     Baiboon's and Nuta's Transactions DSes but not Takumi's — the
     caller is responsible for not passing this for Takumi.
+
+    `points_redeemed`, if given, writes to `ใช้คะแนน` (a `number`
+    property on all three holders' Transactions DSes). Positive values
+    deduct points from the lifetime balance — a redemption row, e.g.
+    "Major Combo set 1 ชุด" at 1,400 points. Negative values add points
+    back (manual adjustment / refund of a prior redemption). The bank
+    posts redemption events as zero-baht rows: callers should usually
+    pair `points_redeemed` with `amount=0` and `multiplier="×0"` so the
+    row doesn't accidentally earn anything either.
     """
     props: dict = {
         "Name": {"title": [{"text": {"content": name}}]},
@@ -68,4 +78,6 @@ def build_transaction_properties(
                 f"(0.05 = 5%); got {cashback_percent!r}"
             )
         props["% cb"] = {"number": float(cashback_percent)}
+    if points_redeemed is not None:
+        props["ใช้คะแนน"] = {"number": float(points_redeemed)}
     return props

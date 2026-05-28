@@ -47,6 +47,15 @@ def _check_cashback_percent(value: Any, field: str) -> None:
         )
 
 
+def _check_points_redeemed(value: Any, field: str) -> None:
+    if value is None:
+        return
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        raise SpecError(
+            f"{field}={value!r} must be a number (points; positive = deduct, negative = add back)"
+        )
+
+
 def _iso_date(s: Any, field: str) -> str:
     if not isinstance(s, str):
         raise SpecError(f"{field} must be an ISO date string, got {type(s).__name__}")
@@ -89,6 +98,7 @@ def validate_spec(spec: dict[str, Any]) -> None:
 
     _check_multiplier(spec.get("multiplier"), "multiplier")
     _check_cashback_percent(spec.get("cashback_percent"), "cashback_percent")
+    _check_points_redeemed(spec.get("points_redeemed"), "points_redeemed")
 
     holder = spec["holder"]
     has_batch_cb = spec.get("cashback_percent") is not None
@@ -113,6 +123,9 @@ def validate_spec(spec: dict[str, Any]) -> None:
         _check_multiplier(tx.get("multiplier"), f"transactions[{i}].multiplier")
         _check_cashback_percent(
             tx.get("cashback_percent"), f"transactions[{i}].cashback_percent"
+        )
+        _check_points_redeemed(
+            tx.get("points_redeemed"), f"transactions[{i}].points_redeemed"
         )
         # `% cb` exists on Baiboon's and Nuta's Transactions DSes; Takumi's DS
         # does not carry it (and Notion will 400 on the property name).

@@ -123,6 +123,26 @@ export interface Promotion {
 
 export type TransactionStatus = "pending" | "processed" | "paid" | "refunded";
 
+/**
+ * An installment plan term as it lives on a single transaction row.
+ *
+ * Parallel plans under the same bank-side merchant string are common (the
+ * user routinely runs several Shopee installments at once). The disambiguator
+ * is `perTermAmount` — two `2C2P *SHOPEE` 10-term plans at ฿449.10 and ฿1,079.20
+ * are *distinct* plans and cluster separately. Mirrors `lib/installments.py`
+ * in `scripts/python/` so the POC's logic stays faithful to the system of record.
+ */
+export interface InstallmentTerm {
+  /** Merchant string with the trailing `NN/NN` stripped (e.g. `2C2P *SHOPEE`). */
+  base: string;
+  /** 1-indexed term number. */
+  term: number;
+  /** Total terms in the plan. */
+  total: number;
+  /** Canonical per-term baht — cluster identity within (base, total). */
+  perTermAmount: number;
+}
+
 export interface Transaction {
   id: string;
   holder: HolderKey;
@@ -138,10 +158,18 @@ export interface Transaction {
   note?: string;
   cashbackPercent?: number; // raw fraction
   multiplier?: "×0" | "×2" | "×3" | "×4" | "×5" | "÷4";
-  isInstallment?: boolean;
+  /**
+   * When the merchant string carries a trailing `NN/NN`, this is populated
+   * (parsed once at mock-data construction time via `parseInstallmentName`).
+   * The `isInstallment(tx)` helper still works for legacy boolean checks.
+   */
+  installment?: InstallmentTerm;
   /** Optional canonical merchant + category from alias rules (phase-2 spec). */
   alias?: { canonical: string; category: string };
 }
+
+/** Back-compat boolean check; mirrors `lib.installments.is_installment` in Python. */
+export const isInstallment = (tx: Transaction): boolean => tx.installment !== undefined;
 
 export type BillStatus = "draft" | "issued" | "paid";
 

@@ -61,7 +61,7 @@ export const TransactionRow = ({ tx, hideCardChip, onTap, index = 0 }: Props) =>
                 {card.name}
               </span>
             )}
-            {tx.isInstallment && <Pill tone="ghost">installment</Pill>}
+            {tx.installment && <Pill tone="ghost">installment</Pill>}
           </div>
           <div className="mt-1.5 truncate font-display text-[15px] leading-tight tracking-tight text-ink">
             {headline}

@@ -63,6 +63,41 @@ When the bill was resolved by `(holder, card, bill_cycle)` (or by `id` with the 
 
 Surface this to the user when marking a bill paid — it shows what installment commitments will appear on the next several statements. Read-only side effect: no plan rows are added by this skill. To advance the cycle, use [[../populate-installment/SKILL.md|/populate-installment]] (or let [[../prepare-bill/SKILL.md|/prepare-bill]] handle it on the next bill).
 
+### When to auto-mark a bill `จ่ายแล้ว: true`
+
+The agent **never** flips `paid: true` on its own initiative. There are exactly two paths:
+
+1. **All three conditions hold:**
+   - `หลักฐานการชำระ` has at least one slip attached.
+   - `ใบแจ้งยอด (PDF)` has the issuer's statement attached.
+   - **Sum of slip amounts (parsed from each slip's content) equals the bill's `ยอดชำระ` exactly** — not "close enough", not "matches one slip but ignore the rest".
+
+   Then it's safe to pass `paid: true` alongside whatever else this call writes. If the sum *mismatches*, surface the delta to the user and leave `จ่ายแล้ว` alone. This is a check, not a correction — per *Reconcile against the statement PDF* below, the agent does not adjust the bill's `ยอดชำระ` or any slip's amount to make them line up.
+
+2. **Explicit user instruction.** The user says "mark it paid" or sets `paid: true` themselves. Common when the household paid in cash and there's no slip / no statement match to verify against.
+
+**Adjacent corner cases:**
+
+- *Slip present, statement still in draft / not yet uploaded.* Leave `จ่ายแล้ว` alone. Offer in the response to flip it once the statement arrives.
+- *Statement uploaded, no slip yet.* Same — leave alone. Statement finalises the bill; the slip proves payment. Both needed.
+- *Payment recorded as a transaction row (e.g. `ชำระบิลล่วงหน้า -฿8,800`) but not as a slip file.* Does **not** satisfy the auto-mark. The file evidence is the contract; ask the user.
+- *Multiple slips totalling the bill amount.* Allowed — sum them.
+
+### Reconcile against the statement PDF — *report-only, never auto-correct*
+
+When the user uploads a statement PDF and asks to finalize one or more bills, **the agent's job includes comparing the statement against Notion** and surfacing any mismatches it can spot. The user maintains Notion's `ยอดชำระ` as the *internal* calculated balance — drift from the bank statement is expected (cashback-credit timing, debt-takeover offsets, hand-entered adjustment rows) and is preserved on purpose. So:
+
+1. **Never call `refresh_from_transactions: true` to "make the balance match" the statement.** The bank's number is for verification; the Notion number is the system of record for the household's accounting.
+2. **Do not edit individual transaction rows** to reconcile them against the statement unless the user explicitly asks. Even for clear data-entry mistakes (an off-by-one on an installment term, a baht-and-satang typo), report first.
+3. **Do** call out, in the response back to the user:
+   - **Total discrepancy** per bill: statement subtotal vs Notion `ยอดชำระ`. Sign and magnitude.
+   - **Row-level diffs** when identifiable: missing rows in Notion (statement has a charge that Notion doesn't), extra rows in Notion (typically `[บัตรหลัก]`-style debt-takeover offsets or hand-entered adjustments), amount mismatches (small or large), date mismatches that change which cycle a row falls into.
+   - **Installment-term drift**: when the statement's `NN/NN` differs from Notion's labelling, this usually indicates an off-by-one in a prior cycle. Note which plan and which row is suspect — a single mislabelled row can cascade into every future cycle via [[../populate-installment/SKILL.md|/populate-installment]]. Pair the comment with the suggested fix path (e.g. "if you fix this row in cycle 2026-04-24 to 03/10, next populate run will be correct").
+   - **Convention-difference notes**, written shortly: the bank credits cashback on the *next* statement; the user's Notion writes it inside the *closing* cycle. Cite once if relevant, don't repeat per row.
+4. **Multi-cardholder PDFs**: a single UOB statement bundles Takumi's primary card alongside Baiboon's and Nuta's supplements. Each sub-card has its own subtotal — use the right one when comparing against each holder's Notion bill. Per-row attribution: rows on the primary's sub-card stay with Takumi; rows on the supplement's sub-card belong to that supplement, even if the user's Notion has tagged them with `[บัตรหลัก]` to internally offset back to the primary.
+
+Phrasing: lead the report with the per-bill totals table (Notion vs statement vs Δ), then a per-bill bullet list of misalignments grouped by cause. Keep convention-difference notes terse — the user already knows about them.
+
 ## What the user typically asks
 
 - "Attach this slip to Baiboon's First Choice bill" → resolve to the active cycle, `slip: "<path>"`.

@@ -12,6 +12,8 @@ import { Pill } from "../components/Pill";
 import { SectionLabel } from "../components/SectionLabel";
 import { TransactionRow } from "../components/TransactionRow";
 import { CardFace } from "../components/CardFace";
+import { categoriseBillTx, type BillTxBucket } from "../components/BillRow";
+import type { Transaction } from "../data/types";
 
 export const BillDetailScreen = () => {
   const { id } = useParams();
@@ -33,6 +35,28 @@ export const BillDetailScreen = () => {
 
   const subtotal = cycleTxs.reduce((s, t) => s + (t.amount > 0 ? t.amount : 0), 0);
   const credits = cycleTxs.reduce((s, t) => s + (t.amount < 0 ? t.amount : 0), 0);
+
+  // Bucket the cycle's rows by what they *represent* in the bill. Mirrors
+  // the auto-Note structure on the Bills DB written by /prepare-bill and
+  // /update-bill — the user reading the bill should see the same shape
+  // they'd read in the Notion Note: regular purchases first (the bulk),
+  // then installment terms, then cashback credits, then manual adjustments.
+  const sections: Array<{
+    key: BillTxBucket;
+    title: string;
+    rows: Transaction[];
+  }> = [
+    { key: "regular",            title: "Regular purchases",  rows: [] },
+    { key: "installment",        title: "Installment terms",  rows: [] },
+    { key: "cashback-credit",    title: "Cashback credits",   rows: [] },
+    { key: "manual-adjustment",  title: "Manual adjustments", rows: [] },
+  ];
+  for (const tx of cycleTxs) {
+    const bucket = categoriseBillTx(tx);
+    const section = sections.find((s) => s.key === bucket)!;
+    section.rows.push(tx);
+  }
+  const visibleSections = sections.filter((s) => s.rows.length > 0);
 
   return (
     <div className="mx-auto max-w-md md:max-w-3xl lg:max-w-6xl">
@@ -134,16 +158,42 @@ export const BillDetailScreen = () => {
         </div>
 
         <div className="lg:col-span-7">
-          <section className="mt-8 px-5 pb-10 lg:mt-0 lg:px-0">
-            <SectionLabel number="01" trailing={`${cycleTxs.length} rows`}>
-              Line items
-            </SectionLabel>
-            <div className="mt-2 overflow-hidden rounded-2xl border border-paper-line/60 bg-paper-raised/30">
-              {cycleTxs.map((t, i) => (
-                <TransactionRow key={t.id} tx={t} hideCardChip index={i} />
-              ))}
-            </div>
-          </section>
+          {visibleSections.map((section, idx) => {
+            const total = section.rows.reduce((s, t) => s + t.amount, 0);
+            const rowsWord = section.rows.length === 1 ? "row" : "rows";
+            return (
+              <section
+                key={section.key}
+                className={
+                  idx === 0
+                    ? "mt-8 px-5 pb-2 lg:mt-0 lg:px-0"
+                    : "mt-6 px-5 pb-2 lg:px-0"
+                }
+              >
+                <SectionLabel
+                  number={String(idx + 1).padStart(2, "0")}
+                  trailing={
+                    <span className="flex items-baseline gap-3">
+                      <span>{section.rows.length} {rowsWord}</span>
+                      <Amount
+                        value={total}
+                        size="sm"
+                        tone={total < 0 ? "credit" : "default"}
+                      />
+                    </span>
+                  }
+                >
+                  {section.title}
+                </SectionLabel>
+                <div className="mt-2 overflow-hidden rounded-2xl border border-paper-line/60 bg-paper-raised/30">
+                  {section.rows.map((t, i) => (
+                    <TransactionRow key={t.id} tx={t} hideCardChip index={i} />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+          <div className="px-5 pb-10 lg:px-0" />
         </div>
       </div>
     </div>

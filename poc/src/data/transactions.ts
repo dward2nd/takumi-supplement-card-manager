@@ -1,4 +1,5 @@
 import type { CardId, HolderKey, Transaction } from "./types";
+import { parseInstallmentName } from "./installments";
 
 // A representative slice of cycle 2026-05-25 data, plus a few earlier rows
 // so cycle-history views aren't empty. Real merchant strings (verbatim).
@@ -13,23 +14,37 @@ const tx = (
   billCycleDate: string,
   dueDate: string,
   extras: Partial<Transaction> = {},
-): Transaction => ({
-  id,
-  holder,
-  cardId,
-  name,
-  amount,
-  transactionDate,
-  billCycleDate,
-  dueDate,
-  status: "processed",
-  ...extras,
-});
+): Transaction => {
+  // Auto-derive the structured installment field from the merchant string.
+  // Any new row whose name ends `NN/NN` lights up the installment surfaces
+  // (TransactionRow pill, CardDetail's in-progress section, BillDetail's
+  // bucketed sections) without per-row plumbing in the mock data.
+  // An explicit `extras.installment` still wins.
+  const auto = parseInstallmentName(name, Math.abs(amount));
+  return {
+    id,
+    holder,
+    cardId,
+    name,
+    amount,
+    transactionDate,
+    billCycleDate,
+    dueDate,
+    status: "processed",
+    ...(auto ? { installment: auto } : {}),
+    ...extras,
+  };
+};
 
 const NUTA_UOB_CYCLE = (() => {
   // Compressed sample. Reflects the real cycle's tier mix.
   const bc = "2026-05-25";
   const dd = "2026-06-15";
+  // Prior cycle — same UOB cadence, one month earlier. Used for the 02/10
+  // rows of two ongoing installment plans so the in-progress section has
+  // visible term progression (02 → 03).
+  const prevBc = "2026-04-25";
+  const prevDd = "2026-05-15";
   const rows: Transaction[] = [
     tx("n-uob-1", "nuta", "uob-one", "WWW.GRAB.COM BANGKOK TH", 111, "2026-04-23", bc, dd, { cashbackPercent: 0.05, multiplier: "×0" }),
     tx("n-uob-2", "nuta", "uob-one", "TMN 7-11 BANGKOK TH", 133, "2026-04-24", bc, dd, { cashbackPercent: 0.01, multiplier: "×0" }),
@@ -47,6 +62,51 @@ const NUTA_UOB_CYCLE = (() => {
     tx("n-uob-11", "nuta", "uob-one", "SHOPEETH BANGKOK TH", 184, "2026-05-22", bc, dd, { cashbackPercent: 0.01, multiplier: "×0" }),
     tx("n-uob-12", "nuta", "uob-one", "TMN 7-11 BANGKOK TH", 106, "2026-05-24", bc, dd, { cashbackPercent: 0.01, multiplier: "×0" }),
     tx("n-uob-13", "nuta", "uob-one", "WWW.GRAB.COM BANGKOK TH", 165, "2026-05-24", bc, dd, { cashbackPercent: 0.05, multiplier: "×0" }),
+
+    // Installments — current cycle 2026-05-25.
+    // One brand-new plan (01/10) and two ongoing 10-term plans on the same
+    // bank-side merchant string but different per-term amounts (plan
+    // identity = per-term ฿). Plus one electronics plan mid-progression.
+    // All earn 1% per the UOB One 2026 promo's installment_rule; ×0 because
+    // UOB One never earns points.
+    tx("n-uob-inst-shopee-a-01", "nuta", "uob-one", "2C2P *SHOPEE 01/10", 449.10, "2026-05-25", bc, dd, {
+      cashbackPercent: 0.01,
+      multiplier: "×0",
+      note: "Installment transaction — per UOB One 2026 cashback promotion, 1% per installment row.",
+    }),
+    tx("n-uob-inst-shopee-b-03", "nuta", "uob-one", "2C2P *SHOPEE 03/10", 1079.20, "2026-05-25", bc, dd, {
+      cashbackPercent: 0.01,
+      multiplier: "×0",
+      note: "Installment transaction — per UOB One 2026 cashback promotion, 1% per installment row.",
+    }),
+    tx("n-uob-inst-shopee-c-03", "nuta", "uob-one", "2C2P *SHOPEE 03/10", 373.00, "2026-05-25", bc, dd, {
+      cashbackPercent: 0.01,
+      multiplier: "×0",
+      note: "Installment transaction — per UOB One 2026 cashback promotion, 1% per installment row.",
+    }),
+    tx("n-uob-inst-com7-05", "nuta", "uob-one", "COM7-ID175-BN-CT-CHO 05/10", 959.00, "2026-05-25", bc, dd, {
+      cashbackPercent: 0.01,
+      multiplier: "×0",
+      note: "Installment transaction — per UOB One 2026 cashback promotion, 1% per installment row.",
+    }),
+
+    // Prior-cycle 02/10 rows for the three ongoing plans, so the
+    // in-progress section shows real term progression (02 → 03).
+    tx("n-uob-inst-shopee-b-02", "nuta", "uob-one", "2C2P *SHOPEE 02/10", 1079.20, "2026-04-24", prevBc, prevDd, {
+      cashbackPercent: 0.01,
+      multiplier: "×0",
+      note: "Installment transaction — per UOB One 2026 cashback promotion, 1% per installment row.",
+    }),
+    tx("n-uob-inst-shopee-c-02", "nuta", "uob-one", "2C2P *SHOPEE 02/10", 373.00, "2026-04-24", prevBc, prevDd, {
+      cashbackPercent: 0.01,
+      multiplier: "×0",
+      note: "Installment transaction — per UOB One 2026 cashback promotion, 1% per installment row.",
+    }),
+    tx("n-uob-inst-com7-04", "nuta", "uob-one", "COM7-ID175-BN-CT-CHO 04/10", 959.00, "2026-04-24", prevBc, prevDd, {
+      cashbackPercent: 0.01,
+      multiplier: "×0",
+      note: "Installment transaction — per UOB One 2026 cashback promotion, 1% per installment row.",
+    }),
 
     // Cashback credit rows (the ones we wrote earlier via /post-cashback-credits)
     tx("n-uob-cb-1", "nuta", "uob-one", "UOB ONE CASHBACK 1%", -60.61, bc, bc, dd, {
@@ -124,15 +184,10 @@ const BAIBOON_FIRST_CHOICE = (() => {
     }),
     tx("b-fc-9", "baiboon", "first-choice", "HTTPS://WWW.MAKRO.PRO/ BANGKOK TH", 5532, "2026-05-24", bc, dd, { cashbackPercent: 0.02 }),
     tx("b-fc-10", "baiboon", "first-choice", "FUTURE ELECTRONICS SERV 01/03", 2073.67, "2026-05-05", bc, dd, {
-      isInstallment: true,
       note: "Installment 1/3 — First Choice installment cashback rule TBD; left unset.",
     }),
-    tx("b-fc-11", "baiboon", "first-choice", "FUTURE ELECTRONICS SERV 02/03", 2073.67, "2026-06-05", bc, dd, {
-      isInstallment: true,
-    }),
-    tx("b-fc-12", "baiboon", "first-choice", "FUTURE ELECTRONICS SERV 03/03", 2073.67, "2026-07-05", bc, dd, {
-      isInstallment: true,
-    }),
+    tx("b-fc-11", "baiboon", "first-choice", "FUTURE ELECTRONICS SERV 02/03", 2073.67, "2026-06-05", bc, dd),
+    tx("b-fc-12", "baiboon", "first-choice", "FUTURE ELECTRONICS SERV 03/03", 2073.67, "2026-07-05", bc, dd),
     tx("b-fc-13", "baiboon", "first-choice", "2C2P*MAJOR CINEPLEX BANGKOK TH", 450, "2026-05-24", bc, dd, { cashbackPercent: 0.02 }),
     tx("b-fc-14", "baiboon", "first-choice", "NW2 Cashback 2% (1 พ.ค. - 31 พ.ค.)", -1136.91, "2026-06-05", bc, dd, {
       note: "Cashback credit posted by the bank.",

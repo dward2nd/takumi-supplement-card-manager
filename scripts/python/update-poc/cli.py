@@ -20,6 +20,7 @@ envelope advises the user to commit the current POC state first.
 
 Watched paths — changes here may justify a POC update:
 
+  Documentation surfaces (narrative):
   - docs/future-app/
   - docs/databases/
   - docs/concepts/
@@ -27,9 +28,23 @@ Watched paths — changes here may justify a POC update:
   - docs/people/
   - docs/cards/
   - docs/promotions/
+
+  Structured repositories:
   - scripts/repositories/
+
+  Capability surfaces (new docs without narrative are still POC-relevant):
+  - .claude/skills/           # new SKILL.md → new user capability the POC may need to mirror
+  - scripts/python/lib/       # new lib file → new domain concept (e.g. installments.py)
+
+  Top-level config:
   - CLAUDE.md
   - .mcp.json
+
+A change here is *evidence* of evolution, not a verdict. The agent
+triages each change by `status` (A=added → likely new capability;
+M=modified → existing surface evolved) and decides whether the POC
+needs to reflect it. The CLI doesn't read file contents — it just
+points the agent at what moved.
 
 Override the list with --path (repeatable) if a non-standard sweep is
 needed (e.g. inspecting docs/cards/ after a card-by-card promotion).
@@ -50,6 +65,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from lib import paths  # noqa: E402
 
 DEFAULT_WATCHED: list[str] = [
+    # Documentation surfaces — narrative drift that may reshape the UI.
     "docs/future-app",
     "docs/databases",
     "docs/concepts",
@@ -57,7 +73,15 @@ DEFAULT_WATCHED: list[str] = [
     "docs/people",
     "docs/cards",
     "docs/promotions",
+    # Structured repositories — cards + promotions seed data the POC mirrors.
     "scripts/repositories",
+    # Capability surfaces — new skills / new domain libs change what users
+    # can do, even when no narrative doc was edited. Without these, the CLI
+    # silently misses a session that added /add-installment + lib/installments.py
+    # but didn't touch any doc.
+    ".claude/skills",
+    "scripts/python/lib",
+    # Top-level config.
     "CLAUDE.md",
     ".mcp.json",
 ]

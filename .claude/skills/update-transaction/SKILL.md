@@ -48,6 +48,8 @@ Recognized convenience keys per update entry:
 | `cashback_percent`  | `% cb`          | Raw fraction in `[0, 1]`. `0.05` → displays as `5%`. Pass `null` to **clear** an existing value. **Baiboon + Nuta** — the field doesn't exist on Takumi. |
 | `note`              | `Note`          | Free-form string. Replaces the existing `Note`.                       |
 | `multiplier`        | one of `×0`/`×2`/`×3`/`×4`/`×5`/`÷4` | Sets the named checkbox to `true`. **Mutually exclusive** — only one multiplier per page; the CLI will not unset other multipliers, so don't use this to flip from one tier to another without first thinking about which checkbox is currently on. `×3` is Takumi-only. |
+| `points_redeemed`   | `ใช้คะแนน`       | Numeric. **Positive** deducts points from the lifetime balance (a redemption row, e.g. `1400` for "Major Combo set 1 ชุด"). **Negative** adds points back (refund of a prior redemption, or a manual adjustment). Pass `null` to **clear**. Field exists on all three holders' DSes. |
+| `bill_cycle` + `due_date` | `Bill Cycle Date` / `Due Date` | Re-cycle a row — both **backdate** (move to a closed cycle) and **foredate** (move to an upcoming cycle) are supported. ISO date strings. Must be passed **together**; one without the other is a spec error. Use the issuer's pattern from [[../../docs/concepts/bill-cycle-patterns]] to pick a consistent pair. |
 | `properties`        | (raw)           | Escape hatch: merge an arbitrary Notion `properties` payload. Use sparingly — prefer a convenience key. |
 
 Output: `{ "count": N, "updated": [ { "id": "<page-id>", "fields": [<prop names set>] }, ... ] }`. Surface the count and field list back to the user.

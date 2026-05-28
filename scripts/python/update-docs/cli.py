@@ -17,11 +17,16 @@ Signal kinds (extend here AND in the SKILL.md "Signals" section when
 new patterns are found in the field):
 
   - broken_wikilink     : [[X]] doesn't resolve to any markdown file
+                          or, when X ends with `/`, to any directory
   - broken_path_ref     : `path/to/x.py` doesn't exist on disk
   - wikilink_target_newer : a [[X]] target is newer than the doc
   - path_ref_newer      : a `path/to/x` code-span target is newer than the doc
   - claudemd_newer      : CLAUDE.md is newer than the doc
   - mcp_config_newer    : .mcp.json is newer than the doc
+
+Folder wikilinks (`[[../promotions/]]`, trailing slash) resolve to a
+directory and never emit a `*_newer` signal — directory mtimes have
+no meaningful relation to whether the linking doc has drifted.
 
 Output shape — see `run()`. The CLI never edits docs; that is the
 skill body's job.
@@ -159,6 +164,18 @@ def _resolve_wikilink(raw_target: str, doc_rel: str, doc_index: dict[str, str]) 
     target = raw_target.strip().rstrip("\\")
     if not target:
         return None
+
+    # Folder wikilink: trailing `/` means "link to a directory" (Obsidian
+    # supports this for folder notes). Resolve to the directory if it
+    # exists; the caller skips the newer-check for directory hits.
+    if target.endswith("/"):
+        doc_dir = Path(doc_rel).parent
+        folder_rel = os.path.normpath((doc_dir / target).as_posix()).replace("\\", "/")
+        abs_folder = paths.REPO_ROOT / folder_rel
+        if abs_folder.is_dir():
+            return folder_rel
+        return None
+
     # Strip an optional explicit `.md` extension.
     if target.endswith(".md"):
         bare = target[:-3]
@@ -245,6 +262,11 @@ def _scan_doc(
         resolved = _resolve_wikilink(raw, rel, doc_index)
         if resolved is None:
             _push("broken_wikilink", raw=raw)
+            continue
+        # Folder wikilink — resolved points at a directory. The link is
+        # valid, but directory mtimes don't drive doc staleness, so we
+        # do not emit a `*_newer` signal here.
+        if (paths.REPO_ROOT / resolved).is_dir():
             continue
         target_ts = _freshness(resolved, dirty)
         if target_ts is None:

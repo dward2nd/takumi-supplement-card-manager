@@ -38,6 +38,11 @@ Input schema:
                                                     //   Baiboon + Nuta only (% cb does
                                                     //   not exist on Takumi's DS);
                                                     //   raw fraction (0.05 == 5%)
+    "points_redeemed": 1400,                        // optional, batch-level default;
+                                                    //   writes `ใช้คะแนน` (deduct points
+                                                    //   from lifetime; negative = add back).
+                                                    //   Usually paired with amount=0 and
+                                                    //   multiplier="×0".
     "auto_classify": true,                          // optional, default false. When true,
                                                     //   each row is classified by
                                                     //   lib.promotions against the active
@@ -52,10 +57,11 @@ Input schema:
       {
         "date":              "2026-05-13",          // ISO date
         "name":              "TMN 7-11 BANGKOK TH", // verbatim merchant string
-        "amount":            89.0,                  // baht
+        "amount":            89.0,                  // baht (0 for pure points-redemption rows)
         "note":              "...",                 // optional
         "multiplier":        "×2",                  // optional, overrides batch
-        "cashback_percent":  0.05                   // optional, overrides batch
+        "cashback_percent":  0.05,                  // optional, overrides batch
+        "points_redeemed":   1400                   // optional, overrides batch
       }
     ]
   }
@@ -109,6 +115,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     processed = spec.get("processed", True)
     batch_multiplier = spec.get("multiplier")
     batch_cashback = spec.get("cashback_percent")
+    batch_points_redeemed = spec.get("points_redeemed")
     auto_classify = bool(spec.get("auto_classify", False))
     if auto_classify and spec["holder"] == "takumi":
         # Takumi's Transactions DS has no `% cb` field; classification can't write to it.
@@ -124,6 +131,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         # Per-transaction spec wins over batch defaults wins over auto-classified values.
         tx_multiplier = tx.get("multiplier", batch_multiplier)
         tx_cashback = tx.get("cashback_percent", batch_cashback)
+        tx_points_redeemed = tx.get("points_redeemed", batch_points_redeemed)
         tx_note = tx.get("note")
 
         classification_info: dict | None = None
@@ -154,6 +162,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             note=tx_note,
             multiplier=tx_multiplier,
             cashback_percent=tx_cashback,
+            points_redeemed=tx_points_redeemed,
         )
 
         entry: dict = {}

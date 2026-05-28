@@ -45,6 +45,8 @@ If `change_count` is `0`, the POC is in sync; report "POC is in sync (baseline `
 
 ### Watched paths
 
+The CLI watches both **documentation surfaces** (narrative that reshapes the UI) and **capability surfaces** (new skills / new domain libs that introduce things users can do, even without any doc edit). Doc-only watching used to miss sessions where a capability landed without narrative — e.g. adding `/add-installment` + `lib/installments.py` without touching any `docs/` file. The watch is now broader; the agent's job is to filter.
+
 | Path                              | Why it can ripple into the POC                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------|
 | `docs/future-app/`                | Canonical phase-2 product spec — anything here can reshape the UI.                       |
@@ -55,10 +57,14 @@ If `change_count` is `0`, the POC is in sync; report "POC is in sync (baseline `
 | `docs/people/`                    | Cardholder facts — names, roles, visibility rules.                                       |
 | `docs/cards/`                     | Per-card narrative.                                                                      |
 | `scripts/repositories/`           | Structured cards + promotions YAML. Drives the POC's mock data + classification preview. |
+| `.claude/skills/`                 | A new `SKILL.md` is a new user capability — the POC may need to mirror it.               |
+| `scripts/python/lib/`             | A new lib file is a new domain concept (`installments.py`, `bill_explain.py`, etc.).     |
 | `CLAUDE.md`                       | Top-level conventions.                                                                   |
 | `.mcp.json`                       | Notion endpoint config (offline POC ⇒ rarely relevant; included for completeness).       |
 
 ### Triage heuristics
+
+The CLI emits a `status` per change (`A`=added, `M`=modified, `D`=deleted, `R…`=renamed). Read it — `A` on a capability surface is a strong "new capability landed" signal; `M` on the same surface is much weaker (often just internal refactor).
 
 | Change                                                                  | Likely action on POC                                                                                                       |
 |-------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
@@ -68,6 +74,10 @@ If `change_count` is `0`, the POC is in sync; report "POC is in sync (baseline `
 | New promotion YAML in `scripts/repositories/promotions/`                | Mirror the promo into `src/data/promotions.ts` so the classification preview on Add Transaction stays current.               |
 | New card YAML in `scripts/repositories/cards/`                          | Mirror the card into `src/data/cards.ts` with brand colours and a synthetic last-4.                                          |
 | Formula change in `docs/formulas/*`                                     | Usually skip; the POC doesn't compute realized points. Apply only if the *inputs* (data model) shifted.                       |
+| `A` on `.claude/skills/<name>/SKILL.md` (new SKILL.md)                  | **New user capability.** Read the SKILL.md; if the capability is something the user does *in real life*, the POC should expose it. Map it to: data-model fields, a screen surface, an affordance (button / flow / pill). Cross-check the backing CLI for the structural details. |
+| `M` on existing SKILL.md                                                | **Capability evolved.** Skim the diff (`git show <last_commit> -- <path>`). If new spec keys / new flags affect user-visible behaviour, mirror in the POC; if it's docstring polish, skip. |
+| `A` on `scripts/python/lib/<file>.py` (new lib file)                    | **New domain concept.** Read the module's docstring + public functions. If it introduces a data abstraction (clusters, summaries, classifications), reflect the abstraction in `src/data/types.ts` and any screen that should surface it. Pair with the corresponding `SKILL.md`. |
+| `M` on existing `scripts/python/lib/<file>.py`                          | Usually skip — internal refactor. Re-check only if the change is paired with a SKILL.md edit on the same topic.               |
 | `CLAUDE.md` / `.mcp.json` change                                        | Almost always skip for the POC. Re-check the charter section below instead.                                                  |
 
 ### Direct-feedback trigger (args present)

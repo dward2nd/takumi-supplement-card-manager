@@ -14,6 +14,7 @@ import { TransactionRow } from "../components/TransactionRow";
 import { DateGroupedTransactions } from "../components/DateGroupedTransactions";
 import { fmtLong, fmtRate } from "../data/format";
 import { sumCashback, sumPoints } from "../data/earnings";
+import { inProgressPlans, type InstallmentPlan } from "../data/installments";
 import type { CardId, HolderKey, Transaction } from "../data/types";
 
 const TODAY = "2026-05-26"; // POC reference date
@@ -79,10 +80,14 @@ export const CardDetailScreen = () => {
   }
   upcoming.sort((a, b) => a.transactionDate.localeCompare(b.transactionDate));
 
+  // In-progress installment plans on this card (clustered by per-term amount).
+  const installmentPlans = useMemo(() => inProgressPlans(txs), [txs]);
+
   // Section numbering — promos absorb cashback breakdown so there's no separate block.
   let n = 0;
   const nextNum = () => String(++n).padStart(2, "0");
   const promoNum = promos.length > 0 ? nextNum() : null;
+  const installmentsNum = installmentPlans.length > 0 ? nextNum() : null;
   const txNum = nextNum();
   const upcomingNum = upcoming.length > 0 ? nextNum() : null;
 
@@ -239,6 +244,13 @@ export const CardDetailScreen = () => {
       )}
 
       <div className={promos.length > 0 ? "lg:col-span-7" : ""}>
+        {installmentPlans.length > 0 && installmentsNum && (
+          <InProgressInstallments
+            sectionNum={installmentsNum}
+            plans={installmentPlans}
+          />
+        )}
+
         <section className="mt-8 px-5 pb-10 lg:px-0">
           <SectionLabel number={txNum} trailing={`${todayOrPast.length} rows`}>
             Transactions
@@ -287,6 +299,88 @@ const currentBC = (c: { issuer: string }): string => {
   if (c.issuer === "UOB") return "2026-05-25";
   if (c.issuer === "Krungsri" || c.issuer === "CardX") return "2026-06-05";
   return "2026-05-25";
+};
+
+/**
+ * In-progress installment plans on this card. One sub-row per *cluster* —
+ * parallel plans under the same bank-side merchant string are kept apart
+ * by their per-term amount (mirrors `lib.installments.cluster_rows_by_plan`).
+ *
+ * Editorial-journal styling: faint dividers, mono numerals, no card chrome.
+ * The section reads as a sub-stanza of the card detail, not a panel.
+ */
+const InProgressInstallments = ({
+  sectionNum,
+  plans,
+}: {
+  sectionNum: string;
+  plans: InstallmentPlan[];
+}) => {
+  const totalRemaining = plans.reduce((s, p) => s + p.remainingAmount, 0);
+  const planLabel = plans.length === 1 ? "1 plan" : `${plans.length} plans`;
+
+  return (
+    <section className="mt-8 px-5 lg:px-0">
+      <SectionLabel number={sectionNum} trailing={planLabel}>
+        In-progress installments
+      </SectionLabel>
+
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.2, 0.7, 0.1, 1] }}
+        className="mt-2 overflow-hidden rounded-2xl border border-paper-line/40 bg-paper-raised/15"
+      >
+        {plans.map((p) => (
+          <div
+            key={`${p.base}\x00${p.total}\x00${p.perTermAmount}`}
+            className="flex items-start justify-between gap-3 border-b border-paper-line/40 px-5 py-4 last:border-b-0"
+          >
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline gap-2">
+                <span className="num text-[12px] tracking-[0.14em] text-ink-faint">
+                  {String(p.maxTerm).padStart(2, "0")} / {String(p.total).padStart(2, "0")}
+                </span>
+                <span className="text-[10.5px] uppercase tracking-[0.22em] text-ink-ghost">
+                  posted
+                </span>
+              </div>
+              <div className="mt-1 truncate font-display text-[15px] leading-tight tracking-tight text-ink">
+                {p.base}
+              </div>
+              <div className="mt-1 flex items-baseline gap-1 text-[12px] uppercase tracking-[0.16em] text-ink-faint">
+                <span className="num text-ink-dim">{p.remainingTerms}</span>
+                <span>terms left ·</span>
+                <span className="num text-ink-dim">
+                  {String(p.maxTerm + 1).padStart(2, "0")}/
+                  {String(p.total).padStart(2, "0")}
+                </span>
+                <span>next</span>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 flex-col items-end gap-0.5">
+              <div className="text-[10.5px] uppercase tracking-[0.22em] text-ink-faint">
+                per term
+              </div>
+              <Amount value={p.perTermAmount} signed={false} size="md" />
+              <div className="num mt-0.5 text-[11px] tracking-[0.04em] text-ink-faint">
+                {p.remainingTerms} × ฿{p.perTermAmount.toFixed(2)} ={" "}
+                <span className="text-ink-dim">฿{p.remainingAmount.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </motion.div>
+
+      <p className="mt-2 flex items-baseline justify-between text-[12px] uppercase tracking-[0.18em] text-ink-faint">
+        <span>Remaining obligation across all plans</span>
+        <span>
+          <Amount value={totalRemaining} signed={false} size="sm" className="text-ink-dim" />
+        </span>
+      </p>
+    </section>
+  );
 };
 
 const Tile = ({

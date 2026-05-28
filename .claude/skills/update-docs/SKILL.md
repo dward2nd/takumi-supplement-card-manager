@@ -37,7 +37,7 @@ What it does:
    - If the file is dirty in `git status` → use filesystem mtime.
    - Else → use `git log -1 --format=%ct` for that path.
 3. For each doc, parses two reference kinds:
-   - **Wikilinks** `[[target]]` / `[[target|alias]]` / `[[../rel/path]]`. Obsidian's `[[x\|alias]]` table-escape is handled. Wikilinks that fall **inside a backtick code-span** are skipped — they're prose examples (e.g. `` `[[folder/note]]` `` in a syntax explanation), not real links.
+   - **Wikilinks** `[[target]]` / `[[target|alias]]` / `[[../rel/path]]` / `[[../folder/]]` (trailing slash = link to a directory). Obsidian's `[[x\|alias]]` table-escape is handled. Wikilinks that fall **inside a backtick code-span** are skipped — they're prose examples (e.g. `` `[[folder/note]]` `` in a syntax explanation), not real links. Folder wikilinks resolve when the directory exists, and never emit a `*_newer` signal (directory mtime is not a meaningful staleness driver).
    - **Path code-spans** with a `/` in them: `` `scripts/python/lib/notion_client.py` ``, `` `docs/concepts/cashback.md` ``. Bare filenames like `` `package.json` `` are intentionally ignored to avoid false positives on prose examples.
 4. Emits a JSON envelope listing every doc with at least one signal. Signals are deduplicated within a doc.
 
@@ -47,7 +47,7 @@ Extend this table AND the `cli.py` source when new patterns surface — see *Sel
 
 | Kind                      | Meaning                                                              | Triage rule of thumb                                                          |
 |---------------------------|----------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| `broken_wikilink`         | `[[X]]` doesn't resolve to any markdown file                         | **High priority** — fix or remove the link.                                   |
+| `broken_wikilink`         | `[[X]]` doesn't resolve to any markdown file (or, when `X` ends with `/`, to any directory) | **High priority** — fix or remove the link.                                   |
 | `broken_path_ref`         | `` `path/to/x.py` `` doesn't exist on disk                           | **High priority** — usually a rename/move the doc didn't catch.               |
 | `wikilink_target_newer`   | The wikilink target file is newer than this doc                      | Re-read the target; if it changed substantively, update this doc.             |
 | `path_ref_newer`          | A path code-span target is newer than this doc                       | Same as above. Often the doc describes a script that has since been refactored. |
