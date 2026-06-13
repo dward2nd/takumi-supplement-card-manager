@@ -20,6 +20,15 @@ Reads a JSON spec from stdin (or --input <file>):
     "slips":         ["/abs/a.jpg", ...],     // appends many
     "statement_pdf": "/abs/path.pdf",         // appends one to ใบแจ้งยอด (PDF)
     "statement_pdfs":["/abs/a.pdf", ...],     // appends many
+    "record_payment": true,                   // default true. When a slip is attached,
+                                              //   record the matching negative-amount
+                                              //   payment row (full bill ยอดชำระ) in the
+                                              //   Transactions DB via lib.payments. Dedups,
+                                              //   so it's a no-op if a payment already
+                                              //   exists. Set false to skip. Partial /
+                                              //   advance payments → use /record-payment.
+    "payment_date":  "2026-05-29",            // optional slip date for the payment row
+                                              //   (default today). Only used with a slip.
     "finalize":      true,                    // strips a leading `[DRAFT] ` from the
                                               //   title (no-op if already finalized)
     "refresh_from_transactions": true,        // recompute ยอดชำระ from cycle's
@@ -61,7 +70,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib import installments, notion_client, notion_files
+from lib import installments, notion_client, notion_files, payments
 from lib.bills import explain_cycle, find_bill
 from lib.cards import CardNotFoundError, find_card
 from lib.holders import HOLDERS, resolve_holder
@@ -79,6 +88,12 @@ def _current_title(page_id: str) -> str:
         if prop.get("type") == "title":
             return "".join(t.get("plain_text", "") for t in prop.get("title", []))
     return ""
+
+
+def _bill_amount(page_id: str) -> float | None:
+    """Read `ยอดชำระ` off the Bills page (None if unset / draft-without-sum)."""
+    page = notion_client.get_page(page_id)
+    return (page.get("properties", {}).get("ยอดชำระ", {}) or {}).get("number")
 
 
 def _resolve_bill(spec: dict) -> tuple[str, str | None, str | None, str | None]:
@@ -241,6 +256,55 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
 
     in_progress = _in_progress_for(holder_key, card)
 
+    # Slip-upload delegation → lib.payments. A payment slip implies the bill
+    # was paid, so (unless `record_payment: false`) record the matching
+    # negative-amount payment row in the Transactions DB for the *full* bill
+    # `ยอดชำระ`. This is independent of the `จ่ายแล้ว` flag: the checkbox
+    # records *that* it's settled; the negative row offsets the card's
+    # running balance so the cycle nets to zero. lib.payments dedups, so it's
+    # a no-op when a matching payment already exists. Only fires when the bill
+    # is resolvable by (holder, card, bill_cycle) and at least one slip is
+    # being attached. Partial / advance payments go through /record-payment.
+    def _maybe_record_payment(dry: bool) -> dict | None:
+        if not (slips and spec.get("record_payment", True)):
+            return None
+        if not (holder_key and card and bill_cycle):
+            return None
+        amount = _bill_amount(page_id)
+        if amount is None:
+            return {
+                "would_create": False,
+                "created": False,
+                "reason": "bill has no ยอดชำระ yet — record manually via /record-payment",
+            }
+        try:
+            return payments.record_payment(
+                holder_key,
+                card,
+                bill_cycle,
+                amount=float(amount),
+                payment_date=spec.get("payment_date"),
+                kind="full",
+                dry_run=dry,
+            )
+        except CardNotFoundError as e:
+            # The bill's `Card` SELECT resolved (find_bill matched), but the
+            # same string doesn't match a Cards-DB title — usually an
+            # apostrophe-style divergence (SELECT `Lotus's…` vs title
+            # `Lotus's…`). Don't crash the whole update after the slip is
+            # already attached: skip the payment and tell the caller to use
+            # /record-payment with the exact Cards-DB title.
+            return {
+                "would_create": False,
+                "created": False,
+                "reason": (
+                    f"could not resolve card {card!r} in the Cards DB (likely a "
+                    f"Card-SELECT vs Cards-title divergence, e.g. apostrophe style) — "
+                    f"slip attached; record the payment via /record-payment with the "
+                    f"exact card title. ({e})"
+                ),
+            }
+
     if dry_run:
         out = {
             "id": page_id,
@@ -256,6 +320,9 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             out["in_progress_installments"] = in_progress
         if refreshed is not None:
             out["refreshed"] = refreshed
+        payment = _maybe_record_payment(True)
+        if payment is not None:
+            out["payment"] = payment
         return out
 
     if simple_props:
@@ -269,6 +336,11 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         notion_files.append_files_to_page(page_id, _STATEMENT_PROP, statements)
         actions.append(_STATEMENT_PROP)
 
+    # Record the payment row after the slip is attached (evidence first).
+    payment = _maybe_record_payment(False)
+    if payment is not None and payment.get("created"):
+        actions.append("payment recorded")
+
     out = {
         "id": page_id,
         "holder": holder_key,
@@ -280,6 +352,8 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         out["in_progress_installments"] = in_progress
     if refreshed is not None:
         out["refreshed"] = refreshed
+    if payment is not None:
+        out["payment"] = payment
     return out
 
 

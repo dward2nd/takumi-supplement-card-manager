@@ -33,10 +33,14 @@ JSON spec:
   "slips":         ["/abs/a.jpg", "/abs/b.jpg"],
   "statement_pdf": "/abs/path.pdf",
   "statement_pdfs":["/abs/a.pdf", "/abs/b.pdf"],
+  "record_payment": true,
+  "payment_date":   "2026-05-29",
   "finalize":      true,
   "properties":    { "<raw notion prop>": ... }
 }
 ```
+
+`record_payment` (default `true`) — when a slip is attached, delegate to [[../record-payment/SKILL.md|/record-payment]] to record the matching negative-amount payment row (the **full** bill `ยอดชำระ`) in the Transactions DB, so the cycle nets to zero. Idempotent: [[../record-payment/SKILL.md|/record-payment]] dedups against existing payment rows, so re-attaching a slip won't double-record. `payment_date` (default today) sets that row's `Transaction Datetime` — pass the slip's date. Set `record_payment: false` to attach the slip without touching the ledger. **Partial / advance payments are not covered by this delegation** (it always records the full bill amount) — call [[../record-payment/SKILL.md|/record-payment]] directly with `kind: "partial"` / `"advance"`. See *Slip upload records the payment* below.
 
 `finalize: true` strips a leading `[DRAFT] ` from the bill's title — pairs with /prepare-bill which writes the draft prefix. Idempotent: if the prefix is already gone the action is a no-op (still surfaced in the response so you can see it was checked).
 
@@ -125,6 +129,14 @@ Notion's `pages.update` on a files property is *replace* semantics — the new l
 
 The user routinely attaches multiple files per bill (multiple transfer slips, partial-payment evidence). Don't ask whether to replace vs. append — always append.
 
+### Slip upload records the payment (delegates to /record-payment)
+
+Attaching a slip is evidence that the bill was paid. So unless `record_payment: false`, the script delegates to `lib.payments.record_payment` (the core behind [[../record-payment/SKILL.md|/record-payment]]) to write the matching **negative-amount payment transaction** for the **full** bill `ยอดชำระ`, tagged to the bill's cycle, dated on `payment_date` (default today). This is what makes the cycle net to zero — the slip file is evidence on the Bills row; the negative transaction is the ledger movement. The result rides back in the envelope under `payment`.
+
+It is **idempotent**: `record_payment` dedups against existing payment rows in the cycle (single-row match or sum-of-rows match within ฿0.50), so re-attaching a slip won't double-record — `payment.created` comes back `false` with a `reason`. It only fires when the bill resolves by `(holder, card, bill_cycle)` and at least one slip is being attached; the `id`-only form skips it.
+
+This is the **only** transaction this skill writes, and it does so by delegating — the boundary with [[../add-transaction/SKILL.md|/add-transaction]] (charges) and [[../record-payment/SKILL.md|/record-payment]] (the payment core) stays intact. **Partial / advance payments are out of scope here** (the delegation always pays the full bill); use [[../record-payment/SKILL.md|/record-payment]] directly with `kind: "partial"` / `"advance"`.
+
 ### 4. Date alignment
 
 `bill_cycle` is the value of `วันตัดรอบบิล` on the Bills row. It corresponds to the same date the Transactions DB uses as `Bill Cycle Date` for that cycle — see [[../../docs/concepts/bill-cycle-patterns]] for per-issuer rules. If the user gives you a transaction-side BC date and a card name, the matching bill row uses the *same* date.
@@ -143,7 +155,7 @@ Pass `--dry-run` to the CLI when a mistake would be hard to undo (e.g. writing a
 ## What this skill does NOT do
 
 - Does **not** create new Bills rows. The Bills DB has its own creation flow per cycle; this skill only patches.
-- Does **not** add transactions. Use [[../add-transaction/SKILL.md|/add-transaction]].
+- Does **not** add *charge* transactions. Use [[../add-transaction/SKILL.md|/add-transaction]]. (It does record one *payment* transaction on slip upload, by delegating to [[../record-payment/SKILL.md|/record-payment]] — see *Slip upload records the payment*.)
 - Does **not** edit transactions. Use [[../update-transaction/SKILL.md|/update-transaction]].
 - Does **not** mutate Takumi's data (Takumi has no Bills DB).
 - Does **not** translate Thai labels — `จ่ายแล้ว`, `หลักฐานการชำระ`, `ใบแจ้งยอด (PDF)`, `วันตัดรอบบิล` stay verbatim per project convention.
