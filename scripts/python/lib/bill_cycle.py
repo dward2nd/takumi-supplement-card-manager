@@ -70,9 +70,19 @@ def _due_plus(days: int) -> Callable[[dt.date], dt.date]:
     return f
 
 
-def _due_aeon(bc: dt.date) -> dt.date:
-    y, m = _add_months(bc.year, bc.month, 1)
-    return dt.date(y, m, 2)
+def _due_fixed_next_month(day: int) -> Callable[[dt.date], dt.date]:
+    """Due date = a fixed calendar `day` of the month *after* the bill cycle.
+
+    Unlike `_due_plus` (a `BC + N days` offset), this pins the due date to a
+    constant day-of-month. Used by issuers whose due date is a fixed date
+    rather than a grace-period offset (AEON day 2, KBank day 10).
+    """
+
+    def f(bc: dt.date) -> dt.date:
+        y, m = _add_months(bc.year, bc.month, 1)
+        return _safe_day(y, m, day)
+
+    return f
 
 
 @dataclass(frozen=True)
@@ -108,7 +118,13 @@ PATTERNS: dict[str, BillCyclePattern] = {
         key="aeon",
         description="AEON — bill cycle day 10, due day 2 of next month",
         bill_day=10,
-        due_from_nominal_bc=_due_aeon,
+        due_from_nominal_bc=_due_fixed_next_month(2),
+    ),
+    "kbank": BillCyclePattern(
+        key="kbank",
+        description="KBank — bill cycle day 25, due day 10 of next month",
+        bill_day=25,
+        due_from_nominal_bc=_due_fixed_next_month(10),
     ),
     "lotus": BillCyclePattern(
         key="lotus",

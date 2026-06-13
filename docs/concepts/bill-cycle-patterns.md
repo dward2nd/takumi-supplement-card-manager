@@ -31,7 +31,8 @@ For UOB this comparison uses the *shifted* bill-cycle date (see UOB below), not 
 | Krungsri / First Choice / CardX | day **5**   | bill cycle **+ 20 days**          | consistent, no shifts          |
 | KTC                       | day **27**      | bill cycle **+ 15 days**          | consistent, no shifts          |
 | ttb                       | day **27**      | bill cycle **+ 20 days**          | same BC day as KTC, longer grace |
-| AEON                      | day **10**      | day **2** of the **next** month   | consistent, no shifts          |
+| AEON                      | day **10**      | day **2** of the **next** month   | consistent, no shifts; fixed-day due |
+| KBank                     | day **25**      | day **10** of the **next** month  | consistent, no shifts; fixed-day due |
 | Lotus                     | day **28**      | bill cycle **+ 20 days**          | consistent, no shifts          |
 | SPayLater                 | day **15**      | bill cycle **+ 10 days**          | consistent, no shifts          |
 | UOB                       | day **25**      | bill cycle **+ 20 days**          | see *UOB exceptions* below     |
@@ -46,6 +47,7 @@ For UOB this comparison uses the *shifted* bill-cycle date (see UOB below), not 
 | `KTC …`              | KTC            |
 | `ttb …`              | ttb            |
 | `AEON …`             | AEON           |
+| `KBank …`            | KBank          |
 | `Lotus …`            | Lotus          |
 | `SPayLater`          | SPayLater      |
 | `UOB …`              | UOB            |
