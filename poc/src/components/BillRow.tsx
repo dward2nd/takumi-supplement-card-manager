@@ -19,13 +19,22 @@ import type { Bill, Transaction } from "../data/types";
 export type BillTxBucket =
   | "installment"
   | "cashback-credit"
+  | "payment"
   | "manual-adjustment"
   | "regular";
+
+// Payment rows are negative-amount transactions whose name is one of the
+// `lib.payments` labels (ชำระบิลเต็มจำนวน / ชำระบางส่วน / ชำระบิลล่วงหน้า).
+// They offset the cycle to ~zero — distinct from cashback credits and from
+// bracket-prefixed manual adjustments. Written by /record-payment (and by
+// /update-bill on slip upload).
+const PAYMENT_NAME = /ชำระบิล|ชำระบางส่วน|payment/i;
 
 export const categoriseBillTx = (tx: Transaction): BillTxBucket => {
   const name = (tx.name || "").trim();
   if (/CASHBACK/i.test(name)) return "cashback-credit";
   if (tx.installment) return "installment";
+  if (tx.amount < 0 && PAYMENT_NAME.test(name)) return "payment";
   if (name.startsWith("[")) return "manual-adjustment";
   if (tx.status === "refunded") return "manual-adjustment";
   if (tx.amount < 0) return "manual-adjustment";
@@ -51,7 +60,7 @@ export const BillRow = ({ bill, index = 0 }: { bill: Bill; index?: number }) => 
   // is implied and would just be noise. Mirrors the auto-Note structure
   // in `lib.bills.explain_cycle`.
   const buckets = useMemo(() => {
-    const counts = { installment: 0, "cashback-credit": 0, "manual-adjustment": 0 };
+    const counts = { installment: 0, "cashback-credit": 0, payment: 0, "manual-adjustment": 0 };
     for (const tx of TRANSACTIONS) {
       if (tx.holder !== bill.holder) continue;
       if (tx.cardId !== bill.cardId) continue;
@@ -66,6 +75,7 @@ export const BillRow = ({ bill, index = 0 }: { bill: Bill; index?: number }) => 
     buckets["cashback-credit"] > 0
       ? `${buckets["cashback-credit"]} credit${buckets["cashback-credit"] === 1 ? "" : "s"}`
       : null,
+    buckets.payment > 0 ? `${buckets.payment} payment${buckets.payment === 1 ? "" : "s"}` : null,
     buckets["manual-adjustment"] > 0
       ? `${buckets["manual-adjustment"]} adjustment${buckets["manual-adjustment"] === 1 ? "" : "s"}`
       : null,

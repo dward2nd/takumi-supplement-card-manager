@@ -117,6 +117,14 @@ const NUTA_UOB_CYCLE = (() => {
       multiplier: "×0",
       note: "Cycle 2026-05-25 cashback credit: 5% × 2048.00 = 102.40.",
     }),
+
+    // Payment row — the negative-amount transaction that settled the prior
+    // (2026-04) cycle in full, offsetting it to ~zero. Written by
+    // /record-payment (or by /update-bill on slip upload); carries no cashback.
+    tx("n-uob-pay-2026-04", "nuta", "uob-one", "ชำระบิลเต็มจำนวน", -17611.21, "2026-05-08", "2026-04-24", "2026-05-15", {
+      status: "paid",
+      note: "Paid the 2026-04 statement in full — offsets the cycle to zero.",
+    }),
   ];
   return rows;
 })();

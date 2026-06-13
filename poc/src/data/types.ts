@@ -23,6 +23,7 @@ export type IssuerKey =
   | "CardX"
   | "KTC"
   | "ttb"
+  | "KBank"
   | "AEON"
   | "Lotus"
   | "Shopee";
@@ -39,8 +40,10 @@ export type CardId =
   | "cardx-jcb"
   | "ktc-unionpay"
   | "ttb-so-smart"
+  | "kbank-plustinum"
   | "aeon-primo"
   | "aeon-next-gen"
+  | "aeon-unionpay"
   | "lotuss-beyond"
   | "spaylater";
 

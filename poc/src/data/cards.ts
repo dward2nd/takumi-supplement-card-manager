@@ -112,6 +112,7 @@ export const CARDS: Record<CardId, Card> = {
     holderLifetimePoints: { baiboon: 1_230 },
     holderCurrentBalance: { baiboon: 0 },
     brandColors: ["#9a3b1e", "#4a1c0d"],
+    blurb: "Online spend · ฿25 per ฿500 cashback (manual, capped ฿300/mo)",
   },
   "krungsri-visa": {
     id: "krungsri-visa",
@@ -162,6 +163,22 @@ export const CARDS: Record<CardId, Card> = {
     holderCurrentBalance: { baiboon: 0 },
     brandColors: ["#1a4a7a", "#0a2240"],
   },
+  "kbank-plustinum": {
+    id: "kbank-plustinum",
+    name: "KBank PLUSTINUM",
+    issuer: "KBank",
+    network: "Mastercard",
+    premiumTier: "Platinum",
+    holderLast4: { takumi: "7012", baiboon: "3398" },
+    bahtPer1Point: 25,
+    holders: ["takumi", "baiboon"],
+    creditLimit: 150_000,
+    holderLifetimePoints: { takumi: 2_870, baiboon: 1_540 },
+    holderCurrentBalance: { takumi: 0, baiboon: 0 },
+    // KBank cycle: bill day 25 → due day 10 of next month (see bill-cycle-patterns).
+    brandColors: ["#0a8a3c", "#063f1e"],
+    blurb: "KBank Platinum · earns points · cycle 25 → due 10",
+  },
   "aeon-primo": {
     id: "aeon-primo",
     name: "AEON Primo",
@@ -185,6 +202,21 @@ export const CARDS: Record<CardId, Card> = {
     holderLifetimePoints: { baiboon: 980 },
     holderCurrentBalance: { baiboon: 0 },
     brandColors: ["#7a1c2a", "#380c14"],
+  },
+  "aeon-unionpay": {
+    id: "aeon-unionpay",
+    name: "AEON UnionPay",
+    issuer: "AEON",
+    network: "UnionPay",
+    holderLast4: { nuta: "6203" },
+    // Earns no points (×0 left unchecked) — used as a UnionPay foreign-cashback card.
+    pointsDefault: "×0",
+    holders: ["nuta"],
+    holderLifetimePoints: { nuta: 0 },
+    // Balance is often intentionally negative (advance payments / cashback-heavy).
+    holderCurrentBalance: { nuta: -1_240 },
+    brandColors: ["#9a1f3a", "#46101b"],
+    blurb: "3% cashback on CNY/HKD/MOP/TWD · no points",
   },
   "lotuss-beyond": {
     id: "lotuss-beyond",

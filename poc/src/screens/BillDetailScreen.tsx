@@ -49,6 +49,7 @@ export const BillDetailScreen = () => {
     { key: "regular",            title: "Regular purchases",  rows: [] },
     { key: "installment",        title: "Installment terms",  rows: [] },
     { key: "cashback-credit",    title: "Cashback credits",   rows: [] },
+    { key: "payment",            title: "Payments",           rows: [] },
     { key: "manual-adjustment",  title: "Manual adjustments", rows: [] },
   ];
   for (const tx of cycleTxs) {
@@ -136,7 +137,7 @@ export const BillDetailScreen = () => {
                   <div>
                     <div className="font-display text-sm tracking-tight text-ink">Mark as paid</div>
                     <div className="text-[12px] uppercase tracking-[0.16em] text-ink-faint">
-                      attach the transfer slip
+                      attach slip · records the payment row
                     </div>
                   </div>
                 </div>

@@ -83,11 +83,13 @@ export const CardFace = ({
                 ? "k"
                 : card.issuer === "ttb"
                   ? "t"
-                  : card.issuer === "AEON"
-                    ? "A"
-                    : card.issuer === "Lotus"
-                      ? "L"
-                      : "S"}
+                  : card.issuer === "KBank"
+                    ? "K"
+                    : card.issuer === "AEON"
+                      ? "A"
+                      : card.issuer === "Lotus"
+                        ? "L"
+                        : "S"}
       </span>
 
       <div className="relative flex h-full flex-col justify-between text-white">
@@ -125,7 +127,10 @@ export const CardFace = ({
         {size !== "sm" && (
           <div className="leading-tight">
             <div className="text-[10.5px] uppercase tracking-[0.22em] text-white/55">
-              outstanding
+              {/* A negative balance is a credit (advance payment / cashback-heavy
+                  cards like AEON UnionPay sit in credit) — label it as such so
+                  formatBahtInt's unsigned figure doesn't read as debt. */}
+              {balance < 0 ? "in credit" : "outstanding"}
             </div>
             <div className="num mt-0.5 text-base text-white/95">
               ฿ {formatBahtInt(balance)}
