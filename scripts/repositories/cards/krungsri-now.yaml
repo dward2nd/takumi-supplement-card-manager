@@ -1,3 +1,24 @@
 name: Krungsri NOW
 issuer: Krungsri
 bill_cycle_pattern: krungsri
+notes: |
+  Cashback policy (block-based, NOT expressible as the promotions/*.yaml % cb
+  tier model — see below):
+    - 25 THB cashback per complete 500 THB of ONLINE spend (i.e. floor(amount / 500) * 25;
+      a 718.36 THB charge earns one 500-block = 25 THB, not 5% of 718.36).
+    - Monthly cap: 300 THB total cashback per calendar month (1st→last day),
+      reached at 6,000 THB qualifying spend. Spend beyond the cap earns nothing.
+    - Rows that earn this cashback earn ZERO points — set ×0 on them.
+    - The card is used mostly for online transactions ("unless told otherwise").
+  Recording convention (per the user, 2026-06-02):
+    - Cashback is recorded as a SEPARATE transaction row, NOT via the % cb field.
+    - The CB row shares the spend row's Transaction Date and prefixes the merchant
+      name with "CB " (e.g. spend "CLAUDE.AI ... CA" -> credit "CB CLAUDE.AI ... CA"),
+      amount negative (e.g. -25).
+    - Optional / manual: the user decides which rows receive cashback and how much,
+      because of the monthly cap. Do NOT auto-apply; confirm with the user.
+  Why this is in `notes` and not a promotions/*.yaml: the promo schema models flat
+  per-merchant % cb tiers consumed by lib.promotions.classify (which writes % cb).
+  It cannot express 500-THB block math, a 300-THB/month cap, an online-only basis,
+  or the separate-CB-row recording model. Codifying it as a tier would make
+  auto_classify write a wrong flat rate. See the proposal to extend the schema.
