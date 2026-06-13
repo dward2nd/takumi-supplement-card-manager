@@ -3,6 +3,9 @@
 .env.local
 .env.*.local
 
+# Statement-PDF decryption passwords (issuer DOB/ID). Keep the .example committed.
+scripts/repositories/statement-passwords.yaml
+
 # Claude Code local-only state (machine-specific MCP toggles, permissions, etc.)
 .claude/settings.local.json
 .claude/**/settings.local.json

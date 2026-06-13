@@ -13,12 +13,19 @@ Reads either CLI flags or a JSON spec on stdin:
 
   $ uv run scripts/python/audit-bill/extract.py --pdf /abs/path.pdf [--password 1234]
 
+  # Auto-resolve the password from the repository by card (or issuer):
+  $ uv run scripts/python/audit-bill/extract.py --pdf /abs/path.pdf --card "First Choice"
+
   $ echo '{"pdf": "/abs/path.pdf", "password": "1234", "pages": "5-7"}' \\
       | uv run scripts/python/audit-bill/extract.py
 
 Writes the joined per-page text to stdout, each page prefixed with
 `===== Page N =====`. Encrypted PDFs are decrypted with --password
-(or "password" in the JSON spec).
+(or "password" in the JSON spec). When no explicit password is given but
+`--card`/`--issuer` is, the password is looked up in
+`scripts/repositories/statement-passwords.yaml` (gitignored) via
+`lib.statement_secrets` — so the agent never needs to re-type a known
+issuer's password.
 
 Why a separate CLI: PDF text extraction is reusable beyond audit-bill
 (e.g. parsing slip files for /update-bill). The implementation lives in
@@ -35,7 +42,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib import pdf_text
+from lib import pdf_text, statement_secrets
 
 
 def _parse_pages(spec: str | None, total: int) -> list[int]:
@@ -58,11 +65,33 @@ def _parse_pages(spec: str | None, total: int) -> list[int]:
 
 def _resolve_spec(args: argparse.Namespace) -> dict:
     if args.pdf:
-        return {"pdf": args.pdf, "password": args.password, "pages": args.pages}
+        return {
+            "pdf": args.pdf,
+            "password": args.password,
+            "pages": args.pages,
+            "card": args.card,
+            "issuer": args.issuer,
+            "holder": args.holder,
+        }
     raw = sys.stdin.read().strip()
     if not raw:
         raise SystemExit("no spec on stdin and no --pdf flag")
     return json.loads(raw)
+
+
+def _resolve_password(spec: dict) -> str | None:
+    """Explicit `password` wins; otherwise look it up by card/issuer."""
+    password = spec.get("password")
+    if password:
+        return password
+    holder = spec.get("holder")
+    card = spec.get("card")
+    if card:
+        return statement_secrets.password_for_card(card, holder=holder)
+    issuer = spec.get("issuer")
+    if issuer:
+        return statement_secrets.password_for_issuer(issuer, holder=holder)
+    return None
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -70,6 +99,18 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--pdf", help="Path to the PDF (absolute or relative).")
     ap.add_argument("--password", help="Decryption password, if the PDF is encrypted.")
     ap.add_argument("--pages", help='Page selector, e.g. "1,3-5". Default: every page.')
+    ap.add_argument(
+        "--card",
+        help="Card title; auto-resolves the password from the repository when --password is omitted.",
+    )
+    ap.add_argument(
+        "--issuer",
+        help="Issuer name; alternative to --card for password auto-resolution.",
+    )
+    ap.add_argument(
+        "--holder",
+        help="Holder slug (baiboon|nuta|takumi); used only for issuers with per-holder password overrides.",
+    )
     args = ap.parse_args(argv)
 
     spec = _resolve_spec(args)
@@ -79,7 +120,7 @@ def main(argv: list[str] | None = None) -> int:
     if not Path(pdf_path).is_file():
         raise SystemExit(f"PDF not found: {pdf_path}")
 
-    extracted = pdf_text.extract(pdf_path, password=spec.get("password"))
+    extracted = pdf_text.extract(pdf_path, password=_resolve_password(spec))
     page_nums = _parse_pages(spec.get("pages"), len(extracted.pages))
 
     chunks: list[str] = []

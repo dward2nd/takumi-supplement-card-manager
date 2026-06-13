@@ -22,3 +22,7 @@ VERSION_FILE: Path = REPO_ROOT / "VERSION"
 REPOSITORIES_DIR: Path = REPO_ROOT / "scripts" / "repositories"
 CARDS_REPO_DIR: Path = REPOSITORIES_DIR / "cards"
 PROMOTIONS_REPO_DIR: Path = REPOSITORIES_DIR / "promotions"
+
+# Statement-PDF decryption passwords, keyed by issuer. Real secrets — gitignored
+# (see statement-passwords.example.yaml for the committed template).
+STATEMENT_PASSWORDS_FILE: Path = REPOSITORIES_DIR / "statement-passwords.yaml"

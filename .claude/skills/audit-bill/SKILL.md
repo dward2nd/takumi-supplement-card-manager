@@ -15,13 +15,31 @@ The skill is two CLIs working together. **Step 1** extracts the statement PDF to
 
 ```sh
 # Step 1 — extract the PDF to text (do not screenshot the PDF page by page,
-# that burns tokens). Add --password "..." if the bank encrypted it.
-uv run scripts/python/audit-bill/extract.py --pdf /abs/path/statement.pdf [--password XXXX] [--pages 4-7]
+# that burns tokens). Most Thai issuers encrypt the PDF; pass --card "<title>"
+# and the password auto-resolves from the repository (see Statement passwords
+# below). Fall back to an explicit --password "..." only for an unregistered issuer.
+uv run scripts/python/audit-bill/extract.py --pdf /abs/path/statement.pdf --card "First Choice" [--pages 4-7]
 
 # Step 2 — diff the cycle. Read the text from step 1, pick out only the
 # requested holder's sub-section, build the JSON below.
 echo '<JSON-spec>' | uv run scripts/python/audit-bill/cli.py
 ```
+
+### Statement passwords (encrypted PDFs)
+
+Most Thai statement PDFs are AES-encrypted. Passwords live in
+`scripts/repositories/statement-passwords.yaml` — **gitignored** (the committed
+template is `statement-passwords.example.yaml`; schema in the repositories
+README). They are keyed by the card's `issuer`, so `extract.py --card "<title>"`
+resolves `card → issuer → password` via `lib/statement_secrets.py` with no
+prompt. Krungsri-family statements (First Choice / Krungsri NOW / Krungsri JCB /
+Krungsri Visa) bundle the primary + all supplements into one PDF locked with the
+**primary holder's date of birth**, so one issuer key covers all four.
+
+If `extract.py` fails to decrypt because the issuer isn't registered, ask the
+user for the password **once**, add it under the right `issuer:` in
+`statement-passwords.yaml`, and re-run — never hard-code a password in a command
+you leave behind, and never commit the real file.
 
 The Notion query in step 2 is built off the same `Bill Cycle Date` filter [[../prepare-bill/SKILL.md|/prepare-bill]] uses, so what you audit here is exactly what got summed into the bill.
 
@@ -92,8 +110,8 @@ Greedy 1-1 pairing by exact baht amount (rounded to 2dp), with merchant-token pr
 
 ## Procedure
 
-1. **Get the statement — Notion first, disk second, ask only as a last resort.** Each Bills row stores the issuer's PDF on `ใบแจ้งยอด (PDF)`; that's the authoritative copy. Query the Bills DB for `(Card, วันตัดรอบบิล)` matching the cycle, pull the file's signed `file.url`, `curl` it to a temp path. Only if Notion has no statement attached should you look in `~/Downloads` / ask the user. UOB / AEON statements are bundles — pages cover Takumi (primary) + Baiboon + Nuta on the same product. CardX / KTC / Krungsri-family statements are scoped to one (card, holder). For bundles, find the sub-section whose cardmember name matches the requested holder (e.g. `JINUTA SAKARUN` for Nuta) — see [[../../docs/concepts/statement-bundling]].
-2. **Extract the PDF to text** using `audit-bill/extract.py --pdf <path> [--password …] [--pages a-b]`. Read the text. Do not screenshot the PDF page by page — the text version is faithful enough and an order of magnitude cheaper.
+1. **Get the statement — Notion first, disk second, ask only as a last resort.** Each Bills row stores the issuer's PDF on `ใบแจ้งยอด (PDF)`; that's the authoritative copy. Query the Bills DB for `(Card, วันตัดรอบบิล)` matching the cycle, pull the file's signed `file.url`, `curl` it to a temp path. Only if Notion has no statement attached should you look in `~/Downloads` / ask the user. **Bundling matters here:** UOB / AEON statements bundle many cards + holders (Takumi primary + Baiboon + Nuta) in one PDF. **Krungsri-family statements** (First Choice / Krungsri NOW / Krungsri JCB / Krungsri Visa) are one PDF *per card* that still bundles the primary's section plus every supplement holder's section (e.g. `JINUTA SAKARUN`, `BAIBOON BOONMAPA`, `S. PETCHKULJINDA`). Only **CardX / KTC** are strictly one PDF per (card, holder). For any bundle, find the sub-section whose cardmember name matches the requested holder — see [[../../docs/concepts/statement-bundling]].
+2. **Extract the PDF to text** using `audit-bill/extract.py --pdf <path> --card "<title>" [--pages a-b]`. The password auto-resolves by issuer from `scripts/repositories/statement-passwords.yaml` (see *Statement passwords* above); fall back to an explicit `--password …` only for an unregistered issuer. Read the text. Do not screenshot the PDF page by page — the text version is faithful enough and an order of magnitude cheaper.
 3. **Slice this holder's rows for this card** from the text. Skip `PREVIOUS BALANCE`, `SUB TOTAL`, `TOTAL BALANCE`, payment-acknowledgement rows. CR rows → negative `amount`. Foreign-currency rows: use the printed THB column, not the foreign one.
 4. **Compute the cycle's BC date in Notion's convention.** UOB shifts the day-25 BC earlier on weekend/Thai holidays — feed the *shifted* date (see `lib.bill_cycle` and [[../../docs/concepts/bill-cycle-patterns]]).
 5. **Build the JSON spec.** Include `statement_subtotal` when the PDF prints it — the script will then surface any transcription drift between your `statement_transactions` sum and the bank's printed total via `statement.subtotal_source` / `statement.rows_sum`.

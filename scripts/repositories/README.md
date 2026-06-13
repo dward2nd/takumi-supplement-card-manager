@@ -6,12 +6,15 @@ The vault (`docs/`) contains the human-readable narrative. The narrative *refere
 
 ## Kinds
 
-| Kind          | Directory                  | Keyed by                       |
-|---------------|----------------------------|--------------------------------|
-| Cards         | `cards/`                   | exact Cards DS title (verbatim) |
-| Promotions    | `promotions/`              | promo `id` (kebab-case)        |
+| Kind          | Directory / file                      | Keyed by                       |
+|---------------|---------------------------------------|--------------------------------|
+| Cards         | `cards/`                              | exact Cards DS title (verbatim) |
+| Promotions    | `promotions/`                         | promo `id` (kebab-case)        |
+| Statement passwords | `statement-passwords.yaml` *(gitignored)* | card `issuer`            |
 
-One file per resource. Filename = `<id>.yaml` for promotions; `<card-slug>.yaml` for cards (lowercase, hyphens for spaces and apostrophes). The slug is just the filename; the canonical key inside each file is the explicit `name` / `id` field.
+One file per resource for cards/promotions. Filename = `<id>.yaml` for promotions; `<card-slug>.yaml` for cards (lowercase, hyphens for spaces and apostrophes). The slug is just the filename; the canonical key inside each file is the explicit `name` / `id` field.
+
+Statement passwords are the exception — a **single gitignored file** holding real secrets (see its schema below), with `statement-passwords.example.yaml` committed as the template. This mirrors the `.env` / `.env.example` convention.
 
 ## Cards schema (`cards/<slug>.yaml`)
 
@@ -96,10 +99,37 @@ When `lib.promotions.classify(card, date, merchant, [is_installment])` runs agai
 4. **Tiers** are tried in order; first match wins.
 5. **No match** → no cashback (`% cb` left unset).
 
+## Statement passwords schema (`statement-passwords.yaml` — gitignored)
+
+Most Thai issuers ship AES-encrypted statement PDFs. The decryption passwords
+live in this one file, keyed by the card's `issuer` (the same string as the
+`issuer:` field in `cards/*.yaml`). **Never commit the real file** — only
+`statement-passwords.example.yaml`.
+
+```yaml
+issuers:
+  # Scalar = one password for every card from this issuer. Krungsri-family
+  # bundles the primary + all supplements in one PDF locked with the PRIMARY
+  # holder's date of birth, so a single value covers all four Krungsri cards.
+  Krungsri: "DDMonYYYY"
+
+  # Mapping form — when an issuer locks each supplement's PDF with that
+  # holder's own DOB instead of the primary's:
+  CardX:
+    default: "DDMonYYYY"        # primary
+    holders:
+      nuta: "DDMonYYYY"         # keyed by lowercase holder slug
+```
+
+Resolution is `card name → card_repo issuer → password`. `/audit-bill`'s
+`extract.py` auto-resolves it from `--card "<title>"` (or `--issuer`), so a
+known issuer's password is never re-typed.
+
 ## How skills read this
 
 - `scripts/python/lib/card_repo.py` — load + lookup cards by name.
 - `scripts/python/lib/promotions.py` — load + classify + crediting schedule.
+- `scripts/python/lib/statement_secrets.py` — resolve a card/issuer to its statement-PDF password (consumed by `/audit-bill`'s `extract.py`).
 - Existing libs (`lib/bill_cycle.py`, `lib/cards.py` for Notion joins) consume the card repo as the source of truth for pattern keys and policy flags. **Never hard-code a card-by-name list inside a script.** Add the fact to the repository instead.
 
 ## How skills write this
