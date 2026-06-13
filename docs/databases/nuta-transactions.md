@@ -15,18 +15,18 @@ Every purchase Nuta makes on her supplement cards. Schema mirrors Baiboon's — 
 
 ## Properties
 
-| Name (Notion)       | Type      | Notes |
-|---------------------|-----------|-------|
-| `Name`              | title     |  |
-| `Card`              | relation → [[nuta-cards]] |  |
-| `ยอดชำระ`            | number (baht) |  |
-| `ใช้คะแนน`           | number (int)  |  |
-| `Transaction Datetime` | datetime  |  |
-| `Process Date`      | date          |  |
-| `Bill Cycle Date`   | date          |  |
-| `Due Date`          | date          |  |
-| `Note`              | text          |  |
-| **`% cb`**          | number (percent, 1 decimal) | Cashback percentage applied to this transaction. Also exists on Baiboon's DS; absent on Takumi's. See [[../concepts/cashback]]. |
+| Name (Notion)          | Type                        | Notes                                                                                                                           |
+| ---------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `Name`                 | title                       |                                                                                                                                 |
+| `Card`                 | relation → [[nuta-cards]]   |                                                                                                                                 |
+| `ยอดชำระ`              | number (baht)               |                                                                                                                                 |
+| `ใช้คะแนน`             | number (int)                |                                                                                                                                 |
+| `Transaction Datetime` | datetime                    |                                                                                                                                 |
+| `Process Date`         | date                        |                                                                                                                                 |
+| `Bill Cycle Date`      | date                        |                                                                                                                                 |
+| `Due Date`             | date                        |                                                                                                                                 |
+| `Note`                 | text                        |                                                                                                                                 |
+| **`% cb`**             | number (percent, 1 decimal) | Cashback percentage applied to this transaction. Also exists on Baiboon's DS; absent on Takumi's. See [[../concepts/cashback]]. |
 
 ### Status checkboxes — see [[../concepts/payment-lifecycle]]
 
