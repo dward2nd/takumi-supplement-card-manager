@@ -31,7 +31,9 @@ When a new promotion arrives, add it under [[../promotions/]] and link from the 
 
 ### Foreign merchant billed in THB
 
-**Default**: foreign-merchant-in-THB earns **neither cashback nor points** on any Thai-issued card. The country suffix in the merchant string (`US`, `USA`, `JP`, `SG`, etc.) flags this.
+**Default**: foreign-merchant-in-THB earns **neither cashback nor points** on any Thai-issued card. The country suffix in the merchant string (`US`, `USA`, `JP`, `SG`, etc.) flags a *foreign merchant* — but the exclusion hinges on the charge being **billed in THB**, not on the suffix alone.
+
+**Not covered by this rule — genuine foreign-currency charges.** A transaction billed in the actual foreign currency (the line reads `X USD (Y THB)` — a foreign amount converted to a THB figure for the statement) is a normal international purchase and earns points/cashback per the card's policy + any active promo. It is *not* a foreign-merchant-in-THB row. Don't exclude it on the country suffix alone. (Any `×0` / no-cashback on such a row comes from a *different* rule — e.g. Krungsri NOW's online-category → `×0` and its ฿300/calendar-month cashback cap — and the `Note` should say so, not cite a foreign exclusion.)
 
 **Promotion overrides for cashback**: a promo can grant cashback to foreign-in-THB transactions if it *explicitly* names them. Document the override in the promotion's note.
 

@@ -34,6 +34,15 @@ The `÷4` rate applies **only** when the transaction was physically read by Makr
 
 The common thread: the `÷4` rate is conditional on the **physical reader**, not the merchant brand. TrueMoney intermediation breaks the connection.
 
+## Cashback, and standalone `MAKRO` on *other* UOB cards
+
+Two clarifications from the user (2026-07-13) that the points table above doesn't capture:
+
+- **Cashback**: standalone in-store `MAKRO_…` earns **no cashback** on any UOB card — including UOB Makro (leave `% cb` unset). `HTTPS://WWW.MAKRO.PRO/…` and `TMN*MAKRO …` are ordinary merchants and *are* eligible for cashback under whatever promo the card runs.
+- **The `÷4` rate is UOB-Makro-only.** Standalone `MAKRO_…` on a **non-Makro UOB card** (UOB One / UOB World / UOB Premier) earns **`×0` points and no cashback** — *not* `÷4`. Only the UOB Makro co-brand card applies the reduced Makro rate; every other UOB card zeroes standalone in-store Makro entirely.
+
+So the merchant string alone isn't enough — the `÷4`-vs-`×0` split depends on *which UOB card* the row sits on. The historical `MAKRO_…` rows on Baiboon's UOB World / Premier / One are correctly `×0` and should stay that way. Cross-ref: memory `project_card_uob_makro`, and the `/add-transaction` skill's Makro card-policy section.
+
 ## Notion encoding
 
 The `÷4` checkbox is the cleanest fit on the fixed-enum UI but it's still a *projection* of the true rule — the underlying rule is "this transaction earns at the Makro rate". The phase-2 app should model this as an `EarningRule` on the card that matches merchant-substring `MAKRO` (anchored start) → 1 pt per 100 ฿, and a base rule of 1 pt per 25 ฿ for everything else. See [[../future-app/data-model-target]] and [[../concepts/points-and-multipliers#approximation-caveat]].

@@ -185,6 +185,16 @@ If you want to classify by hand (e.g. to override a heuristic the lib can't yet 
 
 When in doubt about whether a particular merchant string falls into a tier, surface the ambiguity to the user — don't try to re-classify by editing the merchant name (that would violate Rule 1).
 
+### UOB Makro & Makro merchants — standalone `MAKRO_…` vs `MAKRO.PRO` / `TMN MAKRO`
+
+Makro appears under two very different merchant strings that earn **oppositely** (confirmed by user 2026-07-13 — see [[../../docs/cards/uob-makro|UOB Makro card note]]):
+
+- **`HTTPS://WWW.MAKRO.PRO/…`** (Makro PRO online) and **`TMN MAKRO…`** (TrueMoney-Makro) → **normal earning**: points + cashback per the card's usual policy. These are *not* a Makro carve-out.
+- **Standalone `MAKRO_…`** (in-store, e.g. `MAKRO_CHIANG MAI … TH`) → **no cashback** and **`×0` points** on UOB cards generally (seen on UOB One / UOB World / UOB Premier).
+  - **Exception — the UOB Makro co-brand card**: standalone `MAKRO_…` earns **`÷4` points** (quarter rate), still **no cashback**. Pass `"multiplier": "÷4"` and leave `% cb` unset.
+
+Only the **UOB Makro** card gets `÷4`; every other UOB card stays `×0` on standalone `MAKRO_…`. No promo YAML encodes this yet, so classify by hand — `auto_classify` won't apply it.
+
 ### CardX JCB — ongoing card-level policy (not yet framed as a dated promotion)
 
 - **Cashback**:
@@ -208,7 +218,8 @@ By default, foreign-merchant-in-THB earns neither cashback nor points. An active
 
 These apply across **every** card we manage (Takumi, Baiboon, Nuta) by **default**. An active promotion can override the cashback side of rule 1 with an explicit merchant inclusion, but the points side almost never moves:
 
-1. **Foreign merchants billed in THB earn neither points nor cashback** by default, even when the card would normally earn at a higher tier. Examples in the data: `X CORP. PAID FEATURES BASTROP US`, `Google YouTubePremium Mountain View USA`, `AGODA.COM THE QUARTE Internet SG`. Country suffix tells you the merchant is foreign even when the amount is in baht. Promotion overrides for cashback are possible (e.g. First Choice May 2026 → 1.5% on Agoda); promotion overrides for points are almost never seen — set `×0` on the row.
+1. **Foreign merchants billed in THB earn neither points nor cashback** by default, even when the card would normally earn at a higher tier. Examples in the data: `X CORP. PAID FEATURES BASTROP US`, `Google YouTubePremium Mountain View USA`, `AGODA.COM THE QUARTE Internet SG`. Country suffix tells you the merchant is foreign, but the exclusion hinges on the charge being **billed in THB** — the suffix alone is not enough. Promotion overrides for cashback are possible (e.g. First Choice May 2026 → 1.5% on Agoda); promotion overrides for points are almost never seen — set `×0` on the row.
+   - **Not excluded — genuine foreign-currency charges.** A transaction billed in the actual foreign currency (the line reads `X USD (Y THB)` — a foreign amount converted to a THB figure for the statement; enter the THB figure in `ยอดชำระ` and record the foreign original in `Note`) is a normal international purchase and earns points/cashback per the card's policy + any active promo. Don't mark it excluded on the country suffix alone. Any `×0` / no-cashback on such a row comes from a *different* rule (e.g. Krungsri NOW's online-category → `×0` and its ฿300/calendar-month cashback cap) — say **that** in the `Note`, not a foreign exclusion.
 2. **UOB cards: petrol stations earn neither points nor cashback.** Watch for merchant strings containing PT, BCP, ESSO, SHELL, CALTEX, PTT. The exclusion is **issuer-specific to UOB** — **First Choice** (Krungsri) does *not* exclude petrol; SHELL / PTT rows on First Choice earn at the card's normal rate (confirmed by user 2026-05-28). For other issuers (CardX / KTC / ttb / AEON / Lotus / SPayLater) the behaviour is unknown — surface to the user before applying or denying cashback.
 3. The Notion **cashback formula** on Baiboon's and Nuta's transactions and the **realized-points formula** on every transaction already encode these rules where they can; but the formulas can't tell "foreign-merchant-in-THB" apart from a regular domestic THB charge, so the computed cashback/points on such transactions may overstate reality. Flag it when the user asks for a cashback total.
 
