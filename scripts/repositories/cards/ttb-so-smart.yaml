@@ -1,3 +1,17 @@
 name: ttb so smart
 issuer: ttb
 bill_cycle_pattern: ttb
+points_default: "×0"
+petrol_exclusion: true
+notes: |
+  Cashback card — earns NO reward points, so every row is ×0.
+  1% cashback on eligible spend; encoded in
+  promotions/ttb-so-smart-cashback.yaml (consumed by lib.promotions.classify).
+  Excluded from the 1% cashback (per user, 2026-07-21): TrueMoney (TMN*),
+  7-11, petrol stations, and installment rows.
+  Cashback is capped per cycle, but the household spends little on this card,
+  so the cap is intentionally not tracked.
+  Cashback is paid DIRECTLY to a linked savings account, NOT credited to the
+  card statement — never post cashback credit rows and declare no
+  crediting_schedule. The % cb field is informational only (does not offset
+  the card balance).

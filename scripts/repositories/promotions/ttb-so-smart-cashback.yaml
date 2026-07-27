@@ -1,0 +1,19 @@
+id: ttb-so-smart-cashback
+name: ttb so smart 1% cashback (ongoing card-level policy)
+card: ttb so smart
+effective_start: '2026-01-01'
+status: active
+foreign_in_thb_policy:
+  default: exclude
+  overrides: []
+tiers:
+- rate: 0.01
+  label: base
+  patterns:
+  - '*'
+  exclude_patterns:
+  - TMN
+  - 7-11
+installment_rule:
+  rate: 0.0
+  credited: at_purchase
