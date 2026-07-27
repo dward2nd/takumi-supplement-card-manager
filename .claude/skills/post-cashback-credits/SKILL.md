@@ -24,28 +24,31 @@ JSON spec:
   "holder":     "baiboon | nuta",
   "card":       "UOB One",
   "bill_cycle": "2026-05-25",
+  "skip_populate_installments": false,
   "force":      false
 }
 ```
 
 - `holder` and `card` are required. `card` must be in `SUPPORTED_CARDS` (today: `UOB One`).
 - `bill_cycle` is optional; if omitted, the active cycle for the card is inferred from `lib.bill_cycle.active_cycle`.
+- `skip_populate_installments` is optional, default `false`. Before summing, the CLI populates this cycle's in-progress installment terms (same idempotent `lib.installments.populate_for_cycle` that [[../populate-installment/SKILL.md|/populate-installment]] and [[../prepare-bill/SKILL.md|/prepare-bill]] use), so each term's per-row `% cb` is captured in the credit. Set `true` only when re-crediting a historical cycle whose installment rows shouldn't be touched.
 - `force` is optional, default `false`. The CLI refuses to write if any `*CASHBACK*` row already exists in the cycle (prevents double-credit). To rewrite, archive the prior rows first via `scripts/python/add-transaction/archive.py`, then re-run with `force: true`.
 
 ## What the script does
 
 1. Resolves `(holder, card, cycle BC + DD)`.
-2. Fetches every transaction in the cycle on that card.
-3. Aborts if any row already has `CASHBACK` in its title — unless `force` is set.
-4. Groups eligible rows (those with `% cb` set, excluding existing `CASHBACK` rows) by tier rate.
-5. For each tier where the eligible sum is positive, writes one negative-amount transaction:
+2. **Populates in-progress installment terms** into the cycle (unless `skip_populate_installments: true`) — idempotent, so terms already in the cycle are skipped. This must happen *before* summing: installment rows carry a per-term `% cb` (1% on UOB One), so crediting without them under-counts the installment cashback. The result is echoed under `installments` in the response.
+3. Fetches every transaction in the cycle on that card.
+4. Aborts if any row already has `CASHBACK` in its title — unless `force` is set.
+5. Groups eligible rows (those with `% cb` set, excluding existing `CASHBACK` rows) by tier rate.
+6. For each tier where the eligible sum is positive, writes one negative-amount transaction:
    - `Name`: `UOB ONE CASHBACK <N>%`
    - `ยอดชำระ`: `-round(rate × tier_sum, 2)`
    - `Transaction Datetime`: BC date if `rate == 1%`, otherwise first weekday of the next calendar month.
    - `Bill Cycle Date` / `Due Date`: cycle's BC / DD (explicit alignment exception).
    - Multiplier: `×0` (UOB One never earns points).
    - `Note`: `Cycle <BC> cashback credit: <N>% × <sum> = <credit>.`
-6. Returns `{tier_totals, created}` so the caller can verify the math.
+7. Returns `{installments, tier_totals, created}` so the caller can verify the math.
 
 ## Hard rules
 
@@ -66,6 +69,8 @@ If the cycle already has any `*CASHBACK*` row, the CLI aborts. Re-running is saf
 ### 4. Workflow position
 
 `/post-cashback-credits` → verify the credits look right → `/prepare-bill` → verify the bill total → upload statement PDF via `/update-bill` (with `finalize: true` to strip the `[DRAFT] ` prefix once the numbers match the bank).
+
+**Order-independent w.r.t. installments.** Because this skill populates installment terms itself (step 2) before summing, the credit is complete whether you run it before or after `/prepare-bill`. This closes a former footgun: running `/post-cashback-credits` *before* `/prepare-bill` used to miss the installment 1% entirely, since `/prepare-bill` was the only thing populating the terms. If you edit the cycle's transactions after crediting (add/move/remove a row), re-credit: archive the `*CASHBACK*` rows, re-run this skill, then refresh the bill via `/update-bill` with `refresh_from_transactions: true`.
 
 ## What the user typically asks
 

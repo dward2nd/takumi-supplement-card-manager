@@ -9,13 +9,18 @@ to override after manually archiving the prior rows.
 
 What it does:
 
-1. Reads every transaction in the cycle on the named card.
-2. Groups by `% cb` (raw fraction). Ignores rows where `% cb` is
+1. Populates in-progress installment terms into the cycle first
+   (idempotent; disable with `skip_populate_installments`). Installment
+   rows carry a per-term `% cb`, so crediting before they exist — e.g.
+   running this before /prepare-bill, which is what populates them —
+   would under-count the installment cashback. Mirrors /prepare-bill.
+2. Reads every transaction in the cycle on the named card.
+3. Groups by `% cb` (raw fraction). Ignores rows where `% cb` is
    unset, and ignores rows whose `Name` already contains CASHBACK
    (so the skill can be re-run after a partial failure without
    double-counting the credit rows it wrote previously — those still
    trigger the abort guard above, but at least the math is safe).
-3. For each tier with a positive eligible-sum, computes
+4. For each tier with a positive eligible-sum, computes
    `credit = round(rate * sum, 2)` and writes a new transaction:
    - `Name`: `UOB ONE CASHBACK <rate-as-percent>%`
    - `ยอดชำระ`: `-credit` (negative; reduces the bill)
@@ -38,6 +43,8 @@ Reads a JSON spec from stdin (or --input <file>):
     "holder":     "baiboon" | "nuta",       // required (Takumi has no UOB One workflow here)
     "card":       "UOB One",                // required; today only UOB One is supported
     "bill_cycle": "2026-05-25",             // optional ISO; inferred via active_cycle if omitted
+    "skip_populate_installments": false,    // optional; default false. Skip the installment
+                                            //   populate step (e.g. re-crediting a historical cycle)
     "force":      false                     // optional; override the duplicate-CASHBACK guard
   }
 
@@ -69,7 +76,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib import notion_client, promotions
+from lib import installments, notion_client, promotions
 from lib.bill_cycle import active_cycle, pattern_for_card, cycle_for_month
 from lib.cards import find_card
 from lib.holders import resolve_holder
@@ -168,6 +175,25 @@ def _tier_totals(rows: list[dict], skip_cashback_names: bool = True) -> dict[flo
     return totals
 
 
+def _augment_totals_with_appended(totals: dict[float, float], summary: dict) -> None:
+    """Fold a populate-installment **dry-run**'s would-append rows into the tier totals.
+
+    Only needed for --dry-run: in a real run the terms are persisted before the
+    cycle fetch, so they're already summed. In dry-run they were merely simulated,
+    so mirror what a real run would count — each appended entry carries its
+    classified `% cb` (1% on UOB One) and per-term amount.
+    """
+    for entry in summary.get("in_progress", []):
+        if entry.get("action") != "appended":
+            continue
+        rate = (entry.get("classification") or {}).get("cashback_percent")
+        amt = entry.get("amount")
+        if rate is None or amt is None:
+            continue
+        key = round(float(rate), 4)
+        totals[key] = totals.get(key, 0.0) + float(amt)
+
+
 def run(spec: dict, *, dry_run: bool = False) -> dict:
     if not isinstance(spec, dict):
         raise PostCashbackError("spec must be a JSON object")
@@ -198,6 +224,29 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     bill_cycle = bc.isoformat()
     due_date = dd.isoformat()
 
+    # Populate in-progress installment terms into this cycle BEFORE summing,
+    # so each term's per-row `% cb` is captured in the tier credit. Installment
+    # rows carry 1% on UOB One (the promo's installment_rule); without this step,
+    # running post-cashback before /prepare-bill — which is what populates the
+    # terms — silently under-credits the installment 1%. The call is idempotent
+    # (terms already in the cycle are skipped) and shares the lib function
+    # /prepare-bill and /populate-installment use, so the skills can't disagree.
+    # We reuse `due_date` (this cycle's DD) so appended terms align with the
+    # credit rows this skill writes. Disable for historical re-credits.
+    installments_summary: dict | None = None
+    if not spec.get("skip_populate_installments"):
+        installments_summary = installments.populate_for_cycle(
+            holder_key=holder.key,
+            transactions_ds=holder.transactions_ds,
+            card_name=card_name,
+            card_page_id=card["id"],
+            bill_cycle=bill_cycle,
+            due_date=due_date,
+            auto_classify=True,
+            exclude=set(),
+            dry_run=dry_run,
+        )
+
     rows = _fetch_cycle_rows(holder.transactions_ds, card["id"], bill_cycle)
     if not rows:
         raise PostCashbackError(
@@ -214,6 +263,12 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         )
 
     totals = _tier_totals(rows, skip_cashback_names=True)
+
+    # Real runs already persisted the installment terms above, so they're
+    # counted in `rows`. A dry-run only simulated them — fold them in so the
+    # preview matches what a real run would credit.
+    if dry_run and installments_summary:
+        _augment_totals_with_appended(totals, installments_summary)
 
     plan: list[dict] = []
     for rate, total in sorted(totals.items()):
@@ -247,6 +302,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             "card": card_name,
             "bill_cycle": bill_cycle,
             "due_date": due_date,
+            "installments": installments_summary,
             "tier_totals": {str(k): round(v, 2) for k, v in sorted(totals.items())},
             "plan": plan,
         }
@@ -280,6 +336,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         "card": card_name,
         "bill_cycle": bill_cycle,
         "due_date": due_date,
+        "installments": installments_summary,
         "tier_totals": {str(k): round(v, 2) for k, v in sorted(totals.items())},
         "created": created,
     }
