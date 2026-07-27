@@ -11,7 +11,7 @@ plan reads ``01/10``, a 100-term plan reads ``001/100``).
 
 Parallel plans under the same bank-side merchant string (the user often
 runs multiple Shopee installments at once) are disambiguated by per-term
-amount: rows in the same (base, total) group are clustered within a 5%
+amount: rows in the same (base, total) group are clustered within a 2%
 tolerance, and each cluster is its own plan with its own term sequence.
 
 This module is the single source of truth for the format so that add-,
@@ -35,8 +35,16 @@ _INSTALLMENT_SUFFIX_RE = re.compile(r"^(?P<base>.+?)\s+(?P<term>\d{1,3})/(?P<tot
 # Plans within a (base, total) group are clustered by per-term amount.
 # Two amounts match iff they're within this fractional distance —
 # tolerates the small per-term rounding the bank sometimes applies
-# (e.g. 375.30 → 373.00 across consecutive terms).
-_AMOUNT_TOLERANCE = 0.05
+# (e.g. 375.30 → 373.00 across consecutive terms, ~0.6%).
+#
+# Tightened 5% → 2% on 2026-07-26: two genuinely-distinct Nuta Shopee
+# plans running at 1,032.60 and 1,079.20 per term are only 4.3% apart, so
+# the old 5% window merged them into one cluster and populate-installment
+# under-tracked the pair. 2% cleanly separates them while still absorbing
+# every observed single-plan rounding gap (all ≤0.61% across all holders /
+# cards — verified before the change). Keep this above the largest genuine
+# per-term rounding and below the smallest real two-plan gap.
+_AMOUNT_TOLERANCE = 0.02
 
 
 @dataclass(frozen=True)

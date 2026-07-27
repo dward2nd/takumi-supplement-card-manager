@@ -13,7 +13,7 @@ This is the only sanctioned write path for continuing installments. Together the
 
 Backed by `scripts/python/populate-installment/cli.py`. Pulls every transaction tied to the card, filters to those whose merchant name carries the `NN/NN` installment suffix, groups them by **(base merchant, total terms, per-term amount)**, then for each group decides what to do.
 
-The per-term amount is what distinguishes parallel plans with the same bank-side merchant string (the user often runs several `2C2P *SHOPEE 10`-term plans concurrently, each at a different baht/term). Within a `(base, total)` group, rows are clustered greedily by amount with a 5% tolerance — enough to absorb the small per-term rounding the bank sometimes applies (375.30 → 373.00 across consecutive terms).
+The per-term amount is what distinguishes parallel plans with the same bank-side merchant string (the user often runs several `2C2P *SHOPEE 10`-term plans concurrently, each at a different baht/term). Within a `(base, total)` group, rows are clustered greedily by amount with a 2% tolerance — enough to absorb the small per-term rounding the bank sometimes applies (375.30 → 373.00 across consecutive terms, ~0.6%), yet tight enough to keep genuinely-distinct plans apart (e.g. two Shopee plans at 1,032.60 and 1,079.20 per term, only 4.3% apart, must not merge). Tightened from 5% on 2026-07-26.
 
 Per-cluster decisions:
 
@@ -94,7 +94,7 @@ Holder → DS, exact card-title match. The script uses `lib.holders.resolve_hold
 
 ### 2. Parallel plans are clustered by per-term amount
 
-Two rows in the same `(base, total)` group belong to the same plan when their amounts match within 5%. Bank rounding (a few baht across terms) is absorbed; genuinely separate plans (e.g. one at 375 baht and another at 1079 baht) sit in distinct clusters and advance independently.
+Two rows in the same `(base, total)` group belong to the same plan when their amounts match within 2%. Bank rounding (a few baht across terms) is absorbed; genuinely separate plans (e.g. one at 1,032.60 baht/term and another at 1,079.20 — 4.3% apart) sit in distinct clusters and advance independently.
 
 If the user wants stricter separation (e.g. two plans at very close amounts) they should disambiguate by adding a unique qualifier to the base name when starting the second plan via [[../add-installment/SKILL.md|/add-installment]].
 
