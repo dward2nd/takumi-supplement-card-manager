@@ -31,6 +31,13 @@ Reads a JSON spec from stdin (or --input <file>):
                                               //   (default today). Only used with a slip.
     "finalize":      true,                    // strips a leading `[DRAFT] ` from the
                                               //   title (no-op if already finalized)
+    "auto_close_on_statement": true,          // default true. Attaching a statement PDF
+                                              //   auto-finalizes (strip [DRAFT]) and marks
+                                              //   จ่ายแล้ว IFF a transfer slip in
+                                              //   หลักฐานการชำระ covers ยอดชำระ (already on
+                                              //   file, or attached this call). The
+                                              //   statement never proves payment. Explicit
+                                              //   finalize/paid win. false disables.
     "refresh_from_transactions": true,        // recompute ยอดชำระ from cycle's
                                               //   transactions; if no explicit `note`
                                               //   was supplied, also regenerate the
@@ -80,6 +87,46 @@ from lib.transaction_read import project_transaction
 _SLIP_PROP = "หลักฐานการชำระ"
 _STATEMENT_PROP = "ใบแจ้งยอด (PDF)"
 _DRAFT_PREFIX = "[DRAFT] "
+# A satang-level shortfall between recorded payments and `ยอดชำระ` still
+# counts as settled — banks round, and a ฿0.30 gap never means "unpaid".
+_SETTLE_TOLERANCE = 0.5
+
+
+def _payment_coverage(holder_key: str, card_name: str, bill_cycle: str) -> float | None:
+    """Total magnitude of recorded *bill-payment* rows in the cycle.
+
+    Used to confirm a transfer slip's amount: `จ่ายแล้ว` means the peer has
+    transferred their share to Takumi, and attaching that slip records a
+    matching `ชำระ…`/`จ่าย…` row (see `lib.payments.is_bill_payment_row`). When
+    those rows cover the bill's `ยอดชำระ`, the recorded transfer matches the
+    amount due. Returns None when the (holder, card) can't resolve a Cards-DB
+    page (e.g. id-only bill lookup).
+    """
+    holder = HOLDERS.get((holder_key or "").strip().lower())
+    if holder is None:
+        return None
+    try:
+        card = find_card(holder.cards_ds, card_name)
+    except CardNotFoundError:
+        return None
+    raw = notion_client.query_all(
+        holder.transactions_ds,
+        filter={
+            "and": [
+                {"property": "Card", "relation": {"contains": card["id"]}},
+                {"property": "Bill Cycle Date", "date": {"equals": bill_cycle}},
+            ]
+        },
+    )
+    projected = [project_transaction(r) for r in raw]
+    return round(
+        sum(
+            -float(r.get("amount") or 0.0)
+            for r in projected
+            if payments.is_bill_payment_row(r)
+        ),
+        2,
+    )
 
 
 def _current_title(page_id: str) -> str:
@@ -215,9 +262,31 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         simple_props.update(raw)
         actions.extend(k for k in raw if k not in actions)
 
+    slips = _collect_files(spec, "slip", "slips")
+    statements = _collect_files(spec, "statement_pdf", "statement_pdfs")
+    resolvable = bool(holder_key and card and bill_cycle)
+
+    # Auto-close-on-statement: attaching the issuer's statement PDF finalizes
+    # the bill — it always strips a leading `[DRAFT] `. It marks `จ่ายแล้ว`
+    # only when the PEER's transfer to Takumi is proven: a transfer slip in
+    # หลักฐานการชำระ (already on file, or attached this call) plus a recorded
+    # payment covering `ยอดชำระ`. The statement never proves payment — Takumi
+    # settles with the bank himself, later. (Exception: when the peer pays the
+    # bank directly, Takumi declares it via an explicit `paid: true`, which
+    # wins over this whole block.) An explicit `finalize` / `paid` always wins;
+    # disable the behaviour with `auto_close_on_statement: false`. Needs the
+    # bill resolvable by (holder, card, bill_cycle) — the id-only form skips it.
+    auto_close = (
+        bool(statements)
+        and spec.get("auto_close_on_statement", True) is not False
+        and resolvable
+    )
+
     finalize = spec.get("finalize")
     if finalize is not None and not isinstance(finalize, bool):
         raise ValueError(f"finalize must be a boolean; got {type(finalize).__name__}")
+    if finalize is None and auto_close:
+        finalize = True
     finalized_title: str | None = None
     if finalize:
         current = _current_title(page_id)
@@ -260,8 +329,56 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             actions.append("Note (auto)")
         refreshed = {"ยอดชำระ": total, "tx_count": tx_count, "auto_note": auto_note}
 
-    slips = _collect_files(spec, "slip", "slips")
-    statements = _collect_files(spec, "statement_pdf", "statement_pdfs")
+    # Evidence-gated auto-paid (see `auto_close` above). Skipped when the spec
+    # sets `paid` explicitly — the caller's choice wins.
+    #
+    # `จ่ายแล้ว` tracks the PEER's transfer to Takumi, evidenced by a transfer
+    # slip in หลักฐานการชำระ — NOT by the statement. Takumi settles with the
+    # bank himself, later, so neither the statement nor a bank-payment line on
+    # it proves the peer has paid their share. So require a transfer slip
+    # (already on file, or attached this call) AND a recorded payment covering
+    # `ยอดชำระ`; the statement's role here is only to finalize the amount.
+    auto_paid: dict | None = None
+    if auto_close and spec.get("paid") is None:
+        page = notion_client.get_page(page_id)
+        page_props = page.get("properties", {})
+        amount_due = (
+            refreshed["ยอดชำระ"]
+            if refreshed
+            else (page_props.get("ยอดชำระ", {}) or {}).get("number")
+        )
+        existing_slip = bool((page_props.get(_SLIP_PROP, {}) or {}).get("files"))
+        coverage = _payment_coverage(holder_key, card, bill_cycle)
+        will_record = (
+            bool(slips)
+            and spec.get("record_payment", True) is not False
+            and amount_due is not None
+            and amount_due > 0
+        )
+        covered = (
+            amount_due is not None
+            and amount_due > 0
+            and coverage is not None
+            and coverage + _SETTLE_TOLERANCE >= amount_due
+        )
+        settled = bool(will_record or (existing_slip and covered))
+        auto_paid = {
+            "amount_due": amount_due,
+            "recorded_payments": coverage,
+            "slip_on_file": existing_slip or bool(slips),
+            "settled": settled,
+        }
+        if settled:
+            simple_props["จ่ายแล้ว"] = {"checkbox": True}
+            actions.append("จ่ายแล้ว (auto)")
+        elif not (existing_slip or slips):
+            actions.append(
+                "จ่ายแล้ว (left unpaid — no transfer slip in หลักฐานการชำระ yet)"
+            )
+        else:
+            actions.append(
+                "จ่ายแล้ว (left unpaid — transfer slip doesn't cover ยอดชำระ)"
+            )
 
     if not (simple_props or slips or statements):
         raise ValueError("nothing to do: spec must include at least one update field")
@@ -332,6 +449,8 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             out["in_progress_installments"] = in_progress
         if refreshed is not None:
             out["refreshed"] = refreshed
+        if auto_paid is not None:
+            out["auto_paid"] = auto_paid
         payment = _maybe_record_payment(True)
         if payment is not None:
             out["payment"] = payment
@@ -364,6 +483,8 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         out["in_progress_installments"] = in_progress
     if refreshed is not None:
         out["refreshed"] = refreshed
+    if auto_paid is not None:
+        out["auto_paid"] = auto_paid
     if payment is not None:
         out["payment"] = payment
     return out
