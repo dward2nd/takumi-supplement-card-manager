@@ -46,14 +46,20 @@ PAYMENT_LABELS: dict[str, str] = {
 _MATCH_TOLERANCE = 0.5
 
 
-def _is_payment_row(row: dict) -> bool:
-    """True if a projected row looks like a *payment* (for dedup).
+def is_payment_row(row: dict) -> bool:
+    """True if a projected row looks like a *payment* — LOOSE, for dedup only.
 
     A payment is a negative-amount row that is neither a cashback credit
     nor a bracket-prefixed bookkeeping row (`[ยกเลิก]`, `[เว็บรับหนี้…]`,
     `[ยอดยกมา…]`). Those carry their own meaning and must not be mistaken
     for "the payment that settled this bill". Magnitude matching (below)
     is the real safeguard; this filter just removes obvious non-payments.
+
+    Deliberately over-inclusive: it also matches plain merchant **refunds**
+    (`WWW.GRAB.COM BANGKOK TH −75`, `UNIONPAY MERCHANT BEIJING CHN`) and
+    `CB`-prefixed cashback credits (`CB HTTPS://WWW.MAKRO.PRO/ …`), because
+    inside `record_payment` the amount check filters those out anyway. Do
+    **not** reuse this as a standalone gate — use `is_bill_payment_row`.
     """
     amount = row.get("amount") or 0.0
     if amount >= 0:
@@ -64,6 +70,38 @@ def _is_payment_row(row: dict) -> bool:
     if name.startswith("["):
         return False
     return True
+
+
+# Thai verbs that open every bill-payment row name in the data: ชำระ ("settle")
+# and จ่าย ("pay"). Observed variants include ชำระบิลเต็มจำนวน, ชำระเต็มจำนวน,
+# ชำระบิลล่วงหน้า, ชำระบางส่วน, ชำระบิลบางส่วน, ชำระล่วงหน้า,
+# ชำระล่วงหน้าบางส่วน, ชำระเพิ่มบางส่วนจนครบ, ชำระเต็มจำนวนอย่างล่าช้า,
+# จ่ายเต็มจำนวน, จ่ายบิลเต็มจำนวน, จ่ายก่อนบิลมา, จ่ายบิลล่วงหน้าบางส่วน,
+# จ่ายส่วนขาดเพิ่มเติม. No non-payment row in the data starts with either.
+_PAYMENT_NAME_PREFIXES: tuple[str, ...] = ("ชำระ", "จ่าย")
+
+
+def is_bill_payment_row(row: dict) -> bool:
+    """True if a projected row is a *bill payment* — STRICT, for bill totals.
+
+    A bill's `ยอดชำระ` is the cycle's **amount due**, so `/prepare-bill`'s
+    `_sum_cycle` and `/update-bill`'s `refresh_from_transactions` exclude
+    these rows from the sum. Without that the total silently nets its own
+    payment and becomes order-dependent: the same cycle would read 388.10
+    or 152.00 depending only on whether the payment was recorded before or
+    after the bill was drafted.
+
+    Matches on the Thai payment-verb prefix rather than "negative and not
+    obviously something else" (see `is_payment_row`, which is too loose for
+    this job). Everything that genuinely changes what is owed keeps
+    counting: cashback credits (`Cashback …`, `CB …`, `UOB ONE CASHBACK …`),
+    merchant refunds, `[ยกเลิก]` cancellations, `[เว็บรับหนี้…]` takeovers
+    and `[ยอดยกมา…]` carry-forwards.
+    """
+    if (row.get("amount") or 0.0) >= 0:
+        return False
+    name = (row.get("name") or "").strip()
+    return name.startswith(_PAYMENT_NAME_PREFIXES)
 
 
 def _cycle_rows(holder: Holder, card_page_id: str, bill_cycle: str) -> list[dict]:
@@ -166,7 +204,7 @@ def record_payment(
     label = name or PAYMENT_LABELS[kind]
 
     rows = _cycle_rows(holder, card_page_id, bill_cycle)
-    existing = [p for p in rows if _is_payment_row(p)]
+    existing = [p for p in rows if is_payment_row(p)]
     match = _coverage_match(existing, target)
 
     base = {

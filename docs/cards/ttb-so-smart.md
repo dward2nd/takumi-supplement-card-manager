@@ -16,7 +16,7 @@ ttb's flat-rate cashback card. It is a **cashback card, not a points card** — 
 | General eligible spend | **1%** (`% cb` = `0.01`) | none — `×0` |
 | TrueMoney (`TMN*…`) | **excluded** — no cashback | `×0` |
 | 7-11 (`…7-11…`) | **excluded** — no cashback | `×0` |
-| Petrol stations (`PTT`/`BCP`/`ESSO`/`SHELL`/`CALTEX`) | **excluded** — no cashback | `×0` |
+| Petrol stations (`PTT`/`BCP`/`BANGCHAK`/`ESSO`/`SHELL`/`CALTEX`) | **excluded** — no cashback | `×0` |
 | Installment rows (`NN/NN`) | **excluded** — no cashback | `×0` |
 | Foreign merchant billed in THB | **excluded** (general rule) | `×0` |
 

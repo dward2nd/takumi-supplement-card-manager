@@ -254,7 +254,7 @@ _INSTALLMENT_RE = re.compile(r"\b\d{2}/\d{2}\b")
 # but the merchant-string heuristic for "is this a petrol station?" is
 # kept here next to the rest of the classification logic.
 _PETROL_TOKENS: tuple[str, ...] = (
-    "PTTST", "PTT ", "BCP", "ESSO", "SHELL", "CALTEX",
+    "PTTST", "PTT ", "BCP", "BANGCHAK", "ESSO", "SHELL", "CALTEX",
 )
 
 

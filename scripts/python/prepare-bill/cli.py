@@ -63,6 +63,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib import installments, notion_client, promotions
+from lib.payments import is_bill_payment_row
 from lib.bill_cycle import active_cycle, pattern_for_card, cycle_for_month
 from lib.bills import explain_cycle, require_bills_ds
 from lib.cards import find_card
@@ -122,9 +123,19 @@ def _sum_cycle(transactions_ds: str, card_page_id: str, bill_cycle: str) -> tupl
             ]
         },
     )
+    # Bill-payment rows (`ชำระ…` / `จ่าย…`) are excluded: `ยอดชำระ` is the
+    # cycle's *amount due*, not its remaining balance. Including them would
+    # net the payment into the total and make the result order-dependent — a
+    # cycle drafted before its payment was recorded would read differently
+    # from the same cycle drafted after. Cashback credits, refunds and
+    # `[…]`-prefixed adjustments DO count; they change what is owed.
+    # See lib.payments.is_bill_payment_row.
     total = 0.0
     for r in rows:
-        amt = (r.get("properties", {}).get("ยอดชำระ") or {}).get("number")
+        projected = project_transaction(r)
+        if is_bill_payment_row(projected):
+            continue
+        amt = projected.get("amount")
         if amt is not None:
             total += amt
     return round(total, 2), len(rows), rows

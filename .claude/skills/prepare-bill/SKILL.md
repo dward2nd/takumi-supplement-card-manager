@@ -85,6 +85,16 @@ Lines are omitted when their bucket is empty; if a bucket has many rows, only th
 
 Pass `skip_auto_note: true` to opt out. The `auto_note` field in the response shows whatever was written (or absent when no special rows existed).
 
+## Payment rows are excluded from the total
+
+`ยอดชำระ` is the cycle's **amount due**, not its remaining balance — so the sum skips bill-payment rows, identified by `lib.payments.is_bill_payment_row` (a negative-amount row whose name starts with the Thai payment verb `ชำระ…` or `จ่าย…`: `ชำระบิลเต็มจำนวน`, `ชำระบิลล่วงหน้า`, `ชำระบางส่วน`, `จ่ายเต็มจำนวน`, …).
+
+Without this the total would silently net its own payment and become **order-dependent**: the same cycle reads ฿388.10 if drafted before the payment was recorded and ฿152.00 if drafted after. Historical bills drafted under the old flat-sum behaviour therefore disagree with what a refresh computes today — that's expected drift, not an error to chase. Per [[../../docs/concepts/reconcile-dont-correct|reconcile, don't correct]], don't mass-refresh settled bills to "fix" them.
+
+Everything that genuinely changes what is owed still counts: cashback credits (`UOB ONE CASHBACK 5%`, `Cashback …`, `CB …`), merchant refunds (a negative `WWW.GRAB.COM …` row), `[ยกเลิก]` cancellations, `[เว็บรับหนี้…]` takeovers and `[ยอดยกมา…]` carry-forwards. Note the deliberately *looser* `is_payment_row` in the same module is for `record_payment`'s dedup only — it matches refunds and `CB`-prefixed credits too, and must not be reused here.
+
+The same rule is mirrored in `/update-bill`'s `refresh_from_transactions`.
+
 ## Cashback handling
 
 The bill total is "balance including cashback". The skill itself does **no** cashback arithmetic — that's deliberate. Cashback offsets must already be encoded in the cycle's transactions as **negative-amount rows** (e.g. `UOB ONE CASHBACK 5%` with `ยอดชำระ = -22.77`). A flat sum then yields the net amount due.

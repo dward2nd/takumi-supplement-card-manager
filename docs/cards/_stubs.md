@@ -19,6 +19,7 @@ Sources:
 | AEON UnionPay    | AEON              |          | ✓     |  ?      |
 | CardX JCB        | CardX             |          | ✓     |  ?      |
 | First Choice     | Krungsri          | ✓        | ✓     |  ?      |
+| [[kbank-plustinum\|KBank PLUSTINUM]] | KBank | ✓    |       |  ✓      |
 | Krungsri JCB     | Krungsri          | ✓        | ✓     |  ?      |
 | Krungsri NOW     | Krungsri          | ✓        |       |  ?      |
 | Krungsri Visa    | Krungsri          | ✓        | ✓     |  ?      |
@@ -31,7 +32,7 @@ Sources:
 | UOB Premier      | UOB               | ✓        | ✓     |  ?      |
 | UOB World        | UOB               | ✓        | ✓     |  ?      |
 
-Last harvested: 2026-05-19. Re-harvest after any Cards/Bills DB edits.
+Last harvested: 2026-05-19; `KBank PLUSTINUM` added 2026-07-28 from a statement audit (it was absent from the 2026-05-19 harvest). Re-harvest after any Cards/Bills DB edits.
 
 ## Promotion rule
 

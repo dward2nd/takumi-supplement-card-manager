@@ -158,7 +158,19 @@ def _refresh_from_transactions(
         },
     )
     projected = [project_transaction(r) for r in raw_rows]
-    total = round(sum(float(r.get("amount") or 0.0) for r in projected), 2)
+    # Bill-payment rows are excluded from the total — `ยอดชำระ` is the cycle's
+    # *amount due*, not its remaining balance. See
+    # lib.payments.is_bill_payment_row and the mirror of this rule in
+    # prepare-bill's `_sum_cycle`. The Note still describes every row,
+    # payments included.
+    total = round(
+        sum(
+            float(r.get("amount") or 0.0)
+            for r in projected
+            if not payments.is_bill_payment_row(r)
+        ),
+        2,
+    )
     note = explain_cycle(projected)
     return total, len(projected), note
 
