@@ -17,6 +17,7 @@ it is. Used by both /prepare-bill (on draft) and /update-bill (on refresh).
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 
 from . import installments, notion_client, payments
@@ -77,11 +78,53 @@ def find_bill(holder: Holder, card: str, bill_cycle: str) -> dict:
 # --------------------------------------------------------------------------
 
 
+# Cashback credits are named under two conventions in the data:
+#
+#   1. the word CASHBACK somewhere in the name — `Cashback 5%`,
+#      `UOB ONE CASHBACK 10%`, `NW2 Cashback 2% (1 พ.ค. - 31 พ.ค.)`,
+#      `[บัตรหลัก][Cashback] …`. Used on the UOB / AEON / First Choice cards.
+#   2. a `CB` prefix ahead of the merchant or campaign being credited —
+#      `CB TMN FAST FOOD BANGKOK THA`, `CB HTTPS://WWW.MAKRO.PRO/ BANGKOK TH`,
+#      `CB-025 SHELL-CALTEX NOV 2025`, `CB15_ SUP1 CAMPAIGN 1AUG26-31AUG26`,
+#      `CB88_SAV1 Campaign 01JUN26-30JUN26`. Used on Krungsri NOW (where the
+#      recording convention is a separate credit row rather than `% cb` — see
+#      scripts/repositories/cards/krungsri-now.yaml) and on several of
+#      Takumi's cards.
+#
+# The separator after `CB` varies — a space, a hyphen before a batch number, or
+# a digit opening a campaign code — so this is a character class rather than a
+# `startswith("CB ")`. `payments.is_bill_payment_row` already documents `CB …`
+# as a cashback convention; this is the same fact, applied to bucketing.
+_CB_PREFIX_RE = re.compile(r"^CB[\s\-_0-9]")
+
+
+def _is_cashback_row(row: dict) -> bool:
+    """True when a row is a cashback credit under either naming convention.
+
+    The `CB`-prefix branch also requires a **negative** amount. `CB` is only
+    two letters and could plausibly open a real merchant string, and every
+    cashback row in all three holders' data is a credit — so the sign costs
+    nothing and keeps a hypothetical `CB…` merchant out of the bucket.
+
+    The CASHBACK-substring branch is deliberately left sign-agnostic: it is
+    specific enough on its own, and a positive `Cashback …` row (a clawback of
+    previously-credited cashback) still belongs here rather than in
+    'manual-adjustment'.
+    """
+    name = (row.get("name") or "").strip().upper()
+    if "CASHBACK" in name:
+        return True
+    if not _CB_PREFIX_RE.match(name):
+        return False
+    return (row.get("amount") or 0.0) < 0
+
+
 def _categorize_row(row: dict) -> str:
     """Tag a transaction row by what it represents in the bill.
 
     Categories:
-      - 'cashback'           — credit row (name contains CASHBACK).
+      - 'cashback'           — credit row; see `_is_cashback_row` for the two
+                               naming conventions it recognizes.
       - 'installment-new'    — first term of a plan (term == 1).
       - 'installment-cont'   — second or later term of a plan.
       - 'bill-payment'       — a `ชำระ…`/`จ่าย…` row settling the bill.
@@ -108,7 +151,9 @@ def _categorize_row(row: dict) -> str:
     short by exactly the payment amount.
     """
     name = (row.get("name") or "").strip()
-    if "CASHBACK" in name.upper():
+    # Ahead of the installment test on purpose: a credit row that names the
+    # installment it refunds (`CB … 03/10`) is a cashback credit, not a term.
+    if _is_cashback_row(row):
         return "cashback"
     parsed = installments.parse(name)
     if parsed is not None:
