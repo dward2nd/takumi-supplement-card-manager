@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from . import installments, notion_client
+from . import installments, notion_client, payments
 from .holders import Holder
 
 
@@ -84,16 +84,28 @@ def _categorize_row(row: dict) -> str:
       - 'cashback'           — credit row (name contains CASHBACK).
       - 'installment-new'    — first term of a plan (term == 1).
       - 'installment-cont'   — second or later term of a plan.
+      - 'bill-payment'       — a `ชำระ…`/`จ่าย…` row settling the bill.
+                               EXCLUDED from `ยอดชำระ` by the callers, so it
+                               must not be narrated as something that shaped
+                               the total.
       - 'manual-adjustment'  — square-bracketed name (e.g.
                                `[เว็บรับหนี้ไปบริหารต่อ]`), or `Credit Return`
                                flag set, or a negative-amount row that isn't
-                               cashback / installment.
+                               cashback / installment / a bill payment.
       - 'regular'            — normal purchase.
 
     These are heuristics, not authoritative classifications. The bracket
     rule is intentionally limited to `[` — `(FOR SHOPEE)*(FOR SHOP …` is
     a legitimate merchant string that starts with `(` and should stay in
     `regular`.
+
+    The 'bill-payment' test delegates to `payments.is_bill_payment_row`, the
+    same predicate `/prepare-bill`'s `_sum_cycle` and `/update-bill`'s
+    `refresh_from_transactions` use to drop these rows from the sum. Sharing
+    the predicate is the point: when the two disagreed, the Note listed the
+    payment among the "manual adjustments" that produced `ยอดชำระ` while the
+    sum had excluded it, so following the Note's arithmetic landed a reader
+    short by exactly the payment amount.
     """
     name = (row.get("name") or "").strip()
     if "CASHBACK" in name.upper():
@@ -105,6 +117,12 @@ def _categorize_row(row: dict) -> str:
         return "manual-adjustment"
     if row.get("credit_return"):
         return "manual-adjustment"
+    # Must precede the negative-amount fallback below, which would otherwise
+    # swallow every payment row into 'manual-adjustment'. Strict on the Thai
+    # payment-verb prefix, so cashback credits, refunds and `[…]` rows are
+    # untouched.
+    if payments.is_bill_payment_row(row):
+        return "bill-payment"
     amount = row.get("amount") or 0.0
     if amount < 0:
         # Negative + not cashback + not bracketed — most likely a refund or
@@ -148,8 +166,13 @@ def explain_cycle(rows: list[dict]) -> str | None:
         - N ongoing installment term(s): ...
         - N cashback credit(s): ...
         - N manual adjustment(s): ...
+        - N bill payment(s) (excluded from the total): ...
 
     Bullets are omitted when their bucket is empty.
+
+    Every bullet except the last describes a row that *contributed* to
+    `ยอดชำระ`. Bill payments are listed separately and labelled excluded,
+    because the callers drop them from the sum — see `_categorize_row`.
     """
     buckets: dict[str, list[dict]] = defaultdict(list)
     for r in rows:
@@ -190,6 +213,18 @@ def explain_cycle(rows: list[dict]) -> str | None:
             descs.append(f"{r['name']} {_fmt_thb(amt)}{tail}")
         label = "manual adjustment" + ("" if len(adjustments) == 1 else "s")
         lines.append(f"- {len(adjustments)} {label}: {_join_short(descs)}.")
+
+    # Last, and explicitly flagged: these rows are NOT part of `ยอดชำระ`.
+    bill_payments = buckets.get("bill-payment", [])
+    if bill_payments:
+        descs = [
+            f"{r['name']} {_fmt_thb(float(r.get('amount') or 0.0))}" for r in bill_payments
+        ]
+        label = "bill payment" + ("" if len(bill_payments) == 1 else "s")
+        lines.append(
+            f"- {len(bill_payments)} {label} (excluded from the total): "
+            f"{_join_short(descs)}."
+        )
 
     if not lines:
         return None
