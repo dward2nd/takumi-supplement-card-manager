@@ -1,0 +1,28 @@
+name: KBank JCB
+issuer: KBank
+bill_cycle_pattern: kbank
+notes: |
+  Registered 2026-08-31 so the card resolves for BC/DD inference. `name` is
+  the verbatim Cards DS title in Baiboon's Cards DB (page
+  3cdcb755-f0f1-8085-a967-da69a91e7d67).
+
+  **Cycle is verified, the earning policy is not.** The `kbank` pattern
+  (bill cycle day 25, due day 10 of the next month) is confirmed from
+  KBank PLUSTINUM's live rows — bc 2026-06-25 → dd 2026-07-10 and
+  bc 2026-07-25 → dd 2026-08-10 — and the two cards sit on the same KBank
+  primary account (one statement bundles three KBank products under the
+  primary, no supplement sections), so they share the cut-off.
+
+  No reward fields are set, which means `classify` returns the card's
+  default `×1` and no cashback. That is a **placeholder, not a confirmed
+  policy**: the card had zero transactions until 2026-08-30, so there is no
+  history to infer points-per-baht, a cashback rate, or whether the petrol /
+  TrueMoney carve-outs apply. Ask the user before writing a reward-bearing
+  row on this card, and fill in `points_default` /
+  `petrol_exclusion` / `truemoney_711_points_exclusion` here once known.
+
+  Deliberately NOT assumed:
+    - `petrol_exclusion` — confirmed only for the UOB cards and ttb so smart.
+    - `truemoney_711_points_exclusion` — Krungsri-family only; KBank is not
+      in that family.
+    - `installment_rewards_upfront` — Krungsri-only convention.

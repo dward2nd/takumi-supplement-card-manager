@@ -2,10 +2,12 @@
 
 deterministic + idempotent — safe to re-run.
 
-Matching is strict: case-sensitive equality on the title text after
-trimming whitespace. We never substring-match (`UOB One` is not
-`UOB World`), and we never invent a card if zero matches. The caller
-gets an explicit error and is expected to surface it to the user.
+Matching is strict first, then forgiving on case only: exact
+case-sensitive equality on the title text after trimming whitespace,
+falling back to case-insensitive equality when that finds nothing. We
+never substring-match (`UOB One` is not `UOB World`), we never resolve
+an ambiguous match, and we never invent a card if zero matches. The
+caller gets an explicit error and is expected to surface it to the user.
 """
 
 from __future__ import annotations
@@ -29,13 +31,36 @@ def _title_text(page: dict) -> str:
 
 
 def find_card(cards_ds: str, card_name: str) -> dict:
-    """Return the single Card page whose title exactly equals `card_name`."""
+    """Return the single Card page whose title equals `card_name`.
+
+    Two passes, strict to forgiving:
+
+    1. exact, case-sensitive match;
+    2. case-insensitive match, when pass 1 finds nothing.
+
+    Pass 2 exists because a card's title is spelled independently in two
+    places in Notion — the Cards DS page title and the Bills `Card` SELECT
+    option — and the two do not always agree on case. `Krungsri VISA`
+    (Cards DS) vs `Krungsri Visa` (Bills SELECT, and the YAML repo) was
+    found 2026-08-27; see docs/concepts/known-divergences.md #11. Without
+    it, `/prepare-bill` cannot draft that card at all: it validates the
+    Bills SELECT with one spelling and then resolves the Cards relation
+    with the other, and no single string satisfies both. `card_repo.by_name`
+    already carries the same case-insensitive fallback for the same reason.
+
+    Case folding cannot reintroduce the confusion strictness guards against
+    — `UOB One` and `UOB World` differ by more than case — and an ambiguous
+    fold still raises rather than guessing.
+    """
     target = (card_name or "").strip()
     if not target:
         raise CardNotFoundError("card name is required")
 
     pages = notion_client.query_all(cards_ds)
     exact = [p for p in pages if _title_text(p).strip() == target]
+
+    if not exact:
+        exact = [p for p in pages if _title_text(p).strip().casefold() == target.casefold()]
 
     if not exact:
         substring_hits = sorted(

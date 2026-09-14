@@ -22,7 +22,7 @@ Per-cluster decisions:
 | `base` listed in `exclude` | `skipped-excluded` | No write. Use when the user has cancelled / closed a plan early. |
 | `max_term >= total_terms` | `skipped-complete` | No write. Plan finished. |
 | Any row in cluster already sits on the target cycle | `skipped-already-in-cycle` | No write. Idempotency guard — covers /add-installment writing `01/N` in this cycle and /populate-installment then being run on the same cycle. |
-| Otherwise | `appended` | Writes a new row with `term = max_term + 1`, same base, **previous term's amount**, target BC/DD. Transaction date == BC. |
+| Otherwise | `appended` | Writes a new row with `term = max_term + 1`, same base, **previous term's amount**, target BC/DD. Transaction date == BC. Inherits any campaign detected on the plan's earlier terms (see hard rule 5). |
 
 Invocation:
 
@@ -106,6 +106,22 @@ For a 10-month plan whose last posted term was 02/10 at 1079.20, the next term w
 
 The new row is classified via `lib.promotions.classify` with `is_installment_override=True`. On UOB One that hits the promo's `installment_rule` → 1% cashback + `×0`. Pass `auto_classify: false` to leave `% cb` and the multiplier unset (e.g. for First Choice plans where the user wants to leave classification manual).
 
+### 5. Campaign treatment is inherited from the plan's earlier terms
+
+Some installment plans belong to a bank campaign that changes how they earn — CardX's **ดีจังผ่อน 0%** and Krungsri's **U Plan 0%** both grant *no reward points* on every term. Both are post-purchase conversions, so **nothing in the merchant string reveals them**: two plans with identical merchant strings on the same card can earn differently. `classify` can't see it.
+
+So the skill reads the plan's already-recorded terms. If any of them carries a campaign's marker substring in its `Note`, the campaign applies to the new term too — forcing its multiplier and re-writing its exact `Note`. `% cb` is left as classified.
+
+The appended entry then carries `"campaign": "<id>"`. Registry: `scripts/repositories/installment-campaigns/`; full model in [[../../docs/concepts/installment-reward-campaigns]].
+
+**The `Note` is load-bearing.** It's the only durable record that a plan was converted. Don't reword a campaign note by hand — that silently breaks inheritance for every future term.
+
+### 6. `campaign_hint` is a question, never an action
+
+When a plan matches a campaign's issuer + typical term count but carries **no** campaign note, the entry comes back with `"campaign_hint": ["<id>"]` and **nothing is applied**. Dee-Jang issues 4-term plans where Thai plans conventionally run 3/6/10, and U Plan issues 3 — but a merchant could too.
+
+**Surface the hint to the user and ask.** Don't zero someone's points on a term count. If they confirm, patch the row with [[../update-transaction/SKILL.md|/update-transaction]] (`multiplier` + the campaign's exact note) and every later term inherits it automatically.
+
 ## Procedure
 
 1. **Confirm holder + card.** If the user says "populate Nuta's UOB One", that's the scope; no extra clarification needed.
@@ -115,6 +131,7 @@ The new row is classified via `lib.promotions.classify` with `is_installment_ove
 5. **Anomalies to mention** when reporting:
    - More than one cluster within the same `(base, total)` → confirms parallel plans (usually fine, worth a one-liner so the user knows the skill saw both).
    - A plan whose previous term's amount looks different from the bank-statement figure for this cycle → the user may want to `/update-transaction` after populate.
+   - Any `campaign` that was inherited (say which, so the `×0` isn't a surprise) and any `campaign_hint` that wasn't (ask, per hard rule 6).
 
 ## What this skill does NOT do
 

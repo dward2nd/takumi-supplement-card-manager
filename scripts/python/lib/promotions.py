@@ -18,11 +18,19 @@ Classification semantics (see also that doc):
        means points are still excluded → set `×0`).
      - The promo can override globally via `foreign_in_thb_policy.default: apply`
        (tier rules then apply to foreign-in-THB rows like any other row).
-  3. UOB-card petrol exclusion (general rule): petrol-merchant strings on
-     UOB-prefixed cards earn nothing.
+  3. Petrol exclusion (general rule): petrol-merchant strings on a card with
+     `petrol_exclusion: true` earn nothing.
+
+  Steps 2 and 3 are **not promo-driven** — they fire on a card with no active
+  promotion too, forcing `×0`. Only a promo's `overrides` / `default: apply`
+  can soften step 2, so with no promo the default exclusion always wins.
   4. Tier matching: first tier whose `patterns` matches the merchant
      string (and whose `exclude_patterns` does not) wins.
   5. Falls through to no cashback if nothing matches.
+  6. Card-level *points-only* exclusions are layered on top of whatever
+     1–5 decided: `truemoney_711_points_exclusion` (the Krungsri-family
+     rule) forces `×0` on 7-11 / TrueMoney rows while leaving the
+     cashback rate untouched, since only reward points are withdrawn.
 
 `points_default` on the promo (typically `"×0"` for cards like UOB One)
 is returned alongside the rate so callers can set the correct multiplier
@@ -239,12 +247,44 @@ def active_for_card_date(
 
 
 # Country suffixes we treat as "foreign" when they appear at the end of the
-# merchant string. TH is intentionally absent (TH = domestic).
+# merchant string.
+#
+# Both alpha-2 and alpha-3 forms appear in the data — the same issuer will
+# bill `APPLE.COM/BILL CORK IE` one month and `... CORK IRL` the next — so
+# both are listed. Three tokens are DELIBERATELY excluded; do not "complete"
+# the list by adding them (checked against the live data 2026-08-20):
+#
+#   THA  — domestic Thailand, the alpha-3 form of TH. 712 rows carry it
+#          (`WWW.SFCINEMACITY.COM-C BANGKOK THA`). Adding it would misclassify
+#          the single largest group of ordinary domestic charges as foreign.
+#   MTH  — also domestic (`7-11 PHOTHARAM ROAD CHANGPHUEAK MTH`), an issuer
+#          variant spelling, not Mauritania/anything foreign.
+#   VAT  — the tax line `SALES DR RETR FEE - INC OF VAT`, not Vatican City.
+#          A genuine alpha-3 collision; the accounting row must stay domestic.
+#   CHN  — foreign, but NOT foreign-in-THB. All 70 occurrences are CNY-billed
+#          `Alipay Shanghai CHN` / `UNIONPAY MERCHANT BEIJING CHN` rows on
+#          Nuta's AEON UnionPay, whose entire purpose is CNY spend at 3%
+#          cashback. Those are *genuine foreign-currency* charges, which the
+#          project rule explicitly does NOT exclude. Listing CHN here would
+#          zero out the one card that earns on them. Note the asymmetry with
+#          alpha-2 `CN`, which IS listed: `CN` has never appeared in the data,
+#          so it carries no such counter-evidence. Revisit if a THB-billed
+#          `… CHN` row ever shows up on a non-UnionPay card.
+#
+# Note this is a *heuristic on the merchant string* — the actual exclusion
+# hinges on the charge being billed in THB, which the string cannot tell us.
+# See the module docstring and docs/concepts/promotions.md.
 _FOREIGN_COUNTRY_TOKENS: frozenset[str] = frozenset({
-    "US", "USA", "JP", "SG", "KR", "HK", "TW", "CN", "MY", "VN",
+    # alpha-2
+    "US", "JP", "SG", "KR", "HK", "TW", "CN", "MY", "VN",
     "ID", "PH", "AU", "GB", "UK", "DE", "FR", "ES", "IT", "NL",
     "CH", "CA", "NZ", "IN", "AE", "QA", "SA", "TR", "LA", "KH",
-    "MM",
+    "MM", "IE", "SE",
+    # alpha-3 (THA / MTH / VAT excluded on purpose — see above)
+    "USA", "JPN", "KOR", "SGP", "HKG", "TWN", "MYS", "VNM",
+    "IDN", "PHL", "AUS", "GBR", "DEU", "FRA", "ESP", "ITA", "NLD",
+    "CHE", "CAN", "NZL", "IND", "ARE", "QAT", "SAU", "TUR", "LAO",
+    "KHM", "MMR", "IRL", "SWE",
 })
 
 _INSTALLMENT_RE = re.compile(r"\b\d{2}/\d{2}\b")
@@ -253,9 +293,25 @@ _INSTALLMENT_RE = re.compile(r"\b\d{2}/\d{2}\b")
 # `petrol_exclusion: true` in scripts/repositories/cards/<card>.yaml),
 # but the merchant-string heuristic for "is this a petrol station?" is
 # kept here next to the rest of the classification logic.
+#
+# One brand, several string forms — Bangchak bills as the ticker-style `BCP`,
+# the spelled-out `BANGCHAK-…`, *and* `BSRC-…`. The last is Bangchak Sriracha
+# (the former Esso Thailand network, renamed after Bangchak's acquisition), so
+# the dealer name follows the prefix: `BSRC-PHAAPOOM ENERGY LAMPHUN TH`,
+# `BSRC-SUSCO-MAE SA CHIANGMAI TH`. Added 2026-08-27 after a ttb so smart row
+# classified as the flat 1% tier; the household had already been hand-noting
+# those rows `หมวดหมู่น้ำมัน` (fuel category) since 2025-09.
 _PETROL_TOKENS: tuple[str, ...] = (
-    "PTTST", "PTT ", "BCP", "BANGCHAK", "ESSO", "SHELL", "CALTEX",
+    "PTTST", "PTT ", "BCP", "BANGCHAK", "BSRC", "ESSO", "SHELL", "CALTEX",
 )
+
+# 7-Eleven / TrueMoney heuristic, for the *points-only* exclusion carried by
+# `truemoney_711_points_exclusion: true` in scripts/repositories/cards/<card>.yaml
+# (the Krungsri-family rule). TrueMoney is matched on the merchant *prefix*
+# (`TMN ` / `TMN*`) so an unrelated merchant containing "TMN" mid-string
+# doesn't trip it; 7-Eleven is matched anywhere in the string.
+_TRUEMONEY_PREFIXES: tuple[str, ...] = ("TMN ", "TMN*")
+_SEVEN_ELEVEN_TOKENS: tuple[str, ...] = ("7-11", "7-ELEVEN")
 
 
 def is_installment(merchant_name: str) -> bool:
@@ -280,6 +336,89 @@ def _card_excludes_petrol(card: str) -> bool:
     """True when the card-repo entry for `card` has `petrol_exclusion: true`."""
     entry = card_repo.get(card)
     return bool(entry and entry.petrol_exclusion)
+
+
+def looks_truemoney_or_711(merchant_name: str) -> bool:
+    """True for TrueMoney (`TMN `/`TMN*` prefix) or 7-Eleven merchant strings."""
+    upper = merchant_name.strip().upper()
+    if any(upper.startswith(p) for p in _TRUEMONEY_PREFIXES):
+        return True
+    return any(tok in upper for tok in _SEVEN_ELEVEN_TOKENS)
+
+
+def _card_excludes_truemoney_711_points(card: str) -> bool:
+    """True when the card carries `truemoney_711_points_exclusion: true`."""
+    entry = card_repo.get(card)
+    return bool(entry and entry.truemoney_711_points_exclusion)
+
+
+def _apply_truemoney_711_points_exclusion(
+    result: "Classification", card: str, merchant_name: str
+) -> "Classification":
+    """Force `×0` points on 7-11 / TrueMoney rows for cards carrying the flag.
+
+    Points-only: `cashback_percent` is left exactly as the tier / promo logic
+    computed it, because the Krungsri-family rule withdraws *reward points*
+    only — cashback promotions are unaffected (user, 2026-08-08).
+    """
+    if not _card_excludes_truemoney_711_points(card):
+        return result
+    if not looks_truemoney_or_711(merchant_name):
+        return result
+    if result.points_override == "×0":
+        return result  # already excluded by a stronger rule; leave the note alone
+    note = (
+        "7-11 / TrueMoney — Krungsri-family cards earn no reward points at "
+        "these merchants."
+    )
+    return Classification(
+        cashback_percent=result.cashback_percent,
+        note=f"{result.note} {note}".strip() if result.note else note,
+        points_override="×0",
+        promotion_id=result.promotion_id,
+        reason=f"{result.reason}+truemoney-711-points-exclusion",
+    )
+
+
+def _apply_installment_rewards_upfront(
+    result: "Classification", card: str, *, is_inst: bool
+) -> "Classification":
+    """Zero out both axes on installment terms for cards flagged upfront-rewards.
+
+    Krungsri grants the points and cashback for an installment purchase **in
+    full at the moment of purchase**, not spread across the terms (user,
+    2026-08-10). Each `NN/NN` term therefore earns nothing on its own — the
+    reward already landed on the original charge.
+
+    The *reason* differs per card, so the explanation is data-driven: a card may
+    supply its own `installment_note`. First Choice does, because there the
+    mechanism is a dual credit line rather than upfront crediting — a
+    merchant-offered installment is booked against the personal-loan line, which
+    earns no card rewards at all.
+
+    Unlike the 7-11 / TrueMoney rule this touches *both* axes, so it runs only
+    when no promotion has spoken specifically about installments: a promo with
+    an explicit `installment_rule` (reason `installment`) is the more specific
+    fact and keeps its per-term rate. That is what leaves room for the First
+    Choice U Plan case, where a row earns no points but may still take cashback
+    under an active promo.
+    """
+    entry = card_repo.get(card)
+    if not is_inst or not (entry and entry.installment_rewards_upfront):
+        return result
+    if result.reason.startswith("installment"):
+        return result  # promo rules installments explicitly; it wins
+    note = entry.installment_note or (
+        f"Installment term — {card} grants points and cashback upfront at "
+        "purchase, so individual terms earn nothing."
+    )
+    return Classification(
+        cashback_percent=None,
+        note=f"{result.note} {note}".strip() if result.note else note,
+        points_override="×0",
+        promotion_id=result.promotion_id,
+        reason=f"{result.reason}+installment-rewards-upfront",
+    )
 
 
 def _matches_tier(merchant_name: str, tier: Tier) -> bool:
@@ -315,7 +454,38 @@ def classify(
     `is_installment_override` lets callers force-set the installment flag; by
     default it's auto-detected from the merchant string. Passing `False`
     explicitly disables auto-detection.
+
+    Card-level points-only exclusions are layered on top of the promo result
+    (step 6 in the module docstring), so they can withdraw points without
+    disturbing the cashback rate a promotion granted.
     """
+    result = _classify_core(
+        card,
+        date,
+        merchant_name,
+        is_installment_override=is_installment_override,
+        promotions=promotions,
+    )
+    is_inst = (
+        is_installment(merchant_name)
+        if is_installment_override is None
+        else is_installment_override
+    )
+    # Upfront-rewards runs first: it sets `×0`, which the TrueMoney step then
+    # sees and skips, so an installment row at a TrueMoney merchant carries one
+    # explanation rather than two stacked ones.
+    result = _apply_installment_rewards_upfront(result, card, is_inst=is_inst)
+    return _apply_truemoney_711_points_exclusion(result, card, merchant_name)
+
+
+def _classify_core(
+    card: str,
+    date: _dt.date,
+    merchant_name: str,
+    *,
+    is_installment_override: bool | None = None,
+    promotions: list[Promotion] | None = None,
+) -> Classification:
     actives = active_for_card_date(card, date, promotions=promotions)
     inst = (
         is_installment(merchant_name)
@@ -327,13 +497,33 @@ def classify(
     card_points_default = card_entry.points_default if card_entry else None
 
     if not actives:
-        # No active promo → no cashback. Still surface the petrol exclusion
-        # for the Note when it applies (card-driven).
+        # No active promo → no cashback. But the exclusions that withdraw
+        # *points* are not promo-driven, so they must still fire here — a row
+        # has to classify the same way whether or not a promo happens to be
+        # active on its card. Order mirrors the promo path below:
+        # foreign-in-THB first, then petrol.
+        #
+        # The foreign-in-THB check was missing until 2026-08-31, which left
+        # every foreign row on a promo-less card sitting at the card's default
+        # multiplier instead of ×0 (found on Baiboon's
+        # `[บัตรหลัก] AGODA.COM SL CNX-DMK INTERNET SG`, First Choice — a card
+        # with no active promo). Cashback was unaffected either way (None
+        # here regardless), so the bug was points-only.
+        if looks_foreign_in_thb(merchant_name):
+            return Classification(
+                cashback_percent=None,
+                note="Foreign merchant in THB — no cashback / points by default rule.",
+                points_override="×0",
+                promotion_id=None,
+                reason="foreign-default-exclude",
+            )
         if (_card_excludes_petrol(card) and _looks_petrol(merchant_name)):
             return Classification(
                 cashback_percent=None,
                 note=f"Petrol station — {card} earns no cashback / points at fuel merchants.",
-                points_override=card_points_default,
+                # Petrol withdraws BOTH axes, so the multiplier is forced to ×0
+                # rather than inheriting the card's default earning tier.
+                points_override="×0",
                 promotion_id=None,
                 reason="petrol-exclusion",
             )
@@ -404,7 +594,10 @@ def classify(
         return Classification(
             cashback_percent=None,
             note=f"Petrol station — {card} earns no cashback / points at fuel merchants.",
-            points_override=promo.points_default or card_points_default,
+            # As above: ×0 on both axes. Inheriting `promo.points_default` would
+            # hand a petrol row the promo's boosted tier (e.g. UOB World's ×5),
+            # contradicting the note this same branch writes.
+            points_override="×0",
             promotion_id=promo.id,
             reason="petrol-exclusion",
         )

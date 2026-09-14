@@ -74,3 +74,30 @@ This bites exactly one card in the current household — [[../cards/lotuss-beyon
 There is no point fixing this in Notion — the multiplier-checkbox shape can't be coaxed into representing 0.25× per row, and inventing a new fractional column would compound the divergence between Takumi / Baiboon / Nuta. See the broader framing in [[points-and-multipliers#approximation-caveat]].
 
 **Resolved in phase 2**: `RewardRule.value` is a plain number (no integer constraint). See [[../future-app/data-model-target]] and the `RewardRule` shape in [[../future-app/product-shape]].
+
+## 11. A card's title is spelled twice, and the two can disagree on case
+
+A card's name lives in two independent places in Notion: the **Cards DS page title** and the **Bills `Card` SELECT option** (divergence 1 is why there are two at all). Nothing keeps them in sync, and for one card they differ:
+
+| Where | Spelling |
+|---|---|
+| Baiboon's Cards DS page title | `Krungsri VISA` |
+| Baiboon's + Nuta's Bills `Card` SELECT | `Krungsri Visa` |
+| `scripts/repositories/cards/krungsri-visa.yaml` → `name` | `Krungsri Visa` |
+
+Found 2026-08-27 while adding a transaction to that card. It matters because the two spellings are consumed by different code paths that cannot both be satisfied by one string:
+
+- `lib.cards.find_card` resolves the **Cards DS title** (exact) to build a transaction's `Card` relation → needs `Krungsri VISA`.
+- `/prepare-bill` validates against the **Bills SELECT** option list → needs `Krungsri Visa`.
+- `lib.card_repo.by_name` joins on the YAML `name` → and used to be case-sensitive, so `Krungsri VISA` silently missed, dropping the card's `bill_cycle_pattern` and its `truemoney_711_points_exclusion` / `installment_rewards_upfront` flags. A `TMN*` row or an `NN/NN` term on this card would then have earned points it shouldn't.
+
+`/prepare-bill` needs **both** spellings in a single call — it validates the SELECT with `card_name` and then hands that same string to `find_card` — so until 2026-09-09 the card could not be drafted at all. The failure surfaced when the first Krungsri Visa bill was drafted (cycle 2026-09-05): `CardNotFoundError: no card titled exactly 'Krungsri Visa' … Substring candidates: ['Krungsri VISA']`.
+
+**Mitigated on the code side; the Notion data still diverges.** Both resolvers now fall back to a case-insensitive match that refuses ambiguity:
+
+- `card_repo.by_name` — three passes (exact → apostrophes folded → case-insensitive).
+- `lib.cards.find_card` — two passes (exact → case-insensitive), added 2026-09-09 for the reason above.
+
+Case folding cannot reintroduce what strictness guards against (`UOB One` vs `UOB World` differ by more than case), and an ambiguous fold still raises. The YAML deliberately keeps `Krungsri Visa` — matching the Bills SELECT — which means the README's "exact Cards DS title" rule is satisfied only up to case for this one card.
+
+Renaming either side in Notion would still fix it properly at the source; until then, either spelling resolves everywhere, so don't "correct" the YAML to `Krungsri VISA` — it would buy nothing and desynchronize it from the Bills SELECT.

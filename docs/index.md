@@ -44,6 +44,7 @@ Each note opens with a live Notion URL, collection ID, and the full property sch
 - [[concepts/points-and-multipliers]] — `×0` `×2` `×3` `×4` `×5` `÷4`
 - [[concepts/cashback]] — `% cb` on Baiboon and Nuta (not Takumi)
 - [[concepts/promotions]] — cashback is promotion-driven; effective dates, tier rules, and how general rules (foreign-in-THB, etc.) interact with promos
+- [[concepts/installment-reward-campaigns]] — ดีจังผ่อน / U Plan and why an installment plan's rewards can't be read off the merchant string
 - [[concepts/premium-tier]] — Signature / Platinum / none
 - [[concepts/card-network]] — JCB / Mastercard / VISA / UnionPay
 - [[concepts/known-divergences]] — schema inconsistencies worth knowing

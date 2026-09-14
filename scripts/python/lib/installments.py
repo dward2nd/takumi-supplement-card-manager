@@ -17,6 +17,11 @@ tolerance, and each cluster is its own plan with its own term sequence.
 This module is the single source of truth for the format so that add-,
 populate-, prepare-, and update-bill skills agree on what counts as an
 installment row.
+
+Reward treatment can also be a property of the *plan* rather than the card
+or the merchant — see `lib.installment_campaigns`. `populate_for_cycle`
+inherits a detected campaign from the plan's earlier terms so a converted
+0%-installment plan keeps earning nothing on every subsequent term.
 """
 
 from __future__ import annotations
@@ -182,7 +187,7 @@ def populate_for_cycle(
     decorate). Used by /populate-installment directly and by /prepare-bill
     via this function — keeps a single implementation in one place.
     """
-    from . import notion_client, promotions  # local — keep parse/format light
+    from . import card_repo, installment_campaigns, notion_client, promotions
     from .transaction_write import build_transaction_properties
 
     exclude = exclude or set()
@@ -250,6 +255,30 @@ def populate_for_cycle(
             cashback_percent = cls.cashback_percent
             multiplier = cls.points_override
             note = cls.note
+
+        # Plan-level campaign inheritance. A campaign like CardX's ดีจังผ่อน 0%
+        # is invisible to promotions.classify (which only sees card + date +
+        # merchant string), so the evidence has to come from the plan's own
+        # earlier terms — their `Note`. Points-only: the campaign overrides the
+        # multiplier and note but never touches `% cb`, which stays whatever
+        # the card's normal policy produced above.
+        campaign = installment_campaigns.detect_from_rows(cluster)
+        if campaign is not None:
+            entry["campaign"] = campaign.id
+            if campaign.points_default:
+                multiplier = campaign.points_default
+            if campaign.note:
+                note = campaign.note
+        else:
+            card_entry = card_repo.get(card_name)
+            hints = installment_campaigns.hint_for_plan(
+                issuer=card_entry.issuer if card_entry else None,
+                total_terms=total,
+            )
+            if hints:
+                # Advisory only — never applied. Surfaced so the agent can ask
+                # whether this plan belongs to the campaign.
+                entry["campaign_hint"] = hints
 
         props = build_transaction_properties(
             name=next_name,

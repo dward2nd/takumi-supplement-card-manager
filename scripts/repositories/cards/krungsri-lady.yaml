@@ -1,0 +1,26 @@
+name: Krungsri Lady
+issuer: Krungsri
+bill_cycle_pattern: krungsri
+truemoney_711_points_exclusion: true
+installment_rewards_upfront: true   # Krungsri pays an installment's points + cashback in full
+                                    # at purchase, so each NN/NN term earns nothing on its own.
+notes: |
+  Registered 2026-09-14 at the user's instruction, alongside the first
+  transaction ever recorded against this card. The Notion Cards row already
+  existed but was empty — no ธนาคาร/บริษัท (bank/company) set, zero balance,
+  zero transactions — so nothing in the repo referenced it.
+
+  UNVERIFIED — `bill_cycle_pattern: krungsri` (cut-off day 5, due +20 days) is
+  inherited from the three sibling Krungsri cards, NOT confirmed against a
+  statement. No Krungsri Lady statement has been seen. Re-check against the
+  first statement and correct this key if the real cut-off differs; the
+  2026-09-14 `HTTPS://WWW.MAKRO.PRO/` row was filed under BC 2026-10-05 /
+  DD 2026-10-25 on this assumption and would need repointing too.
+
+  The two Krungsri-family reward flags above are inherited on the same basis
+  (issuer-level rules, so they should hold), but neither has been observed on
+  this card's own data yet.
+
+  No cashback programme known. Cashback is promotion-driven, and no
+  `promotions/*.yaml` targets this card, so `auto_classify` leaves `% cb`
+  unset on every row. Add a promo entry when the user announces one.

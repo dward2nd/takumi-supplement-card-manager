@@ -1,4 +1,29 @@
 name: UOB World
 issuer: UOB
 bill_cycle_pattern: uob
+points_default: "×2"
 petrol_exclusion: true
+notes: |
+  Points card — earns NO cashback on any row; `% cb` stays unset always.
+
+  Two earning tiers, both predating the promotions system (user, 2026-08-20):
+
+    - `×5` — the standing bonus, active in the data since 2025-01-28. Encoded
+      as promotions/uob-world-points.yaml so it carries effective dates.
+    - `×2` — this card's BASE rate for Thailand merchants, and what rows fall
+      back to once the bonus quota is used up. That is why `points_default`
+      here is `×2` and not `×1`: an unboosted UOB World row still earns
+      double, so `×1` would under-report.
+
+  **Per-cycle bonus quota ≈ ฿20,000 — NOT enforced by any script.** Once a
+  cycle's eligible spend passes the quota, further rows drop from `×5` to
+  `×2`, and the row that straddles the boundary is split by hand. Evidence in
+  Notion (verbatim notes on Baiboon's rows):
+
+      ได้คะแนน 2 เท่าเพราะเต็มโควต้า 20k แล้ว
+      ยอดเกินมาจาก quota 20k เป็นจำนวน 729.55 บาท เหลือยอดที่ได้ 5 เท่า
+
+  `lib.promotions.classify` is a pure function of (card, date, merchant) and
+  has no view of cycle-to-date spend, so it ALWAYS returns `×5` while the
+  bonus promo is active. Check the cycle total before trusting it on a
+  high-spend cycle — Feb 2026 and Apr 2026 both blew the quota.

@@ -126,9 +126,12 @@ PATTERNS: dict[str, BillCyclePattern] = {
         bill_day=25,
         due_from_nominal_bc=_due_fixed_next_month(10),
     ),
+    # HISTORICAL — no card points at this pattern any more. Lotus's Beyond moved
+    # to `krungsri` (day 5, +20d) on 2026-08-08; its pre-switch rows still carry
+    # BC day 28 / DD +20, so the pattern is kept for reading that history.
     "lotus": BillCyclePattern(
         key="lotus",
-        description="Lotus — bill cycle day 28, due +20 days",
+        description="Lotus (historical, pre-2026-08-08) — bill cycle day 28, due +20 days",
         bill_day=28,
         due_from_nominal_bc=_due_plus(20),
     ),

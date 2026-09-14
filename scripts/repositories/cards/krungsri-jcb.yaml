@@ -1,3 +1,6 @@
 name: Krungsri JCB
 issuer: Krungsri
 bill_cycle_pattern: krungsri
+truemoney_711_points_exclusion: true
+installment_rewards_upfront: true   # Krungsri pays an installment's points + cashback in full
+                                    # at purchase, so each NN/NN term earns nothing on its own.

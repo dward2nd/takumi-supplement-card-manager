@@ -1,3 +1,18 @@
 name: CardX JCB
 issuer: CardX
-bill_cycle_pattern: krungsri      # CardX is a Krungsri spinoff; same BC/DD shape
+bill_cycle_pattern: krungsri      # same BC/DD shape as the krungsri pattern (day 5, +20d) — a coincidence of shape only
+# CardX is part of the SCB X group — a completely different financial group from
+# Krungsri (user, 2026-08-08). It shares only the bill-cycle pattern key above.
+# So Krungsri-family rules do NOT reach this card: no truemoney_711_points_exclusion,
+# and deliberately no installment_rewards_upfront either — see below.
+notes: |
+  Installments: deliberately NO `installment_rewards_upfront` flag. Only plans
+  converted under the ดีจังผ่อน 0% campaign lose points on this card (user,
+  2026-08-10); merchant-offered installments earn normally. A card-level flag
+  would wrongly zero both. The campaign is plan-level and detected from the
+  `Note` on earlier terms — see
+  scripts/repositories/installment-campaigns/dee-jang.yaml and
+  docs/concepts/installment-reward-campaigns.md.
+
+  Tell for a ดีจังผ่อน plan: 4 terms, where Thai plans conventionally run 3, 6
+  or 10. Advisory only — never auto-applied.

@@ -1,3 +1,21 @@
-name: Lotus's Beyond
+name: Lotus's Beyond            # verbatim Cards DS title — ASCII apostrophe, matching the Notion page
 issuer: Lotus
-bill_cycle_pattern: lotus
+bill_cycle_pattern: krungsri
+# The Notion title used a typographic apostrophe (U+2019) until 2026-08-08 and so
+# never matched this file; the page was renamed to the ASCII form, which is the
+# preferred spelling (user, 2026-08-08). Keep both in sync if either is edited.
+# Bill cycle switched from the `lotus` pattern (day 28, due +20d) to `krungsri`
+# (day 5, due +20d) by the user on 2026-08-08, to line this card up with the rest
+# of the Krungsri family. Notes:
+#   - Rows written BEFORE the switch keep their old dates (BC day 28 / DD +20) and
+#     are deliberately NOT migrated (user instruction). The two existing rows sit
+#     on BC 2026-05-28 / DD 2026-06-17.
+#   - So the `lotus` pattern in lib.bill_cycle is retained for reading history,
+#     even though no card points at it any more.
+#   - Backdating a row into a pre-switch cycle must pass explicit bill_cycle +
+#     due_date; the inference now answers with the new pattern for every date.
+# truemoney_711_points_exclusion is deliberately ABSENT (user, 2026-08-08).
+# Krungsri-family cards earn no points at 7-11 / TrueMoney, but Lotus's Beyond
+# is exempt: Lotus's, 7-Eleven and TrueMoney are all CP ALL businesses, so those
+# merchants keep earning points here. Do not add the flag. The shared bill-cycle
+# pattern above does NOT change that — it is a BC/DD shape, not family membership.

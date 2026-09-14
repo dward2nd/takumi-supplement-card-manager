@@ -11,7 +11,7 @@ This is a write skill — it overrides the project's "don't mutate Notion withou
 
 ## Primary execution path — the deterministic script
 
-Backed by `scripts/python/prepare-bill/cli.py`. Use it.
+Backed by `scripts/python/prepare-bill/cli.py`, a thin CLI over `lib.bill_draft.draft_bill` (where the drafting core lives so [[../update-bill/SKILL.md|/update-bill]] can reuse it — it drafts a missing bill when a payment slip needs somewhere to attach). Use it.
 
 ```sh
 echo '<JSON-spec>' | uv run scripts/python/prepare-bill/cli.py

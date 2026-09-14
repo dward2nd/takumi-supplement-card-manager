@@ -1,0 +1,8 @@
+id: uob-world-points
+name: UOB World ×5 points bonus (standing)
+card: UOB World
+effective_start: '2025-01-01'
+effective_end: null
+status: active
+points_default: ×5
+tiers: []

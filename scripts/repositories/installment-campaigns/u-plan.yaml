@@ -1,0 +1,42 @@
+id: u-plan
+name: U Plan 0% (Krungsri self-requested installment conversion)
+issuer: Krungsri
+status: active
+
+# Points-only withdrawal. Cashback is deliberately NOT zeroed here: U Plan rows
+# "might receive the cashback, varying by promotion" (user, 2026-08-10). So the
+# campaign forces ×0 and leaves `% cb` to whatever the card's active promo — or
+# the user's manual entry, which is how First Choice cashback works — decides.
+points_default: "×0"
+cashback: varies-by-promotion
+
+# Byte-identical to the note already on Baiboon's First Choice U Plan rows
+# (ICARE-RT / FUTURE ELECTRONICS, cycles 2026-03-05 → 2026-07-05). Rewording it
+# breaks `detect.note_contains` against those historical rows.
+note: เป็นรายการผ่อนชำระเอง ไม่ได้รับคะแนนสะสม
+
+detect:
+  # DEFINITIVE. "ผ่อนชำระเอง" — self-requested installment — is the phrase the
+  # user writes on U Plan terms, and it is what /populate-installment inherits.
+  note_contains: ผ่อนชำระเอง
+
+  # ADVISORY ONLY. U Plan converts to 0% over 3 months. Unlike Dee-Jang's 4,
+  # 3 IS a conventional Thai installment term, so this hint is weaker than
+  # Dee-Jang's — plenty of merchant-offered plans also run 3 terms. Never
+  # auto-applied; it only raises a `campaign_hint`.
+  typical_total_terms: [3]
+
+notes: |
+  U Plan is Krungsri's post-purchase conversion: the cardholder pays in full at
+  the merchant, then asks Krungsri to re-split the posted charge into 0%
+  interest over 3 months. Like ดีจังผ่อน on CardX, it is requested from the bank
+  rather than offered at checkout, so the merchant string cannot reveal it —
+  hence a plan-level campaign rather than a card flag.
+
+  Relationship to the card-level `installment_rewards_upfront` flag on the four
+  Krungsri cards: that flag already zeroes both points and cashback on Krungsri
+  installment terms, because the rewards were granted in full at purchase time.
+  U Plan is the narrower statement that the *points* are gone for good while
+  cashback may still be paid per promotion. Where a Krungsri promo defines an
+  explicit `installment_rule`, that rule wins and pays cashback per term; this
+  campaign keeps forcing ×0 on top of it.

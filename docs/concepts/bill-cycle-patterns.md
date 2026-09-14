@@ -28,12 +28,12 @@ For UOB this comparison uses the *shifted* bill-cycle date (see UOB below), not 
 
 | Issuer family             | Bill cycle day  | Due date                          | Notes                          |
 |---------------------------|-----------------|-----------------------------------|--------------------------------|
-| Krungsri / First Choice / CardX | day **5**   | bill cycle **+ 20 days**          | consistent, no shifts          |
+| Krungsri / First Choice / CardX / Lotus's | day **5**   | bill cycle **+ 20 days**          | consistent, no shifts; Lotus's joined 2026-08-08 |
 | KTC                       | day **27**      | bill cycle **+ 15 days**          | consistent, no shifts          |
 | ttb                       | day **27**      | bill cycle **+ 20 days**          | same BC day as KTC, longer grace |
 | AEON                      | day **10**      | day **2** of the **next** month   | consistent, no shifts; fixed-day due |
 | KBank                     | day **25**      | day **10** of the **next** month  | consistent, no shifts; fixed-day due |
-| Lotus                     | day **28**      | bill cycle **+ 20 days**          | consistent, no shifts          |
+| ~~Lotus~~ *(historical)*  | day **28**      | bill cycle **+ 20 days**          | **retired 2026-08-08** — see below |
 | SPayLater                 | day **15**      | bill cycle **+ 10 days**          | consistent, no shifts          |
 | UOB                       | day **25**      | bill cycle **+ 20 days**          | see *UOB exceptions* below     |
 
@@ -48,11 +48,22 @@ For UOB this comparison uses the *shifted* bill-cycle date (see UOB below), not 
 | `ttb …`              | ttb            |
 | `AEON …`             | AEON           |
 | `KBank …`            | KBank          |
-| `Lotus …`            | Lotus          |
+| `Lotus's Beyond`     | Krungsri/etc   |
 | `SPayLater`          | SPayLater      |
 | `UOB …`              | UOB            |
 
 The match is on the card's title in the Cards DB. Looking up the `ธนาคาร/บริษัท` (bank/company) select is unreliable — many rows have it blank — so we key off the card name itself. See [[known-divergences#9. Takumi's Cards DB omits ธนาคาร/บริษัท]].
+
+**Apostrophes: use ASCII `'`.** It is the preferred spelling in both Notion titles and the card YAMLs. Notion's editor inserts the typographic `’` (U+2019) readily and it is visually identical, so a mismatch is silent — `Lotus's Beyond` was mis-titled in Notion for months, and `card_repo` returned `None` for it, meaning the card had *no* bill-cycle pattern and *no* exclusion flags. `lib.card_repo.by_name` now folds curly→ASCII as a safety net, but the titles themselves should stay ASCII. If a card reports "no registered pattern", check the apostrophe first.
+
+### Lotus's Beyond changed pattern on 2026-08-08
+
+The card moved from the retired `lotus` pattern (day 28, +20d) onto `krungsri` (day 5, +20d), matching the rest of the Krungsri family.
+
+- **Pre-switch rows keep their old dates and were deliberately not migrated** (user instruction). The card's two existing rows stay on BC `2026-05-28` / DD `2026-06-17`.
+- The `lotus` key is retained in `lib.bill_cycle.PATTERNS` purely so that history reads correctly; no card points at it.
+- Inference has no notion of a dated pattern change, so it now answers with day-5 for *every* date. **Backdating a row into a pre-switch cycle must pass explicit `bill_cycle` + `due_date`.**
+- The shared pattern key does **not** make this a Krungsri-family card for reward purposes — it stays exempt from the 7-11 / TrueMoney points exclusion. See [[krungsri-truemoney-711-exclusion]].
 
 ## UOB exceptions — weekend / Thai public holiday shifts
 

@@ -1,0 +1,40 @@
+id: dee-jang
+name: ดีจังผ่อน 0% (Dee-Jang 0% installment conversion)
+issuer: CardX
+status: active
+
+# What the campaign does to rewards. Points-only: every term of a converted
+# plan earns nothing, while cashback follows the card's normal policy.
+points_default: "×0"
+cashback: unaffected
+
+# Written verbatim onto every term of a plan under this campaign. Byte-identical
+# to what the user hand-entered on the pre-automation CardX JCB rows — do not
+# reword it, or `detect.note_contains` stops matching the historical rows.
+note: ไม่ได้รับคะแนนสะสม เนื่องจากเป็นจากรายการดีจังผ่อน 0%
+
+# How lib.installment_campaigns recognises a plan as belonging to this campaign.
+detect:
+  # DEFINITIVE. A prior term carrying this substring in its `Note` proves the
+  # plan is a Dee-Jang conversion, so /populate-installment inherits the
+  # treatment onto the next term without being told.
+  note_contains: ดีจังผ่อน
+
+  # ADVISORY ONLY — never auto-applied. Thai installment plans are
+  # conventionally 3, 6 or 10 months; Dee-Jang issues 4. A 4-term plan on a
+  # CardX card is therefore probably a Dee-Jang conversion, but "probably" is
+  # not enough to zero out points, so this only raises a `campaign_hint`.
+  typical_total_terms: [4]
+
+notes: |
+  ดีจังผ่อน is a post-purchase conversion: the cardholder asks CardX to split an
+  already-posted charge into 0% installments. Because it is requested from the
+  bank rather than offered by the merchant at checkout, NOTHING in the merchant
+  string distinguishes a converted plan from a merchant-offered one — the
+  campaign is an attribute of the *plan*, not of the card and not of the
+  merchant. That is why this lives here as a plan-level campaign instead of as
+  a `cards/*.yaml` flag: a card-level flag would wrongly zero points on
+  merchant-offered installments taken on the same card.
+
+  Scope confirmed by the user 2026-08-10: only plans in this campaign lose
+  points. Other CardX JCB installments earn normally.

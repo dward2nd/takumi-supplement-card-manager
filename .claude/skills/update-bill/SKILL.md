@@ -37,6 +37,7 @@ JSON spec:
   "payment_date":   "2026-05-29",
   "finalize":      true,
   "auto_close_on_statement": true,
+  "auto_prepare_bill": true,
   "properties":    { "<raw notion prop>": ... }
 }
 ```
@@ -48,6 +49,17 @@ JSON spec:
 `auto_close_on_statement` (default `true`) — attaching a statement PDF (`statement_pdf` / `statement_pdfs`) *closes* the bill: the CLI auto-finalizes (strips `[DRAFT] `) and, **only when payment is proven**, sets `จ่ายแล้ว: true`. See [[#when-a-bill-gets-marked-จ่ายแล้ว-true|When a bill gets marked จ่ายแล้ว]] for the evidence gate. An explicit `finalize` / `paid` in the spec overrides the auto behaviour; set `auto_close_on_statement: false` to disable it entirely (e.g. saving a statement on a cycle that isn't settled yet without touching the title). Needs the bill resolvable by `(holder, card, bill_cycle)` — the `id`-only form skips it. The `auto_paid` block in the response reports `amount_due`, `recorded_payments`, and the `settled` decision.
 
 `refresh_from_transactions: true` re-derives the bill's `ยอดชำระ` from the cycle's transactions — **excluding bill-payment rows**, since `ยอดชำระ` is the amount *due*, not the balance remaining. Payment rows are matched by `lib.payments.is_bill_payment_row` (negative amount + a name opening with `ชำระ…` / `จ่าย…`); cashback credits, refunds and `[…]`-prefixed adjustments all still count. See [[../prepare-bill/SKILL.md#payment-rows-are-excluded-from-the-total|/prepare-bill → Payment rows are excluded]] for why (the total would otherwise be order-dependent), and note that bills drafted before this rule existed will compute differently on refresh — don't mass-refresh settled bills to reconcile them. It also (unless the spec also passes an explicit `note`) regenerates the explanation Note via the same `lib.bills.explain_cycle` function [[../prepare-bill/SKILL.md|/prepare-bill]] uses on draft. Use this after appending installment terms or cashback credits to a cycle whose bill was already drafted — without it, the bill row's amount would silently drift from the underlying transactions. Requires the bill to be resolvable by `(holder, card, bill_cycle)`; the `id`-only form needs those echo fields supplied alongside.
+
+`auto_prepare_bill` (default `true`) — when a **slip** is being attached and no Bills row exists for `(holder, card, bill_cycle)`, the CLI drafts it first (via `lib.bill_draft.draft_bill`, the same core behind [[../prepare-bill/SKILL.md|/prepare-bill]]) and then attaches the slip to the new row. The response carries the draft envelope under `prepared_bill` and `"bill drafted"` leads the `fields` list.
+
+The peer often transfers **before** the statement cuts — an advance, or the balance Takumi quoted them — so on the day a slip arrives the Bills row may simply not exist yet. That's a timing artifact, not a decision point; don't stop and ask whether to draft it (user instruction, 2026-08-04). Notes:
+
+- Gated on a **slip** specifically. A Note-only or statement-only patch against a missing bill still raises `BillNotFoundError`, so a typo'd `bill_cycle` can't quietly mint a bill. `draft_bill` also refuses a cycle with no transactions, which catches most typos even when a slip is present.
+- The `id`-only form can't draft (nothing to resolve from). Pass the lookup keys.
+- Resolve the cycle from the card's **bank pattern**, not the slip's date — a slip dated 4 Aug can belong to the cycle closing 5 Aug (see [[../../docs/concepts/bill-cycle-patterns|bill-cycle-patterns]]).
+- The drafted `ยอดชำระ` is the amount **due** (payment rows excluded), so it will exceed a single slip whenever an advance was already paid. Expected, not a mismatch to reconcile.
+- Drafting a bill so a slip can attach does **not** license `จ่ายแล้ว` — see the evidence gate below.
+- Set `false` to restore the old not-found error.
 
 **Identify the bill row** either by `(holder, card, bill_cycle)` *or* by `id`. If `id` is set, the lookup keys are optional (used only for the response echo). Otherwise all three lookup keys are required and must match a unique row.
 
@@ -83,12 +95,17 @@ The CLI can't OCR a slip image, so it uses the slip-derived payment row (the `re
 
 **Explicit paths — always win over the automatic one:**
 
-1. **Verified transfer slip.** `หลักฐานการชำระ` has slip(s) whose amounts (parsed from each slip's content) **sum to the bill's `ยอดชำระ` exactly** — not "close enough", not "one slip, ignore the rest". Then pass `paid: true`. On a mismatch, surface the delta and leave `จ่ายแล้ว` alone. This is a check, not a correction — per *Reconcile against the statement PDF* below, don't adjust `ยอดชำระ` or any slip amount to make them line up.
-2. **Explicit user instruction.** The user says "mark it paid" or passes `paid: true`. This is also how the user declares the **exception** to the peer-transfers-first model: when a peer **paid the bank directly themselves**, there's no transfer slip to Takumi, so the user marks it paid explicitly. The CLI never infers this case on its own.
+1. **Verified transfer slip — *and* the statement on file.** All three must hold: `หลักฐานการชำระ` has slip(s); `ใบแจ้งยอด (PDF)` has the issuer's statement; and the slip amounts (parsed from each slip's content) **sum to the bill's `ยอดชำระ` exactly** — not "close enough", not "one slip, ignore the rest". Then pass `paid: true`. On a mismatch, surface the delta and leave `จ่ายแล้ว` alone. This is a check, not a correction — per *Reconcile against the statement PDF* below, don't adjust `ยอดชำระ` or any slip amount to make them line up.
+
+   **Slips that reconcile perfectly are not sufficient on their own.** With no statement attached, leave the flag alone and offer to flip it once the statement lands. The agent has flipped `จ่ายแล้ว` prematurely on statement-less drafts four times (2026-06-26, 07-06, 07-27, 08-04) and the user reverted it every time; the 08-04 case was caused by this very bullet, which used to omit the statement requirement while the prose above says the statement isn't the *evidence*. Both are true and not in conflict: the transfer slip is what proves the peer paid, and the statement is what makes the bill final enough to close. `จ่ายแล้ว` needs both.
+2. **Explicit instruction *about the checkbox itself*.** The user directs `จ่ายแล้ว` specifically, or passes `paid: true` themselves. This is also how the user declares the **exception** to the peer-transfers-first model: when a peer **paid the bank directly themselves**, there's no transfer slip to Takumi, so the user marks it paid explicitly. The CLI never infers this case on its own.
+
+   **A routine "mark that X paid" is NOT this** — that means *record the payment* (attach the slip, write the negative `ชำระบิลเต็มจำนวน` ledger row) and leave the checkbox for the statement. Nor does a user **supplying a slip you asked for** authorize the flag: don't read your own prior "send it and I'll flip it" framing back as consent, and don't make that offer — offer to flip it *once the statement arrives*.
 
 **Adjacent corner cases:**
 
-- *Transfer slip present, but no statement yet.* The automatic path is statement-triggered, so it won't fire — but you may still mark paid via the explicit verified-slip path once the slip amount matches. The bill stays `[DRAFT]` until a statement finalizes it.
+- *Transfer slip present, but no statement yet.* **Leave `จ่ายแล้ว` alone** — the automatic path is statement-triggered so it won't fire, and path #1 requires the statement too. Attach the slip, record the payment, and offer to flip the flag once the statement lands. The bill stays `[DRAFT]` until then. This holds even when the slips sum to `ยอดชำระ` to the satang.
+- *Slip arrives before the Bills row exists at all.* The row is drafted automatically and the slip attached to it — see `auto_prepare_bill` above. Still no `จ่ายแล้ว`.
 - *Statement uploaded, no transfer slip yet.* Auto-finalizes, leaves `จ่ายแล้ว` unpaid (`settled: false`, reason "no transfer slip"). Correct — the peer hasn't settled with Takumi.
 - *A bank-payment line on the statement (or a `ชำระ…` ledger row) but no slip file.* Does **not** by itself mark paid — that reflects Takumi paying the bank, not the peer transferring. The transfer-slip file is the contract.
 - *Multiple slips totalling the bill amount.* Allowed — sum them.
@@ -160,7 +177,7 @@ Pass `--dry-run` to the CLI when a mistake would be hard to undo (e.g. writing a
 
 ## What this skill does NOT do
 
-- Does **not** create new Bills rows. The Bills DB has its own creation flow per cycle; this skill only patches.
+- Does **not** create new Bills rows *as its own purpose* — [[../prepare-bill/SKILL.md|/prepare-bill]] owns per-cycle drafting. The one exception is `auto_prepare_bill`: when a slip needs a row to attach to and none exists, this skill drafts one by delegating to the same `lib.bill_draft` core. It never creates a bill for a Note-only or statement-only patch.
 - Does **not** add *charge* transactions. Use [[../add-transaction/SKILL.md|/add-transaction]]. (It does record one *payment* transaction on slip upload, by delegating to [[../record-payment/SKILL.md|/record-payment]] — see *Slip upload records the payment*.)
 - Does **not** edit transactions. Use [[../update-transaction/SKILL.md|/update-transaction]].
 - Does **not** mutate Takumi's data (Takumi has no Bills DB).

@@ -36,6 +36,7 @@ JSON spec:
   "total_terms":      10,
   "bill_cycle":       "2026-05-25",       // optional; defaults to most-recently-closed cycle
   "auto_classify":    true,                // optional, default true
+  "campaign":         "dee-jang",          // optional; "dee-jang" | "u-plan" — see hard rule 6
   "multiplier":       "×0",                // optional override
   "cashback_percent": 0.01,                // optional override (raw fraction)
   "note":             "..."                // optional; auto-filled when auto_classify hits
@@ -53,6 +54,8 @@ Output:
   "name": "2C2P *SHOPEE 01/10", "term_amount": 449.10,
   "classification": { "promotion_id": "uob-one-2026", "reason": "installment",
                        "cashback_percent": 0.01, "points_override": "×0" },
+  "campaign": "dee-jang",              // only when `campaign` was passed
+  "campaign_hint": ["u-plan"],         // only when it wasn't and the term count matches — ADVISORY
   "created": { "id": "...", "url": "...", "name": "...", "amount": 449.10, "date": "2026-05-25" }
 }
 ```
@@ -95,6 +98,25 @@ If the user explicitly wants one plan only, point them at the existing in-progre
 ### 5. Default classification: 1% cashback + `×0` on UOB One
 
 `auto_classify: true` (the default) runs `lib.promotions.classify` with `is_installment_override=True`, so the active promo's `installment_rule` decides the rate. For UOB One that's 1% per term and `×0` (the card never earns points). For First Choice, **don't** auto-classify cashback: pass `auto_classify: false` and ask the user — First Choice may credit installment cashback at purchase time only (see [[../add-transaction/SKILL.md|/add-transaction]] for the First Choice exception).
+
+On the four **Krungsri** cards, `classify` also applies the card-level `installment_rewards_upfront` rule: every term gets `×0` and **no** cashback, because Krungsri grants an installment's rewards in full at purchase. On **First Choice** the same flag fires for a different reason (a merchant installment is booked to the personal-loan credit line, which earns nothing at all) and writes that card-specific `Note`. A promo with an explicit `installment_rule` outranks the flag.
+
+### 6. Campaigns must be declared at plan start — they're invisible later
+
+Some plans belong to a bank campaign that changes how the whole plan earns:
+
+| `campaign` | Card / issuer | Terms | Points | Cashback |
+|---|---|:--:|:--:|---|
+| `dee-jang` | CardX (ดีจังผ่อน 0%) | 4 | `×0` | unaffected |
+| `u-plan` | Krungsri / First Choice (U Plan 0%) | 3 | `×0` | varies by promotion |
+
+Both are **post-purchase conversions** — the cardholder asks the bank to re-split an already-posted charge — so the merchant string is identical whether or not a plan was converted. No amount of classification logic can recover this, which is why it has to be declared here, on term 1.
+
+Passing `campaign` writes the campaign's exact `Note` and multiplier onto the first term. From then on [[../populate-installment/SKILL.md|/populate-installment]] **inherits** it for every later term by reading that note — so declaring it once is enough for the whole plan. Skip it and the plan silently earns full rewards for its entire life.
+
+An unknown id is rejected with the list of known ids rather than written silently. Registry: `scripts/repositories/installment-campaigns/`; full model in [[../../docs/concepts/installment-reward-campaigns]].
+
+**When the user announces a new installment, the term count is a prompt to ask.** A 4-term plan on CardX or a 3-term plan on First Choice comes back with `"campaign_hint": ["<id>"]` in the envelope when no `campaign` was passed. That's advisory only — nothing is applied — but it's the moment to ask "was this ดีจังผ่อน / U Plan?", because after this write nobody can tell from the data.
 
 ## Procedure
 

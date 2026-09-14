@@ -1,3 +1,32 @@
 name: First Choice
 issuer: Krungsri
 bill_cycle_pattern: krungsri
+truemoney_711_points_exclusion: true
+installment_rewards_upfront: true   # every NN/NN term earns nothing — see installment_note
+                                    # for why First Choice's reason differs from its siblings'.
+installment_note: >-
+  Installment term — booked against First Choice's personal-loan credit line,
+  which earns no card points or cashback.
+notes: |
+  Two simultaneous credit lines (user, 2026-08-10):
+
+    1. credit card — a pay-in-full purchase lands here and earns normally;
+    2. personal loan — a merchant-offered installment (0% interest, up to 10
+       months) lands here instead.
+
+  Because merchant installments leave the card line entirely, they earn NO
+  points and NO cashback — not a reward exclusion so much as a different product
+  doing the lending. This is the reason behind `installment_rewards_upfront`
+  on this card, and why `installment_note` overrides the generic
+  Krungsri "rewards paid upfront" wording.
+
+  The other First Choice installment shape is U Plan: pay in full at the
+  merchant (so the charge starts on the CARD line), then ask Krungsri to
+  re-split it into 0% over 3 months. Those rows earn no points but MAY earn
+  cashback depending on the active promotion, so they are tracked as a
+  plan-level campaign rather than by this flag —
+  see scripts/repositories/installment-campaigns/u-plan.yaml.
+
+  Cashback on this card is promo-driven and hand-entered; there is deliberately
+  no promotions/*.yaml for it. Petrol earns normally here (confirmed
+  2026-05-28), so no petrol_exclusion flag.

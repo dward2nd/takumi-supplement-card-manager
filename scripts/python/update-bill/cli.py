@@ -38,6 +38,14 @@ Reads a JSON spec from stdin (or --input <file>):
                                               //   file, or attached this call). The
                                               //   statement never proves payment. Explicit
                                               //   finalize/paid win. false disables.
+    "auto_prepare_bill": true,                // default true. When a slip is being
+                                              //   attached and no Bills row exists for
+                                              //   (holder, card, bill_cycle), draft it
+                                              //   first via lib.bill_draft so the slip
+                                              //   has somewhere to live. Only fires for
+                                              //   slip attachments and only when the bill
+                                              //   is resolvable by lookup keys (not id).
+                                              //   false restores the old not-found error.
     "refresh_from_transactions": true,        // recompute ยอดชำระ from cycle's
                                               //   transactions; if no explicit `note`
                                               //   was supplied, also regenerate the
@@ -78,7 +86,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib import installments, notion_client, notion_files, payments
-from lib.bills import explain_cycle, find_bill
+from lib.bill_draft import draft_bill
+from lib.bills import BillNotFoundError, explain_cycle, find_bill
 from lib.cards import CardNotFoundError, find_card
 from lib.holders import HOLDERS, resolve_holder
 from lib.transaction_read import project_transaction
@@ -143,10 +152,27 @@ def _bill_amount(page_id: str) -> float | None:
     return (page.get("properties", {}).get("ยอดชำระ", {}) or {}).get("number")
 
 
-def _resolve_bill(spec: dict) -> tuple[str, str | None, str | None, str | None]:
-    """Return (page_id, holder_key, card, bill_cycle) — echo fields may be None."""
+def _resolve_bill(
+    spec: dict, *, may_draft: bool = False, dry_run: bool = False
+) -> tuple[str | None, str | None, str | None, str | None, dict | None]:
+    """Return (page_id, holder_key, card, bill_cycle, drafted).
+
+    Echo fields may be None. `drafted` is the `lib.bill_draft` envelope when
+    this call had to create the Bills row, else None.
+
+    When `may_draft` and the lookup finds nothing, the bill is drafted rather
+    than raising. The peer often transfers *before* the statement cuts — an
+    advance, or the balance Takumi quoted them — so on the day a slip arrives
+    the Bills row may simply not exist yet. That's a timing artifact, not a
+    decision point: the slip still needs somewhere to attach. Callers gate
+    this on a slip actually being attached, so a typo'd `bill_cycle` on a
+    Note-only patch keeps erroring instead of quietly creating a bill. (Even
+    then `draft_bill` refuses a cycle with no transactions, which catches most
+    typos.) In dry-run the draft is computed, not written, so `page_id` comes
+    back None and the caller reports a preview.
+    """
     if (page_id := spec.get("id")):
-        return page_id, spec.get("holder"), spec.get("card"), spec.get("bill_cycle")
+        return page_id, spec.get("holder"), spec.get("card"), spec.get("bill_cycle"), None
 
     for key in ("holder", "card", "bill_cycle"):
         if not spec.get(key):
@@ -154,8 +180,21 @@ def _resolve_bill(spec: dict) -> tuple[str, str | None, str | None, str | None]:
                 f"missing {key!r}: either pass id, or pass all of holder+card+bill_cycle"
             )
     holder = resolve_holder(spec["holder"])
-    bill = find_bill(holder, spec["card"], spec["bill_cycle"])
-    return bill["id"], holder.key, spec["card"], spec["bill_cycle"]
+    try:
+        bill = find_bill(holder, spec["card"], spec["bill_cycle"])
+    except BillNotFoundError:
+        if not may_draft:
+            raise
+        drafted = draft_bill(
+            {
+                "holder": spec["holder"],
+                "card": spec["card"],
+                "bill_cycle": spec["bill_cycle"],
+            },
+            dry_run=dry_run,
+        )
+        return drafted.get("id"), holder.key, spec["card"], spec["bill_cycle"], drafted
+    return bill["id"], holder.key, spec["card"], spec["bill_cycle"], None
 
 
 def _in_progress_for(holder_key: str | None, card_name: str | None) -> list[dict] | None:
@@ -239,7 +278,31 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     if not isinstance(spec, dict):
         raise ValueError("spec must be a JSON object")
 
-    page_id, holder_key, card, bill_cycle = _resolve_bill(spec)
+    # Collected before resolution: whether a slip is being attached decides
+    # whether a missing Bills row may be drafted on the fly.
+    slips = _collect_files(spec, "slip", "slips")
+    statements = _collect_files(spec, "statement_pdf", "statement_pdfs")
+
+    page_id, holder_key, card, bill_cycle, drafted = _resolve_bill(
+        spec,
+        may_draft=bool(slips) and spec.get("auto_prepare_bill", True) is not False,
+        dry_run=dry_run,
+    )
+
+    if page_id is None:
+        # dry-run + the bill didn't exist: `drafted` holds the computed draft
+        # but nothing was written, so there's no page to inspect or patch.
+        # Report the two-step preview rather than reading a nonexistent page.
+        return {
+            "id": None,
+            "holder": holder_key,
+            "card": card,
+            "bill_cycle": bill_cycle,
+            "dry_run": True,
+            "would_prepare_bill": drafted,
+            "would_append_slips": slips,
+            "would_append_statements": statements,
+        }
 
     actions: list[str] = []
     simple_props: dict = {}
@@ -262,8 +325,6 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         simple_props.update(raw)
         actions.extend(k for k in raw if k not in actions)
 
-    slips = _collect_files(spec, "slip", "slips")
-    statements = _collect_files(spec, "statement_pdf", "statement_pdfs")
     resolvable = bool(holder_key and card and bill_cycle)
 
     # Auto-close-on-statement: attaching the issuer's statement PDF finalizes
@@ -445,6 +506,8 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             "would_append_slips": slips,
             "would_append_statements": statements,
         }
+        if drafted is not None:
+            out["prepared_bill"] = drafted
         if in_progress is not None:
             out["in_progress_installments"] = in_progress
         if refreshed is not None:
@@ -479,6 +542,12 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         "bill_cycle": bill_cycle,
         "fields": actions,
     }
+    if drafted is not None:
+        # The bill did not exist when this call started — surface that the row
+        # was created here, so the caller doesn't read the attach as a patch to
+        # a bill the user had already drafted.
+        out["prepared_bill"] = drafted
+        actions.insert(0, "bill drafted")
     if in_progress is not None:
         out["in_progress_installments"] = in_progress
     if refreshed is not None:

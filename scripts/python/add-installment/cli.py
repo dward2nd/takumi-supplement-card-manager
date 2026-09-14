@@ -28,6 +28,15 @@ JSON spec:
     "auto_classify": true,                            // optional, default true; the active
                                                       //   promotion's `installment_rule`
                                                       //   sets `% cb` + multiplier
+    "campaign":     "dee-jang",                       // optional; id from
+                                                      //   scripts/repositories/installment-campaigns/.
+                                                      //   Declares the plan was converted under a
+                                                      //   bank campaign whose reward treatment
+                                                      //   (e.g. no points) applies to every term.
+                                                      //   Nothing in the merchant string reveals
+                                                      //   this, so it must be declared here — and
+                                                      //   /populate-installment then inherits it
+                                                      //   from the note this writes.
     "multiplier":   "×0",                             // optional override
     "cashback_percent": 0.01,                         // optional override (raw fraction)
     "note":         "..."                             // optional; if omitted and
@@ -72,7 +81,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib import installments, notion_client, promotions
+from lib import card_repo, installment_campaigns, installments, notion_client, promotions
 from lib.bill_cycle import most_recent_closed_cycle, pattern_for_card, cycle_for_month
 from lib.cards import find_card
 from lib.holders import resolve_holder
@@ -116,6 +125,12 @@ def _validate(spec: dict) -> None:
         raise SpecError(
             f"multiplier must be one of {sorted(VALID_MULTIPLIERS)} or null; got {m!r}"
         )
+    if (camp := spec.get("campaign")) is not None:
+        if not isinstance(camp, str) or not camp.strip():
+            raise SpecError("campaign must be a non-empty campaign id string")
+        # Raises InstallmentCampaignNotFoundError (listing known ids) on a typo,
+        # rather than silently writing a plan with no campaign treatment.
+        installment_campaigns.by_id(camp)
     if (cb := spec.get("cashback_percent")) is not None:
         if not isinstance(cb, (int, float)) or isinstance(cb, bool):
             raise SpecError("cashback_percent must be a number (raw fraction)")
@@ -192,6 +207,24 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         if note is None and cls.note:
             note = cls.note
 
+    # Plan-level campaign (e.g. CardX ดีจังผ่อน 0%). Applied after
+    # auto_classify because the campaign is the more specific fact, and
+    # points-only: `% cb` is left exactly as the card's policy set it.
+    # An explicit per-spec `multiplier` / `note` still wins over both.
+    campaign = installment_campaigns.by_id(spec["campaign"]) if spec.get("campaign") else None
+    campaign_hint: list[str] = []
+    if campaign is not None:
+        if spec.get("multiplier") is None and campaign.points_default:
+            multiplier = campaign.points_default
+        if spec.get("note") is None and campaign.note:
+            note = campaign.note
+    else:
+        card_entry = card_repo.get(card_name)
+        campaign_hint = installment_campaigns.hint_for_plan(
+            issuer=card_entry.issuer if card_entry else None,
+            total_terms=total_terms,
+        )
+
     props = build_transaction_properties(
         name=name,
         amount=amount,
@@ -218,6 +251,10 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     }
     if classification_info is not None:
         envelope["classification"] = classification_info
+    if campaign is not None:
+        envelope["campaign"] = campaign.id
+    if campaign_hint:
+        envelope["campaign_hint"] = campaign_hint
 
     if dry_run:
         envelope["dry_run"] = True

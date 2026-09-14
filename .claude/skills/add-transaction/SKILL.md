@@ -195,6 +195,17 @@ Makro appears under two very different merchant strings that earn **oppositely**
 
 Only the **UOB Makro** card gets `÷4`; every other UOB card stays `×0` on standalone `MAKRO_…`. No promo YAML encodes this yet, so classify by hand — `auto_classify` won't apply it.
 
+### UOB World — `×5` points bonus, `×2` base, no cashback ever
+
+A **points** card, not a cashback one — leave `% cb` unset on every row, always. The earning rules predate the promotions system and were only written down 2026-08-20; they are now encoded, so **`auto_classify` handles this card**.
+
+- **`×5`** — the standing bonus ([[../../docs/promotions/uob-world-points|uob-world-points]], effective `2025-01-01` → open-ended).
+- **`×2`** — the card's *base* Thailand rate and the post-quota fallback (`points_default` on the card YAML). Note it is `×2`, not `×1`: an unboosted row still earns double.
+- **`×0`** — petrol (UOB-wide `petrol_exclusion`) and foreign-merchant-in-THB.
+- **No 7-11 / TrueMoney exclusion.** That is Krungsri-family only, so `TMN 7-11` and `TMN ISERVICECCP` earn the full `×5` here. Don't copy the First Choice treatment across.
+
+**The one thing `auto_classify` gets wrong: the ≈฿20,000 per-cycle bonus quota.** Past that, rows drop to `×2`, but `lib.promotions.classify` is a pure function of (card, date, merchant) and cannot see cycle-to-date spend — so it returns `×5` regardless. On a high-spend cycle, sum the cycle's eligible rows first and override to `multiplier: "×2"` per-tx where needed, explaining in `Note`. The row straddling the boundary gets split by hand (one row, one checkbox). See [[../../docs/cards/uob-world|UOB World card note]].
+
 ### CardX JCB — ongoing card-level policy (not yet framed as a dated promotion)
 
 - **Cashback**:
@@ -208,7 +219,24 @@ Only the **UOB Makro** card gets `÷4`; every other UOB card stays `×0` on stan
 
 The user runs First Choice cashback as short-duration promos and patches rows manually as they're announced. **Don't infer** a cashback rate on First Choice — wait for the user's instruction. When the user is ready to document a First Choice promo at the promotion level, create `docs/promotions/first-choice-<period>.md` and link from this skill.
 
-**Installment exception on First Choice**: don't apply per-row cashback on installment rows (merchant name `NN/NN`) without explicit user confirmation — First Choice may credit installment cashback at purchase time only.
+**Installments on First Choice earn nothing — two credit lines, not one.** The card runs a credit-card line *and* a personal-loan line simultaneously (user, 2026-08-10). A pay-in-full purchase lands on the card line and earns normally; a **merchant-offered installment** (0% interest, up to 10 months) is booked against the **personal-loan** line, which earns no points and no cashback at all. That's a different product doing the lending, not a reward exclusion — so there's no promo override to look for.
+
+The other shape is **U Plan**: pay in full at the merchant (so it starts on the card line), then ask Krungsri to re-split into 0% over 3 months. Those rows earn no points but **may** earn cashback per the active promotion. U Plan is tracked as a plan-level campaign — see [[../../docs/concepts/installment-reward-campaigns]] and [[../add-installment/SKILL.md|/add-installment]]'s `campaign` key.
+
+### Installment terms on Krungsri cards earn nothing (`installment_rewards_upfront`)
+
+On all four `issuer: Krungsri` cards — First Choice, Krungsri JCB, Krungsri NOW, Krungsri Visa — an installment purchase's points and cashback are granted **in full at the moment of purchase**, not spread across the terms. Each `NN/NN` term therefore earns nothing on its own; crediting them would double-count the reward.
+
+Card-level flag, so `auto_classify` applies it automatically — reason tag `<base>+installment-rewards-upfront`, and it zeroes **both** axes (unlike the 7-11 / TrueMoney rule, which is points-only). A promo with an explicit `installment_rule` outranks it.
+
+### Installment campaigns — ดีจังผ่อน (CardX) and U Plan (Krungsri)
+
+Some plans belong to a bank campaign that withholds points for the plan's whole life. Both known campaigns are post-purchase conversions, so **the merchant string can't reveal them** and `auto_classify` cannot infer them:
+
+- **`dee-jang`** — CardX ดีจังผ่อน 0%, typically **4** terms, `×0` points, cashback unaffected. Only plans in this campaign lose points; other CardX JCB installments earn normally, which is why this is not a card flag.
+- **`u-plan`** — Krungsri U Plan 0%, **3** terms, `×0` points, cashback varies by promotion.
+
+These are declared at plan start via [[../add-installment/SKILL.md|/add-installment]]'s `campaign` key and then inherited by [[../populate-installment/SKILL.md|/populate-installment]] from the `Note` on earlier terms. If you're writing an installment row through *this* skill instead, set `multiplier: "×0"` and copy the campaign's exact note from `scripts/repositories/installment-campaigns/<id>.yaml` — the note is what makes future terms inherit correctly.
 
 ### Foreign-merchant-in-THB → promotion overrides
 
@@ -219,14 +247,26 @@ By default, foreign-merchant-in-THB earns neither cashback nor points. An active
 These apply across **every** card we manage (Takumi, Baiboon, Nuta) by **default**. An active promotion can override the cashback side of rule 1 with an explicit merchant inclusion, but the points side almost never moves:
 
 1. **Foreign merchants billed in THB earn neither points nor cashback** by default, even when the card would normally earn at a higher tier. Examples in the data: `X CORP. PAID FEATURES BASTROP US`, `Google YouTubePremium Mountain View USA`, `AGODA.COM THE QUARTE Internet SG`. Country suffix tells you the merchant is foreign, but the exclusion hinges on the charge being **billed in THB** — the suffix alone is not enough. Promotion overrides for cashback are possible (e.g. First Choice May 2026 → 1.5% on Agoda); promotion overrides for points are almost never seen — set `×0` on the row.
+   - **Both alpha-2 and alpha-3 suffixes count.** The same issuer bills `APPLE.COM/BILL CORK IE` one month and `… CORK IRL` the next, so `lib.promotions` matches both forms. Three tokens are **deliberately treated as domestic** — don't "complete" the list with them:
+     - **`THA`** — the alpha-3 form of Thailand, on 712 rows (`WWW.SFCINEMACITY.COM-C BANGKOK THA`). Domestic.
+     - **`MTH`** — an issuer variant spelling of Thailand (`7-11 PHOTHARAM ROAD CHANGPHUEAK MTH`). Domestic.
+     - **`VAT`** — the tax line `SALES DR RETR FEE - INC OF VAT`, not Vatican City. An accounting row.
+     - **`CHN`** — foreign, but *not* foreign-in-THB: every occurrence is a CNY-billed `Alipay Shanghai CHN` / `UNIONPAY MERCHANT BEIJING CHN` row on Nuta's AEON UnionPay, i.e. the genuine-foreign-currency case below. Excluding it would zero out the one card that earns on them. Note the asymmetry with alpha-2 `CN`, which *is* treated as foreign — `CN` has never appeared in the data.
    - **Not excluded — genuine foreign-currency charges.** A transaction billed in the actual foreign currency (the line reads `X USD (Y THB)` — a foreign amount converted to a THB figure for the statement; enter the THB figure in `ยอดชำระ` and record the foreign original in `Note`) is a normal international purchase and earns points/cashback per the card's policy + any active promo. Don't mark it excluded on the country suffix alone. Any `×0` / no-cashback on such a row comes from a *different* rule (e.g. Krungsri NOW's online-category → `×0` and its ฿300/calendar-month cashback cap) — say **that** in the `Note`, not a foreign exclusion.
-2. **Petrol stations earn neither points nor cashback — on the cards that carry the exclusion.** Watch for merchant strings containing PTTST, PTT, BCP, BANGCHAK, ESSO, SHELL, CALTEX. Note that Thai brands bill under multiple string forms — Bangchak appears as both `BCP` and the spelled-out `BANGCHAK-…`.
+2. **Petrol stations earn neither points nor cashback — on the cards that carry the exclusion.** Watch for merchant strings containing PTTST, PTT, BCP, BANGCHAK, BSRC, ESSO, SHELL, CALTEX. Note that Thai brands bill under multiple string forms — Bangchak appears as `BCP`, the spelled-out `BANGCHAK-…`, and `BSRC-…` (Bangchak Sriracha, the former Esso Thailand network — e.g. `BSRC-PHAAPOOM ENERGY LAMPHUN TH`).
    - **Confirmed excluding**: all **UOB** cards (One, World, Premier, Makro) and **ttb so smart**.
    - **Confirmed *not* excluding**: **First Choice** (Krungsri) — SHELL / PTT rows earn at the card's normal rate (confirmed by user 2026-05-28).
    - **Unknown**: CardX / KTC / AEON / Lotus / SPayLater — surface to the user before applying or denying cashback.
 
    The exclusion is card-level (`petrol_exclusion: true` in `scripts/repositories/cards/<card>.yaml`), so `auto_classify` applies it automatically for the confirmed cards — reason tag `petrol-exclusion`.
-3. The Notion **cashback formula** on Baiboon's and Nuta's transactions and the **realized-points formula** on every transaction already encode these rules where they can; but the formulas can't tell "foreign-merchant-in-THB" apart from a regular domestic THB charge, so the computed cashback/points on such transactions may overstate reality. Flag it when the user asks for a cashback total.
+3. **7-11 and TrueMoney earn no *points* on Krungsri-family cards** (user, 2026-08-08; applied to rows dated 2026-08-01 onward). Covers direct 7-Eleven (`7-11 …`), 7-Eleven via TrueMoney (`TMN 7-11 …`), and **every** other TrueMoney charge — `TMN*PROMPTPAY30`, `TMN*LOTUS`, `TMN*FAST FOOD`, `TMN MAKRO`, etc. TrueMoney is matched on the `TMN ` / `TMN*` prefix.
+   - **Points-only.** Cashback is *not* withdrawn — First Choice cashback promos still pay at these merchants, and the user adjusts First Choice cashback by hand. A row carrying both `% cb = 2%` and `×0` is correct, not a mistake.
+   - **Confirmed excluding**: First Choice, Krungsri JCB, Krungsri NOW, Krungsri Visa (`issuer: Krungsri`).
+   - **Exempt**: **Lotus's Beyond** — Lotus's, 7-Eleven and TrueMoney are all CP ALL businesses, so those merchants keep earning there.
+   - **Not in the family**: **CardX JCB** — CardX is SCB X group, unrelated to Krungsri. It shares only the `bill_cycle_pattern: krungsri` key (a BC/DD *shape*, day 5 + 20 days); don't read that as family membership.
+
+   Card-level flag (`truemoney_711_points_exclusion: true`), so `auto_classify` applies it automatically — reason tag suffix `+truemoney-711-points-exclusion`. Full rule: [[../../docs/concepts/krungsri-truemoney-711-exclusion]].
+4. The Notion **cashback formula** on Baiboon's and Nuta's transactions and the **realized-points formula** on every transaction already encode these rules where they can; but the formulas can't tell "foreign-merchant-in-THB" apart from a regular domestic THB charge, so the computed cashback/points on such transactions may overstate reality. Flag it when the user asks for a cashback total.
 
 ### A note on Notion percentage fields
 
