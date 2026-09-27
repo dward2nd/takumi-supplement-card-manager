@@ -37,12 +37,30 @@ def boundary(alloc: Allocation) -> list[dict]:
 
 
 def drift(promo: BasePromotion, alloc: Allocation, txs: list[Tx], bank_spend: Decimal) -> dict:
-    """Linked total vs the bank app's figure, with the single rows that would explain it."""
+    """Linked total vs the bank app's figure, laid out to find the gap by eye.
+
+    `by_date` is meant to be read against the app's list. `dates_matching_delta`
+    is the whole-day version of "one thing is missing". `repeats` are rows that
+    appear twice: the same holder twice, or two holders without a `[บัตรหลัก]`
+    split between them. A single row equal to the gap is no lead: every even
+    half of a split charge is one.
+    """
     delta = alloc.pooled - bank_spend
+    by_date: dict[str, Decimal] = {}
+    groups: dict[tuple, list[Tx]] = {}
+    for t in txs:
+        by_date[t.date[:10]] = by_date.get(t.date[:10], Decimal(0)) + t.amount
+        groups.setdefault((t.date, t.merchant, t.amount), []).append(t)
+    repeats = [
+        [line(t) for t in g] for g in groups.values()
+        if len(g) > 1 and not any(t.name.startswith("[บัตรหลัก]") for t in g)
+    ]
     return {
         "bank_spend": float(bank_spend),
         "linked_spend": float(alloc.pooled),
         "delta": float(delta),
         "bank_cashback": float(promo.cashback(bank_spend)),
-        "rows_matching_delta": [line(t) for t in txs if delta and t.amount == abs(delta)],
+        "dates_matching_delta": [d for d, s in sorted(by_date.items()) if delta and s == abs(delta)],
+        "repeats": repeats,
+        "by_date": {d: float(s) for d, s in sorted(by_date.items())},
     }

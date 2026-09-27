@@ -1,6 +1,6 @@
 ---
 name: sync-promotion
-description: Bring one Promotion Bureau row up to date — screen every holder's linked transactions against the campaign's exclusions, split the bank's credit first come first served, write `เงินคืนรวม` / `เงินคืนส่วน<name>`, upsert each holder's `รายการติดตามเครดิตเงินคืนของ<name>` tracker row linked to it, and write the campaign summary into the Bureau page. Use when the user says "sync NW3", "update the Promotion Bureau for <promo>", "who gets how much of the NW3 cashback?", "create the tracker rows for this promotion", or links more transactions to a Bureau row and wants the split refreshed. Also reports drift against the bank app's pooled-spend figure.
+description: Bring one Promotion Bureau row up to date — screen every holder's linked transactions against the campaign's exclusions, split the bank's credit first come first served, write `เงินคืนรวม` / `เงินคืนส่วน<name>`, upsert each holder's `รายการติดตามเครดิตเงินคืนของ<name>` tracker row linked to it, and write the campaign summary into the Bureau page. Use when the user says "sync NW3", "update the Promotion Bureau for <promo>", "who gets how much of the NW3 cashback?", "create the tracker rows for this promotion", or links more transactions to a Bureau row and wants the split refreshed. Also lays out drift against the bank app's pooled-spend figure.
 ---
 
 # sync-promotion
@@ -19,7 +19,7 @@ Always dry-run first and show the user the shares, `flagged`, `unlinked_candidat
 | Field | Default | Meaning |
 |---|---|---|
 | `promotion` | — | Bureau row Name (exact), page ID or URL |
-| `bank_spend` | — | The bank app's pooled-spend figure; adds a `drift` block naming single rows equal to the gap |
+| `bank_spend` | — | The total of the bank app's eligible-transactions list for the promotion (Krungsri-family apps show one; other issuers unknown); adds a `drift` block: per-date totals to read against the app, dates whose total equals the gap, and repeated rows. (A single row equal to the gap is no lead: every even half of a split charge is one.) |
 | `link_candidates` | `false` | Link the card's **eligible** unlinked rows in the period. Uncertain/excluded rows are never linked. Only on the user's say-so — linking is their judgment call |
 | `replace_summary` | `false` | Rewrite the page body even if it already has content (it's written automatically only when empty) |
 
