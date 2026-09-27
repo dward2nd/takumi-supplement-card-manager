@@ -20,7 +20,7 @@ from decimal import Decimal
 from typing import ClassVar
 
 from .. import promotions
-from .base import UNCERTAIN, BasePromotion, Rule, Tranche
+from .base import BasePromotion, Rule, Tranche
 
 STEP = Decimal(10_000)
 RATE = Decimal("0.02")
@@ -113,9 +113,11 @@ class NW3Promotion(BasePromotion):
              r"NETFLIX|SPOTIFY|YOUTUBE|DISNEY|\bHBO\b|ITUNES|APPLE\.COM|OPENAI|CHATGPT|CANVA|ADOBE"),
         Rule("Interest, fees and penalties; charges later cancelled or refunded",
              r"\bFEE\b|INTEREST|LATE CHARGE|PENALTY"),
-        Rule("E-wallet top-ups (TrueMoney, Rabbit LINE Pay, ShopeePay …)",
-             r"^TMN[ *]|TRUE ?MONEY|LINE ?PAY|SHOPEE ?PAY|AIRPAY",
-             level=UNCERTAIN, hint="routed through an e-wallet; the bank may count it as a top-up"),
+        # Page-only: no merchant test. The app's NW3 eligible list for Sep 2026 counted
+        # the household's TMN* card payments (฿6,465 of them, against a ฿105 gap), so
+        # TrueMoney-routed payments are not what the bank means by a top-up.
+        Rule("E-wallet top-ups (TrueMoney, Rabbit LINE Pay, ShopeePay …). Card payments made "
+             "through TrueMoney (TMN*…) still count: the app's eligible list includes them"),
     )
     crediting: ClassVar = (
         "Within 30 business days after each month-end, as a statement line like "
