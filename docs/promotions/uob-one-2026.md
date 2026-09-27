@@ -7,7 +7,7 @@ tags: [promotion, uob-one]
 The UOB One Account spend-and-save tiered-cashback promotion as it applies to UOB One supplement transactions in 2026. Carried over from 2025; the issuer has extended the same shape year-over-year, so the tier table and carve-outs below are stable across the 2025 → 2026 renewal.
 
 > **Structured source of truth**: `scripts/repositories/promotions/uob-one-2026.yaml`.
-> This page is the *narrative* — effective dates, tiers, exclusions, installment rule, and the crediting schedule all live in the repo YAML, which is what `lib.promotions` and the skills read. Don't duplicate the structured fields here. If the issuer changes anything, update the YAML via [[../../.claude/skills/update-promotion/SKILL.md|/update-promotion]] and only re-summarise here when the *story* changes.
+> This page is the *narrative* — effective dates, tiers, exclusions and installment rule all live in the repo YAML, which is what `lib.promotions` and the skills read. Don't duplicate the structured fields here. If the issuer changes anything, update the YAML via [[../../.claude/skills/update-promotion/SKILL.md|/update-promotion]] and only re-summarise here when the *story* changes.
 
 - **Effective**: `2026-01-01` → `2026-12-31`.
 - **Card**: [[../cards/uob-one]] (Takumi primary; Baiboon and Nuta supplements).
@@ -38,14 +38,14 @@ The promo does **not** override the project-wide exclusions:
 
 When such a row is left at `% cb` unset, write a `Note` per [[../../.claude/skills/add-transaction/SKILL.md|/add-transaction]]'s exclusion-note rule.
 
-## Cashback crediting schedule
+## Cashback crediting
 
-Per the YAML's `crediting_schedule`:
+Since 2026-09-28 the ledger follows the bank's periods (user, 2026-09-28), in code (`scripts/python/lib/crediting/uob_one.py`, driven by [[../../.claude/skills/post-cashback-credits/SKILL.md|/post-cashback-credits]]):
 
-- **1%** tier credited on the cycle's BC date.
-- **5%** / **10%** tiers credited on the first weekday of the following calendar month.
+- **1%**: per statement cycle, a `UOB ONE CASHBACK 1%` row dated the BC date, on that cycle.
+- **10%** / **5%**: per calendar month, one row each dated the month's last day (the next working day if it's a weekend or holiday), billed on the cycle that date falls in.
 
-[[../../.claude/skills/post-cashback-credits/SKILL.md|/post-cashback-credits]] reads this schedule and materializes the cashback as negative-amount transactions whose `Bill Cycle Date` / `Due Date` are aligned to the current cycle (the explicit date-rule exception). `[[../../.claude/skills/prepare-bill/SKILL.md|/prepare-bill]]` then sums the cycle flat.
+Amounts are the holder's first-come-first-served share of the Bureau's capped figure, less cashback that already reached them through a carry-forward leg carrying `% cb`. Before 2026-09-28 the 10%/5% was credited per bill cycle (`Cycle <BC> cashback credit`, dated the first weekday of the next month); rows covered that way are never credited again, so the first monthly run pays only what those didn't cover. `[[../../.claude/skills/prepare-bill/SKILL.md|/prepare-bill]]` then sums the cycle flat.
 
 ## Points
 

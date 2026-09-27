@@ -15,7 +15,7 @@ Each skill is `.claude/skills/<name>/SKILL.md` (the agent-facing contract) backe
 - `add-installment` — write the first `01/NN` term of a new installment plan.
 - `populate-installment` — append the next `NN+1` term of in-progress plans to a cycle.
 - `record-payment` — write the negative-amount **payment** row that offsets a cycle to zero. *(Split out of `/update-bill`, 2026-05-29.)*
-- `post-cashback-credits` — write the cycle's cashback credit rows (UOB One).
+- `post-cashback-credits` — write a card's cashback credit rows the way the bank credits them (UOB One: 1% per cycle, 10%/5% per calendar month), amounts from the Promotion Bureau's capped split. One `Crediting` class per card in `lib/crediting/`.
 - `update-transaction` — patch existing transaction rows.
 
 **Write — Bills DB**
@@ -48,7 +48,7 @@ Most skills are already single-purpose. The candidates where a second concern wa
 | `prepare-bill` | auto-populates installments + checks cashback credits + auto-writes the Note inside "draft a bill" | **Keep, but surface** — this is deliberate orchestration; splitting would force two commands per bill. Improvement is to *report* what it populated, not extract it | open (recommended: surface) |
 | `update-bill` | `finalize` (draft→final state) and `refresh_from_transactions` (recompute total) beyond "patch a field" | Defensible either way; small opt-in branches. Could become `finalize-bill` / `refresh-bill` if they grow | open (low priority) |
 | `audit-bill` | ships `extract.py` (PDF→text) + `cli.py` (diff) as two steps | Extraction already lives in `lib.pdf_text`; formalise `extract-statement-pdf` only if another skill needs PDF text | open (low cost) |
-| `post-cashback-credits` | crediting schedule hardcoded to UOB One | Extensibility refactor (read schedule from promotion YAML), not a split | defer until a 2nd card needs it |
+| `post-cashback-credits` | crediting schedule hardcoded to UOB One | Class per card (`lib/crediting/`), amounts from the Bureau | ✅ done 2026-09-28 |
 
 ## Principles for new behaviour
 

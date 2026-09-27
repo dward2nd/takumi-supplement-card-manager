@@ -1,87 +1,50 @@
 ---
 name: post-cashback-credits
-description: Auto-create UOB One cashback credit rows for a cycle by summing per-tier `% cb` totals on existing transactions and writing one negative-amount transaction per tier (1% at the BC date, higher tiers at the first weekday of next month). Use when the user says "post the cashback for Baiboon's UOB One", "credit the cycle's cashback before drafting the bill", or before running [[../prepare-bill/SKILL.md|/prepare-bill]] on a UOB One cycle.
+description: Write a card's cashback credit rows into Baiboon's or Nuta's ledger the way the bank credits them — for UOB One, a `UOB ONE CASHBACK 1%` row per statement cycle and `UOB ONE CASHBACK 10%` / `5%` rows per calendar month, each holder's amount being their first-come-first-served share of the account's capped cashback from the Promotion Bureau. Use when the user says "post the cashback for Baiboon's UOB One", "credit September's UOB One cashback", "post the 1% for the cycle closing 25 Sep", or before running [[../prepare-bill/SKILL.md|/prepare-bill]] on a UOB One cycle.
 ---
 
 # post-cashback-credits
 
-Writes the cashback credit rows for **one** cycle of **one** holder's card, materializing the active promotion's payout into negative-amount transactions so [[../prepare-bill/SKILL.md|/prepare-bill]] can then sum the cycle to a correct net balance.
+Materializes a card's cashback as negative-amount credit rows in a holder's Transactions DB, so [[../prepare-bill/SKILL.md|/prepare-bill]] sums the cycle to the right net balance. How a card is credited is a class per card in `scripts/python/lib/crediting/` (today: `UOBOneCrediting`); a card without one is refused. Takumi is refused too: his credits come off his statement via [[../record-statement/SKILL.md|/record-statement]].
 
-Currently supports `UOB One` only — it implements the [[../../docs/promotions/uob-one-2026|UOB One 2026 promotion]]'s crediting workflow (1% at BC, higher tiers at first weekday of next month). Per-promotion credit conventions differ; to support another card's active promotion, extend `SUPPORTED_CARDS` and `_classify_tier_date` in `scripts/python/post-cashback-credits/cli.py` and reference the new promotion note.
-
-## Primary execution path — the deterministic script
+## Primary execution path
 
 ```sh
-echo '<JSON-spec>' | uv run scripts/python/post-cashback-credits/cli.py
-# add --dry-run to preview the plan without writing
-# add --force to override the duplicate-CASHBACK guard
+echo '{"holder":"nuta","card":"UOB One","month":"2026-09"}' \
+  | uv run --project scripts/python scripts/python/post-cashback-credits/cli.py --dry-run
 ```
 
-JSON spec:
+Always dry-run first and show the user `detail` and `plan`; then run without `--dry-run`.
 
-```json
-{
-  "holder":     "baiboon | nuta",
-  "card":       "UOB One",
-  "bill_cycle": "2026-05-25",
-  "skip_populate_installments": false,
-  "force":      false
-}
-```
+| Field | Default | Meaning |
+|---|---|---|
+| `holder` | — | `baiboon` or `nuta` |
+| `card` | — | a card with a Crediting class (`UOB One`) |
+| `bill_cycle` | — | post the 1% for the cycle closing on this date |
+| `month` | — | `YYYY-MM`: post the 10%/5% for this calendar month |
+| `skip_populate_installments` | `false` | skip adding the cycle's installment terms before the 1% (historical re-credits) |
+| `force` | `false` | re-post a period whose credit row already exists (archive the old row first with `scripts/python/add-transaction/archive.py`) |
 
-- `holder` and `card` are required. `card` must be in `SUPPORTED_CARDS` (today: `UOB One`).
-- `bill_cycle` is optional; if omitted, the active cycle for the card is inferred from `lib.bill_cycle.active_cycle`.
-- `skip_populate_installments` is optional, default `false`. Before summing, the CLI populates this cycle's in-progress installment terms (same idempotent `lib.installments.populate_for_cycle` that [[../populate-installment/SKILL.md|/populate-installment]] and [[../prepare-bill/SKILL.md|/prepare-bill]] use), so each term's per-row `% cb` is captured in the credit. Set `true` only when re-crediting a historical cycle whose installment rows shouldn't be touched.
-- `force` is optional, default `false`. The CLI refuses to write if any `*CASHBACK*` row already exists in the cycle (prevents double-credit). To rewrite, archive the prior rows first via `scripts/python/add-transaction/archive.py`, then re-run with `force: true`.
+With neither `bill_cycle` nor `month`: the most recently closed cycle and the last completed calendar month.
 
-## What the script does
+## How UOB One is credited (user, 2026-09-28: follow the bank's periods)
 
-1. Resolves `(holder, card, cycle BC + DD)`.
-2. **Populates in-progress installment terms** into the cycle (unless `skip_populate_installments: true`) — idempotent, so terms already in the cycle are skipped. This must happen *before* summing: installment rows carry a per-term `% cb` (1% on UOB One), so crediting without them under-counts the installment cashback. The result is echoed under `installments` in the response.
-3. Fetches every transaction in the cycle on that card.
-4. Aborts if any row already has `CASHBACK` in its title — unless `force` is set.
-5. Groups eligible rows (those with `% cb` set, excluding existing `CASHBACK` rows) by tier rate.
-6. For each tier where the eligible sum is positive, writes one negative-amount transaction:
-   - `Name`: `UOB ONE CASHBACK <N>%`
-   - `ยอดชำระ`: `-round(rate × tier_sum, 2)`
-   - `Transaction Datetime`: BC date if `rate == 1%`, otherwise first weekday of the next calendar month.
-   - `Bill Cycle Date` / `Due Date`: cycle's BC / DD (explicit alignment exception).
-   - Multiplier: `×0` (UOB One never earns points).
-   - `Note`: `Cycle <BC> cashback credit: <N>% × <sum> = <credit>.`
-7. Returns `{installments, tier_totals, created}` so the caller can verify the math.
+| Row | Period | Dated | Billed on |
+|---|---|---|---|
+| `UOB ONE CASHBACK 1%` | statement cycle | the BC date | that cycle |
+| `UOB ONE CASHBACK 10%`, `… 5%` | calendar month | the month's last day, or the next working day | the cycle that date falls in |
 
-## Hard rules
+1. **Amounts come from the Promotion Bureau** (`2026M9 — UOB One cb 1%`, `2026M9 — UOB One cb 10%/5%`): the rows are created if missing and the period's qualifying rows linked, then the account's cashback is split first come, first served under the pooled caps (฿2,000 a cycle; ฿500 a month for 10% and 5% together). The holder's row is their share. See [[../sync-promotion/SKILL.md|/sync-promotion]].
+2. **Carry-forward legs net out**: a bracketed row carrying `% cb` (e.g. Nuta's `[ยอดยกมาจากรอบ 2026-08]` −฿231 at 1%) subtracts its cashback, which already reached the holder in an earlier period. The Note says so.
+3. **Installment terms first** (1% path): the cycle's in-progress terms are populated before the split, since each earns 1%. A dry run simulates them.
+4. **Never twice**: a period whose row exists is reported under `already_posted`. For 10%/5%, rows already covered by the old per-bill-cycle credits (`Cycle <BC> cashback credit`, before 2026-09-28) are left out, so the first monthly run pays only what those didn't cover.
 
-### 1. UOB One only (for now)
+Each row is `×0`, `Processed`, with a Note carrying the working (`Month 2026-09 cashback credit (10%): baiboon's first-come-first-served share …`).
 
-The date-by-tier convention (1% at BC, others at first weekday of next month) is the [[../../docs/promotions/uob-one-2026|UOB One 2026 promotion]]'s crediting workflow as confirmed by the user 2026-05-25. Other promotions and other cards' workflows differ; adding support is a deliberate extension (update `SUPPORTED_CARDS` + `_classify_tier_date` + reference the new promo note), not an automatic generalization.
+## Workflow position
 
-When the UOB One promotion renews for 2027 with a different crediting cadence, branch the promo note and revisit the `_classify_tier_date` function.
+`/record-statement` (Takumi's rows) → `/sync-promotion` on the UOB One rows (optional: this skill links rows itself) → `/post-cashback-credits` → `/prepare-bill`. `/prepare-bill` refuses a UOB One cycle with no `*CASHBACK*` row unless `skip_cashback_check: true`.
 
-### 2. Zero-tier rows are skipped
+## Adding a card
 
-Tiers whose eligible sum is `≤ 0` (or whose computed credit rounds to `≤ 0`) get **no row written**. Don't create 0-baht placeholder rows.
-
-### 3. Idempotency via the duplicate guard
-
-If the cycle already has any `*CASHBACK*` row, the CLI aborts. Re-running is safe — it never double-writes silently. To regenerate, archive the prior rows first.
-
-### 4. Workflow position
-
-`/post-cashback-credits` → verify the credits look right → `/prepare-bill` → verify the bill total → upload statement PDF via `/update-bill` (with `finalize: true` to strip the `[DRAFT] ` prefix once the numbers match the bank).
-
-**Order-independent w.r.t. installments.** Because this skill populates installment terms itself (step 2) before summing, the credit is complete whether you run it before or after `/prepare-bill`. This closes a former footgun: running `/post-cashback-credits` *before* `/prepare-bill` used to miss the installment 1% entirely, since `/prepare-bill` was the only thing populating the terms. If you edit the cycle's transactions after crediting (add/move/remove a row), re-credit: archive the `*CASHBACK*` rows, re-run this skill, then refresh the bill via `/update-bill` with `refresh_from_transactions: true`.
-
-## What the user typically asks
-
-- "Post the cashback for Nuta's UOB One" → spec with `holder: "nuta"`, `card: "UOB One"`; cycle inferred.
-- "Credit Baiboon's UOB One cashback before drafting" → as above.
-- "Re-do the cashback rows on this cycle, I missed one" → archive the existing rows, then re-run with `--force`.
-
-## What this skill does NOT do
-
-- Does **not** back-fill `% cb` on transactions that lack it. Use [[../update-transaction/SKILL.md|/update-transaction]] (with the merchant-tier classification done by you, per the policies in [[../add-transaction/SKILL.md|/add-transaction]]'s *Card-specific earning policies*).
-- Does **not** draft the bill. Use [[../prepare-bill/SKILL.md|/prepare-bill]] after this.
-- Does **not** delete or update existing credit rows. Use `add-transaction/archive.py` to remove, then re-run this skill.
-- Does **not** apply to Takumi (UOB One is only on Baiboon and Nuta in the current data).
-- Does **not** translate Thai labels — `ยอดชำระ`, `Bill Cycle Date`, etc. stay verbatim per project convention.
+Subclass `Crediting` in `scripts/python/lib/crediting/<card>.py` (`plan()` returns the rows; the base `post()` writes them) and register it in `CREDITINGS` in `lib/crediting/__init__.py`. No YAML key does this any more (`crediting_schedule` was retired 2026-09-28).
