@@ -327,7 +327,7 @@ def looks_foreign_in_thb(merchant_name: str) -> bool:
     return tokens[-1].upper() in _FOREIGN_COUNTRY_TOKENS
 
 
-def _looks_petrol(merchant_name: str) -> bool:
+def looks_petrol(merchant_name: str) -> bool:
     upper = merchant_name.upper()
     return any(tok in upper for tok in _PETROL_TOKENS)
 
@@ -517,7 +517,7 @@ def _classify_core(
                 promotion_id=None,
                 reason="foreign-default-exclude",
             )
-        if (_card_excludes_petrol(card) and _looks_petrol(merchant_name)):
+        if (_card_excludes_petrol(card) and looks_petrol(merchant_name)):
             return Classification(
                 cashback_percent=None,
                 note=f"Petrol station — {card} earns no cashback / points at fuel merchants.",
@@ -590,7 +590,7 @@ def _classify_core(
         # default == "apply": tier rules apply to foreign-in-THB rows too.
 
     # 3) Petrol exclusion (card-level rule)
-    if (_card_excludes_petrol(card) and _looks_petrol(merchant_name)):
+    if (_card_excludes_petrol(card) and looks_petrol(merchant_name)):
         return Classification(
             cashback_percent=None,
             note=f"Petrol station — {card} earns no cashback / points at fuel merchants.",

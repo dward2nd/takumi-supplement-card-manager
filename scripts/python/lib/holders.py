@@ -6,6 +6,10 @@ Source of truth for these IDs is /CLAUDE.md. If you edit one, edit both.
 Takumi (เว็บ) is the primary card holder; Baiboon (ใบบุญ) and Nuta (นุตา)
 are supplement holders. Each has their own Cards and Transactions data
 sources; only Baiboon and Nuta have Bills (Takumi does not).
+
+Since 2026-09-28 each holder also has a cashback tracker
+(`รายการติดตามเครดิตเงินคืนของ<name>`), and all three share one Promotion
+Bureau DS — see `lib.bureau`.
 """
 
 from __future__ import annotations
@@ -20,6 +24,14 @@ class Holder:
     transactions_ds: str
     cards_ds: str
     bills_ds: str | None
+    # `รายการติดตามเครดิตเงินคืนของ<name>` — one row per promotion credit the
+    # holder expects back. Linked to the Promotion Bureau via `Promotion`.
+    cashback_tracker_ds: str | None = None
+
+
+# The household-wide promotion ledger: one row per promotion period, linking
+# every holder's qualifying transactions (`รายการใช้จ่ายจาก<name>`).
+PROMOTION_BUREAU_DS = "3e7cb755-f0f1-80f0-8c78-000b1d9f44cb"
 
 
 HOLDERS: dict[str, Holder] = {
@@ -29,6 +41,7 @@ HOLDERS: dict[str, Holder] = {
         transactions_ds="1aacb755-f0f1-81dc-8e9f-000b20891025",
         cards_ds="1aacb755-f0f1-818a-a284-000b17d155de",
         bills_ds=None,
+        cashback_tracker_ds="96bcb755-f0f1-83ef-a5b9-079f9ba3ae98",
     ),
     "baiboon": Holder(
         key="baiboon",
@@ -36,6 +49,7 @@ HOLDERS: dict[str, Holder] = {
         transactions_ds="181cb755-f0f1-8167-b5b6-000bc6d47469",
         cards_ds="99bb5ba6-79b1-47e2-9b8f-fa3102d5b294",
         bills_ds="192cb755-f0f1-8064-9075-000be05ba72d",
+        cashback_tracker_ds="374cb755-f0f1-80b2-97cc-000b0105e43e",
     ),
     "nuta": Holder(
         key="nuta",
@@ -43,6 +57,7 @@ HOLDERS: dict[str, Holder] = {
         transactions_ds="2a1cb755-f0f1-8110-9795-000bf7d48b4f",
         cards_ds="2a1cb755-f0f1-8188-9b00-000b5fa448b8",
         bills_ds="2a1cb755-f0f1-8193-982d-000bd4e3156c",
+        cashback_tracker_ds="2e4cb755-f0f1-838a-9317-877c67577916",
     ),
 }
 
