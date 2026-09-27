@@ -380,6 +380,35 @@ def _apply_truemoney_711_points_exclusion(
     )
 
 
+def _apply_merchant_points_exclusions(
+    result: "Classification", card: str, date: _dt.date, merchant_name: str
+) -> "Classification":
+    """Force `×0` points on merchant strings the card's YAML lists as excluded.
+
+    Points-only, like the 7-11 / TrueMoney rule: `cashback_percent` is left as
+    computed. Entries come from `points_excluded_merchants` in the card YAML
+    (e.g. AEON's MCC exclusions from 2025-11-11, where `WWW.MAKRO.PRO …` bills
+    as MCC 5199 but `HTTPS://WWW.MAKRO.PRO/ …` as 5411). A prefix of `*`
+    matches every merchant — AEON Rabbit stopped earning points altogether.
+    """
+    entry = card_repo.get(card)
+    if not entry or not entry.points_excluded_merchants or result.points_override == "×0":
+        return result
+    name = merchant_name.strip()
+    if name.startswith("[บัตรหลัก]"):
+        name = name[len("[บัตรหลัก]"):].strip()
+    for ex in entry.points_excluded_merchants:
+        if date >= ex.effective_from and (ex.prefix == "*" or name.upper().startswith(ex.prefix.upper())):
+            return Classification(
+                cashback_percent=result.cashback_percent,
+                note=f"{result.note} {ex.note}".strip() if result.note else ex.note,
+                points_override="×0",
+                promotion_id=result.promotion_id,
+                reason=f"{result.reason}+merchant-points-exclusion",
+            )
+    return result
+
+
 def _apply_installment_rewards_upfront(
     result: "Classification", card: str, *, is_inst: bool
 ) -> "Classification":
@@ -475,7 +504,8 @@ def classify(
     # sees and skips, so an installment row at a TrueMoney merchant carries one
     # explanation rather than two stacked ones.
     result = _apply_installment_rewards_upfront(result, card, is_inst=is_inst)
-    return _apply_truemoney_711_points_exclusion(result, card, merchant_name)
+    result = _apply_truemoney_711_points_exclusion(result, card, merchant_name)
+    return _apply_merchant_points_exclusions(result, card, date, merchant_name)
 
 
 def _classify_core(

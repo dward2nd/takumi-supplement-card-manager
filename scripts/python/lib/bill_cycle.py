@@ -141,6 +141,12 @@ PATTERNS: dict[str, BillCyclePattern] = {
         bill_day=15,
         due_from_nominal_bc=_due_plus(10),
     ),
+    "grab": BillCyclePattern(
+        key="grab",
+        description="Grab PayLater — bill cycle day 1, due day 7 of the same month",
+        bill_day=1,
+        due_from_nominal_bc=_due_plus(6),
+    ),
     "uob": BillCyclePattern(
         key="uob",
         description=(

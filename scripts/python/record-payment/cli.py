@@ -13,7 +13,7 @@ cashback**. See `lib.payments` for the model rationale.
 Reads a JSON spec from stdin (or --input <file>):
 
   {
-    "holder":       "baiboon" | "nuta",   // required (takumi has no Bills DB)
+    "holder":       "baiboon" | "nuta",   // required (takumi's bank payment isn't automated)
     "card":         "UOB One",             // required, exact Cards-DB title
     "bill_cycle":   "2026-05-25",          // required, วันตัดรอบบิล of the bill being paid
 

@@ -78,7 +78,10 @@ def is_payment_row(row: dict) -> bool:
 # ชำระล่วงหน้าบางส่วน, ชำระเพิ่มบางส่วนจนครบ, ชำระเต็มจำนวนอย่างล่าช้า,
 # จ่ายเต็มจำนวน, จ่ายบิลเต็มจำนวน, จ่ายก่อนบิลมา, จ่ายบิลล่วงหน้าบางส่วน,
 # จ่ายส่วนขาดเพิ่มเติม. No non-payment row in the data starts with either.
-_PAYMENT_NAME_PREFIXES: tuple[str, ...] = ("ชำระ", "จ่าย")
+# `AUTO DEBIT` is Takumi's bank-side auto-debit row (the Krungsri family pays
+# that way; his 2025 UOB rows read `AUTO DEBIT - <card>`). Only his ledger
+# carries it.
+_PAYMENT_NAME_PREFIXES: tuple[str, ...] = ("ชำระ", "จ่าย", "AUTO DEBIT")
 
 
 def is_bill_payment_row(row: dict) -> bool:
@@ -191,6 +194,16 @@ def record_payment(
     if holder.bills_ds is None:
         raise ValueError(
             f"{holder.key!r} has no Bills DB — payments are recorded for baiboon/nuta only"
+        )
+    if holder.statement_bills:
+        # Takumi's slip pays the bank for the whole card — the supplements'
+        # shares too — so a single full-bill row would drive his own card's
+        # balance negative by their amount. His 2025 ledger balanced it with
+        # `โอนยอดจาก<holder> - <card>` rows; that pairing isn't automated yet.
+        raise ValueError(
+            f"{holder.key!r} pays the whole card bill to the bank; a full-bill payment "
+            f"row needs matching โอนยอดจาก… rows for the supplements' shares, which "
+            f"this helper doesn't write — record it by hand"
         )
     if kind not in PAYMENT_LABELS:
         raise ValueError(f"kind must be one of {sorted(PAYMENT_LABELS)}; got {kind!r}")

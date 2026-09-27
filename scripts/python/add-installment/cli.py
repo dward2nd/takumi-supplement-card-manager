@@ -177,12 +177,6 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     amount = float(spec["term_amount"])
 
     auto_classify = bool(spec.get("auto_classify", True))
-    if auto_classify and spec["holder"] == "takumi":
-        # Same rationale as add-transaction: % cb doesn't exist on Takumi.
-        raise SpecError(
-            "auto_classify is not supported for holder='takumi' "
-            "(Takumi's Transactions DS has no `% cb` field)"
-        )
 
     multiplier = spec.get("multiplier")
     cashback_percent = spec.get("cashback_percent")

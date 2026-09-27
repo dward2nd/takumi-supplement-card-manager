@@ -7,7 +7,8 @@ field is a SELECT (not a relation — see docs/concepts/known-divergences),
 so card matching here is on the verbatim select-option string. Bill
 cycle dates are ISO date strings.
 
-Takumi has no Bills DB; lookups for `takumi` raise BillsNotSupported.
+All three holders have a Bills DB. Takumi's holds statement-driven bills
+(`Holder.statement_bills`); lookups work the same way on it.
 
 `explain_cycle()` produces a one-block Note text summarising the special
 rows in a cycle — installment terms, cashback credit rows, and manual
@@ -39,7 +40,7 @@ class BillsNotSupported(RuntimeError):
 def require_bills_ds(holder: Holder) -> str:
     if not holder.bills_ds:
         raise BillsNotSupported(
-            f"{holder.key!r} has no Bills database (only baiboon and nuta do)"
+            f"{holder.key!r} has no Bills database"
         )
     return holder.bills_ds
 

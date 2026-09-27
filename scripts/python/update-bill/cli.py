@@ -61,7 +61,7 @@ Resolution rules:
   optional (only used for the response echo).
 - Otherwise `holder`, `card`, `bill_cycle` are all required.
 - Slip/statement appends preserve existing entries in the target
-  property (re-uploaded from their signed URLs). Takumi has no Bills DB.
+  property (re-uploaded from their signed URLs). Takumi's Bills DB is statement-driven: no refresh, no auto payment row, no auto `จ่ายแล้ว`.
 
 Output:
   {
@@ -327,6 +327,14 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
 
     resolvable = bool(holder_key and card and bill_cycle)
 
+    # Takumi's bills (Holder.statement_bills) are the bank statement's card
+    # totals, and his slip pays the bank for every holder on the card. A total
+    # recomputed from his own rows would understate the bill, and a full-bill
+    # payment row would overstate what he paid for himself — so both
+    # automations stand down, and `จ่ายแล้ว` is only ever set explicitly.
+    holder_rec = HOLDERS.get((holder_key or "").strip().lower())
+    statement_bills = bool(holder_rec and holder_rec.statement_bills)
+
     # Auto-close-on-statement: attaching the issuer's statement PDF finalizes
     # the bill — it always strips a leading `[DRAFT] `. It marks `จ่ายแล้ว`
     # only when the PEER's transfer to Takumi is proven: a transfer slip in
@@ -367,6 +375,11 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     # sync with what the user will see on the bank statement.
     refresh = bool(spec.get("refresh_from_transactions"))
     refreshed: dict | None = None
+    if refresh and statement_bills:
+        raise ValueError(
+            f"refresh_from_transactions doesn't apply to {holder_key!r}: the bill is "
+            f"the statement's card total, not a sum of {holder_key}'s own rows"
+        )
     if refresh:
         if not (holder_key and card and bill_cycle):
             raise ValueError(
@@ -412,6 +425,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         coverage = _payment_coverage(holder_key, card, bill_cycle)
         will_record = (
             bool(slips)
+            and not statement_bills
             and spec.get("record_payment", True) is not False
             and amount_due is not None
             and amount_due > 0
@@ -460,6 +474,16 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             return None
         if not (holder_key and card and bill_cycle):
             return None
+        if statement_bills:
+            return {
+                "would_create": False,
+                "created": False,
+                "reason": (
+                    f"{holder_key}'s slip pays the bank for the whole card; no payment "
+                    f"row is recorded automatically (it needs โอนยอดจาก… rows for the "
+                    f"supplements' shares). Mark the bill paid with `paid: true`."
+                ),
+            }
         amount = _bill_amount(page_id)
         if amount is None:
             return {

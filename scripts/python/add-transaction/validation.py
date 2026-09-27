@@ -101,7 +101,6 @@ def validate_spec(spec: dict[str, Any]) -> None:
     _check_points_redeemed(spec.get("points_redeemed"), "points_redeemed")
 
     holder = spec["holder"]
-    has_batch_cb = spec.get("cashback_percent") is not None
 
     txs = spec["transactions"]
     if not isinstance(txs, list) or not txs:
@@ -127,9 +126,3 @@ def validate_spec(spec: dict[str, Any]) -> None:
         _check_points_redeemed(
             tx.get("points_redeemed"), f"transactions[{i}].points_redeemed"
         )
-        # `% cb` exists on Baiboon's and Nuta's Transactions DSes; Takumi's DS
-        # does not carry it (and Notion will 400 on the property name).
-        if (has_batch_cb or tx.get("cashback_percent") is not None) and holder == "takumi":
-            raise SpecError(
-                f"cashback_percent (`% cb`) does not exist on Takumi's Transactions DS"
-            )

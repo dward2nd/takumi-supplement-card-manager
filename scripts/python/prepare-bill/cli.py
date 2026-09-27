@@ -21,7 +21,7 @@ the prefix.
 Reads a JSON spec from stdin (or --input <file>):
 
   {
-    "holder":     "baiboon" | "nuta",          // required (takumi has no Bills DB)
+    "holder":     "baiboon" | "nuta",          // required (takumi's bills are statement-driven)
     "card":       "UOB One",                   // required, must match a SELECT option
     "bill_cycle": "2026-05-25",                // optional ISO date; inferred if omitted
     "skip_populate_installments": false,       // optional; default false. When false,
@@ -50,6 +50,25 @@ Writes a JSON envelope to stdout:
   }
 
 --dry-run resolves the cycle + total without writing anything.
+
+Date-range mode — draft every cycle whose BC falls in a window, across
+cards and holders. Selected by the presence of `bill_cycle_from`:
+
+  {
+    "bill_cycle_from": "2026-09-25",           // required, ISO, inclusive
+    "bill_cycle_to":   "2026-09-27",           // required, ISO, inclusive; ≤ 31 days
+    "holders": ["baiboon", "nuta"],            // optional; default both (or "holder")
+    "cards":   ["UOB One"],                    // optional filter, case-insensitive
+    "skip_populate_installments": false,       // optional; passed to every draft
+    "skip_cashback_check": false,              //   "
+    "skip_auto_note": false                    //   "
+  }
+
+Cycles come from the Transactions DBs' `Bill Cycle Date` values. Each is
+drafted through the single-card path, so its guards still apply per cycle.
+The envelope lists one result per (holder, card, BC) with a status —
+`created` / `would-create`, `exists`, `off-pattern`, or `blocked` + reason
+— and `counts` per status.
 """
 
 from __future__ import annotations
@@ -61,7 +80,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib.bill_draft import DRAFT_PREFIX, BillDraftError, draft_bill  # noqa: F401
+from lib.bill_draft import DRAFT_PREFIX, BillDraftError, draft_bill, draft_bills_in_window  # noqa: F401
 
 # The drafting core lives in `lib.bill_draft` so /update-bill can reuse it —
 # it drafts a missing bill before attaching a payment slip. This module is
@@ -69,7 +88,11 @@ from lib.bill_draft import DRAFT_PREFIX, BillDraftError, draft_bill  # noqa: F40
 # catches it by name keeps working.
 PrepareBillError = BillDraftError
 
-run = draft_bill
+
+def run(spec: dict, *, dry_run: bool = False) -> dict:
+    if isinstance(spec, dict) and ("bill_cycle_from" in spec or "bill_cycle_to" in spec):
+        return draft_bills_in_window(spec, dry_run=dry_run)
+    return draft_bill(spec, dry_run=dry_run)
 
 
 def main(argv: list[str] | None = None) -> int:

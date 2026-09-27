@@ -5,7 +5,8 @@ deterministic + idempotent — safe to re-run.
 Source of truth for these IDs is /CLAUDE.md. If you edit one, edit both.
 Takumi (เว็บ) is the primary card holder; Baiboon (ใบบุญ) and Nuta (นุตา)
 are supplement holders. Each has their own Cards and Transactions data
-sources; only Baiboon and Nuta have Bills (Takumi does not).
+sources, and a Bills data source. Takumi's Bills DB (added 2026-09-27) is
+different in kind — see `statement_bills` below.
 
 Since 2026-09-28 each holder also has a cashback tracker
 (`รายการติดตามเครดิตเงินคืนของ<name>`), and all three share one Promotion
@@ -24,6 +25,13 @@ class Holder:
     transactions_ds: str
     cards_ds: str
     bills_ds: str | None
+    # True when this holder's bills are the bank statement's per-card totals
+    # — principal plus every supplement section — not a sum of the holder's
+    # own Transactions rows. Takumi pays each card's whole bill to the bank,
+    # so his bill covers Baiboon's and Nuta's charges on it too. Anything
+    # that computes a bill, or books a full-bill payment, from one holder's
+    # rows must refuse such a holder.
+    statement_bills: bool = False
     # `รายการติดตามเครดิตเงินคืนของ<name>` — one row per promotion credit the
     # holder expects back. Linked to the Promotion Bureau via `Promotion`.
     cashback_tracker_ds: str | None = None
@@ -40,7 +48,8 @@ HOLDERS: dict[str, Holder] = {
         thai_name="เว็บ",
         transactions_ds="1aacb755-f0f1-81dc-8e9f-000b20891025",
         cards_ds="1aacb755-f0f1-818a-a284-000b17d155de",
-        bills_ds=None,
+        bills_ds="63dcb755-f0f1-83df-aaa8-871bb9069dae",
+        statement_bills=True,
         cashback_tracker_ds="96bcb755-f0f1-83ef-a5b9-079f9ba3ae98",
     ),
     "baiboon": Holder(

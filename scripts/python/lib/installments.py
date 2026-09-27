@@ -191,11 +191,6 @@ def populate_for_cycle(
     from .transaction_write import build_transaction_properties
 
     exclude = exclude or set()
-    if auto_classify and holder_key == "takumi":
-        raise ValueError(
-            "auto_classify is not supported for holder='takumi' "
-            "(Takumi's Transactions DS has no `% cb` field)"
-        )
 
     rows = fetch_card_installment_rows(transactions_ds, card_page_id)
     plans: list[dict] = []

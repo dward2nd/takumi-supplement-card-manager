@@ -6,7 +6,8 @@ The Cards data sources in Notion hold per-holder card pages (title,
 network, premium tier, etc.); this module holds script-side policy
 flags that don't fit cleanly in Notion or that are needed without a
 Notion round-trip: bill-cycle pattern key, default points multiplier,
-petrol-station exclusion, 7-11/TrueMoney points exclusion, issuer.
+petrol-station exclusion, 7-11/TrueMoney points exclusion, merchant
+points exclusions, issuer.
 
 One YAML file per card under `scripts/repositories/cards/`. See
 `scripts/repositories/README.md` for the schema.
@@ -14,7 +15,8 @@ One YAML file per card under `scripts/repositories/cards/`. See
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import datetime as _dt
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -22,6 +24,21 @@ from typing import Any
 import yaml
 
 from . import paths
+
+
+@dataclass(frozen=True)
+class MerchantPointsExclusion:
+    """Merchant strings that earn no points on this card from a date onwards.
+
+    Issuers exclude by MCC, which a merchant string doesn't carry, so an entry
+    names the strings known to bill under an excluded code. Matched as a
+    prefix, after dropping a leading `[บัตรหลัก] `; `*` matches every merchant.
+    """
+
+    prefix: str
+    effective_from: _dt.date
+    note: str
+    mcc: str | None = None
 
 
 @dataclass(frozen=True)
@@ -36,6 +53,11 @@ class CardRepo:
     installment_note: str | None
     notes: str | None
     source_path: Path
+    # Last four digits printed on the issuer's statement → holder slug
+    # (takumi / baiboon / nuta / unmonitored). Takumi's number is the primary
+    # card; any other holder's is their supplement. Read by /record-statement.
+    statement_numbers: dict[str, str] = field(default_factory=dict)
+    points_excluded_merchants: tuple[MerchantPointsExclusion, ...] = ()
 
 
 class CardRepoNotFoundError(LookupError):
@@ -62,7 +84,51 @@ def _parse_card(data: dict[str, Any], source: Path) -> CardRepo:
         installment_note=data.get("installment_note"),
         notes=data.get("notes"),
         source_path=source,
+        statement_numbers=_parse_statement_numbers(data.get("statement_numbers"), source),
+        points_excluded_merchants=_parse_merchant_exclusions(data.get("points_excluded_merchants"), source),
     )
+
+
+def _parse_merchant_exclusions(raw: Any, source: Path) -> tuple[MerchantPointsExclusion, ...]:
+    """Validate `points_excluded_merchants` — each entry needs prefix, effective_from, note."""
+    out = []
+    for i, e in enumerate(raw or []):
+        missing = [k for k in ("prefix", "effective_from", "note") if not e.get(k)]
+        if missing:
+            raise ValueError(f"{source}: points_excluded_merchants[{i}] missing {missing}")
+        start = e["effective_from"]
+        if not isinstance(start, _dt.date):
+            start = _dt.date.fromisoformat(str(start))
+        out.append(MerchantPointsExclusion(
+            prefix=str(e["prefix"]), effective_from=start, note=str(e["note"]),
+            mcc=str(e["mcc"]) if e.get("mcc") is not None else None,
+        ))
+    return tuple(out)
+
+
+# `unmonitored`: a real supplement nobody in the household tracks — its
+# charges count toward the bill but are recorded in no ledger.
+_HOLDER_SLUGS = frozenset({"takumi", "baiboon", "nuta", "unmonitored"})
+
+
+def _parse_statement_numbers(raw: Any, source: Path) -> dict[str, str]:
+    """Validate `statement_numbers` — quoted 4-digit keys, known holder slugs.
+
+    Keys must be quoted in YAML: an unquoted `0052` loads as an integer (and
+    YAML 1.1 reads a leading zero as octal), which would silently never match.
+    """
+    if not raw:
+        return {}
+    if not isinstance(raw, dict):
+        raise ValueError(f"{source}: statement_numbers must be a mapping")
+    out: dict[str, str] = {}
+    for k, v in raw.items():
+        if not (isinstance(k, str) and len(k) == 4 and k.isdigit()):
+            raise ValueError(f"{source}: statement_numbers key {k!r} must be a quoted 4-digit string")
+        if str(v).lower() not in _HOLDER_SLUGS:
+            raise ValueError(f"{source}: statement_numbers[{k!r}] = {v!r} is not a holder slug")
+        out[k] = str(v).lower()
+    return out
 
 
 @lru_cache(maxsize=1)

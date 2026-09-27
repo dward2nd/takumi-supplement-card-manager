@@ -72,8 +72,8 @@ Hard rules enforced here:
   3. Card relation must resolve to exactly one card; otherwise abort.
   4. `Processed` defaults to true unless the spec says otherwise.
   5. At most one multiplier checkbox is set per page. Absence ⇒ ×1.
-  6. cashback_percent is Baiboon + Nuta only; rejected for Takumi at spec-validation
-     (the `% cb` property does not exist on Takumi's Transactions DS).
+  6. cashback_percent writes `% cb`, which all three holders' DSes carry (Takumi's
+     since 2026-09-28).
 
 --dry-run builds the payload and reports it without calling Notion.
 """
@@ -117,13 +117,6 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     batch_cashback = spec.get("cashback_percent")
     batch_points_redeemed = spec.get("points_redeemed")
     auto_classify = bool(spec.get("auto_classify", False))
-    if auto_classify and spec["holder"] == "takumi":
-        # Takumi's Transactions DS has no `% cb` field; classification can't write to it.
-        # Refuse rather than silently dropping the result.
-        raise ValueError(
-            "auto_classify is not supported for holder='takumi' "
-            "(Takumi's Transactions DS has no `% cb` field)"
-        )
 
     created: list[dict] = []
     classifications: list[dict] = []

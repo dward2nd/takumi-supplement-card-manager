@@ -77,6 +77,20 @@ def find_card(cards_ds: str, card_name: str) -> dict:
     return exact[0]
 
 
+def card_title_text(page: dict) -> str:
+    """A Card page's title, whitespace-trimmed."""
+    return _title_text(page).strip()
+
+
+def card_titles_by_id(cards_ds: str) -> dict[str, str]:
+    """{page id → title} for every row of a Cards DB, in one query.
+
+    For resolving many `Card` relation IDs at once — a relation carries only
+    the page ID.
+    """
+    return {p["id"]: card_title_text(p) for p in notion_client.query_all(cards_ds)}
+
+
 def list_card_titles(cards_ds: str) -> list[str]:
     """Helper for diagnostics / fuzzy suggestions."""
     return sorted({_title_text(p).strip() for p in notion_client.query_all(cards_ds)})
