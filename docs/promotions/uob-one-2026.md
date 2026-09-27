@@ -58,9 +58,30 @@ UOB One earns no points — `×0` multiplier on every transaction. This is a **c
 
 If the issuer renews for 2027 with different terms, **branch** a fresh `scripts/repositories/promotions/uob-one-2027.yaml` via [[../../.claude/skills/add-promotion/SKILL.md|/add-promotion]] and set this promo's `effective_end` (if it isn't already past) via [[../../.claude/skills/update-promotion/SKILL.md|/update-promotion]]. Don't mutate the 2026 YAML's effective dates after the fact — preserve the historical reading.
 
+## Caps, and the Promotion Bureau
+
+The bank caps the cashback, and the two caps count over **different periods** (bank page, read 2026-09-28):
+
+| Tiers | Cap | Counted per | Credited |
+|---|---|---|---|
+| 10% + 5% together | ฿500 | **calendar month**, by post date | last day of the month |
+| 1% | ฿2,000 | **statement cycle** | within the cycle |
+
+The caps are shared by everyone on the account and split first come, first served (user, 2026-09-28), so each has its own [[../concepts/promotion-bureau|Promotion Bureau]] row per period: `2026M9 — UOB One cb 10%/5%` (1–30 Sep) and `2026M9 — UOB One cb 1%` (26 Aug–25 Sep). The tiers themselves still come from `uob-one-2026.yaml` through `lib.promotions.classify`; the Bureau classes (`scripts/python/lib/bureau/uob_one.py`) add only the caps. One exception the YAML doesn't know: **Makro in-store** (`MAKRO_…`) earns nothing, while its catch-all tier would give 1%.
+
+September 2026, before Takumi's UOB statement (2026-09-28):
+
+| Row | Pooled | Credit | Nuta | Baiboon |
+|---|---|---|---|---|
+| 10%/5% (1–30 Sep) | ฿2,417.50 | ฿132.63 | ฿120.80 | ฿11.83 |
+| 1% (26 Aug–25 Sep) | ฿13,029.40 | ฿130.29 | ฿128.49 | ฿1.80 |
+
+**Where this differs from the ledger's credit rows.** [[../../.claude/skills/post-cashback-credits/SKILL.md|/post-cashback-credits]] groups the 10%/5% rows by **bill cycle** (`Cycle 2026-09-25 cashback credit: 5% × 3122.00`), but the bank counts them per **calendar month**. Rows from 26–31 Aug and 26–30 Sep land in different periods, so Nuta's September 10%/5% is ฿120.80 in the Bureau against ฿173.60 in her cycle credit rows. The 1% differs by ฿2.31: Nuta's `[ยอดยกมาจากรอบ 2026-08]` −฿231 carry-forward carries `% cb` 1%, and the ledger nets it, while the Bureau counts purchases only. Both are open questions below.
+
 ## Open questions
 
-- Monthly cashback cap (account-level or card-level?) — not yet surfaced from the issuer T&Cs.
+- **10%/5% by month or by cycle?** The bank says calendar month; `/post-cashback-credits` groups by cycle. Which should the ledger's credit rows follow? (Raised 2026-09-28.)
+- **Should carry-forward rows with `% cb` reduce the Bureau's 1%?** The ledger nets them; the Bureau ignores non-purchase rows. (Raised 2026-09-28.)
 - Does Takumi's primary UOB One get the same supplement-side tier treatment, or do primary-card swipes count differently? Phase-1 data hasn't given a clean answer.
 
 ## See also

@@ -23,17 +23,9 @@ Two tiers, both of which **predate the promotions system** (user, 2026-08-20):
 
 The base is `×2`, not `×1` — an unboosted UOB World row still earns double. Leaving the multiplier unset means `×1` in Notion's `คะแนนที่ได้จริง` formula, which would under-report; hence the explicit card-level default. See [[../concepts/points-and-multipliers]].
 
-### The ≈฿20,000 per-cycle quota
+### The ฿20,000 per-cycle quota
 
-Past roughly ฿20,000 of eligible spend in a cycle, rows drop from `×5` to `×2`. **No script enforces this** — `lib.promotions.classify` can't see cycle-to-date spend, so it returns `×5` for as long as the promo is active. Check the cycle total yourself on a heavy month; Feb 2026 and Apr 2026 both exceeded the quota and are dominated by `×2` rows as a result.
-
-The row that straddles the boundary gets split by hand — one Notion row carries one multiplier checkbox, so a part-`×5` / part-`×2` charge can't be expressed. The user records the arithmetic in `Note` instead:
-
-```
-ยอดเกินมาจาก quota 20k เป็นจำนวน 729.55 บาท เหลือยอดที่ได้ 5 เท่า
-```
-
-Full detail, including whether the quota might be account-level rather than per-card, is in [[../promotions/uob-world-points]].
+Per account (Takumi + Baiboon together), counting every transaction, first come, first served; ×5 only on the bank's bonus categories (online, e-wallet, dining, travel, foreign currency). Enforced since 2026-09-28 by the Promotion Bureau (one row per cycle). The row the quota ends in keeps ×5 and gives back its over-quota part through `ใช้คะแนน`. Full detail in [[../promotions/uob-world-points]].
 
 ## Exclusions
 

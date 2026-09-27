@@ -30,21 +30,24 @@ Note that the base is `×2`, not `×1`. An unboosted UOB World row still earns d
 
 Historical rows confirm both tiers in the user's own words — `UOB World default ×2 multiplier (Thailand merchant)` on April 2026 rows, against `UOB World ×5 multiplier for May 25 bill cycle (special promo…)` on others.
 
-## The ≈฿20,000 per-cycle quota — a known gap
+## The ฿20,000 per-cycle quota — enforced by the Promotion Bureau
 
-Once a cycle's eligible spend passes roughly **฿20,000**, further rows drop from `×5` to `×2`, and the row straddling the boundary is **split by hand**. The evidence is in the Notion notes, verbatim:
+Settled with the user on 2026-09-28, and enforced since then by the [[../concepts/promotion-bureau|Promotion Bureau]] (`UOBWorldBonus` in `scripts/python/lib/bureau/uob_world.py`, one Bureau row per cycle, e.g. `2026M9 — UOB World ×5` for 26 Aug–25 Sep):
+
+- **Per account, not per card**: Takumi's principal and Baiboon's supplement share one ฿20,000.
+- **Every transaction counts toward it**, bonus category or not, excluded or not (foreign-in-THB included). The bank's page words the ฿20,000 as a cap on bonus-category spend; the household's observation wins.
+- **First come, first served** by `Transaction Datetime`.
+- **×5 only on the bank's bonus categories**: online (card-network e-commerce), e-wallet, dining, travel, foreign currency. Everything else is ×2, and excluded spend is ×0. `category()` settles what the merchant string can show (TrueMoney, LINE Pay, Shopee and Grab are bonus; supermarkets and clinics are ×2; petrol, Makro in-store, utilities and baht-at-foreign are ×0). For the rest, dining especially, it trusts the multiplier the household set.
+
+The household's conventions, now checked on every `/sync-promotion` run (`field_mismatches`):
 
 ```
-ได้คะแนน 2 เท่าเพราะเต็มโควต้า 20k แล้ว
-ยอดเกินมาจาก quota 20k เป็นจำนวน 729.55 บาท เหลือยอดที่ได้ 5 เท่า
+a bonus row wholly past the quota → ×2, Note: ได้คะแนน 2 เท่าเพราะเต็มโควต้า 20k แล้ว
+the row the quota ends in        → keeps ×5; ใช้คะแนน = ⌊over × 3 / 25⌋, Note:
+  ยอดเกินมาจาก quota 20k เป็นจำนวน 729.55 บาท เหลือยอดที่ได้ 5 เท่า 926.45 บาท จึงทดไป 87 คะแนนเพื่อสะท้อนส่วนที่ได้ 2 เท่า
 ```
 
-**No script enforces this.** `lib.promotions.classify(card, date, merchant)` is a pure function of those three arguments — it has no view of cycle-to-date spend, so while this promo is active it returns `×5` unconditionally. Two consequences:
-
-1. On a high-spend cycle, `auto_classify` will over-report. Check the cycle total before trusting it. Feb 2026 and Apr 2026 both blew the quota (`×2` dominates those two months).
-2. The straddling-row split can't be automated at all under the current schema — one Notion row carries one multiplier checkbox, so a part-`×5` / part-`×2` charge is a manual judgment call. See [[../concepts/known-divergences]] on the integer-only points model.
-
-Making this enforceable would mean giving `classify` a cycle-spend argument (or moving quota logic to a caller that has it), plus a `points_quota` block in the promotion schema. Deliberately not built — see *Open questions*.
+`lib.promotions.classify` still returns ×5 for every UOB World row (this promo has no tiers), so `/add-transaction`'s `auto_classify` over-reports on non-bonus merchants and past the quota. The Bureau sync is what corrects it.
 
 ## Exclusions
 
@@ -61,8 +64,6 @@ UOB World has a real points balance, and it gets redeemed — e.g. a `Major Comb
 
 ## Open questions
 
-- **Is the ฿20,000 quota per-card or per-account?** Baiboon is one of several holders on Takumi's UOB account, and [[../future-app/product-shape]] explicitly anticipates household-wide shared quotas. If it's account-level, the quota is consumed faster than a per-card reading suggests. Unresolved.
-- **Is the quota measured on eligible spend or total spend?** The reconstruction above assumes eligible (positive-amount, non-`×0`) rows.
 - **What is the real `effective_start`?** `2025-01-01` is inferred from first observation, not sourced. Baiboon's data begins around then, so the bonus may well be older than the ledger.
 - **Does `×5` apply to foreign-currency (non-THB) charges?** All observed `×0` foreign rows were THB-billed, so the genuine-foreign-currency case is untested on this card.
 

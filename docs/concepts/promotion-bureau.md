@@ -4,13 +4,37 @@ tags: [concept, rewards, promotion]
 
 # Promotion Bureau — pooled campaigns and the FCFS split
 
-Some bank campaigns pay on the **primary account's pooled spend**, not per row. NW3 on First Choice pays ฿200 per whole ฿10,000 the household spends in a month, across Takumi's principal card and Baiboon's and Nuta's supplements. No single holder's ledger can tell what the bank will pay, or who earned it. The [[../databases/promotion-bureau|Promotion Bureau]] DB exists for these: one row per campaign period, linked to every holder's qualifying transactions. Added by Takumi 2026-09-26.
+Some bank campaigns pay on the **primary account's pooled spend**, not per row. NW3 on First Choice pays ฿200 per whole ฿10,000 the household spends in a month, across Takumi's principal card and Baiboon's and Nuta's supplements. No single holder's ledger can tell what the bank will pay, or who earned it. The [[../databases/promotion-bureau|Promotion Bureau]] DB exists for these: one row per **quota period**, linked to every holder's qualifying transactions. Added by Takumi 2026-09-26.
 
 This sits beside, not inside, the per-row [[promotions|promotion model]] (`% cb` from `scripts/repositories/promotions/*.yaml`). The YAML model answers "what rate does this row earn?". The Bureau answers "what does the bank pay the account, and whose spend earned it?".
 
-## One class per campaign
+## One row per quota period
 
-Campaign terms don't share a shape (stepped ladders, flat bonuses, merchant-specific tiers, points), so each is a `BasePromotion` subclass in `scripts/python/lib/bureau/`, declaring the bank's terms in code: card, dates, `tranches()` (the ladder), `rules` (exclusions, each with a merchant-string test where one exists), and the page text. Screening, the split and the Bureau page summary are shared and read those declarations, so the page and the screening can't drift apart. [[../../.claude/skills/sync-promotion/SKILL.md|/sync-promotion]] drives it.
+A quota period is the window a bank counts a limit over (user, 2026-09-28). Even a campaign that runs a quarter or a year usually counts per month (`สะสมยอดใช้จ่ายต่อเดือน` "spend accumulated per month", `จำกัดสูงสุด…ต่อเดือน` "capped at … a month"), and its `จำกัด…ตลอดรายการ` (whole-campaign cap) is usually just the months added up. So each Bureau row is one period, named `<year>M<month> — <campaign>`:
+
+| The bank counts per… | `<month>` is… | Example |
+|---|---|---|
+| calendar month | that month | `2026M9 — NW3 cb 2%` (1–30 Sep) |
+| statement cycle | the month of the cycle's closing (BC) date | `2026M9 — UOB One cb 1%` (26 Aug–25 Sep) |
+| the whole campaign | the campaign's first month | — |
+
+One campaign can have two quotas with different periods: UOB One caps its 10%/5% tiers per calendar month and its 1% per statement cycle, so it has two rows a month.
+
+## One class per campaign, one class per payout shape
+
+Campaign terms don't share a shape, so the shape is a class and each campaign subclasses it (`scripts/python/lib/bureau/`):
+
+| Shape | How the reward is paid | Campaigns |
+|---|---|---|
+| `LadderPromotion` | steps of pooled spend: ฿200 per whole ฿10,000, ฿100 per ฿5,000 … | NW3, EPW538 |
+| `CreditCapPromotion` | each row earns its own rate until the period's pooled credit hits a cap | UOB One 10%/5%, UOB One 1% |
+| `UOBWorldBonus` (its own shape) | points: ×5 on bonus categories inside the first ฿20,000 of a cycle | UOB World ×5 |
+
+A campaign class states the bank's terms in code: cards, dates, what counts (`qualifies`, `rules`), the payout, and the page text. Screening, the split and the Bureau page summary read those declarations, so the page and the screening can't drift apart. [[../../.claude/skills/sync-promotion/SKILL.md|/sync-promotion]] drives it.
+
+## One row, several campaigns — same bank only
+
+A transaction can count toward more than one campaign of its own bank (user, 2026-09-28). Nuta's `TMN 7-11` on UOB One earns UOB One's 1% **and** counts toward EPW538. Each campaign gets its own Bureau row and tracker rows. The row's single `% cb`, though, shows only the card's own cashback (UOB One's tier, First Choice's NW3); an overlay paid as a lump sum on top (EPW538) sets `marks_rows = False` and lives in the trackers alone.
 
 ## Who gets how much: first come, first served
 
@@ -19,7 +43,9 @@ Decided by the user 2026-09-28:
 1. Walk the linked rows in `Transaction Datetime` order. Only the spend inside a **paying step** earns; it earns at the step's rate and goes to whoever spent it. Spend past the last whole step earns nothing, whoever it belongs to.
 2. Rows with the **same `Transaction Datetime`** count as simultaneous. That covers a shared bill (a `[บัตรหลัก]` row plus Takumi's remainder of the same charge, given the same time) and date-only rows, whose order within the day is unknown. When such a group straddles a step, the part inside the step is shared **pro rata by amount**.
    Only the day the last step ends on needs exact order. Store it as times in `Transaction Datetime` on that day's rows. Apps (UCHOOSE included) show dates only, so the user has to dig the times out of notification logs; ask for that one day's times, nothing more. A boundary day that mixes timed and date-only rows draws a warning.
-3. Each holder's total is rounded to the satang, and the leftover satang go to the largest remainders, so the shares add up to the credit exactly.
+3. **Per-row fields follow the split** (user, 2026-09-28). For cashback, the `% cb`: A row wholly inside the paying steps carries the full rate (`0.02` for NW3). The row, or same-time group, that straddles the last step is left **unset**, even though part of it earns; so is every row after it. The share fields and trackers carry the exact money. September 2026: 81 rows at 2% and 12 unset (Hai Di Lao's two shares, and everything after). For points (UOB World), the multiplier: ×5 inside the quota, ×2 past it, and the row the quota ends in keeps ×5 and gives back the over-quota part through `ใช้คะแนน`. `/sync-promotion` checks these on every run (`field_mismatches`), since a newly linked row can move the boundary to another day.
+4. Each holder's total is rounded to the satang, and the leftover satang go to the largest remainders, so the shares add up to the credit exactly.
+5. `เงินคืนรวม` (total cashback) follows the split while it equals the sum of the share fields. Once someone types a different figure there (the bank's actual credit), it's never overwritten, and a split that disagrees with it is held back with a warning.
 
 Worked case, September 2026 (reconciled): pooled ฿36,803.92 → 3 steps → ฿600 on the first ฿30,000. The step ends on 2026-09-24 with ฿176.08 of room left. By the times the user looked up, `TMN*PROMPTPAY30` ฿35 (10:56) and `DUMPLINGS` ฿10 (18:47) come first. Hai Di Lao (21:21; Takumi ฿1,562.67 + Baiboon `[บัตรหลัก]` ฿781.33, one charge) takes the last ฿131.08, pro rata: Takumi ฿87.39, Baiboon ฿43.69.
 

@@ -50,7 +50,7 @@ Each note opens with a live Notion URL, collection ID, and the full property sch
 - [[concepts/points-and-multipliers]] — `×0` `×2` `×3` `×4` `×5` `÷4`
 - [[concepts/cashback]] — `% cb` on Baiboon and Nuta (not Takumi)
 - [[concepts/promotions]] — cashback is promotion-driven; effective dates, tier rules, and how general rules (foreign-in-THB, etc.) interact with promos
-- [[concepts/promotion-bureau]] — campaigns paid on pooled spend (NW3), one class per campaign, first-come-first-served split
+- [[concepts/promotion-bureau]] — campaigns paid on pooled spend: one Bureau row per quota period, one class per payout shape and per campaign, first-come-first-served split
 - [[concepts/installment-reward-campaigns]] — ดีจังผ่อน / U Plan and why an installment plan's rewards can't be read off the merchant string
 - [[concepts/premium-tier]] — Signature / Platinum / none
 - [[concepts/card-network]] — JCB / Mastercard / VISA / UnionPay
@@ -74,6 +74,7 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 
 - [[promotions/uob-one-2026]] — UOB One 2026 cashback promotion (effective `2026-01-01` → `2026-12-31`).
 - [[promotions/first-choice-nw3]] — First Choice NW3 pooled cashback ladder (`2026-07-01` → `2026-09-30`), tracked in the Promotion Bureau.
+- [[promotions/uob-epw538]] — UOB e-Commerce & e-Wallet EPW538 (`2026-07-01` → `2026-09-30`), pooled across every UOB card, tracked in the Promotion Bureau.
 
 ## Future application
 
