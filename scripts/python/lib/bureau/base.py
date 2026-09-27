@@ -2,20 +2,19 @@
 
 deterministic + idempotent — pure functions of the transactions handed in.
 
-Bank campaigns differ too much for one schema (NW3 is a stepped ladder on
-pooled monthly spend; the next may be a flat rate, a merchant bonus, or
-points), so each campaign is a subclass that states the bank's terms in code:
+Bank campaigns differ too much for one schema, so the payout *shape* is a
+class too:
 
-  code, title, card, campaign, source_url   what it is, and when
-  tranches(pooled)                          the cashback ladder
-  rules                                     what the bank excludes
-  ladder_rows, examples, inclusions,
-  crediting                                 the rest of the page summary
+  BasePromotion            identity, matching, screening, the FCFS walk, the page
+  ├── CashbackPromotion    baht shares, trackers, the `% cb` rule
+  │   ├── LadderPromotion      (ladder.py) tranches of pooled spend — NW3, EPW538
+  │   └── CreditCapPromotion   (capped.py) a per-row rate until a credit cap — UOB One
+  └── UOBWorldBonus        (uob_world.py) a points quota
 
-The shared machinery reads those declarations: `screen` checks a row against
-`rules`, `allocate` hands the credit out first come, first served, and
-`summary_blocks` renders the Bureau page. The page and the screening read one
-list of rules, so they can't drift apart.
+and each campaign subclasses its shape, stating the bank's terms in code:
+code, title, cards, campaign, source_url; what counts (`qualifies`, `rules`);
+the payout; and the page text. `screen` and `summary_blocks` read the same
+`rules`, so the page and the screening can't drift apart.
 """
 
 from __future__ import annotations
@@ -27,11 +26,12 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from decimal import ROUND_DOWN, Decimal
 from itertools import groupby
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from .. import notion_blocks as nb
 
 ELIGIBLE, UNCERTAIN, EXCLUDED = "eligible", "uncertain", "excluded"
+CASHBACK, POINTS = "cashback", "points"
 SATANG = Decimal("0.01")
 
 # A household prefix that still marks a real card purchase: the friend's share
@@ -39,6 +39,10 @@ SATANG = Decimal("0.01")
 # `[ยกยอด…]`, `[เว็บรับหนี้…]`) marks a ledger adjustment, not spend.
 _PURCHASE_PREFIX = "[บัตรหลัก]"
 _THAI = re.compile(r"[฀-๿]")
+# Household ledger entries that start in Latin script: the bank's auto-debit
+# payment, and the balance-and-points reset (docs/concepts/ledger-reset.md).
+# Thai *inside* a name is no sign: `traveloka เที่ยวบิน …` is a real purchase.
+_LATIN_LEDGER_ENTRIES = ("AUTO DEBIT", "RESET ")
 
 
 @dataclass(frozen=True)
@@ -48,6 +52,12 @@ class Tx:
     name: str
     amount: Decimal
     date: str  # `Transaction Datetime` as stored: an ISO date, or a datetime
+    cb: Decimal | None = None             # `% cb` as stored (raw fraction)
+    multiplier: str | None = None         # the checked multiplier box; None = ×1
+    points_used: Decimal | None = None    # `ใช้คะแนน`
+    note: str = ""
+    card: str = ""                        # the Card relation's title
+    bill_cycle: str | None = None         # `Bill Cycle Date`
 
     @property
     def when(self) -> tuple:
@@ -60,6 +70,10 @@ class Tx:
         return (day, bool(time), dt.datetime.fromisoformat(self.date) if time else None)
 
     @property
+    def day(self) -> dt.date:
+        return dt.date.fromisoformat(self.date[:10])
+
+    @property
     def merchant(self) -> str:
         """The bank's merchant string, upper-cased, without `[บัตรหลัก]`."""
         return self.name.removeprefix(_PURCHASE_PREFIX).strip().upper()
@@ -69,11 +83,12 @@ class Tx:
         """False for payments, credits, transfers and other ledger entries.
 
         Card charges carry the bank's Latin-script merchant string; rows the
-        household writes itself (`โอนยอดจาก…`, `ชำระ…`, `แลกคะแนน…`) are Thai.
+        household writes itself (`โอนยอดจาก…`, `ชำระ…`, `แลกคะแนน…`) start in Thai,
+        with a couple of Latin-led exceptions (`_LATIN_LEDGER_ENTRIES`).
         """
         name = self.name.removeprefix(_PURCHASE_PREFIX).strip()
         return self.amount > 0 and not name.startswith("[") and not _THAI.match(name) \
-            and name.upper() != "AUTO DEBIT"
+            and not name.upper().startswith(_LATIN_LEDGER_ENTRIES)
 
 
 @dataclass(frozen=True)
@@ -103,60 +118,42 @@ class Rule:
 
 
 @dataclass(frozen=True)
-class Tranche:
-    """A band of pooled spend, [start, end), that earns `credit` in total.
-
-    The credit is spread evenly over the band's baht, so whoever's spend
-    fills the band earns its slice of it.
-    """
-
-    start: Decimal
-    end: Decimal
-    credit: Decimal
-
-    def earned(self, lo: Decimal, hi: Decimal) -> Decimal:
-        overlap = min(hi, self.end) - max(lo, self.start)
-        return overlap * self.credit / (self.end - self.start) if overlap > 0 else Decimal(0)
-
-    def counted(self, lo: Decimal, hi: Decimal) -> Decimal:
-        return max(min(hi, self.end) - max(lo, self.start), Decimal(0))
-
-
-@dataclass(frozen=True)
 class TxCredit:
     tx: Tx
-    counted: Decimal  # baht of this row inside a paying tranche
-    credit: Decimal   # unrounded
+    counted: Decimal  # baht of this row inside the quota
+    credit: Decimal   # unrounded baht (0 for a points campaign)
 
 
 @dataclass
 class Allocation:
-    pooled: Decimal                 # every row's spend, all holders
-    counted: Decimal                # the part inside paying tranches
-    credit: Decimal                 # what the bank pays on `pooled`
+    pooled: Decimal                 # every counted row's spend, all holders
+    counted: Decimal                # the part inside the quota
+    credit: Decimal                 # what the bank pays in baht (0 for points)
     rows: list[TxCredit]
     shares: dict[str, Decimal]      # per holder, to the satang, summing to `credit`
-    boundary: list[TxCredit] = field(default_factory=list)  # the group the last paying step ends in
+    boundary: list[TxCredit] = field(default_factory=list)  # the group the quota ends in
     warnings: list[str] = field(default_factory=list)
 
 
 class BasePromotion(ABC):
-    code: ClassVar[str]                 # the bank's registration code, e.g. "NW3"
+    code: ClassVar[str]                 # the bank's code or a short name, e.g. "NW3"
     title: ClassVar[str]                # the bank's campaign name
-    card: ClassVar[str]                 # card title in every holder's Cards DB
-    campaign: ClassVar[tuple[dt.date, dt.date]]
+    cards: ClassVar[tuple[str, ...]]    # card titles as in each holder's Cards DB
+    campaign: ClassVar[tuple[dt.date, dt.date | None]]  # None = open-ended
     source_url: ClassVar[str]
     headline: ClassVar[str]             # short rate for tracker titles, e.g. "2%"
 
+    reward: ClassVar[str]               # CASHBACK or POINTS
+    period_basis: ClassVar[str] = "transaction_date"  # or "bill_cycle": Bureau End = the BC date
+    name_pattern: ClassVar[str | None] = None         # regex on the Bureau Name; default: the code
+
     rules: ClassVar[tuple[Rule, ...]] = ()
+    ladder_title: ClassVar[str] = "Cashback ladder"
+    ladder_header: ClassVar[tuple[str, str]] = ("Pooled spend in the month", "Cashback")
     ladder_rows: ClassVar[tuple[tuple[str, str], ...]] = ()
-    examples: ClassVar[tuple[tuple[int, int], ...]] = ()  # the bank's own (spend, cashback)
     inclusions: ClassVar[tuple[str, ...]] = ()
     crediting: ClassVar[tuple[str, ...]] = ()
-
-    @abstractmethod
-    def tranches(self, pooled: Decimal) -> list[Tranche]:
-        """The paying bands for one period's pooled spend."""
+    split_text: ClassVar[tuple[str, ...]] = ()           # how the household shares it (page text)
 
     # -- matching ---------------------------------------------------------
 
@@ -164,18 +161,21 @@ class BasePromotion(ABC):
     def matches(cls, bureau_name: str, start: dt.date, end: dt.date) -> bool:
         """Does a Bureau row with this Name and period belong to this campaign?"""
         first, last = cls.campaign
-        return bool(re.search(rf"\b{re.escape(cls.code)}\b", bureau_name)) \
-            and first <= start and end <= last
+        pattern = cls.name_pattern or rf"\b{re.escape(cls.code)}\b"
+        return bool(re.search(pattern, bureau_name)) and first <= start and (last is None or end <= last)
 
     # -- rules ------------------------------------------------------------
 
-    def cashback(self, pooled: Decimal) -> Decimal:
-        return sum((t.credit for t in self.tranches(pooled)), Decimal(0))
+    def qualifies(self, tx: Tx) -> bool:
+        """Is the row the kind of spend this quota counts? Default: any purchase."""
+        return True
 
     def screen(self, tx: Tx) -> tuple[str, str | None]:
-        """(level, reason) — the first rule the row hits, or ELIGIBLE."""
+        """(level, reason): not a purchase, not counted here, the first rule hit, or ELIGIBLE."""
         if not tx.is_card_purchase:
             return EXCLUDED, "not a card purchase (payment, credit, transfer or adjustment)"
+        if not self.qualifies(tx):
+            return EXCLUDED, f"not counted by {self.code} {self.headline}"
         for rule in self.rules:
             if rule.hits(tx):
                 return rule.level, f"{rule.label} — {rule.hint}" if rule.hint else rule.label
@@ -183,58 +183,63 @@ class BasePromotion(ABC):
 
     # -- the household split ----------------------------------------------
 
+    @abstractmethod
     def allocate(self, txs: list[Tx]) -> Allocation:
-        """Hand the credit out first come, first served by `Transaction Datetime`.
+        """Hand the period's reward out first come, first served (see `_walk`)."""
 
-        Rows are walked in time order (`Tx.when`), filling the paying tranches; a
-        row earns the credit on the part of it that lands inside one. Rows with
-        the same `Transaction Datetime` count as simultaneous — a shared bill
-        split across holders, or date-only rows whose order the ledger can't
-        tell — so a group that straddles a step shares its slice pro rata by
-        amount. Only the straddling group's order matters; give that day's rows
-        times to settle it (apps show dates only; the user finds the times).
+    def _walk(self, txs: list[Tx], take: Callable[[Decimal, Decimal, list[Tx]], list[TxCredit]]
+              ) -> tuple[list[TxCredit], list[TxCredit], list[str]]:
+        """Walk rows first come, first served by `Transaction Datetime`.
+
+        Rows with the same value count as simultaneous (a shared bill split
+        across holders, or date-only rows whose order the ledger can't tell), so
+        `take` gets one same-time group at a time, with the pooled spend before
+        and after it. The group the quota ends in is returned as the boundary.
+        Only its day needs exact order; give that day's rows times to settle it.
         """
         spend = sorted((t for t in txs if t.amount > 0), key=lambda t: t.when)
-        pooled = sum((t.amount for t in spend), Decimal(0))
-        tranches = self.tranches(pooled)
-        top = max((t.end for t in tranches), default=Decimal(0))
-
         rows: list[TxCredit] = []
         boundary: list[TxCredit] = []
         cum = Decimal(0)
         for _, grp in groupby(spend, key=lambda t: t.when):
             grp = list(grp)
             size = sum((t.amount for t in grp), Decimal(0))
-            lo, hi = cum, cum + size
-            earned = sum((b.earned(lo, hi) for b in tranches), Decimal(0))
-            counted = sum((b.counted(lo, hi) for b in tranches), Decimal(0))
-            credited = [TxCredit(t, counted * t.amount / size, earned * t.amount / size) for t in grp]
+            credited = take(cum, cum + size, grp)
             rows += credited
-            if lo < top < hi:
+            if any(0 < r.counted < r.tx.amount for r in credited):
                 boundary = credited
-            cum = hi
+            cum += size
 
         warnings = []
         if boundary:
             day = boundary[0].tx.when[0]
-            timed = {t.when[1] for t in spend if t.when[0] == day}
-            if len(timed) > 1:
-                warnings.append(f"{day} mixes timed and date-only rows and the step ends that day; "
+            if len({t.when[1] for t in spend if t.when[0] == day}) > 1:
+                warnings.append(f"{day} mixes timed and date-only rows and the quota ends that day; "
                                 f"the date-only ones are placed first — give them times too")
+        return rows, boundary, warnings
 
-        credit = self.cashback(pooled)
+    def _allocation(self, rows: list[TxCredit], boundary: list[TxCredit], warnings: list[str], *,
+                    credit: Decimal) -> Allocation:
         raw: dict[str, Decimal] = {}
         for r in rows:
             raw[r.tx.holder] = raw.get(r.tx.holder, Decimal(0)) + r.credit
         return Allocation(
-            pooled=pooled,
+            pooled=sum((r.tx.amount for r in rows), Decimal(0)),
             counted=sum((r.counted for r in rows), Decimal(0)),
             credit=credit,
             rows=rows,
-            shares=_round_to_total(raw, credit),
+            shares=_round_to_total(raw, credit) if self.reward == CASHBACK else {},
             boundary=boundary,
             warnings=warnings,
         )
+
+    @abstractmethod
+    def expected(self, r: TxCredit) -> dict[str, Any]:
+        """The fields a row should carry after the split, as /update-transaction keys."""
+
+    def suggested_note(self, r: TxCredit) -> str | None:
+        """A Note to propose alongside a fix, when the household has a convention for it."""
+        return None
 
     # -- Notion text --------------------------------------------------------
 
@@ -246,38 +251,47 @@ class BasePromotion(ABC):
 
     def summary_blocks(self) -> list[dict]:
         """The Bureau page body: ladder, what counts, exclusions, crediting, split."""
-        self._check_examples()
         first, last = self.campaign
+        span = f"{first:%-d %b %Y} – {last:%-d %b %Y}" if last else f"since {first:%-d %b %Y}"
         blocks = [
-            nb.callout((f"{self.title} ({self.code})", "b"),
-                       f" · {first:%-d %b %Y} – {last:%-d %b %Y} · {self.card} · ",
+            nb.callout((f"{self.title} ({self.code})", "b"), f" · {span} · {', '.join(self.cards)} · ",
                        ("bank's terms", "", self.source_url)),
-            nb.heading("Cashback ladder"),
-            nb.table(["Pooled spend in the month", "Cashback"], [list(r) for r in self.ladder_rows]),
+            nb.heading(self.ladder_title),
+            nb.table(list(self.ladder_header), [list(r) for r in self.ladder_rows]),
         ]
-        if self.examples:
-            blocks.append(nb.paragraph(("Bank's examples: ", "b"), " · ".join(
-                f"฿{spend:,} → ฿{self.cashback(Decimal(spend)):,.0f}" for spend, _ in self.examples)))
+        blocks += self._ladder_extras()
         blocks += [nb.heading("What counts"), *(nb.bullet(i) for i in self.inclusions)]
-        blocks += [nb.heading("Excluded"), *(nb.bullet(r.label) for r in self.rules)]
+        if self.rules:
+            blocks += [nb.heading("Excluded"), *(nb.bullet(r.label) for r in self.rules)]
         blocks += [nb.heading("Crediting"), *(nb.bullet(c) for c in self.crediting)]
-        blocks += [nb.heading("Household split"), *(nb.bullet(s) for s in _SPLIT_TEXT)]
+        blocks += [nb.heading("Household split"), *(nb.bullet(s) for s in self.split_text)]
         return blocks
 
-    def _check_examples(self) -> None:
-        wrong = [(s, want, self.cashback(Decimal(s))) for s, want in self.examples
-                 if self.cashback(Decimal(s)) != want]
-        if wrong:
-            raise AssertionError(f"{type(self).__name__}.tranches disagrees with the bank: {wrong}")
+    def _ladder_extras(self) -> list[dict]:
+        """Blocks to show right under the ladder table (a subclass's worked examples)."""
+        return []
 
 
-_SPLIT_TEXT = (
-    "Linked rows (รายการใช้จ่ายจาก…) are what the household counts toward this promotion.",
-    "First come, first served by Transaction Datetime: only spend inside a paying step earns, "
-    "and it goes to whoever spent it first. Spend past the last full step earns nothing.",
-    "Same-date rows count as simultaneous (e.g. one bill split across holders): the part inside "
-    "the step is shared pro rata by amount.",
-)
+class CashbackPromotion(BasePromotion):
+    """A campaign paid in baht: shares per holder, tracker rows, and `% cb` on rows."""
+
+    reward = CASHBACK
+    # Whether this campaign's split is what a row's `% cb` shows. A row has one
+    # `% cb`, but it can earn from two campaigns (UOB One's 1% and EPW538), so
+    # only the card's own cashback claims it. An overlay paid as a lump sum on
+    # top (EPW538) sets this False and lives in the trackers alone.
+    marks_rows: ClassVar[bool] = True
+
+    def expected(self, r: TxCredit) -> dict[str, Any]:
+        """The full rate when the whole row earns; `% cb` unset when only part of
+        it does (the row or same-time group the quota ends in) or none of it does
+        (user, 2026-09-28). The exact money lives in the Bureau's share fields
+        and the trackers, not here."""
+        if not self.marks_rows:
+            return {}
+        if r.counted != r.tx.amount or r.credit <= 0:
+            return {"cashback_percent": None}
+        return {"cashback_percent": (r.credit / r.tx.amount).quantize(Decimal("0.0001"))}
 
 
 def _round_to_total(raw: dict[str, Decimal], total: Decimal) -> dict[str, Decimal]:

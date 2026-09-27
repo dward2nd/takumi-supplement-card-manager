@@ -2,28 +2,31 @@
 """sync-promotion — bring one Promotion Bureau row up to date.
 
 deterministic + idempotent — every write sets a value to what the linked
-transactions imply, and creates a tracker row only when none exists; a second
-run with nothing changed writes nothing.
+transactions imply, and creates a Bureau or tracker row only when none exists;
+a second run with nothing changed writes nothing.
 
-For one Bureau row (e.g. `2026M9 — NW3 cb 2%`), with the campaign class
-from `lib.bureau` that matches it:
+For one Bureau row (one quota period, e.g. `2026M9 — NW3 cb 2%`), with the
+campaign class from `lib.bureau` that matches it:
 
-1. Reads every holder's linked transactions, screens each against the
-   campaign's exclusions, and lists the card's unlinked rows in the period
-   as candidates (links the eligible ones with `link_candidates`).
-2. Splits the credit first come, first served (see BasePromotion.allocate).
-3. Writes `เงินคืนรวม` when empty, and `เงินคืนส่วน<name>` per holder —
-   unless `เงินคืนรวม` already holds a different figure, which is reported.
-4. Upserts each holder's tracker row (`<CODE> 2% 1—30 Sep`) linked to the
-   Bureau row with `Expected Cashback` = the share; a ticked (settled) row
-   is left alone.
-5. Writes the campaign summary into the Bureau page body when it's empty
-   (or always, with `replace_summary`).
+1. Creates the row when it doesn't exist yet and `start`/`end` are given.
+2. Reads every holder's linked transactions and screens them; lists the
+   campaign cards' unlinked rows in the period as candidates, and links the
+   eligible ones with `link_candidates` (gather.py).
+3. Splits the reward first come, first served (the campaign's `allocate`).
+4. Cashback campaigns: writes `เงินคืนรวม` when empty and `เงินคืนส่วน<name>`,
+   and upserts each holder's tracker row (settle.py). Points campaigns have
+   no money to settle.
+5. Checks every linked row's fields against the split (`expected`: `% cb`,
+   multiplier, points used) and lists disagreements with ready
+   /update-transaction entries — read-only.
+6. Writes the campaign summary into the page body when it's empty (or always,
+   with `replace_summary`).
 
 Spec (stdin or --input):
   {
     "promotion":       "2026M9 — NW3 cb 2%",  // Bureau row Name, page ID or URL
-    "bank_spend":      36803.92,              // optional: the bank app's pooled figure
+    "start": "2026-09-01", "end": "2026-09-30",  // optional: create the row if missing
+    "bank_spend":      36803.92,              // optional: the bank app's eligible total
     "link_candidates": false,                 // optional: link eligible unlinked rows
     "replace_summary": false                  // optional: rewrite a non-empty page body
   }
@@ -34,6 +37,7 @@ Spec (stdin or --input):
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import sys
 from decimal import Decimal
@@ -41,88 +45,72 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from lib import cards  # noqa: E402
-from lib.bureau import ELIGIBLE, promotion_for, store  # noqa: E402
+from lib.bureau import CASHBACK, promotion_for, store  # noqa: E402
 from lib.holders import HOLDERS  # noqa: E402
 
+import gather  # noqa: E402
 import report  # noqa: E402
+import settle  # noqa: E402
+
+
+class Writer:
+    """Records every write; performs it unless this is a dry run."""
+
+    def __init__(self, dry_run: bool):
+        self.dry_run, self.done = dry_run, []
+
+    def __call__(self, what: str, fn, *args, **kwargs) -> None:
+        self.done.append(what)
+        if not self.dry_run:
+            fn(*args, **kwargs)
+
+
+def _find_or_create(spec: dict, write: Writer):
+    try:
+        return store.find_row(spec["promotion"])
+    except LookupError:
+        if not (spec.get("start") and spec.get("end")):
+            raise
+    start, end = dt.date.fromisoformat(spec["start"]), dt.date.fromisoformat(spec["end"])
+    promotion_for(spec["promotion"], start, end)  # refuse a row no campaign class would match
+    if write.dry_run:
+        return None
+    write.done.append(f"create Bureau row {spec['promotion']!r} {start}→{end}")
+    return store.create_row(spec["promotion"], start, end)
 
 
 def run(spec: dict, *, dry_run: bool = False) -> dict:
-    row = store.find_row(spec["promotion"])
+    write = Writer(dry_run)
+    row = _find_or_create(spec, write)
+    if row is None:
+        return {"would_create": {"name": spec["promotion"], "start": spec["start"], "end": spec["end"]},
+                "dry_run": True}
     promo = promotion_for(row.name, row.start, row.end)
-    writes: list[str] = []
-    warnings: list[str] = []
 
-    def write(what: str, fn, *args, **kwargs) -> None:
-        writes.append(what)
-        if not dry_run:
-            fn(*args, **kwargs)
-
-    # 1. linked rows, and candidates on the card that aren't linked yet
-    txs, candidates = [], []
-    card_ids = {h.key: cards.find_card(h.cards_ds, promo.card)["id"] for h in HOLDERS.values()}
-    for h in HOLDERS.values():
-        linked = store.linked_txs(row, h)
-        txs += linked
-        total = sum((t.amount for t in linked), Decimal(0))
-        if total != row.rollups[h.key]:
-            warnings.append(f"{store.rollup_prop(h)} shows ฿{row.rollups[h.key]:,.2f} but the linked "
-                            f"rows sum to ฿{total:,.2f}")
-        for tx, existing in store.unlinked_txs(row, h, card_ids[h.key]):
-            level, reason = promo.screen(tx)
-            if level == ELIGIBLE and spec.get("link_candidates"):
-                write(f"link {report.line(tx)}", store.link_tx, tx.id, existing, row.id)
-                txs.append(tx)
-            elif tx.is_card_purchase:
-                candidates.append({"row": report.line(tx), "level": level, "reason": reason})
-
-    # 2. the split
+    cards = gather.campaign_cards(promo)
+    txs, candidates, warnings = gather.collect(row, promo, cards, link=bool(spec.get("link_candidates")),
+                                               write=write)
     alloc = promo.allocate(txs)
-    flagged, flagged_amount = report.flagged(promo, txs)
-    shares = {h.key: alloc.shares.get(h.key, Decimal(0)) for h in HOLDERS.values()}
     warnings += alloc.warnings
+    flagged, flagged_ids = report.flagged(promo, txs)
+    mismatched = report.field_mismatches(promo, alloc)
+    if mismatched:
+        warnings.append(f"{len(mismatched)} linked row(s) carry fields the split disagrees with — see "
+                        f"field_mismatches; fix with /update-transaction")
 
-    # 3. Bureau numbers
-    if row.total is not None and row.total != alloc.credit:
-        warnings.append(f"{store.TOTAL} holds ฿{row.total:,.2f} but the ladder pays ฿{alloc.credit:,.2f} on "
-                        f"the linked ฿{alloc.pooled:,.2f} — shares and trackers not written. Fix the links, "
-                        f"or clear {store.TOTAL} to let the ladder figure stand.")
-        shares_ok = False
-    else:
-        shares_ok = True
-        numbers = {} if row.total is not None else {store.TOTAL: alloc.credit}
-        numbers |= {store.share_prop(h): shares[h.key] for h in HOLDERS.values()
-                    if row.shares[h.key] != shares[h.key]}
-        if numbers:
-            write(f"Bureau {', '.join(f'{k}={v}' for k, v in numbers.items())}",
-                  store.write_numbers, row.id, numbers)
+    totals = {"pooled": float(alloc.pooled), "counted": float(alloc.counted)}
+    trackers: dict[str, list[str]] = {}
+    if promo.reward == CASHBACK:
+        without_flagged = promo.allocate([t for t in txs if t.id not in flagged_ids])
+        totals |= {"credit": float(alloc.credit),
+                   "entered": None if row.total is None else float(row.total),
+                   "if_flagged_rejected": float(without_flagged.credit)}
+        shares_ok, w = settle.bureau_numbers(row, alloc, write)
+        warnings += w
+        if shares_ok:
+            trackers, w = settle.trackers(row, promo, alloc, txs, cards, write)
+            warnings += w
 
-    # 4. trackers
-    title = promo.tracker_title(row.start, row.end)
-    trackers = {}
-    for h in HOLDERS.values():
-        share = shares[h.key]
-        found = store.trackers(h, row, title)
-        trackers[h.key] = [t.name for t in found]
-        if not shares_ok:
-            continue
-        if not found:
-            if share > 0:
-                write(f"create {h.key} tracker {title!r} expecting ฿{share}", store.create_tracker, h,
-                      title=title, date=row.start, card_id=card_ids[h.key], row_id=row.id, expected=share)
-        elif len(found) > 1 or not found[0].linked:
-            warnings.append(f"{h.key}: tracker rows {[t.name for t in found]} need a look — more than "
-                            f"one, or titled {title!r} without a Promotion link; left alone")
-        elif found[0].settled:
-            if found[0].expected != share:
-                warnings.append(f"{h.key}: {found[0].name!r} is ticked as credited at "
-                                f"฿{found[0].expected} but the split now gives ฿{share}; left alone")
-        elif found[0].expected != share:
-            write(f"{h.key} tracker Expected Cashback {found[0].expected} → {share}",
-                  store.set_expected, found[0].id, share)
-
-    # 5. page summary
     body = store.body_block_ids(row.id)
     if not body or spec.get("replace_summary"):
         write(f"{'replace' if body else 'write'} page summary", store.write_body, row.id,
@@ -130,18 +118,17 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
 
     out = {
         "promotion": {"name": row.name, "url": row.url, "class": type(promo).__name__,
-                      "period": [row.start.isoformat(), row.end.isoformat()]},
+                      "reward": promo.reward, "period": [row.start.isoformat(), row.end.isoformat()]},
         "spend": {h.key: float(sum((t.amount for t in txs if t.holder == h.key), Decimal(0)))
-                  for h in HOLDERS.values()} | {"pooled": float(alloc.pooled)},
-        "cashback": {"ladder": float(alloc.credit), "entered": None if row.total is None else float(row.total),
-                     "counted_spend": float(alloc.counted),
-                     "if_flagged_rejected": float(promo.cashback(alloc.pooled - flagged_amount))},
-        "shares": {k: float(v) for k, v in shares.items()},
+                  for h in HOLDERS.values()},
+        "totals": totals,
+        "shares": {k: float(v) for k, v in alloc.shares.items()},
         "boundary": report.boundary(alloc),
+        "field_mismatches": mismatched,
         "flagged": flagged,
         "unlinked_candidates": candidates,
         "trackers": trackers,
-        "writes": writes,
+        "writes": write.done,
         "warnings": warnings,
         "dry_run": dry_run,
     }

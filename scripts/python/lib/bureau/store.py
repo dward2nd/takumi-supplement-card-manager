@@ -16,10 +16,13 @@ import datetime as dt
 import re
 from dataclasses import dataclass
 from decimal import Decimal
+from functools import cache
 
 from .. import notion_client
+from ..cards import card_titles_by_id
 from ..holders import HOLDERS, PROMOTION_BUREAU_DS, Holder
 from ..transaction_read import project_transaction
+from ..transaction_write import VALID_MULTIPLIERS
 from .base import Tx
 
 LINK = "Promotion"      # on every Transactions DS and every tracker
@@ -78,6 +81,16 @@ def _parse_row(page: dict) -> BureauRow:
     )
 
 
+def create_row(name: str, start: dt.date, end: dt.date) -> BureauRow:
+    """A new Bureau row for one quota period."""
+    page = notion_client.create_page(PROMOTION_BUREAU_DS, {
+        "Name": {"title": [{"text": {"content": name}}]},
+        "Start Date": {"date": {"start": start.isoformat()}},
+        "End Date": {"date": {"start": end.isoformat()}},
+    })
+    return _parse_row(notion_client.get_page(page["id"]))
+
+
 def find_row(ref: str) -> BureauRow:
     """A Bureau row by page ID / URL, or by its exact Name."""
     m = _PAGE_ID.search(ref.strip())
@@ -92,10 +105,24 @@ def find_row(ref: str) -> BureauRow:
     return _parse_row(pages[0])
 
 
+@cache
+def card_titles(holder_key: str) -> dict[str, str]:
+    """{card page id → title} for one holder, read once per process."""
+    return card_titles_by_id(HOLDERS[holder_key].cards_ds)
+
+
 def _to_tx(h: Holder, page: dict) -> Tx:
     t = project_transaction(page)
+    p = page["properties"]
+    cb, used = t["cashback_percent"], (p.get("ใช้คะแนน") or {}).get("number")
     return Tx(id=t["id"], holder=h.key, name=t["name"],
-              amount=_money(t["amount"]) or Decimal(0), date=t["transaction_date"] or "")
+              amount=_money(t["amount"]) or Decimal(0), date=t["transaction_date"] or "",
+              cb=None if cb is None else Decimal(str(cb)),
+              multiplier=next((m for m in sorted(VALID_MULTIPLIERS) if (p.get(m) or {}).get("checkbox")), None),
+              points_used=None if used is None else Decimal(str(used)),
+              note=t["note"],
+              card=card_titles(h.key).get(t["card_ids"][0], "") if t["card_ids"] else "",
+              bill_cycle=t["bill_cycle_date"])
 
 
 def linked_txs(row: BureauRow, h: Holder) -> list[Tx]:
@@ -106,19 +133,31 @@ def linked_txs(row: BureauRow, h: Holder) -> list[Tx]:
     return [_to_tx(h, pg) for pg in pages]
 
 
-def unlinked_txs(row: BureauRow, h: Holder, card_id: str) -> list[tuple[Tx, list[str]]]:
-    """The card's rows dated inside the period that aren't linked to the row,
-    with each one's existing `Promotion` links (to preserve when linking)."""
+def unlinked_txs(row: BureauRow, h: Holder, card_ids: list[str], basis: str
+                 ) -> list[tuple[Tx, list[str]]]:
+    """The cards' rows inside the period that aren't linked to the row, with each
+    one's existing `Promotion` links (to preserve when linking).
+
+    `basis` "transaction_date": dated start..end. "bill_cycle": billed on the
+    cycle closing on the row's End Date, which is how the ledger already sorts
+    rows into statements (late postings included).
+    """
+    if not card_ids:
+        return []
+    if basis == "bill_cycle":
+        period = [{"property": "Bill Cycle Date", "date": {"equals": row.end.isoformat()}}]
+    else:
+        period = [{"property": "Transaction Datetime", "date": {"on_or_after": row.start.isoformat()}},
+                  {"property": "Transaction Datetime", "date": {"on_or_before": row.end.isoformat()}}]
     pages = notion_client.query_all(h.transactions_ds, filter={"and": [
-        {"property": "Card", "relation": {"contains": card_id}},
-        {"property": "Transaction Datetime", "date": {"on_or_after": row.start.isoformat()}},
-        {"property": "Transaction Datetime", "date": {"on_or_before": row.end.isoformat()}},
+        {"or": [{"property": "Card", "relation": {"contains": c}} for c in card_ids]},
+        *period,
         {"property": LINK, "relation": {"does_not_contain": row.id}},
     ]})
     out = []
     for pg in pages:
         tx = _to_tx(h, pg)
-        if row.start.isoformat() <= tx.date[:10] <= row.end.isoformat():
+        if basis == "bill_cycle" or row.start.isoformat() <= tx.date[:10] <= row.end.isoformat():
             out.append((tx, [r["id"] for r in pg["properties"][LINK]["relation"]]))
     return out
 
@@ -166,12 +205,12 @@ def trackers(h: Holder, row: BureauRow, title: str) -> list[Tracker]:
     return [_tracker(pg) for pg in pages]
 
 
-def create_tracker(h: Holder, *, title: str, date: dt.date, card_id: str, row_id: str,
+def create_tracker(h: Holder, *, title: str, date: dt.date, card_id: str | None, row_id: str,
                    expected: Decimal) -> str:
     page = notion_client.create_page(h.cashback_tracker_ds, {
         "Name": {"title": [{"text": {"content": title}}]},
         "Transaction Date": {"date": {"start": date.isoformat()}},
-        "Card": {"relation": [{"id": card_id}]},
+        "Card": {"relation": [{"id": card_id}] if card_id else []},
         LINK: {"relation": [{"id": row_id}]},
         "Expected Cashback": {"number": float(expected)},
     })

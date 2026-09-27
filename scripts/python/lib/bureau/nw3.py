@@ -20,7 +20,8 @@ from decimal import Decimal
 from typing import ClassVar
 
 from .. import promotions
-from .base import BasePromotion, Rule, Tranche
+from .base import Rule
+from .ladder import LadderPromotion, Tranche
 
 STEP = Decimal(10_000)
 RATE = Decimal("0.02")
@@ -36,10 +37,10 @@ def _foreign(tx) -> bool:
     return promotions.looks_foreign_in_thb(tx.merchant) or bool(_FOREIGN_SITES.search(tx.merchant))
 
 
-class NW3Promotion(BasePromotion):
+class NW3Promotion(LadderPromotion):
     code = "NW3"
     title = "แมตช์ทุกยอด คุ้มทุกการใช้"
-    card = "First Choice"
+    cards = ("First Choice",)
     campaign = (dt.date(2026, 7, 1), dt.date(2026, 9, 30))
     source_url = "https://www.firstchoice.co.th/promotion/cashback-firstchoice"
     headline = "2%"
