@@ -1,0 +1,26 @@
+id: aeon-rabbit-cashback
+name: AEON Rabbit Platinum cashback (standing card benefit)
+card: AEON Rabbit
+effective_start: '2025-01-01'
+effective_end: null
+status: active
+foreign_in_thb_policy:
+  default: exclude
+  overrides: []
+tiers:
+- rate: 0.05
+  label: line-pay-rabbit-top-up
+  patterns:
+  - LINEPAY*
+  - BANGKOK SMARTCARD SYSTEM
+notes: |
+  Source: https://www.aeon.co.th/aeon/cards/aeon-rabbit-platinum-card (user, 2026-09-28).
+  - 5% on LINE Pay (`LINEPAY*…`) and Rabbit card auto top-up (`BANGKOK SMARTCARD SYSTEM`, BTS).
+  - 1% on MRT Purple Line card top-up — no merchant string seen yet, so no tier; add one
+    when the first row appears.
+  - Caps the schema can't express: ฿50 cashback per transaction (so the 5% tier tops out
+    at a ฿1,000 charge) and ฿1,000 per primary card per cycle. Check by hand on big cycles.
+  - Digital-wallet top-ups earn nothing. AEON credits the cashback to the primary card
+    within 2 billing cycles, as `CASH BACK - CREDIT CARD PROMOTION`.
+  - effective_start is a placeholder: this is a standing card benefit with no printed period.
+  - Points are a separate card-level rule: none since 2025-11-11 (cards/aeon-rabbit.yaml).

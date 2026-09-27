@@ -1,6 +1,10 @@
 name: First Choice
 issuer: Krungsri
 bill_cycle_pattern: krungsri
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; supplements named on the statement)
+  "9214": takumi
+  "1285": nuta
+  "1064": baiboon
 truemoney_711_points_exclusion: true
 installment_rewards_upfront: true   # every NN/NN term earns nothing — see installment_note
                                     # for why First Choice's reason differs from its siblings'.

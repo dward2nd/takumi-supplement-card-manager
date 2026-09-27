@@ -1,3 +1,5 @@
 name: AEON UnionPay
 issuer: AEON
 bill_cycle_pattern: aeon
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27)
+  "2918": takumi

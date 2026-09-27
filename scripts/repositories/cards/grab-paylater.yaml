@@ -1,0 +1,22 @@
+name: Grab PayLater
+issuer: Grab
+bill_cycle_pattern: grab
+notes: |
+  Takumi-only. The statement cuts at the turn of the month and is due on the
+  7th. It is registered as BC **day 1** (due +6 days ⇒ day 7 of the same
+  month), NOT as BC = the last day of the outgoing month, even though the
+  bank's own cut lands there.
+
+  This follows the house convention that a transaction dated exactly on the
+  bill-cycle day belongs to the NEXT cycle: labelling the cycle day 1 puts a
+  purchase made on the 30th or 31st into the cycle due on the 7th, which is
+  where the bank bills it. User's call, 2026-09-23.
+
+  Consequence: the 29 pre-2025-07 rows on this card carry the old labelling
+  (BC day 31, or day 28 in February) and now read one day earlier than the
+  pattern predicts. They are history on a reset ledger, so they were left
+  alone; `/audit-transaction-dates` will flag them.
+
+  Reward policy unverified — no promo YAML, no `points_default`. The card
+  carries `บาทต่อ 1 คะแนน = 10` in Notion, which is the household's richest
+  point rate; confirm before relying on it.

@@ -1,3 +1,5 @@
 name: KBank PLUSTINUM
 issuer: KBank
 bill_cycle_pattern: kbank
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27)
+  "3831": takumi

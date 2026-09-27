@@ -48,8 +48,30 @@ notes: |                       # optional — anything the schema doesn't captur
 
 - `points_default: "×0"` — string, matches the multiplier names. Any multiplier is meaningful, not just `×0`: it is the card's **base earning tier**, used when no promotion is active and as the fallback a promo-boosted card drops back to. `UOB World` sets `×2` because an unboosted row on that card still earns double, so omitting the field (⇒ Notion reads `×1`) would under-report.
 - `petrol_exclusion: true` — applies the petrol exclusion to this card.
-- `truemoney_711_points_exclusion: true` — applies the Krungsri-family 7-11 / TrueMoney **points** exclusion. Points-only: `lib.promotions.classify` forces `×0` and leaves the promo's `% cb` untouched. Set on the four `issuer: Krungsri` cards; deliberately absent on `Lotus's Beyond` (CP ALL exemption) and on `CardX JCB` (SCB X group — shares only the `krungsri` bill-cycle pattern key, not the family). See [[../../docs/concepts/krungsri-truemoney-711-exclusion]].
-- `installment_rewards_upfront: true` — installment terms earn nothing on **both** axes. Set on the four `issuer: Krungsri` cards: Krungsri grants an installment's rewards in full at purchase, so crediting the terms would double-count. A promo with an explicit `installment_rule` outranks it. See [[../../docs/concepts/installment-reward-campaigns]].
+- `truemoney_711_points_exclusion: true` — applies the Krungsri-family 7-11 / TrueMoney **points** exclusion. Points-only: `lib.promotions.classify` forces `×0` and leaves the promo's `% cb` untouched. Set on First Choice, Krungsri JCB, Krungsri NOW and Krungsri Visa; deliberately absent on the other `issuer: Krungsri` cards, notably on `Lotus's Beyond` (CP ALL exemption) and on `CardX JCB` (SCB X group — shares only the `krungsri` bill-cycle pattern key, not the family). See [[../../docs/concepts/krungsri-truemoney-711-exclusion]].
+- `installment_rewards_upfront: true` — installment terms earn nothing on **both** axes. Set on First Choice, Krungsri JCB, Krungsri NOW and Krungsri Visa: Krungsri grants an installment's rewards in full at purchase, so crediting the terms would double-count. A promo with an explicit `installment_rule` outranks it. See [[../../docs/concepts/installment-reward-campaigns]].
+
+### Merchant points exclusions
+
+```yaml
+points_excluded_merchants:    # optional — merchant strings that earn no points from a date on
+  - prefix: "WWW.MAKRO.PRO "  #   prefix match, after dropping a leading `[บัตรหลัก] `; "*" = every merchant
+    mcc: "5199"               #   informational: the excluded MCC the string bills under
+    effective_from: 2025-11-11
+    note: "..."               #   written into the row's Note
+```
+
+Points-only: `lib.promotions.classify` forces `×0` from `effective_from` onwards and leaves `% cb` untouched (reason suffix `+merchant-points-exclusion`). Issuers exclude by MCC, which a merchant string doesn't carry, so list the strings known to bill under an excluded code. Used on `AEON World Mastercard` (AEON's MCC exclusions from 2025-11-11) and on `AEON Rabbit` with `prefix: "*"` (no points on anything from 2025-11-11).
+
+### Statement card numbers
+
+```yaml
+statement_numbers:            # optional — last 4 digits on the issuer's statement → holder
+  "4672": takumi              #   Takumi's number is the primary card
+  "2497": baiboon             #   anyone else's is their supplement
+```
+
+Read by `/record-statement` to decide whose section each statement line sits in. Keys **must be quoted** — an unquoted `0052` loads as a number (and YAML 1.1 reads a leading zero as octal), so the loader rejects anything that isn't a 4-digit string. Values are holder slugs, or `unmonitored` for a real supplement nobody in the household tracks (its charges count toward Takumi's bill but go in no ledger). A number is unique within an issuer, not across issuers.
 
 ## Installment-campaigns schema (`installment-campaigns/<id>.yaml`)
 

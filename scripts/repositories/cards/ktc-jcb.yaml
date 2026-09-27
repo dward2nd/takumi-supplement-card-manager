@@ -1,0 +1,18 @@
+name: KTC JCB
+issuer: KTC
+bill_cycle_pattern: ktc
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; KTC prints one PDF per card number)
+  "0059": takumi
+notes: |
+  Takumi-only.
+
+  CYCLE CAVEAT: every dated row on this card through 2025-06 sits at BC day 2
+  / due +15 (day 17), NOT the day 27 / +15 that the `ktc` pattern encodes.
+  The `ktc` key is used anyway because Baiboon's KTC UnionPay — a supplement
+  on Takumi's KTC account, so necessarily the same billing cycle — currently
+  bills BC day 27 / due day 12. That means KTC moved the cycle sometime after
+  2025-06, and the day-2 rows are history rather than a separate pattern.
+
+  If a fresh KTC statement shows day 2, this is wrong: add a `ktc_day2`
+  pattern to `lib.bill_cycle.PATTERNS` rather than editing `ktc`, which
+  Baiboon's and Nuta's live cards depend on.

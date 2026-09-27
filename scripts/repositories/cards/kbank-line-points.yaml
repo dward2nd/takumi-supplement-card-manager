@@ -1,0 +1,13 @@
+name: KBank LINE Points
+issuer: KBank
+bill_cycle_pattern: kbank
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27)
+  "7805": takumi
+notes: |
+  Registered 2026-09-27. Takumi's own card — the statement prints it as
+  `KBANK-LINE POINTS` (4417 70XX XXXX 7805); `name` is the Cards DS title in
+  Takumi's Cards DB. Shares the KBank statement (and its day-25 / day-10
+  cycle) with KBank PLUSTINUM and KBank Shopee.
+
+  No reward fields are set, so `classify` returns the default `×1` and no
+  cashback. That is a placeholder, not a confirmed policy.

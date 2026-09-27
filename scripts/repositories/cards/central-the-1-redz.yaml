@@ -1,0 +1,21 @@
+name: Central The 1 Redz
+issuer: Krungsri
+bill_cycle_pattern: krungsri
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; supplements named on the statement)
+  "2611": takumi
+truemoney_711_points_exclusion: true
+installment_rewards_upfront: true   # Krungsri pays an installment's points + cashback in full
+                                    # at purchase, so each NN/NN term earns nothing on its own.
+notes: |
+  Held by BOTH Takumi and Baiboon — the only card outside the UOB/AEON sets
+  with that shape. Missing from `docs/cards/_stubs.md` until 2026-09-23.
+
+  `issuer: Krungsri` is inferred, not read from Notion: Baiboon's Cards row
+  leaves `ธนาคาร/บริษัท` unset, and Takumi's Cards DS has no issuer column at
+  all. The BC day 5 / due +20 cycle matches the Krungsri family exactly
+  (6 dated rows, no exceptions), and Central The 1 is a Central Cards /
+  Krungsri Consumer product.
+
+  Family membership on both reward flags confirmed by the user 2026-09-23:
+  The 1 cards follow the Krungsri family on the 7-11 / TrueMoney points
+  exclusion and on upfront installment rewards.

@@ -1,6 +1,9 @@
 name: Lotus's Beyond            # verbatim Cards DS title — ASCII apostrophe, matching the Notion page
-issuer: Lotus
+issuer: Krungsri              # Lotus Money Service, a Krungsri Consumer partner (user, 2026-09-27)
 bill_cycle_pattern: krungsri
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; supplements named on the statement)
+  "3471": takumi
+  "6524": unmonitored         # P. PETCHKULJINDA — real supplement Takumi doesn't track (2026-09-27)
 # The Notion title used a typographic apostrophe (U+2019) until 2026-08-08 and so
 # never matched this file; the page was renamed to the ASCII form, which is the
 # preferred spelling (user, 2026-08-08). Keep both in sync if either is edited.
@@ -17,5 +20,13 @@ bill_cycle_pattern: krungsri
 # truemoney_711_points_exclusion is deliberately ABSENT (user, 2026-08-08).
 # Krungsri-family cards earn no points at 7-11 / TrueMoney, but Lotus's Beyond
 # is exempt: Lotus's, 7-Eleven and TrueMoney are all CP ALL businesses, so those
-# merchants keep earning points here. Do not add the flag. The shared bill-cycle
-# pattern above does NOT change that — it is a BC/DD shape, not family membership.
+# merchants keep earning points here. Do not add the flag. The exclusion is
+# driven by the flag alone, never by `issuer`, so `issuer: Krungsri` (above)
+# doesn't pull it in.
+# Issuer switched Lotus → Krungsri on 2026-09-27 (user): the card is issued
+# through Lotus Money Service, a Krungsri Consumer partner, and Takumi has it on
+# auto-debit like the rest of the family, so its bill is paid with an
+# `AUTO DEBIT` row (see docs/databases/takumi-bills.md). Side effects: its
+# statement numbers are looked up under Krungsri (lib/statements maps the
+# `Lotus` parser key there), its PDF password resolves via Krungsri (same
+# password), and /add-installment now offers the Krungsri U Plan hint.

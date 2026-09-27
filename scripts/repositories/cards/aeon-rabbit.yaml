@@ -1,0 +1,19 @@
+name: AEON Rabbit
+issuer: AEON
+bill_cycle_pattern: aeon
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27)
+  "9908": takumi
+points_excluded_merchants:
+  # AEON stopped awarding reward points on AEON Rabbit Platinum altogether from
+  # 2025-11-11 (https://www.aeon.co.th/aeon/news-events/notification-rabbit-platinum-credit-card-2025).
+  # Earlier rows still earn. Takumi reset the card's points on 2026-09-22 and
+  # adjusts that balance by hand (user, 2026-09-28).
+  - prefix: "*"
+    effective_from: 2025-11-11
+    note: "AEON Rabbit earns no reward points on any transaction since 11 Nov 2025."
+notes: |
+  Takumi-only. Standard AEON cycle (BC day 10, due day 2 of next month),
+  confirmed against 32 dated rows.
+
+  Points: `บาทต่อ 1 คะแนน = 20` in Notion (same as AEON Primo) until
+  2025-11-11; nothing from then on (see points_excluded_merchants). No promo YAML.

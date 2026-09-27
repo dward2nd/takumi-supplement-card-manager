@@ -1,3 +1,5 @@
 name: KTC UnionPay
 issuer: KTC
 bill_cycle_pattern: ktc
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; KTC prints one PDF per card number)
+  "1346": takumi

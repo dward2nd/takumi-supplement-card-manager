@@ -1,3 +1,18 @@
 name: AEON World Mastercard
 issuer: AEON
 bill_cycle_pattern: aeon
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27)
+  "5201": takumi
+points_excluded_merchants:
+  # AEON withholds reward points on a list of MCCs from 2025-11-11, on every AEON
+  # credit card except Big C (https://www.aeon.co.th/aeon/news-events/notification-aeon-credit-cards-2025).
+  # 5199 is on the list and 5411 (supermarkets) isn't. The two Makro PRO strings
+  # bill under different codes (user, 2026-09-28), so only the bare one is listed.
+  - prefix: "WWW.MAKRO.PRO "
+    mcc: "5199"
+    effective_from: 2025-11-11
+    note: "MCC 5199 — AEON gives no reward points on this MCC since 11 Nov 2025 (HTTPS://WWW.MAKRO.PRO/ bills as 5411 and still earns)."
+notes: |
+  The same notification also withholds points on some foreign-registered
+  merchants (EU/EEA, China, UK) from 2025-12-11 and on 0% installments from
+  2026-01-11. Neither is encoded here yet.

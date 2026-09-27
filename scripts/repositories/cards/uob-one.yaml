@@ -1,5 +1,9 @@
 name: UOB One
 issuer: UOB
 bill_cycle_pattern: uob
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27)
+  "4672": takumi
+  "2497": baiboon
+  "3818": nuta
 points_default: "×0"
 petrol_exclusion: true
