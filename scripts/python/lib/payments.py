@@ -25,7 +25,7 @@ from __future__ import annotations
 import datetime as _dt
 
 from lib import notion_client
-from lib.bill_cycle import cycle_for_month
+from lib.bill_cycle import cycle_for_month, pattern_for_card
 from lib.cards import find_card
 from lib.holders import Holder, resolve_holder
 from lib.transaction_read import project_transaction
@@ -152,7 +152,7 @@ def _due_date_for_cycle(
         if dd:
             return dd
     bc = _dt.date.fromisoformat(bill_cycle)
-    _, dd = cycle_for_month(card_name, bc.year, bc.month)
+    _, dd = cycle_for_month(pattern_for_card(card_name), bc.year, bc.month)
     return dd.isoformat()
 
 
