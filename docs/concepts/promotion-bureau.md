@@ -17,13 +17,14 @@ Campaign terms don't share a shape (stepped ladders, flat bonuses, merchant-spec
 Decided by the user 2026-09-28:
 
 1. Walk the linked rows in `Transaction Datetime` order. Only the spend inside a **paying step** earns; it earns at the step's rate and goes to whoever spent it. Spend past the last whole step earns nothing, whoever it belongs to.
-2. Rows on the **same date** count as simultaneous. This covers a shared bill (a `[บัตรหลัก]` row plus Takumi's remainder of the same charge), and any two rows whose order the ledger can't tell, since `Transaction Datetime` holds dates only. When such a group straddles a step, the part inside the step is shared **pro rata by amount**.
+2. Rows with the **same `Transaction Datetime`** count as simultaneous. That covers a shared bill (a `[บัตรหลัก]` row plus Takumi's remainder of the same charge, given the same time) and date-only rows, whose order within the day is unknown. When such a group straddles a step, the part inside the step is shared **pro rata by amount**.
+   Only the day the last step ends on needs exact order. Store it as times in `Transaction Datetime` on that day's rows. Apps (UCHOOSE included) show dates only, so the user has to dig the times out of notification logs; ask for that one day's times, nothing more. A boundary day that mixes timed and date-only rows draws a warning.
 3. Each holder's total is rounded to the satang, and the leftover satang go to the largest remainders, so the shares add up to the credit exactly.
 
-Worked case, September 2026: pooled ฿36,908.92 → 3 steps → ฿600 on the first ฿30,000. The step ends on 2026-09-24 with ฿71.08 of room left. That date holds Hai Di Lao (Takumi ฿1,562.67 + Baiboon `[บัตรหลัก]` ฿781.33, so Baiboon ⅓ and Takumi ⅔) plus two small Takumi rows. Hai Di Lao's pair takes ฿69.74 of the room, 1 : 2.
+Worked case, September 2026 (reconciled): pooled ฿36,803.92 → 3 steps → ฿600 on the first ฿30,000. The step ends on 2026-09-24 with ฿176.08 of room left. By the times the user looked up, `TMN*PROMPTPAY30` ฿35 (10:56) and `DUMPLINGS` ฿10 (18:47) come first. Hai Di Lao (21:21; Takumi ฿1,562.67 + Baiboon `[บัตรหลัก]` ฿781.33, one charge) takes the last ฿131.08, pro rata: Takumi ฿87.39, Baiboon ฿43.69.
 
 This replaced the July/August convention, in which each friend got a flat 2% of their own spend and Takumi kept the remainder (see the note on Takumi's `เครดิตเงินคืน NW3_1JUL26-31JUL26` row).
 
 ## Bureau vs. bank
 
-The bank's app shows its own running total for the campaign. When it differs from the Bureau's `ยอดจ่ายรวม` (total spend), the linked data is wrong somewhere: a row double-counted, mis-split, or linked when the bank excludes it. `/sync-promotion` with `bank_spend` reports the gap and the single rows equal to it. The fix comes from the statement, never from editing numbers to match.
+Krungsri-family apps (UCHOOSE, which covers First Choice) list the transactions the bank counts toward a campaign, with their total; that list is the reference for what to link. Whether other issuers' apps do the same is unknown. When it differs from the Bureau's `ยอดจ่ายรวม` (total spend), the linked data is wrong somewhere: a row double-counted, mis-split, or linked when the bank excludes it. `/sync-promotion` with `bank_spend` lays out the gap: per-date totals to read against the app's list, dates whose total equals the gap, and repeated rows. The fix comes from the app's list or the statement, never from editing numbers to match.
