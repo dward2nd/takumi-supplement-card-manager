@@ -18,12 +18,16 @@ Issuers run cashback as time-bound promotions, even when they look permanent:
 
 Treating cashback as "promotion + dates" instead of "card-level rate" makes year-over-year changes, historical reconciliation, and cross-card comparisons cleaner.
 
+## Pooled campaigns live elsewhere
+
+A campaign that pays on the primary account's **combined** spend (First Choice NW3: ฿200 per whole ฿10,000 the household spends in a month) can't be resolved per row. It is modelled as a `BasePromotion` class and tracked in the [[../databases/promotion-bureau|Promotion Bureau]]: see [[promotion-bureau]]. The per-row `% cb` a First Choice row carries stays hand-entered.
+
 ## Active promotions
 
 | Card           | Promotion                                       | Effective                       |
 |----------------|-------------------------------------------------|---------------------------------|
 | UOB One        | [[../promotions/uob-one-2026]]                  | `2026-01-01` → `2026-12-31`     |
-| First Choice   | ad-hoc — not yet documented at promotion level  | the user updates rows manually  |
+| First Choice   | [[../promotions/first-choice-nw3]] (pooled; Promotion Bureau) | `2026-07-01` → `2026-09-30`     |
 
 When a new promotion arrives, add it under [[../promotions/]] and link from the card's note.
 

@@ -1,0 +1,36 @@
+---
+tags: [database, household, promotion]
+owner: household
+role: cashback-tracker
+---
+
+# Cashback trackers (`รายการติดตามเครดิตเงินคืนของ<name>`)
+
+Three identical DBs, one per holder. Each row is one promotion credit the holder expects to get back, such as `NW3 2% 1—31 Aug` or `ttb so smart 1% Sep bill`. It stays open until the credit reaches them.
+
+| Holder | Collection ID |
+|---|---|
+| Takumi | `96bcb755-f0f1-83ef-a5b9-079f9ba3ae98` |
+| Baiboon | `374cb755-f0f1-80b2-97cc-000b0105e43e` |
+| Nuta | `2e4cb755-f0f1-838a-9317-877c67577916` |
+
+`Holder.cashback_tracker_ds` in `scripts/python/lib/holders.py`. **Last schema-verified**: 2026-09-28.
+
+## Schema
+
+| Property | Type | Meaning |
+|---|---|---|
+| `Name` | title | `<code> <rate> <period>`, e.g. `NW3 2% 1—30 Sep` |
+| `Transaction Date` | date | the period start for a Bureau-driven row (the household's precedent) |
+| `Card` | relation → the holder's own Cards DS | the card earning the credit |
+| `Promotion` | relation → [[promotion-bureau]] (one-way) | set on Bureau-driven rows |
+| `Expected Cashback` | number (baht) | the holder's share |
+| *(unnamed)* | checkbox | ticked once the credit has reached the holder (named `""` in the API) |
+| `Note` | rich_text | the household's own status note, e.g. `รวมไปในบิลของรอบบิล 5 ตุลาคม` ("included in the 5 Oct bill") |
+| `Slip` | files | a transfer slip, when the credit was paid out in cash |
+
+## History
+
+- Baiboon's tracker predates the Bureau (rows from 2026-06). Its 31 earlier rows have no `Promotion` link; leave them as they are.
+- Takumi's and Nuta's were created 2026-09-28 as copies of Baiboon's. The copies had no `Promotion` column, and their `Card` relation still pointed at **Baiboon's** Cards DS. Both were fixed that day while the tables were empty: `Promotion` was added, and `Card` was retargeted to each holder's own Cards DS.
+- `/sync-promotion` writes Bureau-driven rows. It never touches a ticked row or one without a `Promotion` link.

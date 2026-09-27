@@ -28,5 +28,7 @@ notes: |
   see scripts/repositories/installment-campaigns/u-plan.yaml.
 
   Cashback on this card is promo-driven and hand-entered; there is deliberately
-  no promotions/*.yaml for it. Petrol earns normally here (confirmed
-  2026-05-28), so no petrol_exclusion flag.
+  no promotions/*.yaml for it. Its pooled monthly campaigns (NW3, Jul–Sep 2026)
+  are BasePromotion classes in scripts/python/lib/bureau/ instead, tracked in
+  the Promotion Bureau — see docs/promotions/first-choice-nw3.md.
+  Petrol earns normally here (confirmed 2026-05-28), so no petrol_exclusion flag.

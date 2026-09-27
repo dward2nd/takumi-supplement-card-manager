@@ -37,7 +37,7 @@ All data lives in Notion. Access it through the `mcp__notion__*` tool family —
 
 The Notion MCP server is configured in `.mcp.json` (HTTP transport to `https://mcp.notion.com/mcp`).
 
-### The eight databases
+### The twelve databases
 
 All under parent page **Personal Monetary Policy** (`b1989406427a4fb7b4c5ec1805bdbed8`):
 
@@ -51,6 +51,10 @@ All under parent page **Personal Monetary Policy** (`b1989406427a4fb7b4c5ec1805b
 | Nuta    | Cards        | `2a1cb755-f0f1-8188-9b00-000b5fa448b8`     |
 | Nuta    | Transactions | `2a1cb755-f0f1-8110-9795-000bf7d48b4f`     |
 | Nuta    | Bills        | `2a1cb755-f0f1-8193-982d-000bd4e3156c`     |
+| Takumi  | Cashback tracker | `96bcb755-f0f1-83ef-a5b9-079f9ba3ae98` |
+| Baiboon | Cashback tracker | `374cb755-f0f1-80b2-97cc-000b0105e43e` |
+| Nuta    | Cashback tracker | `2e4cb755-f0f1-838a-9317-877c67577916` |
+| (all)   | Promotion Bureau | `3e7cb755-f0f1-80f0-8c78-000b1d9f44cb` |
 
 Pass any collection ID to `mcp__notion__notion-fetch` as `id: "collection://<uuid>"`, or use the original notion.so URL.
 
@@ -60,6 +64,7 @@ Notable schema quirks worth knowing before you touch the data:
 - Bills' `Card` field is a **SELECT (text)**, not a relation to the Cards DB. Deliberate denormalization. Don't try to "fix" it in Notion; document it.
 - Baiboon and Nuta both have `% cb` (writable `number`, percent display — raw fraction in storage so `0.05` shows as `5%`) and `cashback` (read-only formula = `% cb` × `ยอดชำระ`) on transactions. Takumi does not.
 - Takumi's transactions uniquely include a `หมวดหมู่` (category) relation and a `×3` multiplier checkbox.
+- The **Promotion Bureau** (2026-09-28) pools campaigns that pay on the primary account's combined spend (First Choice NW3): one row per period, two-way linked to every holder's transactions (`Promotion` on the Transactions side). Each campaign is a `BasePromotion` subclass in `scripts/python/lib/bureau/`, not YAML: bank terms don't share a shape. The credit is split **first come, first served** by `Transaction Datetime`. `/sync-promotion` drives it. See `docs/concepts/promotion-bureau.md`.
 
 Full schema is documented in `docs/databases/`.
 
@@ -73,7 +78,7 @@ Full schema is documented in `docs/databases/`.
 ├── docs/                    # Obsidian-native knowledge vault (open this folder as a vault)
 │   ├── index.md             # MOC / entry point
 │   ├── people/              # one note per cardholder
-│   ├── databases/           # one note per Notion database (8)
+│   ├── databases/           # one note per Notion database (the three cashback trackers share one)
 │   ├── concepts/            # cross-cutting concepts (multipliers, billing cycle, etc.)
 │   ├── cards/               # stub list now; individual notes promoted lazily
 │   ├── formulas/            # Notion formula decodings

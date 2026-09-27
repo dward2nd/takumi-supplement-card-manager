@@ -35,6 +35,11 @@ Each note opens with a live Notion URL, collection ID, and the full property sch
 - [[databases/nuta-transactions]] — รายการใช้จ่ายผ่านบัตรของนุตา
 - [[databases/nuta-bills]] — บิลเรียกเก็บค่าบัตรเครดิตของนุตา
 
+### Household-wide
+
+- [[databases/promotion-bureau]] — Promotion Bureau: one row per pooled-campaign period, linked to everyone's transactions
+- [[databases/cashback-trackers]] — รายการติดตามเครดิตเงินคืนของ<name>: one per holder, a row per expected credit
+
 ## Concepts (cross-cutting)
 
 - [[concepts/supplement-card-model]] — why this whole system exists
@@ -44,6 +49,7 @@ Each note opens with a live Notion URL, collection ID, and the full property sch
 - [[concepts/points-and-multipliers]] — `×0` `×2` `×3` `×4` `×5` `÷4`
 - [[concepts/cashback]] — `% cb` on Baiboon and Nuta (not Takumi)
 - [[concepts/promotions]] — cashback is promotion-driven; effective dates, tier rules, and how general rules (foreign-in-THB, etc.) interact with promos
+- [[concepts/promotion-bureau]] — campaigns paid on pooled spend (NW3), one class per campaign, first-come-first-served split
 - [[concepts/installment-reward-campaigns]] — ดีจังผ่อน / U Plan and why an installment plan's rewards can't be read off the merchant string
 - [[concepts/premium-tier]] — Signature / Platinum / none
 - [[concepts/card-network]] — JCB / Mastercard / VISA / UnionPay
@@ -65,6 +71,7 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 ## Promotions
 
 - [[promotions/uob-one-2026]] — UOB One 2026 cashback promotion (effective `2026-01-01` → `2026-12-31`).
+- [[promotions/first-choice-nw3]] — First Choice NW3 pooled cashback ladder (`2026-07-01` → `2026-09-30`), tracked in the Promotion Bureau.
 
 ## Future application
 
