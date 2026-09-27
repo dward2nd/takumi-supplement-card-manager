@@ -22,6 +22,9 @@ Each skill is `.claude/skills/<name>/SKILL.md` (the agent-facing contract) backe
 - `prepare-bill` — draft a `[DRAFT]` Bills row from the cycle's transactions.
 - `update-bill` — patch a Bills row (`จ่ายแล้ว`, slip/statement files, Note, finalize). Delegates payment-row creation to `record-payment` on slip upload.
 
+**Write — Promotion Bureau**
+- `sync-promotion` — bring one Bureau row up to date: screen linked rows, split the credit FCFS, write the shares + per-holder tracker rows, render the campaign summary into the page. Campaign rules are `lib.bureau.BasePromotion` subclasses. *(New, 2026-09-28.)*
+
 **Write — repositories**
 - `add-promotion` / `update-promotion` — declare / patch promotion YAML.
 
