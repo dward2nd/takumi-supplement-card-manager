@@ -38,7 +38,7 @@ JSON spec:
 }
 ```
 
-**`auto_classify: true`** runs `lib.promotions.classify(card, tx_date, name)` for each row and fills in `cashback_percent`, `multiplier`, and `note` from the active promotion's tier rules + foreign-in-THB policy + installment rule + petrol exclusion. Per-row spec values still win, then batch-level values, then auto-classified values; the explicit precedence keeps user overrides authoritative. Rejected for `holder: "takumi"` (no `% cb` field on that DS). The response gains an `auto_classified: true` flag and a `classifications` array showing the reason per row (`tier`, `foreign-default-exclude`, `foreign-override`, `installment`, `petrol-exclusion`, `no-promo`, `no-tier-match`).
+**`auto_classify: true`** runs `lib.promotions.classify(card, tx_date, name)` for each row and fills in `cashback_percent`, `multiplier`, and `note` from the active promotion's tier rules + foreign-in-THB policy + installment rule + petrol exclusion. Per-row spec values still win, then batch-level values, then auto-classified values; the explicit precedence keeps user overrides authoritative. Works for all three holders (Takumi's DS gained `% cb` on 2026-09-28). The response gains an `auto_classified: true` flag and a `classifications` array showing the reason per row (`tier`, `foreign-default-exclude`, `foreign-override`, `installment`, `petrol-exclusion`, `no-promo`, `no-tier-match`).
 
 **`bill_cycle` and `due_date` are optional.** Omit them and the CLI infers both from the card's bank pattern (see [[../../../docs/concepts/bill-cycle-patterns|bill-cycle-patterns]]): today is compared against this month's bill cycle date for the card, and the active cycle is this-month-or-next accordingly. Pass them explicitly whenever the transaction's cycle isn't today's active one — that covers both **backdating** (a row that belongs to a closed statement, e.g. a late-posted purchase) and **foredating** (a row scheduled into a future cycle, e.g. an installment term, a prepayment, or a row dated next month). They're "both or neither" — supplying only one is a spec error.
 
@@ -113,7 +113,7 @@ Only **one** of `×0` / `×2` / `×3` / `×4` / `×5` / `÷4` can be checked per
 
 ### 4b. Cashback rate (`% cb`) on Baiboon's and Nuta's transactions
 
-Baiboon's and Nuta's Transactions DSes both have a `% cb` field (number, percent display); Takumi's does not. The CLI accepts `cashback_percent` at batch and per-tx level; the value is the **raw fraction** (e.g. `0.05` for 5%). For Takumi, omit it — the field doesn't exist and the validator rejects the spec to prevent a 400 from Notion.
+All three holders' Transactions DSes have a `% cb` field (number, percent display); Takumi's since 2026-09-28. The CLI accepts `cashback_percent` at batch and per-tx level; the value is the **raw fraction** (e.g. `0.05` for 5%).
 
 When the user supplies tier rules per card (see *Card-specific earning policies* below), classify each transaction's merchant against the tier table and pass the resulting `cashback_percent` per tx. Don't ask the user to compute the fraction — apply the policy yourself, but surface ambiguity (e.g. an aggregator merchant that could bundle several tiers).
 
@@ -165,7 +165,7 @@ The Note exists so a future reviewer of the transactions can immediately see *wh
 
 Point-multiplier checkboxes (`×0` `×2` `×4` `×5` `÷4`, plus Takumi-only `×3`) are set explicitly via the spec's `multiplier` field — see *Rule 4a* and the card-specific policies below.
 
-**`% cb`** (Baiboon + Nuta) is a writable `number` property displayed as a percent — storage is the raw fraction, so `0.05` shows as `5%` in the Notion UI. The CLI accepts it as `cashback_percent` at batch level or per-tx. **`cashback`** (Baiboon + Nuta) is a read-only formula = `% cb` × `ยอดชำระ` — never write to it. Takumi's DS has neither.
+**`% cb`** (all three holders) is a writable `number` property displayed as a percent — storage is the raw fraction, so `0.05` shows as `5%` in the Notion UI. The CLI accepts it as `cashback_percent` at batch level or per-tx. **`cashback`** (all three holders) is a read-only formula = `% cb` × `ยอดชำระ` — never write to it.
 
 ## Active promotions (apply per card, per transaction date)
 
@@ -184,6 +184,12 @@ If you want to classify by hand (e.g. to override a heuristic the lib can't yet 
 - Subject to the [general earning exclusions](#general-earning-exclusions) below; the promo does not override either default exclusion.
 
 When in doubt about whether a particular merchant string falls into a tier, surface the ambiguity to the user — don't try to re-classify by editing the merchant name (that would violate Rule 1).
+
+### AEON World Mastercard — `WWW.MAKRO.PRO` earns no points (from 2025-11-11)
+
+AEON withholds points on a list of MCCs from 11 Nov 2025 ([[../../docs/cards/aeon-world-mastercard|card note]]). `WWW.MAKRO.PRO BANGKOK TH` bills as MCC **5199** (excluded) → `×0` with Note; `HTTPS://WWW.MAKRO.PRO/ BANGKOK TH` bills as **5411** → earns normally. Encoded as `points_excluded_merchants` in the card YAML, so `auto_classify` applies it (reason suffix `+merchant-points-exclusion`), `[บัตรหลัก]` prefix included.
+
+**AEON Rabbit** (Takumi-only) goes further: no points on **any** transaction from 2025-11-11 — the same field with `prefix: "*"`. See [[../../docs/cards/aeon-rabbit|card note]].
 
 ### UOB Makro & Makro merchants — standalone `MAKRO_…` vs `MAKRO.PRO` / `TMN MAKRO`
 
@@ -225,7 +231,7 @@ The other shape is **U Plan**: pay in full at the merchant (so it starts on the 
 
 ### Installment terms on Krungsri cards earn nothing (`installment_rewards_upfront`)
 
-On all four `issuer: Krungsri` cards — First Choice, Krungsri JCB, Krungsri NOW, Krungsri Visa — an installment purchase's points and cashback are granted **in full at the moment of purchase**, not spread across the terms. Each `NN/NN` term therefore earns nothing on its own; crediting them would double-count the reward.
+On four Krungsri cards — First Choice, Krungsri JCB, Krungsri NOW, Krungsri Visa (the ones carrying the flag) — an installment purchase's points and cashback are granted **in full at the moment of purchase**, not spread across the terms. Each `NN/NN` term therefore earns nothing on its own; crediting them would double-count the reward.
 
 Card-level flag, so `auto_classify` applies it automatically — reason tag `<base>+installment-rewards-upfront`, and it zeroes **both** axes (unlike the 7-11 / TrueMoney rule, which is points-only). A promo with an explicit `installment_rule` outranks it.
 
@@ -256,12 +262,13 @@ These apply across **every** card we manage (Takumi, Baiboon, Nuta) by **default
 2. **Petrol stations earn neither points nor cashback — on the cards that carry the exclusion.** Watch for merchant strings containing PTTST, PTT, BCP, BANGCHAK, BSRC, ESSO, SHELL, CALTEX. Note that Thai brands bill under multiple string forms — Bangchak appears as `BCP`, the spelled-out `BANGCHAK-…`, and `BSRC-…` (Bangchak Sriracha, the former Esso Thailand network — e.g. `BSRC-PHAAPOOM ENERGY LAMPHUN TH`).
    - **Confirmed excluding**: all **UOB** cards (One, World, Premier, Makro) and **ttb so smart**.
    - **Confirmed *not* excluding**: **First Choice** (Krungsri) — SHELL / PTT rows earn at the card's normal rate (confirmed by user 2026-05-28).
-   - **Unknown**: CardX / KTC / AEON / Lotus / SPayLater — surface to the user before applying or denying cashback.
+   - **Points-only, by hand**: **Krungsri JCB** — Krungsri's year-long Thai-petrol campaign withholds *points* on fuel (user, 2026-09-27). Set `multiplier: "×0"` per row with the Note `Petrol station (Bangchak/BSRC) — Krungsri's year-long Thai-petrol campaign withholds reward points on fuel spend.` Not encoded as `petrol_exclusion` (that flag zeroes cashback too), so `auto_classify` leaves these rows at `×1` — override them yourself.
+   - **Unknown**: Krungsri Visa / Krungsri NOW / CardX / KTC / AEON / Lotus / SPayLater — surface to the user before applying or denying cashback.
 
    The exclusion is card-level (`petrol_exclusion: true` in `scripts/repositories/cards/<card>.yaml`), so `auto_classify` applies it automatically for the confirmed cards — reason tag `petrol-exclusion`.
 3. **7-11 and TrueMoney earn no *points* on Krungsri-family cards** (user, 2026-08-08; applied to rows dated 2026-08-01 onward). Covers direct 7-Eleven (`7-11 …`), 7-Eleven via TrueMoney (`TMN 7-11 …`), and **every** other TrueMoney charge — `TMN*PROMPTPAY30`, `TMN*LOTUS`, `TMN*FAST FOOD`, `TMN MAKRO`, etc. TrueMoney is matched on the `TMN ` / `TMN*` prefix.
    - **Points-only.** Cashback is *not* withdrawn — First Choice cashback promos still pay at these merchants, and the user adjusts First Choice cashback by hand. A row carrying both `% cb = 2%` and `×0` is correct, not a mistake.
-   - **Confirmed excluding**: First Choice, Krungsri JCB, Krungsri NOW, Krungsri Visa (`issuer: Krungsri`).
+   - **Confirmed excluding**: First Choice, Krungsri JCB, Krungsri NOW, Krungsri Visa (the cards carrying the flag — not every `issuer: Krungsri` card).
    - **Exempt**: **Lotus's Beyond** — Lotus's, 7-Eleven and TrueMoney are all CP ALL businesses, so those merchants keep earning there.
    - **Not in the family**: **CardX JCB** — CardX is SCB X group, unrelated to Krungsri. It shares only the `bill_cycle_pattern: krungsri` key (a BC/DD *shape*, day 5 + 20 days); don't read that as family membership.
 

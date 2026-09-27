@@ -23,6 +23,8 @@ Why it's like this (inferred): Notion's relation UI is heavier than a select for
 
 ## 2. Takumi has no Bills DB
 
+**Resolved 2026-09-27** — Takumi created [[../databases/takumi-bills|his own Bills DB]]. It is not symmetric with the others: his bills are the bank statement's per-card totals, not a sum of his own rows. The history below is kept for context.
+
 [[../people/takumi|Takumi]]'s universe has only Cards + Transactions. [[../people/baiboon|Baiboon]] and [[../people/nuta|Nuta]] have the full [[three-database-trinity]].
 
 Why (inferred): Takumi is also the primary holder receiving the bank's actual statements, so the per-cycle reconciliation surface that Bills provides is less useful for him. Or simply: he built his system first, and Bills came later.

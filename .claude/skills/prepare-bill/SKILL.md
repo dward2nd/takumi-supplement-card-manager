@@ -1,11 +1,11 @@
 ---
 name: prepare-bill
-description: Draft a new row on Baiboon's or Nuta's Bills DB for the current unbilled cycle of a single card. Sums `ยอดชำระ` across every transaction whose `Bill Cycle Date` matches the cycle's BC date and writes it as a `[DRAFT] <Card> <YYYY-MM>` Bills row that stays draft until the user uploads the official statement (via /update-bill) or manually strips the prefix. Use when the user says "prepare the bill for Nuta's UOB One", "draft the May bill for Baiboon's UOB World", or otherwise wants a pre-statement balance written into Notion.
+description: Draft a new row on Baiboon's or Nuta's Bills DB for the current unbilled cycle of a single card. Sums `ยอดชำระ` across every transaction whose `Bill Cycle Date` matches the cycle's BC date and writes it as a `[DRAFT] <Card> <YYYY-MM>` Bills row that stays draft until the user uploads the official statement (via /update-bill) or manually strips the prefix. Use when the user says "prepare the bill for Nuta's UOB One", "draft the May bill for Baiboon's UOB World", or otherwise wants a pre-statement balance written into Notion. Also has a date-range mode that drafts every cycle whose bill cycle date falls in a window, across cards and holders — use it for "prepare the bills for whatever cards closed 25–27 September".
 ---
 
 # prepare-bill
 
-Creates **one** new row on Baiboon's or Nuta's Bills DB representing the cycle that's currently accumulating. Takumi has no Bills DB, so this skill rejects `takumi`.
+Creates **one** new row on Baiboon's or Nuta's Bills DB representing the cycle that's currently accumulating. Takumi's Bills DB is statement-driven — his bill is the bank's per-card total, not a sum of his own rows — so this skill rejects `takumi` (see [[../../docs/databases/takumi-bills|takumi-bills]]).
 
 This is a write skill — it overrides the project's "don't mutate Notion without explicit instruction" rule because the user invoked it explicitly. For patching an existing bill see [[../update-bill/SKILL.md|/update-bill]].
 
@@ -41,6 +41,39 @@ JSON spec:
 - "Prepare the bill for Nuta's UOB One" → `{holder: "nuta", card: "UOB One"}`.
 - "Draft Baiboon's UOB World statement for May" → spec as above; CLI infers BC=2026-05-25 from today.
 - "Make a draft bill for cycle 2026-04-25" → pass `bill_cycle` explicitly.
+
+## Date-range mode — every cycle closing in a window
+
+When the user asks for bills by date rather than by card — "prepare the bills for Nuta and Baiboon for whatever card with bill cycle dates within 25–27 September" — pass a window instead of `card` + `bill_cycle`:
+
+```json
+{
+  "bill_cycle_from": "2026-09-25",
+  "bill_cycle_to":   "2026-09-27",
+  "holders": ["baiboon", "nuta"],
+  "cards":   ["UOB One"]
+}
+```
+
+- `bill_cycle_from` / `bill_cycle_to` — required, inclusive, at most **31 days** apart. The cap is deliberate: a wide window over history would mass-draft every old cycle that never got a Bills row.
+- `holders` (or `holder`) — optional; defaults to both supplement holders.
+- `cards` — optional filter, case-insensitive.
+- `skip_populate_installments` / `skip_cashback_check` / `skip_auto_note` — passed through to every draft.
+
+Cycles are **discovered from the Transactions DBs** (every distinct `(Card, Bill Cycle Date)` with a BC inside the window), not predicted from card patterns — a card with no rows in the window has nothing to bill. Each cycle is then drafted through the single-card path, so every guard above still applies *per cycle*; a guard that refuses becomes that cycle's status instead of aborting the rest.
+
+The envelope has `counts` per status and one `results` entry per cycle:
+
+| `status` | Meaning |
+|----------|---------|
+| `created` / `would-create` | Drafted (or would be, under `--dry-run`). Carries `title`, `ยอดชำระ`, `tx_count`, and `installments_appended` / `new_select_option` when relevant. |
+| `exists` | A Bills row already has this `(Card, วันตัดรอบบิล)` — carries `bill_id`. Re-running a window is therefore idempotent. |
+| `off-pattern` | The rows' BC isn't the card's bank-pattern BC for that month: misdated rows (run [[../audit-transaction-dates/SKILL.md\|/audit-transaction-dates]]), or a genuine bank-side shift the holiday library missed — draft that one in single mode with an explicit `bill_cycle`. |
+| `blocked` | A guard refused; `reason` says which. The common one is **UOB One without cashback credits** — run [[../post-cashback-credits/SKILL.md\|/post-cashback-credits]] for that cycle, then re-run the window. |
+
+Rows in the window with no `Card` relation are counted under `unassigned_rows` — they can't belong to any bill.
+
+**Always `--dry-run` a window first** and show the user the plan: it touches several cards at once, and each `would-create` UOB One cycle needs its credits posted before the real run. A cycle whose BC is *today* is still open (same-day convention) — confirm the user has no more rows to add before drafting it.
 
 ## What the script does
 
@@ -113,11 +146,13 @@ For First Choice **during** an active promotion: the user currently manages thos
 |----------|--------------------------------------------|
 | baiboon  | `192cb755-f0f1-8064-9075-000be05ba72d`     |
 | nuta     | `2a1cb755-f0f1-8193-982d-000bd4e3156c`     |
-| takumi   | *(no Bills DB — rejected)*                 |
+| takumi   | *(statement-driven — rejected)*            |
 
 ### 2. Card SELECT vs Card relation
 
-A bill's `Card` is a SELECT keyed off the card's verbatim title (see [[../../docs/concepts/known-divergences|known-divergences]]). The CLI validates the spec's `card` against the live SELECT option list — a typo aborts with a list of valid options.
+A bill's `Card` is a SELECT keyed off the card's verbatim title (see [[../../docs/concepts/known-divergences|known-divergences]]). The CLI resolves the spec's `card` against the holder's **Cards DB** first — a typo aborts there with substring candidates — and only then maps it onto the SELECT: exact, then case-insensitive (the Cards title and the option can differ in case, known-divergences #11), so an existing option is always reused rather than duplicated by case.
+
+A card that is in the Cards DB but has **no SELECT option yet** has simply never been billed. The first bill is drafted anyway and Notion adds the option on create; the envelope flags it with `new_select_option: true`. (First hit 2026-09-27 on Baiboon's `KBank JCB`, which previously aborted the draft.)
 
 The Transactions DS uses a `Card` **relation** to the Cards DB. The CLI resolves the card name to its Cards page ID via the existing `lib.cards.find_card` (exact title equality), then filters Transactions by `Card.relation.contains`.
 

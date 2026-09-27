@@ -6,7 +6,7 @@ role: transactions
 
 # Nuta — Transactions (`รายการใช้จ่ายผ่านบัตรของนุตา`)
 
-Every purchase Nuta makes on her supplement cards. Schema mirrors Baiboon's — both track cashback via `% cb` + `cashback` formula. Takumi's DS has neither.
+Every purchase Nuta makes on her supplement cards. Schema mirrors Baiboon's — both track cashback via `% cb` + `cashback` formula. Takumi's DS has the same two properties since 2026-09-28.
 
 - **Notion URL**: https://www.notion.so/dward2nd/2a1cb755f0f181ea95d2e8fbec394921
 - **Collection ID**: `2a1cb755-f0f1-8110-9795-000bf7d48b4f`

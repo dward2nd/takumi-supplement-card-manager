@@ -22,6 +22,7 @@ Each note opens with a live Notion URL, collection ID, and the full property sch
 
 - [[databases/takumi-cards]] — สรุปบัตรและสินเชื่อของเว็บ
 - [[databases/takumi-transactions]] — รายการใช้จ่ายผ่านบัตรของเว็บ
+- [[databases/takumi-bills]] — บิลเรียกเก็บค่าบัตรเครดิตของเว็บ (statement-driven)
 
 ### Baiboon's
 
@@ -53,6 +54,7 @@ Each note opens with a live Notion URL, collection ID, and the full property sch
 - [[concepts/installment-reward-campaigns]] — ดีจังผ่อน / U Plan and why an installment plan's rewards can't be read off the merchant string
 - [[concepts/premium-tier]] — Signature / Platinum / none
 - [[concepts/card-network]] — JCB / Mastercard / VISA / UnionPay
+- [[concepts/ledger-reset]] — `Reset ยอดใช้จ่ายและคะแนน`: zeroing a card's balance and points without deleting history
 - [[concepts/known-divergences]] — schema inconsistencies worth knowing
 
 ## Formulas

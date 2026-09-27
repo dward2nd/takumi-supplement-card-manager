@@ -49,6 +49,8 @@ When a new promotion arrives, add it under [[../promotions/]] and link from the 
 
 UOB cards (One, World, Premier, Makro) and [[../cards/ttb-so-smart|ttb so smart]] earn nothing at petrol stations. No promotion has been seen to override this. The exclusion is **card-level** — driven by `petrol_exclusion: true` in `scripts/repositories/cards/<card>.yaml` — while "is this a petrol station?" is a shared merchant-string heuristic in `lib/promotions.py` (`_PETROL_TOKENS`).
 
+**Krungsri JCB** is a points-only variant: Krungsri's year-long Thai-petrol campaign withholds reward **points** on fuel spend (user, 2026-09-27), so its petrol rows take `×0` with the Note `Petrol station (Bangchak/BSRC) — Krungsri's year-long Thai-petrol campaign withholds reward points on fuel spend.` It does *not* carry `petrol_exclusion: true`, because that flag withdraws cashback too; `auto_classify` therefore misses it and the `×0` is set by hand. [[../cards/_stubs|First Choice]] is the opposite case — petrol earns normally there (confirmed 2026-05-28).
+
 Watch for merchant strings containing `PTTST`, `PTT `, `BCP`, `BANGCHAK`, `BSRC`, `ESSO`, `SHELL`, `CALTEX`.
 
 Thai petrol brands show up under **more than one string form** — Bangchak bills both as the ticker-style `BCP` and as the spelled-out `BANGCHAK-…` (e.g. `BANGCHAK-PEMPOON PETROLEUCHIANGMAI TH`, confirmed by user 2026-07-31). When a new petrol row slips through as a normal tier match, the fix is to add the brand's other form to `_PETROL_TOKENS`, not to hand-patch the row.

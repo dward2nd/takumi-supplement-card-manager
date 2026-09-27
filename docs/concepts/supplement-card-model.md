@@ -33,6 +33,12 @@ Each cardholder can be invited to *their* Notion page and see *only* their own d
 - A Transaction row references its Card by relation. (Bills break this — they use a `Card` select. See [[known-divergences]].)
 - Credit limit (`วงเงินที่ได้`) on a supplement Card row is the *holder's* allocated share of Takumi's underlying limit, not the full account limit.
 
+## `[บัตรหลัก]` rows — primary-card charges on a supplement ledger
+
+A row whose name starts `[บัตรหลัก]` (primary card) records a charge made on **Takumi's own primary card**, entered in a supplement holder's Transactions DB so it counts toward that holder's bill like any other row. Its `Note` often narrows it to the holder's share — `เฉพาะส่วนของ…` (only the portion for …), `ทำข้อตกลงหารครึ่ง…` (agreed to split in half).
+
+Such a row can sit beside a supplement-card row with the same merchant, date and amount. Baiboon's `ttb so smart` cycle 2026-09-27 has `WWW.MAKRO.PRO BANGKOK TH` ฿19,875 on 28 Aug twice, one plain and one `[บัตรหลัก]`. Those are **two purchases**, one made by each of them (confirmed by Takumi 2026-09-27), not a double entry. Don't flag the pair as a duplicate.
+
 ## What this means for [[../future-app/data-model-target|the future app]]
 
 The app needs first-class **person** entities, per-person scoping/authorization, and a clear mapping from supplement-card → underlying primary-card-account. The current Notion structure lacks an explicit "primary account" entity — that's a gap to close in phase 2.

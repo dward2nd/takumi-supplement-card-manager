@@ -70,5 +70,4 @@ These are the promo's *rules as encoded*. Genuinely ambiguous merchants (aggrega
 - Does **not** write transactions — see [[../add-transaction/SKILL.md|/add-transaction]].
 - Does **not** read or reconcile against Notion — it's a pure repo-driven preview. For what's actually *in* Notion, see [[../fetch-transactions/SKILL.md|/fetch-transactions]].
 - Does **not** declare or edit promotions — see [[../add-promotion/SKILL.md|/add-promotion]] / [[../update-promotion/SKILL.md|/update-promotion]].
-- Does **not** apply to Takumi's cashback (Takumi's Transactions DS has no `% cb`); a classification preview is still informational, but the value can't be stored there.
 - Does **not** translate Thai labels.

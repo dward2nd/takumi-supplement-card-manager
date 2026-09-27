@@ -10,7 +10,7 @@ Writes **one** payment row — a negative `ยอดชำระ` transaction �
 - `จ่ายแล้ว` on the Bills row records *that the statement was settled* → [[../update-bill/SKILL.md|/update-bill]].
 - The negative transaction this skill writes is *the money leaving* → balances the cycle.
 
-Takumi has no Bills DB, so this skill rejects `takumi`.
+Rejects `takumi`: his slip pays the bank for the whole card, so one full-bill row would need matching `โอนยอดจาก…` rows for the supplements' shares, which this skill doesn't write (see [[../../docs/databases/takumi-bills|takumi-bills]]).
 
 This is a write skill — it overrides the project's "don't mutate Notion without explicit instruction" rule because the user invoked it (or [[../update-bill/SKILL.md|/update-bill]] delegated to it) explicitly. It is the payment counterpart to [[../add-transaction/SKILL.md|/add-transaction]] (charges) and shares its write core (`lib.transaction_write`).
 
@@ -95,7 +95,7 @@ Most of the time you arrive here **via [[../update-bill/SKILL.md|/update-bill]]*
 |----------|--------------------------------------------|
 | baiboon  | `181cb755-f0f1-8167-b5b6-000bc6d47469`     |
 | nuta     | `2a1cb755-f0f1-8110-9795-000bf7d48b4f`     |
-| takumi   | *(no Bills DB — rejected)*                 |
+| takumi   | *(statement-driven — rejected)*            |
 
 ### 2. Never any cashback or points
 

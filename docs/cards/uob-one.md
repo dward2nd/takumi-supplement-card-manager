@@ -23,7 +23,7 @@ Cashback comes from the **active promotion**, not from a permanent card policy. 
 
 The tier table, carve-outs, exclusions, installment rule, and cashback-crediting workflow all live in the promotion note. When the issuer renews for 2027, branch a new promotion note rather than mutating the existing one.
 
-The `% cb` field is on Baiboon's and Nuta's Transactions DSes (added 2026-05-25 — see [[../databases/baiboon-transactions]] / [[../databases/nuta-transactions]]). Takumi's DS has no `% cb`; for Takumi UOB One transactions, the cashback tier is recorded in `Note` for now.
+The `% cb` field is on Baiboon's and Nuta's Transactions DSes (added 2026-05-25 — see [[../databases/baiboon-transactions]] / [[../databases/nuta-transactions]]). Takumi's DS gained `% cb` on 2026-09-28; his older UOB One rows record the tier in `Note` instead.
 
 ## Writing UOB One transactions
 

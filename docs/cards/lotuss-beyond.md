@@ -1,13 +1,13 @@
 ---
 tags: [card, lotus, points, fractional-points]
-issuer: Lotus
+issuer: Krungsri
 holders: [baiboon]
 points: fractional
 ---
 
 # Lotus's Beyond
 
-Lotus-group co-brand card. One of the few cards in the household whose earning model **does not fit** the Notion `×N`/`÷N` multiplier enum — the issuer awards **fractional points**, not just integer multiples of a base rate.
+Lotus-group co-brand card, issued through Lotus Money Service — a Krungsri Consumer partner, so the card repo files it under `issuer: Krungsri` (user, 2026-09-27). It stays exempt from the Krungsri 7-11 / TrueMoney points exclusion (CP ALL), and Takumi pays it by auto-debit like the rest of the family — see [[../databases/takumi-bills#payments|takumi-bills → Payments]]. One of the few cards in the household whose earning model **does not fit** the Notion `×N`/`÷N` multiplier enum — the issuer awards **fractional points**, not just integer multiples of a base rate.
 
 ## Earning rules
 

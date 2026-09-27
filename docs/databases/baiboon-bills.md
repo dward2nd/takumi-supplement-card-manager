@@ -28,13 +28,15 @@ One row per monthly **statement** issued by a card for Baiboon's spending. This 
 
 ### `Card` select options (verbatim)
 
-`AEON Next Gen`, `AEON Primo`, `First Choice`, `Krungsri JCB`, `Krungsri NOW`, `Krungsri Visa`, `KTC UnionPay`, `Lotus's Beyond`, `SPayLater`, `ttb so smart`, `UOB Makro`, `UOB One`, `UOB Premier`, `UOB World`.
+`AEON Next Gen`, `AEON Primo`, `AEON World Mastercard`, `First Choice`, `KBank JCB`, `KBank PLUSTINUM`, `Krungsri JCB`, `Krungsri NOW`, `Krungsri Visa`, `KTC UnionPay`, `Lotus's Beyond`, `SPayLater`, `ttb so smart`, `UOB Makro`, `UOB One`, `UOB Premier`, `UOB World`.
+
+17 options as of 2026-09-27, read live from the DS. `KBank JCB` was added that day by the card's first bill (see below).
 
 ## The big divergence
 
 The `Card` field here is a **SELECT** with a hardcoded list, not a relation to [[baiboon-cards]]. This means:
 
-- Adding a new card requires editing the SELECT options as well as inserting a Cards row.
+- A new card needs a SELECT option as well as a Cards row. `/prepare-bill` now supplies the option itself: when the card resolves in the Cards DB but has no option yet, the first draft creates it (Notion adds a SELECT option on page create).
 - A typo silently disconnects bills from cards.
 - Rollups from bills back to cards do not exist (impossible without a relation).
 

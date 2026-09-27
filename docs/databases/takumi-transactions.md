@@ -55,5 +55,5 @@ Five views: by transaction datetime, by process date, by card (relation grouping
 
 ## Notable absences
 
-- No `% cb` / `cashback` formula — both Baiboon and Nuta have them; Takumi does not.
+- `% cb` (number, percent) and `cashback` (formula `prop("ยอดชำระ")*prop("% cb")`) added 2026-09-28, copied from Baiboon's DS. Only rows from then on carry a value (first: AEON Rabbit's 5% LINE Pay / Rabbit top-up rows).
 - No `÷4` multiplier.

@@ -1,11 +1,11 @@
 ---
 name: update-bill
-description: Patch a row on Baiboon's or Nuta's Bills DB — set `จ่ายแล้ว`, attach a payment slip to `หลักฐานการชำระ`, attach a statement PDF to `ใบแจ้งยอด (PDF)`, write a `Note`, or use a raw-properties escape hatch. Use when the user says "mark this bill paid", "attach the slip to <holder>'s bill", "save the statement PDF", or otherwise wants to mutate a Bills row. The write counterpart for bills (transactions live separately — see [[../update-transaction/SKILL.md|/update-transaction]]).
+description: Patch a row on Baiboon's, Nuta's or Takumi's Bills DB — set `จ่ายแล้ว`, attach a payment slip to `หลักฐานการชำระ`, attach a statement PDF to `ใบแจ้งยอด (PDF)`, write a `Note`, or use a raw-properties escape hatch. Use when the user says "mark this bill paid", "attach the slip to <holder>'s bill", "save the statement PDF", or otherwise wants to mutate a Bills row. The write counterpart for bills (transactions live separately — see [[../update-transaction/SKILL.md|/update-transaction]]).
 ---
 
 # update-bill
 
-Patches property values on **one** row in Baiboon's or Nuta's Bills DB (`บิลเรียกเก็บค่าบัตรเครดิต`). Takumi has no Bills DB, so this skill rejects `takumi`.
+Patches property values on **one** row in Baiboon's or Nuta's Bills DB (`บิลเรียกเก็บค่าบัตรเครดิต`). Also works on Takumi's Bills DB, which is statement-driven (see [[../../docs/databases/takumi-bills|takumi-bills]]): slips, statement PDFs, `Note` and an explicit `paid` apply as usual, but `refresh_from_transactions` is refused, no payment row is recorded when a slip is attached, and `จ่ายแล้ว` is never auto-set — his slip pays the bank for the whole card, so pass `paid: true` yourself once it covers `ยอดชำระ`.
 
 This is a write skill — it overrides the project's "don't mutate Notion without explicit instruction" rule because the user invoked it explicitly. For reads on bills, query Notion directly via MCP for now (no dedicated read skill exists yet). For transaction patches see [[../update-transaction/SKILL.md|/update-transaction]]; for new transactions see [[../add-transaction/SKILL.md|/add-transaction]].
 
@@ -140,7 +140,7 @@ Phrasing: lead the report with the per-bill totals table (Notion vs statement vs
 |----------|--------------------------------------------|
 | baiboon  | `192cb755-f0f1-8064-9075-000be05ba72d`     |
 | nuta     | `2a1cb755-f0f1-8193-982d-000bd4e3156c`     |
-| takumi   | *(no Bills DB — rejected)*                 |
+| takumi   | `63dcb755-f0f1-83df-aaa8-871bb9069dae` (statement-driven) |
 
 ### 2. The `Card` field is a SELECT, not a relation
 
@@ -180,5 +180,5 @@ Pass `--dry-run` to the CLI when a mistake would be hard to undo (e.g. writing a
 - Does **not** create new Bills rows *as its own purpose* — [[../prepare-bill/SKILL.md|/prepare-bill]] owns per-cycle drafting. The one exception is `auto_prepare_bill`: when a slip needs a row to attach to and none exists, this skill drafts one by delegating to the same `lib.bill_draft` core. It never creates a bill for a Note-only or statement-only patch.
 - Does **not** add *charge* transactions. Use [[../add-transaction/SKILL.md|/add-transaction]]. (It does record one *payment* transaction on slip upload, by delegating to [[../record-payment/SKILL.md|/record-payment]] — see *Slip upload records the payment*.)
 - Does **not** edit transactions. Use [[../update-transaction/SKILL.md|/update-transaction]].
-- Does **not** mutate Takumi's data (Takumi has no Bills DB).
+- Does **not** write transactions for Takumi — on his statement-driven bills a slip is only attached; no payment row is recorded and `จ่ายแล้ว` is never auto-set.
 - Does **not** translate Thai labels — `จ่ายแล้ว`, `หลักฐานการชำระ`, `ใบแจ้งยอด (PDF)`, `วันตัดรอบบิล` stay verbatim per project convention.

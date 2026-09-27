@@ -31,13 +31,26 @@ Both friends spend on credit that legally belongs to Takumi. The Notion structur
      Baiboon                  Nuta
 ```
 
-## Primary tool: Notion MCP
+## Primary tool: the Notion HTTP API via `scripts/python`
 
-All data lives in Notion. Access it through the `mcp__notion__*` tool family — `mcp__notion__notion-fetch` for reads, `mcp__notion__notion-search` to discover, plus the page/update/create variants when modification is explicitly authorised.
+All data lives in Notion. **Reach it through `scripts/python`, never through the Notion MCP server.** The scripts are the supported path: they carry the holder routing, card resolution, Thai property names, and write validation that ad-hoc MCP calls skip.
 
-The Notion MCP server is configured in `.mcp.json` (HTTP transport to `https://mcp.notion.com/mcp`).
+```sh
+echo '{"holder":"takumi","limit":5,"sort":"date_desc"}' \
+  | uv run --project scripts/python scripts/python/fetch-transactions/cli.py
+```
 
-### The twelve databases
+Start from an existing skill (`/fetch-transactions`, `/summarize-overview`, `/add-transaction`, …). For a one-off read with no skill behind it, write a throwaway script in the scratchpad that imports `lib.notion_client` — still the HTTP API, still `lib/`. If a read is worth repeating, propose promoting it to a skill rather than leaving it ad-hoc.
+
+`mcp__notion__*` is deprecated in this repo. `.mcp.json` still configures the server, but don't call it.
+
+### Integration access
+
+The scripts authenticate as the Notion integration **"Claude Code's Automated Scripts"** with `NOTION_TOKEN` from the repo-root `.env`. A database invisible to that integration returns `ObjectNotFound` on query, and — more quietly — **relations pointing into it read back as an empty array**, which looks like unset data rather than an access error.
+
+All thirteen databases are shared as of 2026-09-28 (Takumi's Bills DB joined 2026-09-27; the Promotion Bureau and the three cashback trackers 2026-09-28). If a relation ever comes back empty across a whole table, suspect this before suspecting the data — that was the symptom while Takumi's Cards DS was still unshared. Confirm what the token can see with `client.search(filter={"property": "object", "value": "data_source"})`.
+
+### The thirteen databases
 
 All under parent page **Personal Monetary Policy** (`b1989406427a4fb7b4c5ec1805bdbed8`):
 
@@ -45,6 +58,7 @@ All under parent page **Personal Monetary Policy** (`b1989406427a4fb7b4c5ec1805b
 |---------|--------------|--------------------------------------------|
 | Takumi  | Cards        | `1aacb755-f0f1-818a-a284-000b17d155de`     |
 | Takumi  | Transactions | `1aacb755-f0f1-81dc-8e9f-000b20891025`     |
+| Takumi  | Bills        | `63dcb755-f0f1-83df-aaa8-871bb9069dae`     |
 | Baiboon | Cards        | `99bb5ba6-79b1-47e2-9b8f-fa3102d5b294`     |
 | Baiboon | Transactions | `181cb755-f0f1-8167-b5b6-000bc6d47469`     |
 | Baiboon | Bills        | `192cb755-f0f1-8064-9075-000be05ba72d`     |
@@ -56,13 +70,13 @@ All under parent page **Personal Monetary Policy** (`b1989406427a4fb7b4c5ec1805b
 | Nuta    | Cashback tracker | `2e4cb755-f0f1-838a-9317-877c67577916` |
 | (all)   | Promotion Bureau | `3e7cb755-f0f1-80f0-8c78-000b1d9f44cb` |
 
-Pass any collection ID to `mcp__notion__notion-fetch` as `id: "collection://<uuid>"`, or use the original notion.so URL.
+These IDs are data source IDs for the 2025-09-03 API: `GET /v1/data_sources/{id}` for the schema (formula bodies included, inline as `expression`), `POST /v1/data_sources/{id}/query` for rows. `lib/holders.py` mirrors this table — edit both together.
 
 Notable schema quirks worth knowing before you touch the data:
 
-- Takumi has **no Bills database** — only Baiboon and Nuta do.
+- Takumi's Bills DB (added 2026-09-27) is **statement-driven**: each row is the bank's per-card total — principal plus every supplement section — not a sum of his own rows. `Holder.statement_bills` makes `/prepare-bill`, bill refresh and automatic payment rows refuse him. See `docs/databases/takumi-bills.md`.
 - Bills' `Card` field is a **SELECT (text)**, not a relation to the Cards DB. Deliberate denormalization. Don't try to "fix" it in Notion; document it.
-- Baiboon and Nuta both have `% cb` (writable `number`, percent display — raw fraction in storage so `0.05` shows as `5%`) and `cashback` (read-only formula = `% cb` × `ยอดชำระ`) on transactions. Takumi does not.
+- All three Transactions DSes have `% cb` (writable `number`, percent display — raw fraction in storage so `0.05` shows as `5%`) and `cashback` (read-only formula = `% cb` × `ยอดชำระ`). Takumi's were added 2026-09-28, copied from Baiboon's; his cashback figures only exist on rows from then on (first: AEON Rabbit).
 - Takumi's transactions uniquely include a `หมวดหมู่` (category) relation and a `×3` multiplier checkbox.
 - The **Promotion Bureau** (2026-09-28) pools campaigns that pay on the primary account's combined spend (First Choice NW3): one row per period, two-way linked to every holder's transactions (`Promotion` on the Transactions side). Each campaign is a `BasePromotion` subclass in `scripts/python/lib/bureau/`, not YAML: bank terms don't share a shape. The credit is split **first come, first served** by `Transaction Datetime`. `/sync-promotion` drives it. See `docs/concepts/promotion-bureau.md`.
 
@@ -72,7 +86,7 @@ Full schema is documented in `docs/databases/`.
 
 ```
 .
-├── .mcp.json                # Notion HTTP MCP server config
+├── .mcp.json                # Notion MCP server config (deprecated — use scripts/python)
 ├── CLAUDE.md                # this file
 ├── README.md
 ├── docs/                    # Obsidian-native knowledge vault (open this folder as a vault)
@@ -106,10 +120,10 @@ Rules:
 ## Working conventions
 
 - **Documentation language**: English narrative, **Thai field names preserved verbatim** in code-spans. Gloss the Thai term in English on first use per note: `` `ยอดชำระ` (amount due) ``. Never translate Thai labels away.
-- **Notion is the source of truth**. When a question arises about a specific card, transaction, or bill, read Notion via MCP first. The vault describes structure; Notion holds data.
+- **Notion is the source of truth**. When a question arises about a specific card, transaction, or bill, read Notion via `scripts/python` first. The vault describes structure; Notion holds data.
 - **The vault is persistent memory**. When the user describes a new pattern or rule, **update `docs/` rather than only answering inline**.
 - **Wikilinks everywhere**. The Obsidian graph is the navigation layer.
-- **Don't mutate Notion** without explicit instruction. Reads via MCP are free; writes require asking.
+- **Don't mutate Notion** without explicit instruction. Reads are free; writes require asking.
 - **Don't translate Thai labels**, don't rename `ยอดค้างชำระ` → `outstanding_balance`. The future app's data model can rename; the vault cannot.
 
 ## What NOT to do

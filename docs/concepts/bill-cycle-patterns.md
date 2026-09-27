@@ -35,6 +35,7 @@ For UOB this comparison uses the *shifted* bill-cycle date (see UOB below), not 
 | KBank                     | day **25**      | day **10** of the **next** month  | consistent, no shifts; fixed-day due |
 | ~~Lotus~~ *(historical)*  | day **28**      | bill cycle **+ 20 days**          | **retired 2026-08-08** — see below |
 | SPayLater                 | day **15**      | bill cycle **+ 10 days**          | consistent, no shifts          |
+| Grab                      | day **1**       | bill cycle **+ 6 days** (⇒ day 7) | Takumi-only; labelled a day *after* the bank's cut — see below |
 | UOB                       | day **25**      | bill cycle **+ 20 days**          | see *UOB exceptions* below     |
 
 ### Card → pattern mapping (by name prefix, case-insensitive)
@@ -50,7 +51,28 @@ For UOB this comparison uses the *shifted* bill-cycle date (see UOB below), not 
 | `KBank …`            | KBank          |
 | `Lotus's Beyond`     | Krungsri/etc   |
 | `SPayLater`          | SPayLater      |
+| `Grab PayLater`      | Grab           |
 | `UOB …`              | UOB            |
+
+### Grab PayLater is labelled a day after the bank's cut
+
+Grab's statement actually cuts at the turn of the month — the bank's own period ends on the 30th/31st — and is due on the 7th. The pattern nonetheless anchors **BC day 1**, one day later than the cut.
+
+That's deliberate, and it's the house same-day convention doing the work. `active_cycle` assigns a transaction to the cycle whose BC is the next date **≥** the transaction date, so a purchase dated *on* the BC day falls into the cycle closing that day. Label the cycle `09-30` and a purchase made on the 30th lands in the cycle that just closed; label it `10-01` and it lands in the cycle due 10-07, which is where Grab actually bills it.
+
+Deciding this by relabelling rather than by special-casing the comparison keeps one rule for all nine patterns. Set by the user 2026-09-23.
+
+The 29 pre-2025-07 rows on the card still carry the old labelling (BC day 31, or day 28 in February) and now sit one day off the pattern. They are history on a reset ledger and were left as-is; `/audit-transaction-dates` will flag them.
+
+### KTC: Takumi's history predates the current cycle
+
+Every dated KTC row in [[../databases/takumi-transactions]] through 2025-06 sits at **BC day 2 / due +15**, not the day 27 above. All four of his KTC products agree, across 48 rows.
+
+The `ktc` pattern is nonetheless correct today: Baiboon's KTC UnionPay is a supplement on Takumi's KTC account — necessarily the same billing cycle — and it currently bills BC day 27 / due day 12. So KTC moved the cycle sometime after 2025-06 and the day-2 rows are history.
+
+His four KTC cards are registered against `ktc` on that basis, each with the caveat in its YAML. If a fresh KTC statement ever shows day 2, add a `ktc_day2` pattern rather than editing `ktc` — Baiboon's and Nuta's live cards depend on it.
+
+### Matching
 
 The match is on the card's title in the Cards DB. Looking up the `ธนาคาร/บริษัท` (bank/company) select is unreliable — many rows have it blank — so we key off the card name itself. See [[known-divergences#9. Takumi's Cards DB omits ธนาคาร/บริษัท]].
 
@@ -77,6 +99,10 @@ The shifts are independent — a shifted bill cycle date does **not** change how
 The "active cycle" comparison from the top of this note uses the *shifted* bill cycle date for UOB. So if day 25 has been pulled back to day 22 (because 23–25 are all non-working), then on day 22 onwards we're already in the next cycle.
 
 Thai public holidays are sourced from the [`holidays`](https://pypi.org/project/holidays/) Python package, country code `TH`, official public-holiday set. The Bank of Thailand calendar can occasionally diverge by a day around substitution holidays — if a real-world bank statement disagrees with what the library computed, the script's output is overridable: pass `bill_cycle` / `due_date` explicitly in the add-transaction spec and the library is bypassed for that batch.
+
+### Observed exception — cycle 2026-08-25 due 18 Sep
+
+The UOB statement dated 25 Aug 2026 printed a due date of **18 Sep 2026** — 24 days after the bill cycle, where the pattern gives 14 Sep (+20; a Monday, not a holiday). Every UOB row in that cycle, across all three holders, was set to 18 Sep on 2026-09-27 at Takumi's request. One statement isn't enough to change the pattern, so it still says +20 and `/audit-transaction-dates` will flag these rows. If later UOB statements also print +24, change the pattern instead.
 
 ## Worked examples
 

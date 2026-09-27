@@ -37,7 +37,7 @@ earlier term. See [[#how-inheritance-works]].
 
 ### Krungsri pays installment rewards upfront
 
-On the four `issuer: Krungsri` cards, the points and cashback for an installment
+On the four Krungsri cards carrying `installment_rewards_upfront` (First Choice, JCB, NOW, Visa), the points and cashback for an installment
 purchase are granted **in full at the moment of purchase**, not spread across the
 terms (user, 2026-08-10). Each `NN/NN` term therefore earns nothing on its own —
 the reward already landed on the original charge, and crediting the terms too

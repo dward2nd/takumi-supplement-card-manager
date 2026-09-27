@@ -21,7 +21,7 @@ Phase 2 will be a custom full-stack application that **replaces Notion entirely*
 ## How to use this repo
 
 - **Read it as an Obsidian vault**: open the `docs/` folder in Obsidian. The graph view is the navigation; start from `docs/index.md`.
-- **Run Notion operations through MCP**: `.mcp.json` wires the Notion HTTP MCP server. Use Claude Code with `mcp__notion__*` tools.
+- **Run Notion operations through `scripts/python`**: the uv-managed CLIs in `scripts/python/` talk to the Notion HTTP API and are the supported path for every read and write. (`.mcp.json` still wires a Notion MCP server, but it's deprecated — don't use it.)
 - **Don't run anything at the repo root**: this is not a runnable application.
 
 ## Documentation language
