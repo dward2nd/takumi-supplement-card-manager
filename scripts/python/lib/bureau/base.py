@@ -50,6 +50,16 @@ class Tx:
     date: str  # `Transaction Datetime` as stored: an ISO date, or a datetime
 
     @property
+    def when(self) -> tuple:
+        """FCFS order key: the day, then untimed rows (order unknown) before timed ones.
+
+        Two rows with an equal key are simultaneous. Give both shares of a split
+        charge the same time, or none, so they stay one group.
+        """
+        day, _, time = self.date.partition("T")
+        return (day, bool(time), dt.datetime.fromisoformat(self.date) if time else None)
+
+    @property
     def merchant(self) -> str:
         """The bank's merchant string, upper-cased, without `[บัตรหลัก]`."""
         return self.name.removeprefix(_PURCHASE_PREFIX).strip().upper()
@@ -126,7 +136,8 @@ class Allocation:
     credit: Decimal                 # what the bank pays on `pooled`
     rows: list[TxCredit]
     shares: dict[str, Decimal]      # per holder, to the satang, summing to `credit`
-    boundary: list[TxCredit] = field(default_factory=list)  # the date group the last paying step ends in
+    boundary: list[TxCredit] = field(default_factory=list)  # the group the last paying step ends in
+    warnings: list[str] = field(default_factory=list)
 
 
 class BasePromotion(ABC):
@@ -175,13 +186,15 @@ class BasePromotion(ABC):
     def allocate(self, txs: list[Tx]) -> Allocation:
         """Hand the credit out first come, first served by `Transaction Datetime`.
 
-        Rows are walked in date order, filling the paying tranches; a row
-        earns the credit on the part of it that lands inside one. Rows on the
-        same date count as simultaneous — a shared bill split across holders,
-        or any two charges whose order the ledger can't tell — so a date group
-        that straddles a step shares its slice pro rata by amount.
+        Rows are walked in time order (`Tx.when`), filling the paying tranches; a
+        row earns the credit on the part of it that lands inside one. Rows with
+        the same `Transaction Datetime` count as simultaneous — a shared bill
+        split across holders, or date-only rows whose order the ledger can't
+        tell — so a group that straddles a step shares its slice pro rata by
+        amount. Only the straddling group's order matters; give that day's rows
+        times to settle it (apps show dates only; the user finds the times).
         """
-        spend = sorted((t for t in txs if t.amount > 0), key=lambda t: t.date)
+        spend = sorted((t for t in txs if t.amount > 0), key=lambda t: t.when)
         pooled = sum((t.amount for t in spend), Decimal(0))
         tranches = self.tranches(pooled)
         top = max((t.end for t in tranches), default=Decimal(0))
@@ -189,7 +202,7 @@ class BasePromotion(ABC):
         rows: list[TxCredit] = []
         boundary: list[TxCredit] = []
         cum = Decimal(0)
-        for _, grp in groupby(spend, key=lambda t: t.date):
+        for _, grp in groupby(spend, key=lambda t: t.when):
             grp = list(grp)
             size = sum((t.amount for t in grp), Decimal(0))
             lo, hi = cum, cum + size
@@ -200,6 +213,14 @@ class BasePromotion(ABC):
             if lo < top < hi:
                 boundary = credited
             cum = hi
+
+        warnings = []
+        if boundary:
+            day = boundary[0].tx.when[0]
+            timed = {t.when[1] for t in spend if t.when[0] == day}
+            if len(timed) > 1:
+                warnings.append(f"{day} mixes timed and date-only rows and the step ends that day; "
+                                f"the date-only ones are placed first — give them times too")
 
         credit = self.cashback(pooled)
         raw: dict[str, Decimal] = {}
@@ -212,6 +233,7 @@ class BasePromotion(ABC):
             rows=rows,
             shares=_round_to_total(raw, credit),
             boundary=boundary,
+            warnings=warnings,
         )
 
     # -- Notion text --------------------------------------------------------

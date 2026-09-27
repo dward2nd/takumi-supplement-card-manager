@@ -81,6 +81,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     alloc = promo.allocate(txs)
     flagged, flagged_amount = report.flagged(promo, txs)
     shares = {h.key: alloc.shares.get(h.key, Decimal(0)) for h in HOLDERS.values()}
+    warnings += alloc.warnings
 
     # 3. Bureau numbers
     if row.total is not None and row.total != alloc.credit:
