@@ -26,7 +26,6 @@ Optional fields:
   - points_default        "×0" or null (rarely useful at promo level — usually card-level)
   - foreign_in_thb_policy { default: "exclude"|"apply", overrides: [...] }
   - installment_rule      { rate, credited: "per_installment"|"at_purchase" }
-  - crediting_schedule    { "0.01": "bc_date", "0.05": "first_weekday_next_month", ... }
 
 Writes the YAML file and prints a JSON envelope to stdout:
 
@@ -55,7 +54,6 @@ class AddPromotionError(RuntimeError):
 _ALLOWED_TOP_LEVEL = {
     "id", "name", "card", "effective_start", "effective_end", "status",
     "points_default", "foreign_in_thb_policy", "tiers", "installment_rule",
-    "crediting_schedule",
 }
 
 
@@ -122,7 +120,6 @@ def run(spec: dict, *, dry_run: bool = False, force: bool = False) -> dict:
     for k in (
         "id", "name", "card", "effective_start", "effective_end", "status",
         "points_default", "foreign_in_thb_policy", "tiers", "installment_rule",
-        "crediting_schedule",
     ):
         if k in spec:
             ordered[k] = spec[k]

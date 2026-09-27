@@ -90,15 +90,14 @@ def resolve_bill_card_name(
     return cards_title.strip(), True
 
 
-def cards_with_crediting_schedule() -> frozenset[str]:
-    """Cards whose active promo declares a crediting_schedule.
+def cards_with_crediting() -> frozenset[str]:
+    """Cards whose cashback comes back as credit rows (a class in lib.crediting).
 
     Such cards need explicit `*CASHBACK*` credit rows in the cycle before
     the bill is drafted, otherwise the flat sum overstates the balance.
-    Derived from the promotions repository, so adding a new cashback-tier
-    card is a YAML edit, not a Python edit.
     """
-    return frozenset(p.card for p in promotions.load_all() if p.crediting_schedule)
+    from .crediting import CREDITINGS   # late: crediting reaches back into bills-side modules
+    return frozenset(CREDITINGS)
 
 
 def select_options(ds_id: str) -> list[str]:
@@ -241,11 +240,11 @@ def draft_bill(spec: dict, *, dry_run: bool = False) -> dict:
             f"— nothing to bill. Did you mean a different cycle date?"
         )
 
-    if card_name in cards_with_crediting_schedule() and not spec.get("skip_cashback_check"):
+    if card_name in cards_with_crediting() and not spec.get("skip_cashback_check"):
         if not has_cashback_credit_rows(rows):
             raise BillDraftError(
                 f"{card_name} requires cashback credit rows before drafting the bill — "
-                f"its active promotion declares a crediting_schedule but the cycle has no "
+                f"its cashback comes back as credit rows (lib.crediting) but the cycle has no "
                 f"`*CASHBACK*` transactions, so the sum would overstate the balance owed. "
                 f"Run /post-cashback-credits first (or pass "
                 f'`"skip_cashback_check": true` in the spec to override).'

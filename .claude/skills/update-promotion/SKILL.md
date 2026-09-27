@@ -1,6 +1,6 @@
 ---
 name: update-promotion
-description: Patch an existing promotion YAML in `scripts/repositories/promotions/<id>.yaml` — adjust effective dates, status, tiers, foreign-in-THB policy, installment rule, or crediting schedule. Use when the user says "extend the UOB One promo to 2027", "mark this promotion superseded", "add Agoda to the foreign-in-THB overrides", or otherwise wants to change an active or historical promo.
+description: Patch an existing promotion YAML in `scripts/repositories/promotions/<id>.yaml` — adjust effective dates, status, tiers, foreign-in-THB policy, or installment rule. Use when the user says "extend the UOB One promo to 2027", "mark this promotion superseded", "add Agoda to the foreign-in-THB overrides", or otherwise wants to change an active or historical promo.
 ---
 
 # update-promotion
@@ -28,7 +28,7 @@ Spec:
 
 Patchable fields (everything except `id`):
 
-`name`, `card`, `effective_start`, `effective_end`, `status`, `points_default`, `foreign_in_thb_policy`, `tiers`, `installment_rule`, `crediting_schedule`.
+`name`, `card`, `effective_start`, `effective_end`, `status`, `points_default`, `foreign_in_thb_policy`, `tiers`, `installment_rule`. (Crediting isn't YAML any more: `scripts/python/lib/crediting/`.)
 
 ## Hard rules
 

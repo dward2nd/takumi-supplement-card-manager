@@ -93,7 +93,6 @@ class Promotion:
     tiers: tuple[Tier, ...]
     foreign_in_thb_policy: ForeignInThbPolicy
     installment_rule: InstallmentRule | None
-    crediting_schedule: dict[str, str]
     points_default: str | None
     source_path: Path = field(default_factory=Path)
 
@@ -201,7 +200,6 @@ def parse_promotion(frontmatter: dict[str, Any], source_path: Path | None = None
         tiers=tuple(_parse_tier(t) for t in (frontmatter.get("tiers") or [])),
         foreign_in_thb_policy=_parse_foreign_policy(frontmatter.get("foreign_in_thb_policy")),
         installment_rule=_parse_installment(frontmatter.get("installment_rule")),
-        crediting_schedule=dict(frontmatter.get("crediting_schedule") or {}),
         points_default=frontmatter.get("points_default"),
         source_path=source_path or Path(),
     )

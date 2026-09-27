@@ -1,6 +1,6 @@
 ---
 name: add-promotion
-description: Declare a new cashback promotion in the repository at `scripts/repositories/promotions/<id>.yaml`. Use when the user describes a new cashback campaign — its card, effective dates, tier rules, optional foreign-in-THB overrides, installment treatment, and crediting schedule. The promotion immediately becomes available to `lib.promotions.classify` and downstream skills (/add-transaction auto-classify, /post-cashback-credits, /prepare-bill).
+description: Declare a new cashback promotion in the repository at `scripts/repositories/promotions/<id>.yaml`. Use when the user describes a new cashback campaign — its card, effective dates, tier rules, optional foreign-in-THB overrides and installment treatment. The promotion immediately becomes available to `lib.promotions.classify` and downstream skills (/add-transaction auto-classify, /classify-transaction). How the bank pays the cashback back is not YAML — a Crediting class in `scripts/python/lib/crediting/`.
 ---
 
 # add-promotion
@@ -53,12 +53,7 @@ Full spec (every optional block):
     { "rate": 0.05, "label": "bonus", "patterns": ["7-11", "WATSON"], "exclude_patterns": ["TMN 7-11"] },
     { "rate": 0.01, "label": "base",  "patterns": ["*"] }
   ],
-  "installment_rule": { "rate": 0.01, "credited": "per_installment" },
-  "crediting_schedule": {
-    "0.01": "bc_date",
-    "0.05": "first_weekday_next_month",
-    "0.10": "first_weekday_next_month"
-  }
+  "installment_rule": { "rate": 0.01, "credited": "per_installment" }
 }
 ```
 
@@ -80,9 +75,9 @@ Two active promotions on the same card with overlapping effective ranges create 
 
 `points_default` on a promotion is a convenience override; the card's own `points_default` (in `scripts/repositories/cards/<slug>.yaml`) is the canonical source. Set the promo's only when the promo itself changes the default (rare — happens when a card normally earns points but the promo's terms suspend them).
 
-### 5. Crediting schedule unlocks `/post-cashback-credits`
+### 5. Crediting is code, not YAML
 
-If you declare a `crediting_schedule`, the card immediately becomes supported by `/post-cashback-credits`. The schedule's keys are rate-as-string (`"0.01"`, `"0.05"`, `"0.10"`); values are `bc_date` or `first_weekday_next_month`. Match what the issuer actually does.
+How the issuer pays the cashback back (periods, dates, caps) is a `Crediting` class per card in `scripts/python/lib/crediting/`; `crediting_schedule` was retired 2026-09-28. A new card for [[../post-cashback-credits/SKILL.md|/post-cashback-credits]] needs a class there, not a YAML key.
 
 ## Procedure
 

@@ -34,7 +34,7 @@ So `/add-transaction` with `auto_classify: true` fills `% cb`, the `×0` multipl
 
 ## Crediting mechanism — external savings account
 
-ttb pays this cashback **directly into a linked savings account** (per user, 2026-07-21). It is **not** credited to the credit-card statement, so **no cashback credit row is ever posted on the card** — do not run `/post-cashback-credits` for ttb so smart, and the promo intentionally declares **no `crediting_schedule`**.
+ttb pays this cashback **directly into a linked savings account** (per user, 2026-07-21). It is **not** credited to the credit-card statement, so **no cashback credit row is ever posted on the card** — do not run `/post-cashback-credits` for ttb so smart, and the card intentionally has **no `Crediting` class** in `scripts/python/lib/crediting/`.
 
 The `% cb` field on each row is therefore purely **informational**: it records how much cashback the purchase earned (paid out externally), and the read-only `cashback` formula (`% cb` × `ยอดชำระ`) reports the baht amount. Neither offsets the card's outstanding balance — that balance is the running sum of `ยอดชำระ` only.
 

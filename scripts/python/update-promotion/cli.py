@@ -49,7 +49,6 @@ from lib import paths, promotions
 _ALLOWED_FIELDS = {
     "name", "card", "effective_start", "effective_end", "status",
     "points_default", "foreign_in_thb_policy", "tiers", "installment_rule",
-    "crediting_schedule",
     # `id` is intentionally not patchable here — to rename a promo,
     # delete + recreate (the id is the file name).
 }

@@ -39,9 +39,5 @@ installment_rule:
   rate: 0.01
   credited: per_installment
 
-# When the issuer credits cashback per cycle.
-# Keys are rate-as-string; values are date conventions used by /post-cashback-credits.
-crediting_schedule:
-  "0.01": bc_date
-  "0.05": first_weekday_next_month
-  "0.10": first_weekday_next_month
+# How UOB credits the cashback (1% per statement cycle, 10%/5% per calendar
+# month, pooled caps) is code: scripts/python/lib/crediting/uob_one.py.

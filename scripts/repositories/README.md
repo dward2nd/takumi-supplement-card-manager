@@ -138,15 +138,9 @@ tiers:
 installment_rule:
   rate: 0.01
   credited: per_installment          # per_installment | at_purchase
-
-# How the issuer credits cashback per cycle, keyed by tier-rate string.
-# Used by /post-cashback-credits to schedule the credit transaction dates.
-# Values: bc_date | first_weekday_next_month
-crediting_schedule:
-  "0.01": bc_date
-  "0.05": first_weekday_next_month
-  "0.10": first_weekday_next_month
 ```
+
+How and when the issuer pays the cashback back (periods, dates, caps) is **not** YAML: it's a `Crediting` class per card in `scripts/python/lib/crediting/` (retired `crediting_schedule`, 2026-09-28).
 
 ### Classification precedence
 
@@ -194,7 +188,7 @@ known issuer's password is never re-typed.
 ## How skills read this
 
 - `scripts/python/lib/card_repo.py` — load + lookup cards by name.
-- `scripts/python/lib/promotions.py` — load + classify + crediting schedule.
+- `scripts/python/lib/promotions.py` — load + classify. Crediting: `scripts/python/lib/crediting/`.
 - `scripts/python/lib/installment_campaigns.py` — load campaigns, detect one from a row's `Note`, and compute advisory term-count hints. Consumed by `lib/installments.py` and `/add-installment`.
 - `scripts/python/lib/statement_secrets.py` — resolve a card/issuer to its statement-PDF password (consumed by `/audit-bill`'s `extract.py`).
 - Existing libs (`lib/bill_cycle.py`, `lib/cards.py` for Notion joins) consume the card repo as the source of truth for pattern keys and policy flags. **Never hard-code a card-by-name list inside a script.** Add the fact to the repository instead.
