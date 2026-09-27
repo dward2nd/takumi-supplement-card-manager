@@ -14,6 +14,9 @@ Modules:
   ladder     LadderPromotion: steps of pooled spend
   capped     CreditCapPromotion: a per-row rate until a pooled credit cap
   nw3        Krungsri First Choice NW3 (ladder), Jul–Sep 2026
+  epw538     UOB e-Commerce & e-Wallet EPW538 (ladder), Jul–Sep 2026
+  uob_one    UOB One 10%/5% (monthly) and 1% (per cycle) (credit caps)
+  uob_world  UOB World ×5 (a points quota per cycle)
   store      Notion reads/writes for Bureau rows, linked transactions, trackers
 
 To add a campaign: subclass the shape that fits (or BasePromotion for a new
@@ -27,10 +30,15 @@ import datetime as dt
 from .base import (CASHBACK, ELIGIBLE, EXCLUDED, POINTS, UNCERTAIN, Allocation, BasePromotion,
                    CashbackPromotion, Rule, Tx, TxCredit)
 from .capped import CreditCapPromotion
+from .epw538 import EPW538Promotion
 from .ladder import LadderPromotion, Tranche
 from .nw3 import NW3Promotion
+from .uob_one import UOBOneBase, UOBOneBonus
+from .uob_world import UOBWorldBonus
 
-PROMOTIONS: tuple[type[BasePromotion], ...] = (NW3Promotion,)
+PROMOTIONS: tuple[type[BasePromotion], ...] = (
+    NW3Promotion, EPW538Promotion, UOBOneBonus, UOBOneBase, UOBWorldBonus,
+)
 
 
 def promotion_for(bureau_name: str, start: dt.date, end: dt.date) -> BasePromotion:
@@ -45,5 +53,6 @@ def promotion_for(bureau_name: str, start: dt.date, end: dt.date) -> BasePromoti
 
 
 __all__ = ["CASHBACK", "ELIGIBLE", "EXCLUDED", "POINTS", "UNCERTAIN", "Allocation", "BasePromotion",
-           "CashbackPromotion", "CreditCapPromotion", "LadderPromotion", "NW3Promotion",
-           "PROMOTIONS", "Rule", "Tranche", "Tx", "TxCredit", "promotion_for"]
+           "CashbackPromotion", "CreditCapPromotion", "EPW538Promotion", "LadderPromotion",
+           "NW3Promotion", "PROMOTIONS", "Rule", "Tranche", "Tx", "TxCredit", "UOBOneBase",
+           "UOBOneBonus", "UOBWorldBonus", "promotion_for"]
