@@ -40,12 +40,14 @@ When such a row is left at `% cb` unset, write a `Note` per [[../../.claude/skil
 
 ## Cashback crediting
 
-Since 2026-09-28 the ledger follows the bank's periods (user, 2026-09-28), in code (`scripts/python/lib/crediting/uob_one.py`, driven by [[../../.claude/skills/post-cashback-credits/SKILL.md|/post-cashback-credits]]):
+The household's agreement (user, 2026-05-25, kept 2026-09-28): the ledger credits UOB One **per bill cycle**, even though UOB counts 10%/5% per calendar month. [[../../.claude/skills/post-cashback-credits/SKILL.md|/post-cashback-credits]] (`scripts/python/lib/crediting/uob_one.py`) sums the cycle's rows per `% cb` tier and writes:
 
-- **1%**: per statement cycle, a `UOB ONE CASHBACK 1%` row dated the BC date, on that cycle.
-- **10%** / **5%**: per calendar month, one row each dated the month's last day (the next working day if it's a weekend or holiday), billed on the cycle that date falls in.
+- **1%**: `UOB ONE CASHBACK 1%`, dated the cycle's BC date.
+- **5%** / **10%**: `UOB ONE CASHBACK 5%` / `10%`, dated the first weekday of the following calendar month.
 
-Amounts are the holder's first-come-first-served share of the Bureau's capped figure, less cashback that already reached them through a carry-forward leg carrying `% cb`. Before 2026-09-28 the 10%/5% was credited per bill cycle (`Cycle <BC> cashback credit`, dated the first weekday of the next month); rows covered that way are never credited again, so the first monthly run pays only what those didn't cover. `[[../../.claude/skills/prepare-bill/SKILL.md|/prepare-bill]]` then sums the cycle flat.
+All are billed on the cycle itself (the explicit date-rule exception), and `[[../../.claude/skills/prepare-bill/SKILL.md|/prepare-bill]]` then sums the cycle flat. The [[../concepts/promotion-bureau|Promotion Bureau]] keeps the bank's view (calendar months, pooled caps) separately; it matters once the account nears the ฿500 cap, which is a separate question from what the friends pay.
+
+**Past the ฿500 cap** (user, 2026-09-28): the rest of the month's 10%/5% spend earns 1%. `/sync-promotion` on the month's `UOB One cb 10%/5%` row asks for `% cb` 1% on those rows (the row the cap runs out on stays unset), and the 1% quota and the per-cycle credit then count them at 1%.
 
 ## Points
 
@@ -76,12 +78,12 @@ September 2026, before Takumi's UOB statement (2026-09-28):
 | 10%/5% (1–30 Sep) | ฿2,417.50 | ฿132.63 | ฿120.80 | ฿11.83 |
 | 1% (26 Aug–25 Sep) | ฿13,029.40 | ฿130.29 | ฿128.49 | ฿1.80 |
 
-**Where this differs from the ledger's credit rows.** [[../../.claude/skills/post-cashback-credits/SKILL.md|/post-cashback-credits]] groups the 10%/5% rows by **bill cycle** (`Cycle 2026-09-25 cashback credit: 5% × 3122.00`), but the bank counts them per **calendar month**. Rows from 26–31 Aug and 26–30 Sep land in different periods, so Nuta's September 10%/5% is ฿120.80 in the Bureau against ฿173.60 in her cycle credit rows. The 1% differs by ฿2.31: Nuta's `[ยอดยกมาจากรอบ 2026-08]` −฿231 carry-forward carries `% cb` 1%, and the ledger nets it, while the Bureau counts purchases only. Both are open questions below.
+**Where this differs from the ledger's credit rows, on purpose.** The ledger credits per bill cycle (the household's agreement, above), the Bureau per calendar month (the bank's view), so Nuta's September 10%/5% is ฿120.80 in the Bureau against ฿173.60 in her cycle credit rows. The 1% share differs by ฿2.31, which is timing: Nuta's `TMN 7-11 ฿231` got its 1% in August's credit, but UOB pays it in September. Her `[ยอดยกมาจากรอบ 2026-08]` −฿231 leg (carrying `% cb` 1%) nets it out of September's ledger credit (฿126.18), and her tracker nets it the same way, while the Bureau share keeps the bank's ฿128.49.
 
 ## Open questions
 
-- **10%/5% by month or by cycle?** The bank says calendar month; `/post-cashback-credits` groups by cycle. Which should the ledger's credit rows follow? (Raised 2026-09-28.)
-- **Should carry-forward rows with `% cb` reduce the Bureau's 1%?** The ledger nets them; the Bureau ignores non-purchase rows. (Raised 2026-09-28.)
+- ~~10%/5% by month or by cycle?~~ Settled 2026-09-28: the ledger stays per cycle (the household's agreement); the Bureau shows the bank's months.
+- ~~Carry-forward rows with `% cb`?~~ Settled 2026-09-28: a timing difference. The Bureau share keeps the bank's view; the tracker nets the carry-forward leg, like the per-cycle ledger credit does.
 - Does Takumi's primary UOB One get the same supplement-side tier treatment, or do primary-card swipes count differently? Phase-1 data hasn't given a clean answer.
 
 ## See also

@@ -226,20 +226,9 @@ def active_cycle(
     return cycle_for_month(pattern, y, m)
 
 
-def workday_on_or_after(d: dt.date) -> dt.date:
-    """The first Thai working day on or after `d` (weekends and public holidays skipped)."""
-    return _shift_later(d)
-
-
 def due_date_for(card_name: str, bill_cycle: dt.date) -> dt.date:
     """The card pattern's due date for the cycle closing on `bill_cycle`'s month."""
     return cycle_for_month(pattern_for_card(card_name), bill_cycle.year, bill_cycle.month)[1]
-
-
-def cycle_start(card_name: str, bill_cycle: dt.date) -> dt.date:
-    """The first day of the cycle closing on `bill_cycle`: the previous close + 1."""
-    y, m = _add_months(bill_cycle.year, bill_cycle.month, -1)
-    return cycle_for_month(pattern_for_card(card_name), y, m)[0] + dt.timedelta(days=1)
 
 
 def most_recent_closed_cycle(

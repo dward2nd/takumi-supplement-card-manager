@@ -1,40 +1,41 @@
 #!/usr/bin/env python3
-"""post-cashback-credits — write a card's cashback credit rows into a holder's ledger.
+"""post-cashback-credits — write a card's cashback credit rows for one bill cycle.
 
-deterministic + idempotent — a period whose credit row already exists is
-reported under `already_posted` and skipped (override with `force`, after
-archiving the old row); linking rows to the Bureau is a no-op once done.
+deterministic + idempotent — re-running with the same (holder, cycle) refuses
+to overwrite: if any `*CASHBACK*` row already exists in the cycle on the card,
+the script aborts so a second run doesn't double-credit. Pass `force` to
+override after archiving the prior rows.
 
-The card's own Crediting class decides the periods, the dates and the amounts
-(lib/crediting). Today that's UOB One, credited the way the bank does it:
-
-  1%      per statement cycle, dated the statement date     `UOB ONE CASHBACK 1%`
-  10%/5%  per calendar month, dated its last day (the next  `UOB ONE CASHBACK 10%` / `5%`
-          working day if that's a weekend or holiday),
-          billed on the cycle that date falls in
-
-Amounts are the holder's first-come-first-served share of the account's
-capped cashback, taken from the Promotion Bureau's UOB One rows (created and
-linked here when missing), less cashback that already reached the holder
-through a carry-forward leg carrying `% cb`. Before the 1%, this cycle's
-installment terms are populated (each earns 1%); skip with
+The card's Crediting class (lib/crediting) builds the rows. UOB One follows
+the household's agreement (user, 2026-05-25, kept 2026-09-28): per bill cycle,
+one row per `% cb` tier — `UOB ONE CASHBACK 1%` dated the BC date,
+`UOB ONE CASHBACK 10%` / `5%` dated the first weekday of the next month — all
+billed on the cycle, amount = −round(rate × tier sum, 2), ×0. The cycle's
+in-progress installment terms are populated first (each earns 1%); skip with
 `skip_populate_installments`.
 
-Spec (stdin or --input):
-  {
-    "holder":     "baiboon" | "nuta",   // required; Takumi's credits come off his statement
-    "card":       "UOB One",            // required; a card with a Crediting class
-    "bill_cycle": "2026-09-25",         // optional: post the 1% for this cycle
-    "month":      "2026-09",            // optional: post the 10%/5% for this calendar month
-    "skip_populate_installments": false,
-    "force":      false                 // re-post a period whose row exists (archive it first)
-  }
-With neither `bill_cycle` nor `month`: the most recently closed cycle and the
-last completed calendar month.
+Reads a JSON spec from stdin (or --input <file>):
 
-Envelope: {holder, card, detail (per period: Bureau row, share, adjustment,
-credit), already_posted, plan, writes (links, installment terms, Bureau rows),
-created, dry_run}.
+  {
+    "holder":     "baiboon" | "nuta",       // required (Takumi's credits come off his statement)
+    "card":       "UOB One",                // required; a card with a Crediting class
+    "bill_cycle": "2026-05-25",             // optional ISO; inferred via active_cycle if omitted
+    "skip_populate_installments": false,    // optional; skip the installment populate step
+    "force":      false                     // optional; override the duplicate-CASHBACK guard
+  }
+
+Writes a JSON envelope to stdout:
+
+  {
+    "holder": "baiboon", "card": "UOB One",
+    "bill_cycle": "2026-05-25", "due_date": "2026-06-15",
+    "installments": {...},
+    "tier_totals": {"0.01": 6061.40, "0.05": 2048.00},
+    "plan":    [ {name, amount, date, note}, ... ],        // --dry-run
+    "created": [ {name, amount, date, bill_cycle, id}, ... ]
+  }
+
+Tiers with a sum ≤ 0 are skipped (no zero-baht placeholder rows).
 """
 
 from __future__ import annotations
@@ -62,25 +63,25 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     write = Writer(dry_run)
 
     plan = credit.plan(holder, card_id, spec, write)
-    created = [] if dry_run else credit.post(holder, card_id, plan)
-    return {
+    out = {
         "holder": holder.key,
         "card": credit.card,
-        "detail": plan.detail,
-        "already_posted": plan.already_posted,
-        "plan": [{"name": r.name, "amount": float(r.amount), "date": r.date, "bill_cycle": r.bill_cycle,
-                  "due_date": r.due_date, "note": r.note} for r in plan.rows],
-        "writes": write.done,
-        "created": created,
-        "dry_run": dry_run,
+        "bill_cycle": plan.detail.get("bill_cycle"),
+        "due_date": plan.detail.get("due_date"),
+        "installments": plan.detail.get("installments"),
+        "tier_totals": plan.detail.get("tier_totals"),
     }
+    if dry_run:
+        return out | {"dry_run": True, "plan": [
+            {"name": r.name, "amount": float(r.amount), "date": r.date, "note": r.note} for r in plan.rows]}
+    return out | {"created": credit.post(holder, card_id, plan)}
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[1])
     ap.add_argument("--input", "-i", type=Path, help="JSON spec file (default: stdin)")
-    ap.add_argument("--dry-run", action="store_true", help="Plan without writing")
-    ap.add_argument("--force", action="store_true", help="Re-post periods whose row already exists")
+    ap.add_argument("--dry-run", action="store_true", help="Compute the plan without writing")
+    ap.add_argument("--force", action="store_true", help="Override the duplicate-CASHBACK guard")
     args = ap.parse_args(argv)
     spec = json.loads(args.input.read_text(encoding="utf-8") if args.input else sys.stdin.read())
     if args.force:
