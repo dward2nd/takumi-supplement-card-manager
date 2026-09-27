@@ -58,6 +58,15 @@ class _UOBOne(CreditCapPromotion):
         rate = None if c.cashback_percent is None else Decimal(str(c.cashback_percent))
         return rate if rate in self.tiers else None
 
+    def adjustment_for(self, holder: str, adjustments: list[Tx]) -> Decimal:
+        """A carry-forward leg carrying `% cb` in this quota's tiers moves cashback
+        between periods: e.g. Nuta's `[ยอดยกมาจากรอบ 2026-08]` −฿231 at 1%, whose
+        ฿2.31 already reached her in August's credit although UOB pays it in
+        September (user, 2026-09-28: the bank's view stays in the share, the
+        holder's net goes to the tracker and the ledger credit)."""
+        return sum((t.amount * t.cb for t in adjustments
+                    if t.holder == holder and t.cb is not None and t.cb in self.tiers), Decimal(0))
+
 
 class UOBOneBonus(_UOBOne):
     name_pattern = r"\bUOB One cb 10%/5%"

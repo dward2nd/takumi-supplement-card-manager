@@ -19,7 +19,7 @@ Always dry-run first and show the user the shares, `flagged`, `unlinked_candidat
 | Field | Default | Meaning |
 |---|---|---|
 | `promotion` | — | Bureau row Name (exact), page ID or URL |
-| `start`, `end` | — | Create the row when no row has that Name. ISO dates; for a cycle quota, `end` is the BC date. Refused unless a campaign class matches the Name and period. A dry run only reports `would_create` |
+| `start`, `end` | — | Create the row when no row has that Name. ISO dates; for a cycle quota, `end` is the BC date. Refused unless a campaign class matches the Name and period. A dry run previews the new period against a stand-in row (nothing is written) |
 | `bank_spend` | — | The total of the bank app's eligible-transactions list (Krungsri-family apps show one; other issuers unknown). Adds a `drift` block: per-date totals to read against the app, dates whose total equals the gap, repeated rows. (A single row equal to the gap is no lead: every even half of a split charge is one.) |
 | `link_candidates` | `false` | Link the campaign cards' **eligible** unlinked rows in the period (by transaction date, or by `Bill Cycle Date` for a cycle quota). Uncertain/excluded rows are never linked. Existing `Promotion` links on a row are kept |
 | `replace_summary` | `false` | Rewrite the page body even if it already has content (it's written automatically only when empty) |

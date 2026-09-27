@@ -293,6 +293,11 @@ class CashbackPromotion(BasePromotion):
             return {"cashback_percent": None}
         return {"cashback_percent": (r.credit / r.tx.amount).quantize(Decimal("0.0001"))}
 
+    def adjustment_for(self, holder: str, adjustments: list[Tx]) -> Decimal:
+        """Cashback that reaches `holder` another way, to net out of what they're
+        still owed (their share stays the bank's view). None by default."""
+        return Decimal(0)
+
 
 def _round_to_total(raw: dict[str, Decimal], total: Decimal) -> dict[str, Decimal]:
     """Round each share down to the satang, then give the leftover satang to

@@ -9,10 +9,7 @@ from decimal import Decimal
 from typing import Any
 
 from lib.bureau import ELIGIBLE, Allocation, BasePromotion, LadderPromotion, Tx
-
-
-def line(tx: Tx) -> str:
-    return f"{tx.holder} {tx.date[:10]} ฿{tx.amount:,.2f} {tx.name}"
+from lib.bureau.sync import line
 
 
 def flagged(promo: BasePromotion, txs: list[Tx]) -> tuple[list[dict], set[str]]:

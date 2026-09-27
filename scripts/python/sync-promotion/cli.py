@@ -11,7 +11,7 @@ campaign class from `lib.bureau` that matches it:
 1. Creates the row when it doesn't exist yet and `start`/`end` are given.
 2. Reads every holder's linked transactions and screens them; lists the
    campaign cards' unlinked rows in the period as candidates, and links the
-   eligible ones with `link_candidates` (gather.py).
+   eligible ones with `link_candidates` (lib.bureau.sync).
 3. Splits the reward first come, first served (the campaign's `allocate`).
 4. Cashback campaigns: writes `เงินคืนรวม` when empty and `เงินคืนส่วน<name>`,
    and upserts each holder's tracker row (settle.py). Points campaigns have
@@ -45,51 +45,31 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from lib.bureau import CASHBACK, promotion_for, store  # noqa: E402
+from lib.bureau import CASHBACK, promotion_for, store, sync  # noqa: E402
+from lib.bureau.sync import Writer  # noqa: E402
 from lib.holders import HOLDERS  # noqa: E402
 
-import gather  # noqa: E402
 import report  # noqa: E402
 import settle  # noqa: E402
 
 
-class Writer:
-    """Records every write; performs it unless this is a dry run."""
-
-    def __init__(self, dry_run: bool):
-        self.dry_run, self.done = dry_run, []
-
-    def __call__(self, what: str, fn, *args, **kwargs) -> None:
-        self.done.append(what)
-        if not self.dry_run:
-            fn(*args, **kwargs)
-
-
-def _find_or_create(spec: dict, write: Writer):
-    try:
+def _row(spec: dict, write: Writer):
+    """The named Bureau row; with start/end, created when missing (a stand-in on a dry run)."""
+    if not (spec.get("start") and spec.get("end")):
         return store.find_row(spec["promotion"])
-    except LookupError:
-        if not (spec.get("start") and spec.get("end")):
-            raise
     start, end = dt.date.fromisoformat(spec["start"]), dt.date.fromisoformat(spec["end"])
     promotion_for(spec["promotion"], start, end)  # refuse a row no campaign class would match
-    if write.dry_run:
-        return None
-    write.done.append(f"create Bureau row {spec['promotion']!r} {start}→{end}")
-    return store.create_row(spec["promotion"], start, end)
+    return sync.ensure_row(spec["promotion"], start, end, write)
 
 
 def run(spec: dict, *, dry_run: bool = False) -> dict:
     write = Writer(dry_run)
-    row = _find_or_create(spec, write)
-    if row is None:
-        return {"would_create": {"name": spec["promotion"], "start": spec["start"], "end": spec["end"]},
-                "dry_run": True}
+    row = _row(spec, write)
     promo = promotion_for(row.name, row.start, row.end)
 
-    cards = gather.campaign_cards(promo)
-    txs, candidates, warnings = gather.collect(row, promo, cards, link=bool(spec.get("link_candidates")),
-                                               write=write)
+    cards = sync.campaign_cards(promo)
+    txs, candidates, adjustments, warnings = sync.collect(
+        row, promo, cards, link=bool(spec.get("link_candidates")), write=write)
     alloc = promo.allocate(txs)
     warnings += alloc.warnings
     flagged, flagged_ids = report.flagged(promo, txs)
@@ -108,10 +88,10 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         shares_ok, w = settle.bureau_numbers(row, alloc, write)
         warnings += w
         if shares_ok:
-            trackers, w = settle.trackers(row, promo, alloc, txs, cards, write)
+            trackers, w = settle.trackers(row, promo, alloc, txs, adjustments, cards, write)
             warnings += w
 
-    body = store.body_block_ids(row.id)
+    body = [] if sync.is_stand_in(row) else store.body_block_ids(row.id)
     if not body or spec.get("replace_summary"):
         write(f"{'replace' if body else 'write'} page summary", store.write_body, row.id,
               promo.summary_blocks(), replace=bool(body))

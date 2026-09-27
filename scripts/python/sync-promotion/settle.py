@@ -47,17 +47,22 @@ def tracker_card(holder: str, cards: dict[str, str], txs: list[Tx]) -> str | Non
 
 
 def trackers(row: BureauRow, promo: BasePromotion, alloc: Allocation, txs: list[Tx],
-             cards: dict[str, dict[str, str]], write) -> tuple[dict[str, list[str]], list[str]]:
+             adjustments: list[Tx], cards: dict[str, dict[str, str]], write
+             ) -> tuple[dict[str, list[str]], list[str]]:
+    """Each holder's tracker expects their share, net of cashback that already
+    reached them another way (`adjustment_for`); the Bureau share stays the bank's."""
     title = promo.tracker_title(row.start, row.end)
     found_by_holder: dict[str, list[str]] = {}
     warnings: list[str] = []
     for h in HOLDERS.values():
-        share = alloc.shares.get(h.key, Decimal(0))
+        adjust = promo.adjustment_for(h.key, adjustments).quantize(Decimal("0.01"))
+        share = alloc.shares.get(h.key, Decimal(0)) + adjust
+        net = f" (share less ฿{-adjust} already paid via a carry-forward leg)" if adjust else ""
         found = store.trackers(h, row, title)
         found_by_holder[h.key] = [t.name for t in found]
         if not found:
             if share > 0:
-                write(f"create {h.key} tracker {title!r} expecting ฿{share}", store.create_tracker, h,
+                write(f"create {h.key} tracker {title!r} expecting ฿{share}{net}", store.create_tracker, h,
                       title=title, date=row.start, card_id=tracker_card(h.key, cards[h.key], txs),
                       row_id=row.id, expected=share)
         elif len(found) > 1 or not found[0].linked:
@@ -68,6 +73,6 @@ def trackers(row: BureauRow, promo: BasePromotion, alloc: Allocation, txs: list[
                 warnings.append(f"{h.key}: {found[0].name!r} is ticked as credited at "
                                 f"฿{found[0].expected} but the split now gives ฿{share}; left alone")
         elif found[0].expected != share:
-            write(f"{h.key} tracker Expected Cashback {found[0].expected} → {share}",
+            write(f"{h.key} tracker Expected Cashback {found[0].expected} → {share}{net}",
                   store.set_expected, found[0].id, share)
     return found_by_holder, warnings
