@@ -86,6 +86,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib import installments, notion_client, notion_files, payments
+from lib import notion_blocks as nb
 from lib.bill_draft import DRAFT_PREFIX, draft_bill
 from lib.bills import STATEMENT_PDF, BillNotFoundError, explain_cycle, find_bill
 from lib.ledger import amount_due, cycle_rows, is_bill_payment_row, title_text
@@ -277,7 +278,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     if (note := spec.get("note")) is not None:
         if not isinstance(note, str):
             raise ValueError(f"note must be a string; got {type(note).__name__}")
-        simple_props["Note"] = {"rich_text": [{"text": {"content": note}}]}
+        simple_props["Note"] = {"rich_text": nb.text(note)}
         actions.append("Note")
 
     if (raw := spec.get("properties")) is not None:
@@ -360,7 +361,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         # Auto-generated Note loses to a user-supplied `note` — that's already
         # in simple_props from the earlier branch; only fill in when blank.
         if auto_note and "Note" not in simple_props:
-            simple_props["Note"] = {"rich_text": [{"text": {"content": auto_note}}]}
+            simple_props["Note"] = {"rich_text": nb.text(auto_note)}
             actions.append("Note (auto)")
         refreshed = {"ยอดชำระ": total, "tx_count": tx_count, "auto_note": auto_note}
 

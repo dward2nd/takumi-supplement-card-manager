@@ -33,6 +33,7 @@ import datetime as _dt
 from pathlib import Path
 
 from .. import card_repo, notion_client, notion_files, promotions
+from .. import notion_blocks as nb
 from ..bill_cycle import PatternNotFoundError, cycle_for_month, pattern_for_card
 from ..bill_draft import existing_bill, resolve_bill_card_name, select_options
 from ..cards import CardNotFoundError, find_card
@@ -244,7 +245,7 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
                 "วันตัดรอบบิล": {"date": {"start": statement.statement_date}},
                 "ยอดชำระ": {"number": plan.total},
                 "จ่ายแล้ว": {"checkbox": False},
-                "Note": {"rich_text": [{"text": {"content": bill_note(statement, plan, printed)}}]},
+                "Note": {"rich_text": nb.text(bill_note(statement, plan, printed))},
             })
             counts["bills_created"] += 1
             entry["bill"] = {"status": "created", "id": bill["id"], "ยอดชำระ": plan.total}

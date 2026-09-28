@@ -24,6 +24,7 @@ from __future__ import annotations
 import datetime as _dt
 
 from . import installments, notion_client
+from . import notion_blocks as nb
 from .bill_cycle import PatternNotFoundError, active_cycle, cycle_for_month, due_date_for, pattern_for_card
 from .bills import explain_cycle, require_bills_ds
 from .cards import CardAmbiguousError, CardNotFoundError, card_title_text, card_titles_by_id, find_card
@@ -244,7 +245,7 @@ def draft_bill(spec: dict, *, dry_run: bool = False) -> dict:
         "จ่ายแล้ว": {"checkbox": False},
     }
     if auto_note:
-        properties["Note"] = {"rich_text": [{"text": {"content": auto_note}}]}
+        properties["Note"] = {"rich_text": nb.text(auto_note)}
 
     if dry_run:
         out: dict = {"dry_run": True}

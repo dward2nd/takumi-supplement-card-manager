@@ -1,4 +1,5 @@
-"""Builders for Notion page-body blocks (the content inside a page, not its properties).
+"""Builders for Notion page-body blocks (the content inside a page), and `text` for
+a rich-text property value such as `Note`.
 
 deterministic + idempotent — pure functions from text to block JSON.
 
@@ -10,6 +11,24 @@ string, or a `(text, style)` tuple where style is any of "b" (bold),
 from __future__ import annotations
 
 Run = str | tuple
+
+# Notion rejects a rich-text item longer than 2,000 characters, counted in UTF-16 units.
+TEXT_LIMIT = 2000
+
+
+def text(content: str) -> list[dict]:
+    """`content` as a rich-text array (a `Note` property, say), split into pieces
+    Notion accepts. A generated bill Note can run past one piece's limit."""
+    pieces, current, units = [], [], 0
+    for ch in content:
+        size = 2 if ord(ch) > 0xFFFF else 1
+        if units + size > TEXT_LIMIT:
+            pieces.append("".join(current))
+            current, units = [], 0
+        current.append(ch)
+        units += size
+    pieces.append("".join(current))
+    return [{"type": "text", "text": {"content": p}} for p in pieces]
 
 
 def rich(*runs: Run) -> list[dict]:

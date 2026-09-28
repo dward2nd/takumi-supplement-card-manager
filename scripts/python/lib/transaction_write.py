@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import datetime as dt
 
+from . import notion_blocks as nb
+
 
 # Mutually exclusive — at most one per transaction. Unchecked = ×1 (default).
 # Every multiplier box any holder has; which ones a holder's DS actually has is
@@ -70,7 +72,7 @@ def build_transaction_properties(
         "Processed": {"checkbox": bool(processed)},
     }
     if note:
-        props["Note"] = {"rich_text": [{"text": {"content": note}}]}
+        props["Note"] = {"rich_text": nb.text(note)}
     if multiplier is not None:
         if multiplier not in VALID_MULTIPLIERS:
             raise ValueError(
@@ -121,7 +123,7 @@ def build_update_properties(update: dict) -> dict:
     if (note := update.get("note")) is not None:
         if not isinstance(note, str):
             raise ValueError(f"note must be a string; got {type(note).__name__}")
-        props["Note"] = {"rich_text": [{"text": {"content": note}}]}
+        props["Note"] = {"rich_text": nb.text(note)}
 
     if (mult := update.get("multiplier")) is not None:
         if mult not in VALID_MULTIPLIERS:

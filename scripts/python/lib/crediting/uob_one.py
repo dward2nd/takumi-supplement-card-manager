@@ -17,8 +17,8 @@ bank's view):
 Which rows count, and the rounding, follow UOB's own rules (user, 2026-09-28:
 "even if using the household's rule, we follow the same rules as UOB"): a row
 counts in the cycle it *posted* in — from the previous statement date to the
-day before this one, so spend posted on the statement date moves to the next
-cycle's credit — and installment terms in the cycle they're billed on
+day before this one, so anything posted on the statement date (installment
+terms included) moves to the next cycle's credit
 (`lib.bureau.uob_one.in_statement_cycle`). Each row's cashback is rounded to
 the satang before summing, as UOB does.
 

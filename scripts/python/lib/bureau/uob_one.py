@@ -30,8 +30,10 @@ period a row counts in.
 from the Aug/Sep 2026 statements; user, 2026-09-28: the household's credits
 follow the same rules):
   - 1%: rows posted from the previous statement date to the day before this
-    one; spend posted *on* the statement date counts in the next cycle.
-    Installment terms count on the cycle they're billed on.
+    one; anything posted *on* the statement date counts in the next cycle —
+    installment terms included, which post on it (user's catch, 2026-09-28:
+    reproduces Jul/Aug/Sep 2026 to the satang; August's new 2C2P *SHOPEE 01/10
+    ฿1,032.60 earned its 1% in September).
   - 10%/5%: rows posted from the previous month's last day to the day before
     this month's last day; spend posted on a month's last day counts next month.
 The posting date is the row's `Process Date` (stamped by /record-statement
@@ -64,11 +66,9 @@ def posted_on(tx: Tx) -> dt.date:
 
 def in_statement_cycle(tx: Tx, previous_bc: dt.date, bc: dt.date) -> bool:
     """Does `tx` count in the cycle closing on `bc`? Posted from the previous
-    statement date up to the day before this one; installment terms (which post
-    on the statement date as part of it) by the cycle they're billed on. Shared
-    by the 1% quota and the household's per-cycle credits (lib.crediting.uob_one)."""
-    if promotions.is_installment(tx.name):
-        return (tx.bill_cycle or "")[:10] == bc.isoformat()
+    statement date up to the day before this one. No exceptions: an installment
+    term posts on the statement date, so it counts in the next cycle. Shared by
+    the 1% quota and the household's per-cycle credits (lib.crediting.uob_one)."""
     return previous_bc <= posted_on(tx) < bc
 
 
@@ -187,8 +187,6 @@ class UOBOneBase(_UOBOne):
                         {"property": "Bill Cycle Date", "date": {"equals": cycle_billed_on(end).isoformat()}}]}]
 
     def period_for(self, tx: Tx) -> tuple[dt.date, dt.date] | None:
-        if promotions.is_installment(tx.name):
-            return super().period_for(tx)
         pattern = bill_cycle.pattern_for_card(tx.card or "UOB One")
         bc, _ = pattern.active(posted_on(tx) + _DAY)   # the first statement date after it posted
         previous, _ = pattern.closed(bc)
