@@ -60,6 +60,7 @@ The peer often transfers **before** the statement cuts — an advance, or the ba
 - The drafted `ยอดชำระ` is the amount **due** (payment rows excluded), so it will exceed a single slip whenever an advance was already paid. Expected, not a mismatch to reconcile.
 - Drafting a bill so a slip can attach does **not** license `จ่ายแล้ว` — see the evidence gate below.
 - Set `false` to restore the old not-found error.
+- **Takumi's bills** can't be summed from his rows, so a slip with no bill yet gets a placeholder instead (`lib.bill_draft.draft_statement_bill`): `[DRAFT] <Card> <YYYY-MM>`, no `ยอดชำระ`, a Note saying the statement is pending (user, 2026-09-28: "put the payment slips to new drafted bills; I'll bring the statements later"). The card must be in his Cards DB and `bill_cycle` on its bank pattern. When the statement lands, [[../record-statement/SKILL.md|/record-statement]] completes the row (title, `ยอดชำระ`, Note). Then record his payment rows and `paid` with `payment_amount` / `payment_covers` (the slips are already attached).
 
 **Identify the bill row** either by `(holder, card, bill_cycle)` *or* by `id`. If `id` is set, the lookup keys are optional (used only for the response echo). Otherwise all three lookup keys are required and must match a unique row.
 

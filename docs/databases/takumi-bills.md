@@ -17,10 +17,10 @@ One row per card per **bank statement** — the amount [[../people/takumi|Takumi
 A supplement holder's bill is **computed**: the sum of *their own* Transactions rows for the cycle, drafted by `/prepare-bill` and reconciled against the statement afterwards. Takumi's bill is **the statement**:
 
 - `ยอดชำระ` is the issuer's printed total for that card — principal **plus every supplement section**. Takumi pays the whole card to the bank, usually after Baiboon and Nuta have paid their shares to him.
-- The title has no `[DRAFT] ` prefix; there is no pre-statement estimate.
+- The title has no `[DRAFT] ` prefix, except on a placeholder drafted from a payment slip before the statement arrived (see *Slip before statement* below). There is no pre-statement estimate.
 - `จ่ายแล้ว` means *Takumi paid the bank*, not *a friend paid Takumi*.
 
-In code Takumi is a `PrimaryHolder` (`scripts/python/lib/holders.py`), whose `statement_bills` is `True`; Baiboon and Nuta are `SupplementHolder`s. That makes three automations refuse him: `/prepare-bill` (a sum of his own rows would understate the bill), `/update-bill`'s `refresh_from_transactions` (same reason), and the automatic full-bill payment row that `/update-bill` and `/record-payment` write on a slip (see *Payments* below). Slips, statement PDFs, `Note` and an explicit `paid: true` all work through `/update-bill` as usual.
+In code Takumi is a `PrimaryHolder` (`scripts/python/lib/holders.py`), whose `statement_bills` is `True`; Baiboon and Nuta are `SupplementHolder`s. That makes three automations refuse him: `/prepare-bill` (a sum of his own rows would understate the bill; a slip that arrives first gets a placeholder instead), `/update-bill`'s `refresh_from_transactions` (same reason), and the automatic full-bill payment row that `/update-bill` and `/record-payment` write on a slip (see *Payments* below). Slips, statement PDFs, `Note` and an explicit `paid: true` all work through `/update-bill` as usual.
 
 ## Every statement line lives in exactly one ledger
 
@@ -71,7 +71,9 @@ Takumi pays the banks **himself, from his own accounts**, and the transfer slips
 - **Multiplier**: none.
 - **Name**: `ชำระบิลเต็มจำนวน` (paid in full) for a single slip. When several slips add up to the bill, use `ชำระบางส่วน` (partial payment) for the earlier ones and `ชำระเพิ่มบางส่วนจนครบ` (final partial payment completing the bill) for the last. Example: UOB One 2026-08 was paid as ฿15,420.18 on 29 Aug plus ฿585.47 on 31 Aug.
 
-Then attach the slip(s) with `/update-bill` and set `จ่ายแล้ว` once the slips sum to `ยอดชำระ`. `/update-bill` won't write the payment row for him (`statement_bills`), so it goes in through `/add-transaction`.
+Then attach the slip(s) with `/update-bill` and set `จ่ายแล้ว` once the slips sum to `ยอดชำระ`. Since 2026-09-28, `/update-bill` also writes these rows when given the slip's `payment_amount`, plus `payment_covers` when the slip pays friends' shares. It picks the name from what the bill already has paid.
+
+**Slip before statement** (user, 2026-09-28: "put the payment slips to new drafted bills; I'll bring the statements later"). When he pays before the PDF arrives, `/update-bill` creates a placeholder for the slip: `[DRAFT] <Card> <YYYY-MM>`, with no `ยอดชำระ` and a Note naming the slips (`lib.bill_draft.draft_statement_bill`). `/record-statement` later fills in that same row (title, `ยอดชำระ`, Note) instead of creating a second one. The payment rows wait for it, because full vs partial depends on the bill total. First case: KTC Digital VISA (฿20.00), KTC Mastercard …5549 (฿1,545.30) and KTC UnionPay …1346 (฿967.26 + ฿940.00), all cycle 2026-09-27 and paid 28 Sep.
 
 **Krungsri-family cards pay by auto-debit** (user, 2026-09-27), so there is no slip. The group is the `issuer: Krungsri` cards: First Choice, Central The 1 Redz, Krungsri NOW, Krungsri JCB, Krungsri Visa, Krungsri Lady, and Lotus's Beyond (issued through Lotus Money Service, a Krungsri Consumer partner; `issuer: Krungsri` since 2026-09-27). Each paid bill gets one row named `AUTO DEBIT`:
 

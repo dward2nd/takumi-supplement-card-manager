@@ -44,7 +44,7 @@ from pathlib import Path
 from .. import card_repo, notion_client, notion_files, promotions
 from .. import notion_blocks as nb
 from ..bill_cycle import PatternNotFoundError, cycle_for_month, pattern_for_card
-from ..bill_draft import existing_bill, resolve_bill_card_name, select_options
+from ..bill_draft import DRAFT_PREFIX, existing_bill, resolve_bill_card_name, select_options
 from ..cards import CardNotFoundError, find_card
 from ..bills import STATEMENT_PDF
 from .. import holders
@@ -279,8 +279,8 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
     plans = plan_statement(statement, number_lookup, rows, fetch_later_rows(statement, card_ids))
     takumi = holders.primary()
     out_accounts, warnings = [], list(shift_warnings)
-    counts = {"renamed": 0, "created": 0, "bills_created": 0, "pdfs_attached": 0, "process_dates": 0,
-              "points_adjustments": 0}
+    counts = {"renamed": 0, "created": 0, "bills_created": 0, "bills_completed": 0, "pdfs_attached": 0,
+              "process_dates": 0, "points_adjustments": 0}
     written: list[follow.Written] = []
 
     for plan in plans:
@@ -368,6 +368,16 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
             })
             counts["bills_created"] += 1
             entry["bill"] = {"status": "created", "id": bill["id"], "ยอดชำระ": plan.total}
+        elif _pending_draft(bill):
+            # Drafted from a payment slip before the statement arrived
+            # (lib.bill_draft.draft_statement_bill): the statement completes it.
+            notion_client.update_page_properties(bill["id"], {
+                "title": {"title": [{"text": {"content": f"{bill_name} {statement.statement_date[:7]}"}}]},
+                "ยอดชำระ": {"number": plan.total},
+                "Note": {"rich_text": nb.text(bill_note(statement, plan, printed))},
+            })
+            counts["bills_completed"] += 1
+            entry["bill"] = {"status": "draft completed", "id": bill["id"], "ยอดชำระ": plan.total}
         if pdf is not None:
             names = {f.get("name") for f in bill["properties"].get(STATEMENT_PDF, {}).get("files", [])} if "properties" in bill else set()
             if Path(pdf).name not in names:
@@ -424,8 +434,17 @@ def _report(plan: AccountPlan) -> dict:
     return e
 
 
+def _pending_draft(bill: dict) -> bool:
+    """A slip-first placeholder: `[DRAFT] …` title and no `ยอดชำระ` yet."""
+    title = "".join(t.get("plain_text", "") for p in bill["properties"].values()
+                    if p.get("type") == "title" for t in p.get("title", []))
+    return title.startswith(DRAFT_PREFIX) and bill["properties"].get("ยอดชำระ", {}).get("number") is None
+
+
 def _bill_report(bill: dict, plan: AccountPlan) -> dict:
     amount = bill["properties"].get("ยอดชำระ", {}).get("number")
+    if _pending_draft(bill):
+        return {"status": "draft to complete", "id": bill["id"], "ยอดชำระ": plan.total}
     r = {"status": "exists", "id": bill["id"], "ยอดชำระ": amount}
     if amount is None or abs(amount - plan.total) > 0.005:
         r["warning"] = f"existing bill says {amount}, statement prints {plan.total:,.2f} — left unchanged"

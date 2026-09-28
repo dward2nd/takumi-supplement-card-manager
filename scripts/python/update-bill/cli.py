@@ -50,6 +50,9 @@ Reads a JSON spec from stdin (or --input <file>):
                                               //   has somewhere to live. Only fires for
                                               //   slip attachments and only when the bill
                                               //   is resolvable by lookup keys (not id).
+                                              //   Takumi's bills: a placeholder with no
+                                              //   ยอดชำระ, which /record-statement
+                                              //   completes when the statement lands.
                                               //   false restores the old not-found error.
     "refresh_from_transactions": true,        // recompute ยอดชำระ from cycle's
                                               //   transactions; if no explicit `note`
@@ -93,7 +96,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib import installments, notion_client, notion_files, payments
 from lib import notion_blocks as nb
-from lib.bill_draft import DRAFT_PREFIX, draft_bill
+from lib.bill_draft import DRAFT_PREFIX, draft_bill, draft_statement_bill
 from lib.bills import STATEMENT_PDF, BillNotFoundError, explain_cycle, find_bill
 from lib.ledger import amount_due, cycle_rows, is_bill_payment_row, title_text
 from lib.cards import CardNotFoundError, find_card
@@ -170,6 +173,9 @@ def _resolve_bill(
     except BillNotFoundError:
         if not may_draft:
             raise
+        if holder.statement_bills:   # Takumi: a placeholder until the statement lands
+            drafted = draft_statement_bill(holder, spec["card"], spec["bill_cycle"], dry_run=dry_run)
+            return drafted.get("id"), holder.key, spec["card"], spec["bill_cycle"], drafted
         drafted = draft_bill(
             {
                 "holder": spec["holder"],

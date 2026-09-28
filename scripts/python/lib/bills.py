@@ -20,6 +20,8 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from notion_client.errors import APIResponseError
+
 from . import installments, notion_client
 from .ledger import is_bill_payment_row, is_cashback_row
 
@@ -55,15 +57,21 @@ def find_bill(holder: Holder, card: str, bill_cycle: str) -> dict:
     the value of `วันตัดรอบบิล` (ISO date).
     """
     ds = require_bills_ds(holder)
-    pages = notion_client.query_all(
-        ds,
-        filter={
-            "and": [
-                {"property": "Card", "select": {"equals": card}},
-                {"property": "วันตัดรอบบิล", "date": {"equals": bill_cycle}},
-            ]
-        },
-    )
+    try:
+        pages = notion_client.query_all(
+            ds,
+            filter={
+                "and": [
+                    {"property": "Card", "select": {"equals": card}},
+                    {"property": "วันตัดรอบบิล", "date": {"equals": bill_cycle}},
+                ]
+            },
+        )
+    except APIResponseError as e:
+        # A card never billed has no SELECT option yet, and Notion rejects the filter.
+        if "select option" not in str(e):
+            raise
+        pages = []
     if not pages:
         raise BillNotFoundError(
             f"no bill on {holder.key}'s Bills DB for card={card!r}, "

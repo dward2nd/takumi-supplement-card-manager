@@ -65,6 +65,52 @@ def reject_statement_bills(holder) -> None:
         )
 
 
+def draft_statement_bill(holder, card: str, bill_cycle: str, *, dry_run: bool = False) -> dict:
+    """A placeholder `[DRAFT] <Card> <YYYY-MM>` row on a statement-driven Bills DB.
+
+    Takumi often pays the bank before the statement PDF arrives (user,
+    2026-09-28: "put the payment slips to new drafted bills; I'll bring the
+    statements later"), so the slip needs a row to attach to. The row carries
+    no `ยอดชำระ` — only the statement knows the card total — and
+    /record-statement completes it later: `ยอดชำระ`, `Note` and the title.
+
+    Guards against typos: the card must be in the holder's Cards DS and
+    `bill_cycle` must be one of its bank pattern's cycle dates.
+    """
+    if not holder.statement_bills:
+        raise BillDraftError(f"{holder.key!r} bills are drafted from transactions — use draft_bill")
+    try:
+        card_page = find_card(holder.cards_ds, card)
+    except (CardNotFoundError, CardAmbiguousError) as e:
+        raise BillDraftError(str(e)) from e
+    bc = _dt.date.fromisoformat(bill_cycle)
+    try:
+        on_pattern = cycle_for_month(pattern_for_card(card), bc.year, bc.month)[0] == bc
+    except PatternNotFoundError as e:
+        raise BillDraftError(str(e)) from e
+    if not on_pattern:
+        raise BillDraftError(f"{bill_cycle} isn't a cycle date of {card!r}'s bank pattern")
+    ds = require_bills_ds(holder)
+    name, new_option = resolve_bill_card_name(select_options(ds), card, card_title_text(card_page))
+    if not new_option and (page := existing_bill(ds, name, bill_cycle)) is not None:
+        raise BillExistsError(page, holder.key, name, bill_cycle)
+    title = f"{DRAFT_PREFIX}{name} {bill_cycle[:7]}"
+    note = ("Drafted from the payment slip before the statement arrived. "
+            "ยอดชำระ and the split come from the statement (/record-statement completes this row).")
+    out = {"holder": holder.key, "card": name, "bill_cycle": bill_cycle, "title": title,
+           "statement_pending": True, "new_select_option": new_option}
+    if dry_run:
+        return {**out, "id": None, "dry_run": True}
+    page = notion_client.create_page(ds, {
+        "title": {"title": [{"text": {"content": title}}]},
+        "Card": {"select": {"name": name}},
+        "วันตัดรอบบิล": {"date": {"start": bill_cycle}},
+        "จ่ายแล้ว": {"checkbox": False},
+        "Note": {"rich_text": nb.text(note)},
+    })
+    return {**out, "id": page["id"]}
+
+
 def resolve_bill_card_name(
     options: list[str], card_name: str, cards_title: str
 ) -> tuple[str, bool]:
