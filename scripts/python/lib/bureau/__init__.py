@@ -18,6 +18,11 @@ Modules:
   uob_one    UOB One 10%/5% (monthly) and 1% (per cycle) (credit caps)
   uob_world  UOB World ×5 (a points quota per cycle)
   store      Notion reads/writes for Bureau rows, linked transactions, trackers
+  sync       a row's linked rows, candidates and adjustments
+  settle     a cashback row's money: shares and trackers
+  report     flagged rows, field mismatches, the boundary, drift
+  runner     one Bureau row's sync (/sync-promotion's core)
+  follow     re-sync the rows a ledger write touched, and apply the split to them
 
 To add a campaign: subclass the shape that fits (or BasePromotion for a new
 shape) in a new module, then list it in PROMOTIONS below.

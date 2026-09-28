@@ -6,6 +6,13 @@ exists: a renamed row already carries the prefix, Takumi's line is matched
 rather than re-created, the bill is found by (Card, วันตัดรอบบิล), and the PDF
 is attached only when no file of that name is on the bill.
 
+Dates: the ledger files every row and bill under the card's own cycle
+(`ledger_cycle`). A bank sometimes prints a statement date a few days off it —
+UOB printed 27 Sep / due 19 Oct 2026 for the cycle that closed 25 Sep, due
+15 Oct — "they just shifted BC/DD on paper" (user, 2026-09-28). Then the
+card's cycle dates are used and the printed ones go into the bill's Note.
+When the printed date *is* a cycle date, the printed due date is kept.
+
 Writes, per account the plan marks `ready`:
   1. rename friends' primary-card rows to `[บัตรหลัก] …`
   2. create Takumi's rows (statement BC + printed due date; points multiplier
@@ -13,10 +20,15 @@ Writes, per account the plan marks `ready`:
      cashback for credits and fees)
   3. create Takumi's Bills row at the printed total, with the split in `Note`
   4. attach the statement PDF to it
+  4a. stamp `Process Date` (the statement's posting date, where it prints one)
+      on every row a line accounts for — new rows get it at creation
+  5. re-sync the Promotion Bureau rows the created and renamed rows count
+     toward, fixing `% cb` / multiplier to the split (`lib.bureau.follow`)
 """
 
 from __future__ import annotations
 
+import dataclasses
 import datetime as _dt
 from pathlib import Path
 
@@ -26,6 +38,7 @@ from ..bill_draft import existing_bill, resolve_bill_card_name, select_options
 from ..cards import CardNotFoundError, find_card
 from ..bills import STATEMENT_PDF
 from .. import holders
+from ..bureau import follow
 from ..holders import HOLDERS
 from ..ledger import cycle_rows
 from ..transaction_write import build_transaction_properties
@@ -63,6 +76,46 @@ def fetch_rows(statement: Statement) -> tuple[dict, dict]:
     return rows, card_ids
 
 
+# How far a printed statement date may sit from the card's cycle date and still
+# be taken as that cycle (a paper shift); further than this is a real question.
+MAX_PAPER_SHIFT_DAYS = 5
+
+
+def ledger_cycle(statement: Statement) -> tuple[Statement, list[str]]:
+    """The statement re-dated to the ledger's cycle, and why (warnings).
+
+    Every mapped card's cycle rule is asked for the cycle nearest the printed
+    date. The printed date on a cycle date → unchanged (printed due date kept).
+    A few days off → the card's cycle BC and due date. Off by more, or cards
+    that disagree → refuse: that's a changed cycle, not paper.
+    """
+    printed = _dt.date.fromisoformat(statement.statement_date)
+    cards = sorted({o[0] for a in statement.accounts for s in a.sections
+                    if (o := number_lookup(statement.issuer, s.number))})
+    found: dict[tuple[_dt.date, _dt.date], list[str]] = {}
+    for card in cards:
+        try:
+            pattern = pattern_for_card(card)
+        except PatternNotFoundError:
+            continue
+        hit = pattern.nearest(printed, MAX_PAPER_SHIFT_DAYS)
+        if hit is None:
+            raise ValueError(
+                f"{statement.issuer} statement dated {printed}: no {card} cycle date within "
+                f"{MAX_PAPER_SHIFT_DAYS} days — check the statement, or the card's cycle rule in lib/bill_cycle.py")
+        found.setdefault(hit, []).append(card)
+    if len({bc for bc, _ in found}) > 1:
+        raise ValueError(f"{statement.issuer} statement dated {printed}: its cards' cycles disagree: "
+                         + "; ".join(f"{', '.join(c)} → {bc}" for (bc, _), c in found.items()))
+    if not found or next(iter(found))[0] == printed:
+        return statement, []
+    bc, dd = next(iter(found))
+    ledger = dataclasses.replace(statement, statement_date=bc.isoformat(), due_date=dd.isoformat())
+    return ledger, [f"{statement.issuer} printed statement date {statement.statement_date} / due "
+                    f"{statement.due_date}, but the cycle closed {bc}: recorded under {bc} / due {dd} "
+                    f"(the card's cycle); the printed dates are in the bill Note"]
+
+
 def cycle_warnings(statement: Statement, card: str) -> list[str]:
     """Compare the printed dates with the card's bank pattern (report only)."""
     try:
@@ -91,28 +144,34 @@ def _classify(card: str, line: StatementLine) -> tuple[str | None, str | None, f
     return c.points_override, c.note, c.cashback_percent or None
 
 
-def bill_note(statement: Statement, plan: AccountPlan) -> str:
+def bill_note(statement: Statement, plan: AccountPlan, printed: Statement | None = None) -> str:
     parts = []
     for holder in (*HOLDERS, "unmonitored"):
         if holder in plan.split:
             parts.append(f"{THAI_NAMES[holder]} ฿{plan.split[holder]:,.2f}")
     if abs(plan.carried) > 0.005:
         parts.append(f"balance carried from the previous statement ฿{plan.carried:,.2f}")
-    note = (
-        f"{statement.issuer} statement dated {statement.statement_date}, due {statement.due_date}. "
-        f"฿{plan.total:,.2f} = " + " + ".join(parts) + "."
-    )
+    shown = printed or statement
+    note = f"{statement.issuer} statement dated {shown.statement_date}, due {shown.due_date}. "
+    if printed and printed.statement_date != statement.statement_date:
+        note += (f"The cycle closed {statement.statement_date} (filed there, due {statement.due_date}); "
+                 f"the printed dates are shifted on paper. ")
+    note += f"฿{plan.total:,.2f} = " + " + ".join(parts) + "."
     if plan.not_on_statement or plan.missing:
         note += f" Notion differs from the statement by ฿{plan.drift():+,.2f} — see /record-statement's report."
     return note
 
 
-def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool = False) -> dict:
+def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool = False,
+           sync_promotions: bool = True) -> dict:
+    printed = statement
+    statement, shift_warnings = ledger_cycle(printed)
     rows, card_ids = fetch_rows(statement)
     plans = plan_statement(statement, number_lookup, rows)
     takumi = holders.primary()
-    out_accounts, warnings = [], []
-    counts = {"renamed": 0, "created": 0, "bills_created": 0, "pdfs_attached": 0}
+    out_accounts, warnings = [], list(shift_warnings)
+    counts = {"renamed": 0, "created": 0, "bills_created": 0, "pdfs_attached": 0, "process_dates": 0}
+    written: list[follow.Written] = []
 
     for plan in plans:
         entry = _report(plan)
@@ -139,22 +198,42 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
         bill = None if new_option else existing_bill(takumi.bills_ds, bill_name, statement.statement_date)
         entry["bill"] = _bill_report(bill, plan) if bill else {"status": "would-create" if dry_run else "created"}
 
+        bc = statement.statement_date
+        # Renamed and re-dated rows are followed; a row both renamed and stamped once.
+        touched = {r["id"]: {"holder": r["holder"], "date": r["date"], "name": r["new"], "posted": None,
+                             "links": r["links"]} for r in plan.renames}
+        for s in plan.stamps:
+            touched.setdefault(s["id"], {"holder": s["holder"], "date": s["date"], "name": s["name"],
+                                         "links": s["links"]})["posted"] = s["posted"]
+        written += [follow.Written.of(i, t["holder"], card_ids.get((t["holder"], plan.card), ""), t["date"], bc,
+                                      links=tuple(t["links"]), name=t["name"], posted=t["posted"])
+                    for i, t in touched.items()]
+        if plan.stamps:
+            entry["process_dates"] = len(plan.stamps)
         if dry_run:
             entry["creates"] = [_create_report(l, m, n, cb) for l, m, n, cb in creates]
+            written += [follow.Written.of(None, takumi.key, takumi_card, l.date, bc, name=l.name, posted=l.posted)
+                        for l, *_ in creates]
             continue
 
         for r in plan.renames:
             notion_client.update_page_properties(r["id"], {"Name": {"title": [{"text": {"content": r["new"]}}]}})
             counts["renamed"] += 1
+        for s in plan.stamps:
+            notion_client.update_page_properties(s["id"], {"Process Date": {"date": {"start": s["posted"]}}})
+            counts["process_dates"] += 1
         created = []
         for line, mult, note, cb in creates:
             props = build_transaction_properties(
                 name=line.name, amount=line.amount, transaction_date=line.date,
                 bill_cycle_date=statement.statement_date, due_date=statement.due_date,
                 card_page_id=takumi_card, note=note, multiplier=mult, cashback_percent=cb,
+                process_date=line.posted,
             )
             page = notion_client.create_page(takumi.transactions_ds, props)
             created.append({**_create_report(line, mult, note, cb), "id": page["id"]})
+            written.append(follow.Written.of(page["id"], takumi.key, takumi_card, line.date, bc,
+                                             name=line.name, posted=line.posted))
         counts["created"] += len(created)
         entry["creates"] = created
 
@@ -165,7 +244,7 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
                 "วันตัดรอบบิล": {"date": {"start": statement.statement_date}},
                 "ยอดชำระ": {"number": plan.total},
                 "จ่ายแล้ว": {"checkbox": False},
-                "Note": {"rich_text": [{"text": {"content": bill_note(statement, plan)}}]},
+                "Note": {"rich_text": [{"text": {"content": bill_note(statement, plan, printed)}}]},
             })
             counts["bills_created"] += 1
             entry["bill"] = {"status": "created", "id": bill["id"], "ยอดชำระ": plan.total}
@@ -178,13 +257,18 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
             else:
                 entry["bill"]["pdf"] = "already attached"
 
-    return {
-        "statement": {"issuer": statement.issuer, "statement_date": statement.statement_date, "due_date": statement.due_date},
+    out = {
+        "statement": {"issuer": statement.issuer, "statement_date": statement.statement_date, "due_date": statement.due_date,
+                      **({"printed": {"statement_date": printed.statement_date, "due_date": printed.due_date}}
+                         if printed is not statement else {})},
         "dry_run": dry_run,
         "counts": counts,
         "warnings": warnings,
         "accounts": out_accounts,
     }
+    if sync_promotions and written:
+        out["promotions"] = follow.follow_safely(written, dry_run=dry_run)
+    return out
 
 
 def _report(plan: AccountPlan) -> dict:

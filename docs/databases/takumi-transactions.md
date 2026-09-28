@@ -23,7 +23,7 @@ Every individual purchase Takumi makes on his own cards.
 | `ยอดชำระ`            | number (baht) | Transaction amount |
 | `ใช้คะแนน`           | number (int)  | Points redeemed against this transaction |
 | `Transaction Datetime` | datetime  | When the swipe / authorisation happened |
-| `Process Date`      | date          | When the bank posted it. See [[../concepts/billing-cycle]] |
+| `Process Date`      | date          | When the bank posted it: the statement's POST date, stamped by `/record-statement` (UOB). See [[../concepts/billing-cycle#Posting dates (`Process Date`)]] |
 | `Bill Cycle Date`   | date          | Which billing cycle this lands on |
 | `Due Date`          | date          | When payment is owed |
 | `Note`              | text          |  |

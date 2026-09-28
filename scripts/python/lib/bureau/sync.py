@@ -81,7 +81,7 @@ def collect(row: BureauRow, promo: BasePromotion, cards: dict[str, dict[str, str
         if total != row.rollups[h.key]:
             warnings.append(f"{store.rollup_prop(h)} shows ฿{row.rollups[h.key]:,.2f} but the linked "
                             f"rows sum to ฿{total:,.2f}")
-        for tx, existing in store.unlinked_txs(row, h, list(cards[h.key].values()), promo.period_basis):
+        for tx, existing in store.unlinked_txs(row, h, list(cards[h.key].values()), promo):
             if not tx.is_card_purchase:
                 adjustments.append(tx)
                 continue
@@ -90,5 +90,5 @@ def collect(row: BureauRow, promo: BasePromotion, cards: dict[str, dict[str, str
                 write(f"link {line(tx)}", store.link_tx, tx.id, existing, row.id)
                 txs.append(tx)
             elif level == ELIGIBLE or promo.qualifies(tx):
-                candidates.append({"row": line(tx), "level": level, "reason": reason})
+                candidates.append({"id": tx.id, "row": line(tx), "level": level, "reason": reason})
     return txs, candidates, adjustments, warnings

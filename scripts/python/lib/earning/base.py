@@ -8,6 +8,7 @@ migrate gradually, tier lists stay in YAML). What differs between issuers is
 code, one class per family (families.py):
 
   withholds_fuel()   does fuel earn nothing, on both axes?        (UOB, ttb)
+  withholds_top_ups()  do e-wallet top-ups earn nothing, on both axes?  (UOB)
   after_rules()      points-only rules layered on top, in order   (Krungsri family, AEON)
 
 Classification order (unchanged from lib.promotions before 2026-09-28):
@@ -46,6 +47,9 @@ class Card:
     def withholds_fuel(self) -> bool:
         return False
 
+    def withholds_top_ups(self) -> bool:
+        return False
+
     def after_rules(self) -> list[AfterRule]:
         return []
 
@@ -70,6 +74,8 @@ class Card:
                 return _foreign_excluded(None)
             if self.withholds_fuel() and promos.looks_petrol(merchant):
                 return self._fuel_excluded(None)
+            if self.withholds_top_ups() and promos.looks_wallet_top_up(merchant):
+                return self._top_up_excluded(None)
             return Classification(None, None, self.points_default, None, "no-promo")
 
         # Several at once is rare; the most recent start wins.
@@ -99,6 +105,8 @@ class Card:
 
         if self.withholds_fuel() and promos.looks_petrol(merchant):
             return self._fuel_excluded(promo.id)
+        if self.withholds_top_ups() and promos.looks_wallet_top_up(merchant):
+            return self._top_up_excluded(promo.id)
 
         for tier in promo.tiers:
             if promos.matches_tier(merchant, tier):
@@ -111,6 +119,12 @@ class Card:
         return Classification(
             None, f"Petrol station — {self.name} earns no cashback / points at fuel merchants.",
             "×0", promotion_id, "petrol-exclusion")
+
+
+    def _top_up_excluded(self, promotion_id: str | None) -> Classification:
+        return Classification(
+            None, f"E-wallet top-up — {self.name} earns no cashback / points on wallet top-ups.",
+            "×0", promotion_id, "top-up-exclusion")
 
 
 def _foreign_excluded(promotion_id: str | None) -> Classification:

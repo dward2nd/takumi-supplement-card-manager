@@ -29,6 +29,7 @@ from itertools import groupby
 from typing import Any, ClassVar
 
 from .. import notion_blocks as nb
+from ..bill_cycle import cycle_for_month, pattern_for_card
 from ..ledger import PRIMARY_PREFIX
 
 ELIGIBLE, UNCERTAIN, EXCLUDED = "eligible", "uncertain", "excluded"
@@ -46,6 +47,17 @@ _THAI = re.compile(r"[฀-๿]")
 _LATIN_LEDGER_ENTRIES = ("AUTO DEBIT", "RESET ")
 
 
+def cycle_billed_on(end: dt.date) -> dt.date:
+    """The BC date of the statement a cycle quota ending on `end` is billed on.
+
+    A cycle row runs from the previous BC date to the day before this one:
+    spend on the BC date itself lands on the next statement (user, 2026-09-28;
+    UOB's terms say the same, and the ledger agrees), so its End Date is the
+    day before the BC date: `2026M9 — UOB One cb 1%` is 25 Aug–24 Sep, billed 25 Sep.
+    """
+    return end + dt.timedelta(days=1)
+
+
 @dataclass(frozen=True)
 class Tx:
     id: str
@@ -59,6 +71,7 @@ class Tx:
     note: str = ""
     card: str = ""                        # the Card relation's title
     bill_cycle: str | None = None         # `Bill Cycle Date`
+    posted: str | None = None             # `Process Date`: the statement's posting date, once recorded
 
     @property
     def when(self) -> tuple:
@@ -145,7 +158,7 @@ class BasePromotion(ABC):
     headline: ClassVar[str]             # short rate for tracker titles, e.g. "2%"
 
     reward: ClassVar[str]               # CASHBACK or POINTS
-    period_basis: ClassVar[str] = "transaction_date"  # or "bill_cycle": Bureau End = the BC date
+    period_basis: ClassVar[str] = "transaction_date"  # or "bill_cycle": End = the day before the BC date
     name_pattern: ClassVar[str | None] = None         # regex on the Bureau Name; default: the code
 
     rules: ClassVar[tuple[Rule, ...]] = ()
@@ -164,6 +177,70 @@ class BasePromotion(ABC):
         first, last = cls.campaign
         pattern = cls.name_pattern or rf"\b{re.escape(cls.code)}\b"
         return bool(re.search(pattern, bureau_name)) and first <= start and (last is None or end <= last)
+
+    # -- periods ------------------------------------------------------------
+    #
+    # Which rows belong to a Bureau row's period. The defaults read the ledger's
+    # own dates: the transaction date for a calendar month, the Bill Cycle Date
+    # for a statement cycle. A campaign whose bank counts some other way (UOB One
+    # counts by posting date) overrides the three together.
+
+    @property
+    def authoritative_period(self) -> bool:
+        """Does a row outside the period no longer belong to it (so an edit that
+        moves it unlinks it)? A calendar month by transaction date isn't: the bank
+        may count by posting date, and a link across the boundary can be deliberate."""
+        return self.period_basis == "bill_cycle"
+
+    def covers(self, start: dt.date, end: dt.date, tx: Tx) -> bool:
+        """Is `tx` in the Bureau row's period `start`–`end`?"""
+        if self.period_basis == "bill_cycle":
+            return (tx.bill_cycle or "")[:10] == cycle_billed_on(end).isoformat()
+        return start <= tx.day <= end
+
+    def candidate_filter(self, start: dt.date, end: dt.date) -> list[dict]:
+        """A Notion filter (and-ed with card and link) catching every row `covers`
+        might accept — a superset; `covers` decides."""
+        if self.period_basis == "bill_cycle":
+            return [{"property": "Bill Cycle Date", "date": {"equals": cycle_billed_on(end).isoformat()}}]
+        return [{"property": "Transaction Datetime", "date": {"on_or_after": start.isoformat()}},
+                {"property": "Transaction Datetime", "date": {"on_or_before": end.isoformat()}}]
+
+    def period_for(self, tx: Tx) -> tuple[dt.date, dt.date] | None:
+        """The quota period `tx` falls in, or None outside the campaign.
+
+        Default: the calendar month of the transaction date, or — `period_basis`
+        "bill_cycle" — the statement cycle the row is billed on, from the card's
+        previous BC date to the day before the row's own (`cycle_billed_on`).
+        """
+        if self.period_basis == "bill_cycle":
+            if not tx.bill_cycle:
+                return None
+            bc = dt.date.fromisoformat(tx.bill_cycle[:10])
+            y, m = (bc.year, bc.month - 1) if bc.month > 1 else (bc.year - 1, 12)
+            previous, _ = cycle_for_month(pattern_for_card(tx.card), y, m)
+            return self._clip(previous, bc - dt.timedelta(days=1))
+        return self._month(tx.day)
+
+    def _month(self, day: dt.date) -> tuple[dt.date, dt.date] | None:
+        """`day`'s calendar month, clipped to the campaign; None when `day` is outside it."""
+        first, last = self.campaign
+        if day < first or (last is not None and day > last):
+            return None
+        start = day.replace(day=1)
+        return self._clip(start, (start + dt.timedelta(days=32)).replace(day=1) - dt.timedelta(days=1))
+
+    def _clip(self, start: dt.date, end: dt.date) -> tuple[dt.date, dt.date] | None:
+        first, last = self.campaign
+        start, end = max(start, first), end if last is None else min(end, last)
+        return (start, end) if start <= end else None
+
+    def row_name(self, start: dt.date, end: dt.date) -> str:
+        """The Bureau Name for a period: `2026M9 — NW3 cb 2%`, `2026M9 — UOB World ×5`.
+        The month is the BC date's for a cycle quota, else the period's first."""
+        month = cycle_billed_on(end) if self.period_basis == "bill_cycle" else start
+        kind = " cb" if self.reward == CASHBACK else ""
+        return f"{month.year}M{month.month} — {self.code}{kind} {self.headline}"
 
     # -- rules ------------------------------------------------------------
 

@@ -26,7 +26,12 @@ class FuelWithheldCard(Card):
 
 
 class UOBCard(FuelWithheldCard):
-    """UOB One, World, Premier, Makro (petrol withheld: confirmed per card, 2026-05/08)."""
+    """UOB One, World, Premier, Makro (petrol withheld: confirmed per card, 2026-05/08).
+    E-wallet top-ups earn nothing either — UOB's terms exclude them for points and
+    cashback (user, 2026-09-28, on `2C2P *SHOPEEPAY (TOP …` rows)."""
+
+    def withholds_top_ups(self) -> bool:
+        return True
 
 
 class TTBCard(FuelWithheldCard):

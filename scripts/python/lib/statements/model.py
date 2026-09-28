@@ -33,6 +33,7 @@ class StatementLine:
     amount: float  # signed THB
     kind: str  # charge | fee | credit | payment
     note: str | None = None  # e.g. the original foreign amount, or why a line is undated
+    posted: str | None = None  # posting date, ISO, when the issuer prints one (UOB's POST column)
 
     def __post_init__(self) -> None:
         if self.kind not in LINE_KINDS:

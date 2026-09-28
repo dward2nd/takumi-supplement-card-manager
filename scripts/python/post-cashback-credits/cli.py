@@ -31,6 +31,7 @@ Writes a JSON envelope to stdout:
     "bill_cycle": "2026-05-25", "due_date": "2026-06-15",
     "installments": {...},
     "tier_totals": {"0.01": 6061.40, "0.05": 2048.00},
+    "counted_next_cycle": [...],   // UOB One: rows posted on the statement date (their cashback moves on)
     "plan":    [ {name, amount, date, note}, ... ],        // --dry-run
     "created": [ {name, amount, date, bill_cycle, id}, ... ]
   }
@@ -71,6 +72,8 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         "installments": plan.detail.get("installments"),
         "tier_totals": plan.detail.get("tier_totals"),
     }
+    if plan.detail.get("counted_next_cycle"):
+        out["counted_next_cycle"] = plan.detail["counted_next_cycle"]
     if dry_run:
         return out | {"dry_run": True, "plan": [
             {"name": r.name, "amount": float(r.amount), "date": r.date, "note": r.note} for r in plan.rows]}

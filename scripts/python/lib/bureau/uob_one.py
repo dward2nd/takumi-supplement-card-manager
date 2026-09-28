@@ -23,24 +23,60 @@ a row is marked `% cb` 1%, and the 1% quota counts it from that mark.
 Which tier a row falls in is not decided here: it comes from the card's
 promotion YAML (`scripts/repositories/promotions/uob-one-2026.yaml`) through
 `lib.promotions.classify`, the same classifier /add-transaction uses. This
-module adds only what the classifier can't see: the pooled caps.
+module adds only what the classifier can't see: the pooled caps, and which
+period a row counts in.
+
+**UOB counts by posting date, and rounds per line** (reproduced to the satang
+from the Aug/Sep 2026 statements; user, 2026-09-28: the household's credits
+follow the same rules):
+  - 1%: rows posted from the previous statement date to the day before this
+    one; spend posted *on* the statement date counts in the next cycle.
+    Installment terms count on the cycle they're billed on.
+  - 10%/5%: rows posted from the previous month's last day to the day before
+    this month's last day; spend posted on a month's last day counts next month.
+The posting date is the row's `Process Date` (stamped by /record-statement
+from the statement's POST column), or, until the statement comes, the next
+working day (`lib.bill_cycle.posting_date`).
 """
 
 from __future__ import annotations
 
 import datetime as dt
 import re
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, ClassVar
 
-from .. import promotions
-from .base import Rule, Tx, TxCredit
+from .. import bill_cycle, promotions
+from .base import SATANG, Rule, Tx, TxCredit, cycle_billed_on
 from .capped import CreditCapPromotion
 
 # Makro in-store earns nothing on UOB One (bank's 1% exclusion list); the YAML's
 # catch-all 1% tier doesn't know that. Makro PRO online (`MAKRO.PRO`) earns.
 _MAKRO_IN_STORE = re.compile(r"^MAKRO_")
 BASE_RATE = Decimal("0.01")
+_DAY = dt.timedelta(days=1)
+
+
+def posted_on(tx: Tx) -> dt.date:
+    """When the row posted: its `Process Date`, else the issuer's inferred posting."""
+    return bill_cycle.posting_date(tx.card or "UOB One", tx.day, tx.name, tx.posted)
+
+
+def in_statement_cycle(tx: Tx, previous_bc: dt.date, bc: dt.date) -> bool:
+    """Does `tx` count in the cycle closing on `bc`? Posted from the previous
+    statement date up to the day before this one; installment terms (which post
+    on the statement date as part of it) by the cycle they're billed on. Shared
+    by the 1% quota and the household's per-cycle credits (lib.crediting.uob_one)."""
+    if promotions.is_installment(tx.name):
+        return (tx.bill_cycle or "")[:10] == bc.isoformat()
+    return previous_bc <= posted_on(tx) < bc
+
+
+def in_month(tx: Tx, month_start: dt.date) -> bool:
+    """Does `tx` count in the month starting `month_start`? Posted from the previous
+    month's last day up to the day before this month's last day."""
+    last = (month_start + dt.timedelta(days=32)).replace(day=1) - _DAY
+    return month_start - _DAY <= posted_on(tx) < last
 
 
 class _UOBOne(CreditCapPromotion):
@@ -55,7 +91,7 @@ class _UOBOne(CreditCapPromotion):
     ladder_header = ("Where", "Cashback")
 
     def rate(self, tx: Tx) -> Decimal | None:
-        if _MAKRO_IN_STORE.match(tx.merchant):
+        if _MAKRO_IN_STORE.match(tx.merchant) or promotions.looks_wallet_top_up(tx.merchant):
             return None
         tier = self._tier(tx)
         return tier if tier in self.tiers else None
@@ -63,6 +99,14 @@ class _UOBOne(CreditCapPromotion):
     def _tier(self, tx: Tx) -> Decimal | None:
         c = promotions.classify(self.cards[0], tx.day, tx.name)
         return None if c.cashback_percent is None else Decimal(str(c.cashback_percent))
+
+    # UOB counts by posting date, so a row's place is settled by it: an edit or a
+    # statement that moves it unlinks it from the old period.
+    authoritative_period = True
+
+    def line_credit(self, tx: Tx, rate: Decimal) -> Decimal:
+        """UOB rounds each line's cashback to the satang (half up)."""
+        return (rate * tx.amount).quantize(SATANG, rounding=ROUND_HALF_UP)
 
     def adjustment_for(self, holder: str, adjustments: list[Tx]) -> Decimal:
         """A carry-forward leg carrying `% cb` in this quota's tiers moves cashback
@@ -79,6 +123,19 @@ class UOBOneBonus(_UOBOne):
     headline = "10%/5%"
     tiers = frozenset({Decimal("0.1"), Decimal("0.05")})
     cap = Decimal(500)
+
+    # The Bureau row keeps the calendar month's dates (1–30 Sep); the rows in it
+    # are those *posted* 31 Aug–29 Sep.
+    def covers(self, start: dt.date, end: dt.date, tx: Tx) -> bool:
+        return in_month(tx, start.replace(day=1))
+
+    def candidate_filter(self, start: dt.date, end: dt.date) -> list[dict]:
+        # Posting trails the transaction by days, never precedes it.
+        return [{"property": "Transaction Datetime", "date": {"on_or_after": (start - 10 * _DAY).isoformat()}},
+                {"property": "Transaction Datetime", "date": {"on_or_before": end.isoformat()}}]
+
+    def period_for(self, tx: Tx) -> tuple[dt.date, dt.date] | None:
+        return self._month(posted_on(tx) + _DAY)   # a month's last day belongs to the next
 
     def expected(self, r: TxCredit) -> dict[str, Any]:
         """Inside the ฿500: the row's own rate. Wholly past it: 1% (the bank drops
@@ -118,6 +175,24 @@ class UOBOneBase(_UOBOne):
     period_basis = "bill_cycle"
     tiers = frozenset({BASE_RATE})
     cap = Decimal(2_000)
+
+    # Start = the previous statement date, End = the day before this one: the
+    # Bureau row's dates are the posting window itself.
+    def covers(self, start: dt.date, end: dt.date, tx: Tx) -> bool:
+        return in_statement_cycle(tx, start, cycle_billed_on(end))
+
+    def candidate_filter(self, start: dt.date, end: dt.date) -> list[dict]:
+        # Billed on this cycle, or on the last one but posted on its statement date.
+        return [{"or": [{"property": "Bill Cycle Date", "date": {"equals": start.isoformat()}},
+                        {"property": "Bill Cycle Date", "date": {"equals": cycle_billed_on(end).isoformat()}}]}]
+
+    def period_for(self, tx: Tx) -> tuple[dt.date, dt.date] | None:
+        if promotions.is_installment(tx.name):
+            return super().period_for(tx)
+        pattern = bill_cycle.pattern_for_card(tx.card or "UOB One")
+        bc, _ = pattern.active(posted_on(tx) + _DAY)   # the first statement date after it posted
+        previous, _ = pattern.closed(bc)
+        return self._clip(previous, bc - _DAY)
 
     def rate(self, tx: Tx) -> Decimal | None:
         """1% rows, plus 10%/5% rows that ran past the month's ฿500 and are marked

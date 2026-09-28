@@ -9,7 +9,7 @@ Each row in any Transactions DB has **four** date fields, modelled as independen
 | Field                  | What it captures                                                |
 |------------------------|-----------------------------------------------------------------|
 | `Transaction Datetime` | When the holder physically swiped the card (datetime, with time). |
-| `Process Date`         | When the bank posted/cleared the charge. Often later than swipe.|
+| `Process Date`         | When the bank posted/cleared the charge. Often later than swipe. Written only from a statement's POST column, by `/record-statement` (UOB so far); until then it's inferred, never stored (see below).|
 | `Bill Cycle Date`      | The statement (cycle) cut-off date this transaction lands on.   |
 | `Due Date`             | The date the resulting bill is due to be paid.                  |
 
@@ -56,3 +56,14 @@ All four are first-class columns in the UI (not buried behind tabs as in Notion'
 
 - [[payment-lifecycle]] — the orthogonal status axis.
 - [[../future-app/product-shape]] — phase-2 product spec.
+
+## Posting dates (`Process Date`)
+
+UOB One's cashback periods count by **posting date** ([[../promotions/uob-one-2026|UOB One 2026]]), so the ledger now keeps it (user, 2026-09-28):
+
+- **From the statement.** `/record-statement` writes each line's POST date into `Process Date`, on every row the line accounts for: a friend's row, a `[บัตรหลัก]` share, Takumi's row or remainder. The UOB parser reads the POST column; other issuers' parsers don't yet.
+- **Before the statement comes, inferred.** The date is worked out when needed and never written, so an actual posting date is always a statement's (`BillCycle.inferred_posting` / `lib.bill_cycle.posting_date`):
+  - **UOB cards:** the next working day. UOB doesn't post on weekends or Thai public holidays: a 22 Oct 2026 charge posts 26 Oct, because 23 Oct is Chulalongkorn Day.
+  - **Other issuers:** the next day. They post on weekends and holidays.
+  - **TrueMoney (`TMN …`) and Agoda charges:** the next working day on any card.
+

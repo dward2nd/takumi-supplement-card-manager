@@ -63,6 +63,8 @@ class AccountPlan:
     missing: list[dict] = field(default_factory=list)  # supplement lines absent from the holder's DB
     not_on_statement: list[dict] = field(default_factory=list)  # rows no statement line accounts for
     payments: list[StatementLine] = field(default_factory=list)
+    # Rows a line accounts for whose `Process Date` differs from the line's posting date.
+    stamps: list[dict] = field(default_factory=list)
     split: dict[str, float] = field(default_factory=dict)  # holder → attributed amount
     carried: float = 0.0  # previous balance left after this statement's payments
     warnings: list[str] = field(default_factory=list)
@@ -72,6 +74,15 @@ class AccountPlan:
         extra = sum(r["amount"] or 0 for r in self.not_on_statement)
         missing = sum(m["amount"] for m in self.missing)
         return round(extra - missing, 2)
+
+
+def _stamp(plan: AccountPlan, holder: str, row: dict, line: StatementLine) -> None:
+    """Note the posting date `line` gives `row`, when the statement prints one and
+    the row doesn't carry it yet."""
+    if line.posted and (row.get("process_date") or "")[:10] != line.posted:
+        plan.stamps.append({"holder": holder, "id": row["id"], "posted": line.posted,
+                            "date": row["transaction_date"], "name": row["name"],
+                            "links": row.get("promotion_ids") or []})
 
 
 def is_statement_line_row(row: dict, holder: str) -> bool:
@@ -194,6 +205,7 @@ def plan_account(
                 plan.missing.append({"holder": holder, "number": section.number, **_line(line)})
                 continue
             plan.recorded += 1
+            _stamp(plan, holder, row, line)
             if row["transaction_date"] != line.date:
                 plan.near_matches.append({"holder": holder, "row_id": row["id"], "row_date": row["transaction_date"], **_line(line)})
             if row["name"].startswith(PRIMARY_PREFIX.strip()):
@@ -219,11 +231,13 @@ def plan_account(
                 continue
             credit(owner, line.amount)
             plan.recorded += 1
+            _stamp(plan, owner, row, line)
             if near:
                 plan.near_matches.append({"holder": owner, "row_id": row["id"], "row_date": row["transaction_date"], **_line(line)})
             if owner != PRIMARY and not row["name"].startswith(PRIMARY_PREFIX.strip()):
                 plan.renames.append(
-                    {"holder": owner, "id": row["id"], "old": row["name"], "new": PRIMARY_PREFIX + row["name"], **_line(line)}
+                    {"holder": owner, "id": row["id"], "old": row["name"], "new": PRIMARY_PREFIX + row["name"],
+                     "links": row.get("promotion_ids") or [], **_line(line)}
                 )
         primary_lines = remaining
 
@@ -231,6 +245,7 @@ def plan_account(
         claimed = _claim_shares(line, {h: pools[h] for h in friends})
         for h, r in claimed:
             credit(h, r["amount"])
+            _stamp(plan, h, r, line)
         rest = round(line.amount - sum(r["amount"] for _, r in claimed), 2)
         if claimed:
             plan.shares.append(
@@ -243,10 +258,11 @@ def plan_account(
             existing = _take(pools[PRIMARY], line.date, rest, line.name, near=True)
             if existing is not None:
                 plan.recorded += 1
+                _stamp(plan, PRIMARY, existing, line)
                 continue
             shares = ", ".join(f"{h} ฿{r['amount']:,.2f}" for h, r in claimed)
             line = StatementLine(
-                date=line.date, name=line.name, amount=rest, kind=line.kind,
+                date=line.date, name=line.name, amount=rest, kind=line.kind, posted=line.posted,
                 note=f"Takumi's remainder of the ฿{line.amount:,.2f} statement line; friends' share(s): {shares}."
                 + (f" {line.note}" if line.note else ""),
             )

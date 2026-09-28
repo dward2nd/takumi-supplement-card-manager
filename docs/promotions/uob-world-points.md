@@ -32,7 +32,7 @@ Historical rows confirm both tiers in the user's own words — `UOB World defaul
 
 ## The ฿20,000 per-cycle quota — enforced by the Promotion Bureau
 
-Settled with the user on 2026-09-28, and enforced since then by the [[../concepts/promotion-bureau|Promotion Bureau]] (`UOBWorldBonus` in `scripts/python/lib/bureau/uob_world.py`, one Bureau row per cycle, e.g. `2026M9 — UOB World ×5` for 26 Aug–25 Sep):
+Settled with the user on 2026-09-28, and enforced since then by the [[../concepts/promotion-bureau|Promotion Bureau]] (`UOBWorldBonus` in `scripts/python/lib/bureau/uob_world.py`, one Bureau row per cycle, e.g. `2026M9 — UOB World ×5` for 25 Aug–24 Sep, billed 25 Sep):
 
 - **Per account, not per card**: Takumi's principal and Baiboon's supplement share one ฿20,000.
 - **Every transaction counts toward it**, bonus category or not, excluded or not (foreign-in-THB included). The bank's page words the ฿20,000 as a cap on bonus-category spend; the household's observation wins.

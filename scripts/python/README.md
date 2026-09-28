@@ -23,7 +23,8 @@ scripts/python/
 │   ├── earning/                     # Card, one class per card family (UOBCard, KrungsriFamilyCard, AEONCard …)
 │   ├── bill_cycle.py                # BillCycle, one class per issuer's cycle rule
 │   ├── crediting/                   # Crediting, one class per card that gets credit rows (UOBOneCrediting)
-│   ├── bureau/                      # Promotion Bureau: payout shapes (ladder, credit cap, points) + campaigns
+│   ├── bureau/                      # Promotion Bureau: payout shapes (ladder, credit cap, points) + campaigns;
+│   │                                #   runner = one row's sync, follow = re-sync after a ledger write
 │   └── statements/                  # StatementParser, one class per issuer; attribution; recording
 └── <skill-name>/                    # one folder per skill, dir name = skill name
     ├── __init__.py

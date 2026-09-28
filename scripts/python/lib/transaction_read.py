@@ -68,6 +68,7 @@ def project_transaction(page: dict) -> dict[str, Any]:
         "credit_return": _checkbox(props, "Credit Return"),
         "note": _rich_text(props, "Note"),
         "card_ids": _relation_ids(props, "Card"),
+        "promotion_ids": _relation_ids(props, "Promotion"),  # Promotion Bureau rows it's linked to
         "cashback_percent": _number(props, "% cb"),
         "cashback": _formula_number(props, "cashback"),
     }

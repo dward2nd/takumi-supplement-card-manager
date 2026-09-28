@@ -15,8 +15,12 @@ A quota period is the window a bank counts a limit over (user, 2026-09-28). Even
 | The bank counts per… | `<month>` is… | Example |
 |---|---|---|
 | calendar month | that month | `2026M9 — NW3 cb 2%` (1–30 Sep) |
-| statement cycle | the month of the cycle's closing (BC) date | `2026M9 — UOB One cb 1%` (26 Aug–25 Sep) |
+| statement cycle | the month of the cycle's closing (BC) date | `2026M9 — UOB One cb 1%` (25 Aug–24 Sep, billed 25 Sep) |
 | the whole campaign | the campaign's first month | — |
+
+Which rows belong to a period is each campaign class's call (`covers`, `candidate_filter`, `period_for` on `BasePromotion`). The defaults read the transaction date (calendar month) or the `Bill Cycle Date` (cycle). **UOB One overrides them with the bank's posting-date rules** (see [[../promotions/uob-one-2026]]): 1% by posting date within the cycle, 10%/5% by posting date within the month, each with the closing day rolling forward. Posting dates come from `Process Date`, or are inferred until the statement comes ([[billing-cycle#Posting dates (`Process Date`)]]).
+
+A cycle row runs from the previous BC date to the **day before** its BC date. Spend on the BC date itself lands on the next statement (user, 2026-09-28). UOB's terms say the same, and every BC-day UOB purchase in the ledger since 2025 was billed to the next cycle. Rows are still sorted into a cycle row by the `Bill Cycle Date` they carry (End Date + 1 day), so late postings count where the bank billed them.
 
 One campaign can have two quotas with different periods: UOB One caps its 10%/5% tiers per calendar month and its 1% per statement cycle, so it has two rows a month.
 
@@ -50,6 +54,23 @@ Decided by the user 2026-09-28:
 Worked case, September 2026 (reconciled): pooled ฿36,803.92 → 3 steps → ฿600 on the first ฿30,000. The step ends on 2026-09-24 with ฿176.08 of room left. By the times the user looked up, `TMN*PROMPTPAY30` ฿35 (10:56) and `DUMPLINGS` ฿10 (18:47) come first. Hai Di Lao (21:21; Takumi ฿1,562.67 + Baiboon `[บัตรหลัก]` ฿781.33, one charge) takes the last ฿131.08, pro rata: Takumi ฿87.39, Baiboon ฿43.69.
 
 This replaced the July/August convention, in which each friend got a flat 2% of their own spend and Takumi kept the remainder (see the note on Takumi's `เครดิตเงินคืน NW3_1JUL26-31JUL26` row).
+
+## Kept in step with the ledger
+
+Every write to a ledger re-syncs the Bureau (user, 2026-09-28). [[../../.claude/skills/add-transaction/SKILL|/add-transaction]], [[../../.claude/skills/update-transaction/SKILL|/update-transaction]] and [[../../.claude/skills/record-statement/SKILL|/record-statement]] hand the rows they wrote to `lib.bureau.follow`, which:
+
+1. **Places each row.** For every campaign on the row's card, it finds the quota period the row falls in (`BasePromotion.period_for`: the calendar month of the transaction date, or the cycle billed on the row's `Bill Cycle Date`) and that period's Bureau row. It also takes the Bureau rows the row is already linked to, so an edit that moves a row re-syncs where it was counted.
+2. **Re-syncs** each of those rows the way [[../../.claude/skills/sync-promotion/SKILL|/sync-promotion]] does, with `link_candidates`. Eligible rows in the period are linked, the credit is split again, and `เงินคืนรวม` / `เงินคืนส่วน<name>` and the trackers are updated.
+3. **Applies the split to the rows.** Every linked row's `% cb`, multiplier and `ใช้คะแนน` is set to what the split expects, including rows the writer didn't touch. A backdated row can push someone else's row past a cap, and that row's `% cb` has to follow, because it feeds the other quota. A UOB One 10%/5% row past the month's ฿500 is marked 1%, which is what makes the cycle's 1% quota count it. So the rows it fixes are followed again, until a pass fixes nothing. If two quotas want different values for one row (possible only when both UOB One caps are exceeded), it stops after one reversal and warns instead of flipping the value back and forth.
+
+An edit that moves a row onto another statement cycle, or onto another card, **unlinks** it from the Bureau row it no longer belongs to, and that row is re-synced without it. The `Bill Cycle Date` is where the bank billed it. A calendar-month row that's dated outside its month is only warned about, because the bank counts those by posting date, and a link across a month boundary can be deliberate. Example, 2026-09-28: Nuta's `TMN 7-11` ฿137 dated 25 Sep was moved to the 22 Oct cycle. It left `2026M9 — UOB One cb 1%` but stayed in EPW538 and the 10%/5% month, which both count by transaction date.
+
+What it doesn't do:
+
+- **Create Bureau rows.** A period with no row is reported under `missing`, with the name and dates to pass to `/sync-promotion` (the name is the class's: `<year>M<month> — <code> cb <headline>`, or without `cb` for points). Periods before a campaign's first Bureau row are untracked and aren't reported.
+- **Honour hand edits of `% cb` on linked rows.** The split owns those fields, and the next sync puts them back. An exception that should last goes into the campaign class as a `Rule`. A deliberate unlink doesn't last either: the next sync re-links an eligible row.
+
+A Bureau row's dates must match its period. The follow-up finds a cycle row by End Date + 1 day = the row's `Bill Cycle Date`. A row whose dates are off, but whose name has the right `<year>M<month>`, is still re-synced for its linked rows, with a warning that new rows can't be linked to it.
 
 ## Bureau vs. bank
 

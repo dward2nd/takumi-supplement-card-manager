@@ -37,7 +37,8 @@ JSON spec — `updates` is required and must be non-empty:
     { "id": "<page-uuid>", "cashback_percent": 0.00, "note": "Foreign merchant (US) charged in THB — no points/cashback on Thai-issued cards." },
     { "id": "<page-uuid>", "multiplier": "×0" },
     { "id": "<page-uuid>", "properties": { "Note": { "rich_text": [{ "text": { "content": "raw escape hatch" } }] } } }
-  ]
+  ],
+  "sync_promotions": true
 }
 ```
 
@@ -52,7 +53,13 @@ Recognized convenience keys per update entry:
 | `bill_cycle` + `due_date` | `Bill Cycle Date` / `Due Date` | Re-cycle a row — both **backdate** (move to a closed cycle) and **foredate** (move to an upcoming cycle) are supported. ISO date strings. Must be passed **together**; one without the other is a spec error. Use the issuer's pattern from [[../../docs/concepts/bill-cycle-patterns]] to pick a consistent pair. |
 | `properties`        | (raw)           | Escape hatch: merge an arbitrary Notion `properties` payload. Use sparingly — prefer a convenience key. |
 
-Output: `{ "count": N, "updated": [ { "id": "<page-id>", "fields": [<prop names set>] }, ... ] }`. Surface the count and field list back to the user.
+Output: `{ "count": N, "updated": [ { "id": "<page-id>", "fields": [<prop names set>] }, ... ], "promotions": {...} }`. Surface the count and field list back to the user.
+
+**The Promotion Bureau follows automatically** (`sync_promotions`, default `true`; user, 2026-09-28). After patching, the CLI reads the rows back. It then re-syncs every [[../../../docs/databases/promotion-bureau|Bureau]] row they count toward: the rows they're linked to, plus the quota period their date or bill cycle now falls in. Eligible rows get linked, the split and trackers are redone, and **linked rows' `% cb` / multiplier / `ใช้คะแนน` are set to what the split expects**. `promotions` has the same shape as [[../add-transaction/SKILL.md|/add-transaction]]'s: `synced`, `fixed`, `missing`, `warnings`.
+
+This means **a value you just wrote can be put back.** For example, setting a UOB One row to 5% after the month's ฿500 has run out comes back as 1%. When `fixed` reverses the user's own edit, say so and explain the quota. A lasting exception belongs in the campaign class (a `Rule` in `scripts/python/lib/bureau/<campaign>.py`), not in `% cb`. The sync re-links eligible rows and re-applies the split every time, so hand edits don't stick. Moving a linked row to another statement cycle (`bill_cycle`) or card unlinks it from the old cycle row, which is re-synced without it (`promotions.unlinked`). A calendar-month link on a row dated outside that month only gets a warning.
+
+`--dry-run` only names the Bureau rows it would re-sync, as the rows stand before the patch.
 
 ## What the user supplies
 
@@ -93,7 +100,7 @@ If the user explicitly asks to edit `Name` anyway, surface the rationale ("this'
 2. **Apply policy if classifying tiers.** If the user dropped a batch like "set these to 5%, these to 1%", you do the tier classification (see [[../add-transaction/SKILL.md|add-transaction]] *Card-specific earning policies*) and produce the raw fractions yourself.
 3. **Build the JSON spec.** One entry per page.
 4. **Run with `--dry-run` first** if the batch is large (≥ 5 entries) or if any entry uses the `properties` escape hatch. Show the resolved payload to the user, then re-run without `--dry-run`.
-5. **Report back** with the count and a compact list `{id → fields_set}`. Don't dump full URLs unless asked.
+5. **Report back** with the count and a compact list `{id → fields_set}`. Don't dump full URLs unless asked. From `promotions`, report the fields it `fixed` (especially any that undo this update), changed shares, `missing` periods, and `warnings`. An `error` key means the patch is written but the sync failed: re-run [[../sync-promotion/SKILL.md|/sync-promotion]].
 
 ## What this skill does NOT do
 

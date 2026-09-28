@@ -31,6 +31,11 @@ class CreditCapPromotion(CashbackPromotion):
     def rate(self, tx: Tx) -> Decimal | None:
         """The row's rate before the cap, or None when it earns nothing here."""
 
+    def line_credit(self, tx: Tx, rate: Decimal) -> Decimal:
+        """What one row earns before the cap. Unrounded by default; a bank that
+        rounds per line (UOB) overrides this."""
+        return rate * tx.amount
+
     def qualifies(self, tx: Tx) -> bool:
         return self.rate(tx) is not None
 
@@ -38,7 +43,7 @@ class CreditCapPromotion(CashbackPromotion):
         left = [self.cap]
 
         def take(lo: Decimal, hi: Decimal, grp: list[Tx]) -> list[TxCredit]:
-            want = {t.id: (self.rate(t) or Decimal(0)) * t.amount for t in grp}
+            want = {t.id: self.line_credit(t, self.rate(t) or Decimal(0)) for t in grp}
             total = sum(want.values(), Decimal(0))
             granted = min(left[0], total)
             left[0] -= granted

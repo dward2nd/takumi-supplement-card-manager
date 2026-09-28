@@ -7,7 +7,13 @@ opens with its heading (`UOB ONE`) on the line before its primary card number,
 and each further card number under it opens a supplement section. Lines read
 `POST TRANS DESCRIPTION AMOUNT [CR]`, dated `DD MON` without a year;
 installment lines repeat the amount (`373.00 373.00`). The product closes with
-`TOTAL BALANCE - <PRODUCT> <amount>`.
+`TOTAL BALANCE - <PRODUCT> <amount>`. The POST date is kept (`posted`): UOB
+One's cashback periods count by it. A foreign charge's original amount is
+glued to its description (`… SAN FRANCISCO USD107.00`); it moves to the note.
+
+The printed STATEMENT DATE can sit off the cycle (27 Sep 2026 for the cycle
+that closed 25 Sep): the parser keeps what's printed, and /record-statement
+maps it onto the card's cycle (`lib.statements.record.ledger_cycle`).
 """
 
 from __future__ import annotations
@@ -23,9 +29,13 @@ _CARD = re.compile(r"^\d{4} \d\dXX XXXX (\d{4})$")
 _HEADING = re.compile(r"^UOB [A-Z ]+$")
 _PREV = re.compile(r"^PREVIOUS BALANCE (-?[\d,]+\.\d\d)( CR)?$")
 _LINE = re.compile(
-    r"^\d\d [A-Z]{3} (\d\d) ([A-Z]{3}) (.+?) ([\d,]+\.\d\d)(?: (CR)| [\d,]+\.\d\d)?$"
+    r"^(\d\d) ([A-Z]{3}) (\d\d) ([A-Z]{3}) (.+?) ([\d,]+\.\d\d)(?: (CR)| [\d,]+\.\d\d)?$"
 )
 _TOTAL = re.compile(r"^TOTAL BALANCE - (.+?) (-?[\d,]+\.\d\d)( CR)?$")
+# A foreign charge prints its original amount glued to the description:
+# `ANTHROPIC* CLAUDE SUB SAN FRANCISCO USD107.00 3,669.72` (seen 27 Sep 2026).
+_FOREIGN = re.compile(r"^(.*?) ((?:USD|EUR|GBP|JPY|CNY|HKD|MOP|TWD|KRW|SGD|MYR|VND|AUD|NZD|CAD|CHF|INR|IDR|PHP))"
+                      r"([\d,]+\.\d\d)$")
 
 
 def _iso(day: str, mon: str, year: int) -> str:
@@ -82,14 +92,18 @@ def parse(text: str) -> Statement:
             product, sections = None, []
             continue
         if (m := _LINE.match(ln)) and sections:
-            name, credit = m.group(3), bool(m.group(5))
-            amount = parse_amount(m.group(4))
+            name, credit, note = m.group(5), bool(m.group(7)), None
+            if (f := _FOREIGN.match(name)):
+                name, note = f.group(1), f"Original amount {f.group(3)} {f.group(2)}."
+            amount = parse_amount(m.group(6))
             sections[-1]["lines"].append(
                 StatementLine(
-                    date=_iso(m.group(1), m.group(2), year_for(m.group(2))),
+                    date=_iso(m.group(3), m.group(4), year_for(m.group(4))),
                     name=name,
                     amount=-amount if credit else amount,
                     kind=_kind(name, credit),
+                    note=note,
+                    posted=_iso(m.group(1), m.group(2), year_for(m.group(2))),
                 )
             )
 

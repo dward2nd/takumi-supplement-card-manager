@@ -16,7 +16,7 @@ One row per **quota period** (e.g. `2026M9 — NW3 cb 2%`), linking every holder
 | Property | Type | Meaning |
 |---|---|---|
 | `Name` | title | `<YYYY>M<m> — <campaign>`; the month rule is in [[../concepts/promotion-bureau]]. The name picks the `BasePromotion` class |
-| `Start Date` / `End Date` | date | the period: a calendar month, or a statement cycle (End = the BC date) |
+| `Start Date` / `End Date` | date | the period: a calendar month, or a statement cycle — the previous BC date to the day before the BC date, since spend on the BC date lands on the next statement (user, 2026-09-28) |
 | `รายการใช้จ่ายจาก<name>` | relation (two-way) | the holder's linked Transactions rows; the synced side is `Promotion` on each Transactions DS |
 | `ยอดจาก<name>` | rollup | Σ `ยอดชำระ` (amount paid) of those rows |
 | `ยอดจ่ายรวม` | formula | `ยอดจากเว็บ + ยอดจากนุตา + ยอดจากใบบุญ` — pooled spend |
@@ -32,9 +32,9 @@ The page **body** carries the campaign summary: ladder, what counts, exclusions,
 | Row | Class | Notes |
 |---|---|---|
 | `2026M9 — NW3 cb 2%` | `NW3Promotion` | [[../promotions/first-choice-nw3]]; synced 2026-09-28 |
-| `2026M9 — UOB World ×5` | `UOBWorldBonus` | points quota, cycle 26 Aug–25 Sep; [[../promotions/uob-world-points]] |
+| `2026M9 — UOB World ×5` | `UOBWorldBonus` | points quota, cycle 25 Aug–24 Sep (billed 25 Sep); [[../promotions/uob-world-points]] |
 | `2026M9 — UOB One cb 10%/5%` | `UOBOneBonus` | created 2026-09-28; ฿500 cap, calendar Sep; [[../promotions/uob-one-2026]] |
-| `2026M9 — UOB One cb 1%` | `UOBOneBase` | created 2026-09-28; ฿2,000 cap, cycle 26 Aug–25 Sep |
+| `2026M9 — UOB One cb 1%` | `UOBOneBase` | created 2026-09-28; ฿2,000 cap, cycle 25 Aug–24 Sep (billed 25 Sep) |
 | `2026M9 — EPW538 cb 2%` | `EPW538Promotion` | created 2026-09-28; every UOB card; [[../promotions/uob-epw538]] |
 
 ## Quirks

@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import calendar
 import datetime as dt
+import re
 from abc import ABC, abstractmethod
 from typing import ClassVar
 
@@ -37,6 +38,18 @@ _TH_HOLIDAYS = holidays.country_holidays("TH")
 
 def _is_workday(d: dt.date) -> bool:
     return d.weekday() < 5 and d not in _TH_HOLIDAYS
+
+
+def _next_workday(d: dt.date) -> dt.date:
+    d += dt.timedelta(days=1)
+    while not _is_workday(d):
+        d += dt.timedelta(days=1)
+    return d
+
+
+# Merchants whose charges post on the next working day on any card (user, 2026-09-28):
+# TrueMoney (`TMN 7-11`, `TMN*…`) and Agoda. A household prefix (`[บัตรหลัก] `) is skipped.
+_POSTS_ON_WORKDAYS = re.compile(r"^(?:\[[^\]]*\]\s*)*(?:TMN[ *]|.*AGODA)", re.IGNORECASE)
 
 
 def _add_months(year: int, month: int, delta: int) -> tuple[int, int]:
@@ -85,6 +98,25 @@ class BillCycle(ABC):
         if today <= bc:
             return bc, dd
         return self.cycle(*_add_months(today.year, today.month, 1))
+
+    def nearest(self, d: dt.date, within: int) -> tuple[dt.date, dt.date] | None:
+        """The cycle whose BC date is closest to `d`, if no more than `within` days
+        away — how a statement's printed date maps onto the ledger's cycle."""
+        cands = [self.cycle(*_add_months(d.year, d.month, k)) for k in (-1, 0, 1)]
+        bc, dd = min(cands, key=lambda c: abs((c[0] - d).days))
+        return (bc, dd) if abs((bc - d).days) <= within else None
+
+    def inferred_posting(self, tx_date: dt.date, merchant: str) -> dt.date:
+        """When a charge not yet on a statement will likely post (user, 2026-09-28).
+
+        Most issuers post every day, weekends and holidays included, so: the next
+        day. TrueMoney and Agoda charges post the next working day whatever the
+        card. A statement's POST column, once recorded as `Process Date`, replaces
+        this guess.
+        """
+        if _POSTS_ON_WORKDAYS.search(merchant.strip()):
+            return _next_workday(tx_date)
+        return tx_date + dt.timedelta(days=1)
 
     def closed(self, today: dt.date) -> tuple[dt.date, dt.date]:
         """The cycle whose BC is the last one strictly before `today`."""
@@ -171,6 +203,10 @@ class UOBCycle(DueAfterDays):
             d += dt.timedelta(days=1)
         return d
 
+    def inferred_posting(self, tx_date: dt.date, merchant: str) -> dt.date:
+        """UOB posts on working days only: the next working day, for every merchant."""
+        return _next_workday(tx_date)
+
 
 PATTERNS: dict[str, BillCycle] = {c.key: c() for c in (
     KrungsriCycle, KTCCycle, TTBCycle, AEONCycle, KBankCycle, LotusCycle, SPayLaterCycle, GrabCycle, UOBCycle)}
@@ -224,6 +260,14 @@ def most_recent_closed_cycle(card_name: str, today: dt.date | None = None) -> tu
     cycle that just closed rather than the one currently accumulating.
     """
     return pattern_for_card(card_name).closed(today or dt.date.today())
+
+
+def posting_date(card_name: str, tx_date: dt.date, merchant: str, posted: str | dt.date | None = None) -> dt.date:
+    """A row's posting date: the recorded `Process Date` (from a statement) when
+    there is one, else the card issuer's inferred posting (`inferred_posting`)."""
+    if posted:
+        return posted if isinstance(posted, dt.date) else dt.date.fromisoformat(str(posted)[:10])
+    return pattern_for_card(card_name).inferred_posting(tx_date, merchant)
 
 
 def due_date_for(card_name: str, bill_cycle: dt.date) -> dt.date:

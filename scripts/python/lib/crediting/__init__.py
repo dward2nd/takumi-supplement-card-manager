@@ -4,8 +4,8 @@ deterministic + idempotent — see base.py.
 
 Modules:
   base     Crediting (plan + post), CreditRow, CreditPlan
-  uob_one  UOB One: 1% per statement cycle, 10%/5% per calendar month,
-           amounts from the Promotion Bureau's pooled caps
+  uob_one  UOB One: one row per `% cb` tier per bill cycle (the household's
+           agreement), rows taken by UOB's posting-date rule and rounded per line
 
 To credit another card: subclass Crediting in a new module and register it
 below. /prepare-bill refuses to draft a registered card's cycle until its

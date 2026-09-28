@@ -2,7 +2,13 @@ name: ttb so smart
 issuer: ttb
 bill_cycle_pattern: ttb
 points_default: "×0"
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-28)
+  "7368": takumi
+  "0864": baiboon
 notes: |
+  Takumi holds the primary (7368) and Baiboon a supplement (0864); one ttb
+  statement carries both sections. No parser yet: /record-statement takes a
+  hand-transcribed `statement` (issuer "ttb") alongside the PDF.
   Cashback card — earns NO reward points, so every row is ×0.
   1% cashback on eligible spend; encoded in
   promotions/ttb-so-smart-cashback.yaml (consumed by lib.promotions.classify).
@@ -13,4 +19,7 @@ notes: |
   Cashback is paid DIRECTLY to a linked savings account, NOT credited to the
   card statement — never post cashback credit rows (no Crediting class in
   lib/crediting/). The % cb field is informational only (does not offset
-  the card balance).
+  the card balance). Merchant campaigns can still credit the card, e.g.
+  `CB BANGCHAK AUG26` −฿54 on the 2026-09 statement: Baiboon's cashback,
+  booked to Takumi's balance because he pays her the ฿54 himself (user,
+  2026-09-28).

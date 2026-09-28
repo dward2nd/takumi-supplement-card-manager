@@ -31,6 +31,7 @@ JSON spec:
   "processed": true,
   "multiplier": "×0",
   "auto_classify": true,
+  "sync_promotions": true,
   "points_redeemed": 1400,
   "transactions": [
     { "date": "2026-05-13", "name": "TMN 7-11 BANGKOK TH", "amount": 89.0, "note": "optional", "multiplier": "×2", "points_redeemed": 1400 }
@@ -40,13 +41,17 @@ JSON spec:
 
 **`auto_classify: true`** runs `lib.promotions.classify(card, tx_date, name)` for each row and fills in `cashback_percent`, `multiplier`, and `note` from the active promotion's tier rules + foreign-in-THB policy + installment rule + petrol exclusion. Per-row spec values still win, then batch-level values, then auto-classified values; the explicit precedence keeps user overrides authoritative. Works for all three holders (Takumi's DS gained `% cb` on 2026-09-28). The response gains an `auto_classified: true` flag and a `classifications` array showing the reason per row (`tier`, `foreign-default-exclude`, `foreign-override`, `installment`, `petrol-exclusion`, `no-promo`, `no-tier-match`).
 
+**The Promotion Bureau follows automatically** (`sync_promotions`, default `true`; user, 2026-09-28). After writing, the CLI re-syncs every [[../../../docs/databases/promotion-bureau|Bureau]] row the new rows can count toward: for each campaign on the card, the row for the quota period the transaction date (or, for a cycle quota, the `Bill Cycle Date`) falls in. Eligible rows are linked, the reward is split again first come first served, and the shares and trackers are updated. Then **every linked row's `% cb` / multiplier / `ใช้คะแนน` is set to what the split expects**. The split can overrule `auto_classify`: a 5% row past UOB One's ฿500 becomes 1%, and a UOB World row past the ฿20,000 becomes `×2`. See [[../../../docs/concepts/promotion-bureau#Kept in step with the ledger|Kept in step with the ledger]]. `--dry-run` only names the rows it would sync. Pass `"sync_promotions": false` only when the user asks for it.
+
 **`bill_cycle` and `due_date` are optional.** Omit them and the CLI infers both from the card's bank pattern (see [[../../../docs/concepts/bill-cycle-patterns|bill-cycle-patterns]]): today is compared against this month's bill cycle date for the card, and the active cycle is this-month-or-next accordingly. Pass them explicitly whenever the transaction's cycle isn't today's active one — that covers both **backdating** (a row that belongs to a closed statement, e.g. a late-posted purchase) and **foredating** (a row scheduled into a future cycle, e.g. an installment term, a prepayment, or a row dated next month). They're "both or neither" — supplying only one is a spec error.
 
 `multiplier` is optional. At top level it applies to every transaction in the batch; per-transaction it overrides the batch default. Valid values: `"×0"`, `"×2"`, `"×3"` (Takumi only), `"×4"`, `"×5"`, `"÷4"`. **At most one** multiplier checkbox is set per page — that's a hard rule on the Notion side; if you tried to set two, the formulas would double-count. Omitting `multiplier` leaves all checkboxes false, which Notion's formula treats as **×1** (the default earning rate).
 
-Output: a JSON envelope `{holder, card, card_page_id, bill_cycle, due_date, processed, count, created: [{id, url, name, amount, date}, ...]}`. Surface the count + a compact list back to the user. Don't dump full URLs unless asked.
+Output: a JSON envelope `{holder, card, card_page_id, bill_cycle, due_date, processed, count, created: [{id, url, name, amount, date}, ...], promotions}`. Surface the count + a compact list back to the user. Don't dump full URLs unless asked.
 
-**Rollback** (cleanup or mistakes): `uv run scripts/python/add-transaction/archive.py --ids <page-id>[,<page-id>...]`. Archiving is idempotent.
+`promotions` is `{synced, fixed, missing, warnings}`. `synced` has one entry per Bureau row, with the credit and shares for cashback campaigns, its `writes`, and any of *your* rows it left `not_linked` or `flagged` (with the reason). `fixed` lists the fields changed to match the split. `missing` lists periods that have no Bureau row yet, each with the `create_with` spec for [[../sync-promotion/SKILL.md|/sync-promotion]]. An `error` key means the sync failed but the rows **are written**: never re-run the add. Re-run `/sync-promotion` instead.
+
+**Rollback** (cleanup or mistakes): `uv run scripts/python/add-transaction/archive.py --ids <page-id>[,<page-id>...]`. Archiving is idempotent, but it doesn't re-sync the Bureau: if the archived row was linked to one, re-run `/sync-promotion` on that row.
 
 ## What the user supplies
 
@@ -181,6 +186,7 @@ If you want to classify by hand (e.g. to override a heuristic the lib can't yet 
   - **5%** on 7-11 (**not** `TMN 7-11` — that's a TrueMoney top-up at 7-Eleven, falls through to 1%), WATSON, GRAB Thailand-only (`WWW.GRAB.COM` and `GRABTAXI`).
   - **1%** on everything else not excluded.
 - **Installment rule**: rows whose merchant name ends `NN/NN` get **1% per installment row**, regardless of merchant tier. The cashback is *not* given all at once at purchase time — it accrues per installment.
+- **Caps**: ฿500 a calendar month for 10% and 5% together, and ฿2,000 a statement cycle for 1%. Both are shared across the whole account and split first come, first served. `auto_classify` can't see them. The Bureau sync after the write applies them: past the ฿500, a 10%/5% row becomes 1%; past the ฿2,000, `% cb` is unset.
 - Subject to the [general earning exclusions](#general-earning-exclusions) below; the promo does not override either default exclusion.
 
 When in doubt about whether a particular merchant string falls into a tier, surface the ambiguity to the user — don't try to re-classify by editing the merchant name (that would violate Rule 1).
@@ -207,10 +213,10 @@ A **points** card, not a cashback one — leave `% cb` unset on every row, alway
 
 - **`×5`** — the standing bonus ([[../../docs/promotions/uob-world-points|uob-world-points]], effective `2025-01-01` → open-ended).
 - **`×2`** — the card's *base* Thailand rate and the post-quota fallback (`points_default` on the card YAML). Note it is `×2`, not `×1`: an unboosted row still earns double.
-- **`×0`** — petrol (UOB-wide, `UOBCard`) and foreign-merchant-in-THB.
+- **`×0`** — petrol and e-wallet top-ups (`… (TOP` / `TOP UP`; both UOB-wide, `UOBCard`, no cashback either), and foreign-merchant-in-THB.
 - **No 7-11 / TrueMoney exclusion.** That is Krungsri-family only, so `TMN 7-11` and `TMN ISERVICECCP` earn the full `×5` here. Don't copy the First Choice treatment across.
 
-**The one thing `auto_classify` gets wrong: the ≈฿20,000 per-cycle bonus quota.** Past that, rows drop to `×2`, but `lib.promotions.classify` is a pure function of (card, date, merchant) and cannot see cycle-to-date spend — so it returns `×5` regardless. On a high-spend cycle, sum the cycle's eligible rows first and override to `multiplier: "×2"` per-tx where needed, explaining in `Note`. The row straddling the boundary gets split by hand (one row, one checkbox). See [[../../docs/cards/uob-world|UOB World card note]].
+**The ≈฿20,000 per-cycle bonus quota is the Bureau's job, not `auto_classify`'s.** `lib.promotions.classify` is a pure function of (card, date, merchant). It can't see cycle-to-date spend, so it always returns `×5`. The Bureau sync after the write fixes that when the cycle has a `<year>M<month> — UOB World ×5` row. A row wholly past the quota becomes `×2` with the quota Note. The row the quota ends in keeps `×5` and gives the over-quota points back through `ใช้คะแนน` (`UOBWorldBonus`). If the cycle has no Bureau row, `promotions.missing` says so. See [[../../docs/cards/uob-world|UOB World card note]].
 
 ### CardX JCB — ongoing card-level policy (not yet framed as a dated promotion)
 
@@ -284,7 +290,7 @@ Notion's `number` property type with a "percent" format displays as `1%` while t
 1. **Confirm holder and parse the batch.** If the holder is ambiguous from context, ask.
 2. **Build the JSON spec** described in *Primary execution path*. Every amount the user listed becomes its own entry in `transactions`, even when the merchant string repeats across amounts.
 3. **Run the script.** Pipe the JSON in, read the JSON envelope back.
-4. **Report back** with the count, the merchant/amount/date list, and the card. Don't dump every Notion URL unless asked.
+4. **Report back** with the count, the merchant/amount/date list, and the card. Don't dump every Notion URL unless asked. From `promotions`, report: the fields it `fixed`, any row of yours `not_linked` or `flagged`, each Bureau row's new share when it changed, `missing` periods (offer to create them), and `warnings`.
 5. **MCP fallback** — only if the script isn't available (e.g. wrong repo): use one `mcp__notion__notion-create-pages` call with `parent: { type: "data_source_id", data_source_id: "<holder transactions DS>" }` and the same property mapping below.
 
 ## After writing

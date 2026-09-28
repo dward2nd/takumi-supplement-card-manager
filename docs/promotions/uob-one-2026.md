@@ -69,21 +69,34 @@ The bank caps the cashback, and the two caps count over **different periods** (b
 | 10% + 5% together | ฿500 | **calendar month**, by post date | last day of the month |
 | 1% | ฿2,000 | **statement cycle** | within the cycle |
 
-The caps are shared by everyone on the account and split first come, first served (user, 2026-09-28), so each has its own [[../concepts/promotion-bureau|Promotion Bureau]] row per period: `2026M9 — UOB One cb 10%/5%` (1–30 Sep) and `2026M9 — UOB One cb 1%` (26 Aug–25 Sep). The tiers themselves still come from `uob-one-2026.yaml` through `lib.promotions.classify`; the Bureau classes (`scripts/python/lib/bureau/uob_one.py`) add only the caps. One exception the YAML doesn't know: **Makro in-store** (`MAKRO_…`) earns nothing, while its catch-all tier would give 1%.
+The caps are shared by everyone on the account and split first come, first served (user, 2026-09-28), so each has its own [[../concepts/promotion-bureau|Promotion Bureau]] row per period: `2026M9 — UOB One cb 10%/5%` (1–30 Sep) and `2026M9 — UOB One cb 1%` (25 Aug–24 Sep, the cycle billed 25 Sep). The tiers themselves still come from `uob-one-2026.yaml` through `lib.promotions.classify`; the Bureau classes (`scripts/python/lib/bureau/uob_one.py`) add only the caps. One exception the YAML doesn't know: **Makro in-store** (`MAKRO_…`) earns nothing, while its catch-all tier would give 1%.
 
 September 2026, before Takumi's UOB statement (2026-09-28):
 
 | Row | Pooled | Credit | Nuta | Baiboon |
 |---|---|---|---|---|
 | 10%/5% (1–30 Sep) | ฿2,417.50 | ฿132.63 | ฿120.80 | ฿11.83 |
-| 1% (26 Aug–25 Sep) | ฿13,029.40 | ฿130.29 | ฿128.49 | ฿1.80 |
+| 1% (25 Aug–24 Sep) | ฿13,029.40 | ฿130.29 | ฿128.49 | ฿1.80 |
 
 **Where this differs from the ledger's credit rows, on purpose.** The ledger credits per bill cycle (the household's agreement, above), the Bureau per calendar month (the bank's view), so Nuta's September 10%/5% is ฿120.80 in the Bureau against ฿173.60 in her cycle credit rows. The 1% share differs by ฿2.31, which is timing: Nuta's `TMN 7-11 ฿231` got its 1% in August's credit, but UOB pays it in September. Her `[ยอดยกมาจากรอบ 2026-08]` −฿231 leg (carrying `% cb` 1%) nets it out of September's ledger credit (฿126.18), and her tracker nets it the same way, while the Bureau share keeps the bank's ฿128.49.
+
+**The bank's 1% vs the Bureau's, September 2026** (worked out 2026-09-28 from the 27 Sep statement, once Takumi's lines were recorded):
+
+- The statement's 1%-tier lines (all three holders) total ฿12,892.40. That's ฿128.92, exactly the Bureau's figure, so the ledger and the statement agree line for line.
+- UOB credited `UOB One Cashback 1%` ฿124.53. That's reproduced to the satang by two rules:
+  - **Spend posted on the statement date counts toward the next cycle's 1%**, even though it's printed on this statement (UOB's terms say so too). Four purchases were posted 25 Sep: Nuta's `SHOPEE` ฿167, `SHOPEE *SHOPEE` ฿102, `TMN 7-11` ฿57 and `LINEPAY*PF_LINE MAN` ฿111.61, ฿437.61 in all. The installment terms posted that day still counted.
+  - **1% is rounded per line**, half up.
+- Prediction: October's 1% credit includes those four lines (฿4.38).
+- **Applied since 2026-09-28** (user: "use that to determine 1%/5%/10% cashback … even if using the household's rule, we follow the same rules as UOB"). `/record-statement` stamps `Process Date`, and the Bureau's `UOBOneBase` / `UOBOneBonus` count by it and round per line. The household's per-cycle credit rows (`lib.crediting.uob_one`) take a cycle's rows by the same statement-cycle rule. After re-stamping the Aug and Sep statements, `2026M9 — UOB One cb 1%` reads **฿124.53, the bank's credit to the satang**. Nuta's 25 Sep cycle credits became 1% −฿120.42 and 5% −฿156.20.
+- **10%/5% follows the same rule, one level up:** spend posted on the **last day of the month** counts toward the next month. August's `UOB One Cashback 10% 5%` ฿188.40 (posted 31 Aug) is exactly 10%/5% of the lines posted 31 Jul–30 Aug, rounded per line (checked 2026-09-28 against both statements). That window includes July's last-day postings (Nuta's Grab ฿130) and leaves out 31 Aug's (five Nuta Grabs, ฿496). The Bureau's 10%/5% row counts by transaction date, 1–30 Sep, so it drifts at both edges. Lines posted 31 Aug–25 Sep already give ฿317.25 toward September's credit; lines posted 26–29 Sep will add to it on the October statement.
+- August's 1% doesn't fit the statement-date rule on its own. Its 1%-tier lines give ฿116.95 (per line), UOB paid ฿106.88, and nothing but installment terms posted on 25 Aug. About ฿1,006 of 1% spend went unpaid for another reason. Candidates are `TMN MAKRO` ฿1,051.25 (Makro in-store is excluded) and `AIATH AUTO PAY` ฿836 (insurance); neither fits exactly. Settling it needs July's statement.
 
 ## Open questions
 
 - ~~10%/5% by month or by cycle?~~ Settled 2026-09-28: the ledger stays per cycle (the household's agreement); the Bureau shows the bank's months.
 - ~~Carry-forward rows with `% cb`?~~ Settled 2026-09-28: a timing difference. The Bureau share keeps the bank's view; the tracker nets the carry-forward leg, like the per-cycle ledger credit does.
+- Why August 2026's 1% credit was ฿10.07 short (see above).
+- ~~Count by posting date?~~ Done 2026-09-28: see above.
 - Does Takumi's primary UOB One get the same supplement-side tier treatment, or do primary-card swipes count differently? Phase-1 data hasn't given a clean answer.
 
 ## See also

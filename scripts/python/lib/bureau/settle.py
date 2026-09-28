@@ -2,16 +2,17 @@
 
 deterministic + idempotent — each write sets a value to what the split gives;
 a tracker row is created only when none exists, and a ticked one is never touched.
-Points campaigns have no money to settle; the CLI skips this module for them.
+Points campaigns have no money to settle; `runner` skips this module for them.
 """
 
 from __future__ import annotations
 
 from decimal import Decimal
 
-from lib.bureau import Allocation, BasePromotion, Tx, store
-from lib.bureau.store import BureauRow
-from lib.holders import HOLDERS
+from ..holders import HOLDERS
+from . import store
+from .base import Allocation, BasePromotion, Tx
+from .store import BureauRow
 
 
 def bureau_numbers(row: BureauRow, alloc: Allocation, write) -> tuple[bool, list[str]]:

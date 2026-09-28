@@ -1,10 +1,15 @@
 name: KBank JCB
 issuer: KBank
 bill_cycle_pattern: kbank
+statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-28)
+  "2511": takumi
 notes: |
   Registered 2026-08-31 so the card resolves for BC/DD inference. `name` is
   the verbatim Cards DS title in Baiboon's Cards DB (page
-  3cdcb755-f0f1-8085-a967-da69a91e7d67).
+  3cdcb755-f0f1-8085-a967-da69a91e7d67) and, since 2026-09-28, Takumi's
+  (page 3e9cb755-f0f1-8133-82d1-fefd61bfdbdb). The card is Takumi's: 2511 is
+  the primary, and the KBank statement has no supplement sections, so
+  Baiboon's rows sit on his card (`[บัตรหลัก]` once a statement is recorded).
 
   **Cycle is verified, the earning policy is not.** The `kbank` pattern
   (bill cycle day 25, due day 10 of the next month) is confirmed from

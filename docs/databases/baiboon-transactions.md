@@ -22,7 +22,7 @@ Every purchase Baiboon makes on his/her supplement cards.
 | `ยอดชำระ`            | number (baht) | Transaction amount |
 | `ใช้คะแนน`           | number (int)  | Points redeemed |
 | `Transaction Datetime` | datetime  |  |
-| `Process Date`      | date          |  |
+| `Process Date`      | date          | The statement's POST date, stamped by `/record-statement` (UOB); see [[../concepts/billing-cycle]] |
 | `Bill Cycle Date`   | date          |  |
 | `Due Date`          | date          |  |
 | `Note`              | text          |  |

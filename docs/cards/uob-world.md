@@ -19,6 +19,7 @@ Two tiers, both of which **predate the promotions system** (user, 2026-08-20):
 | Multiplier | Meaning |
 |---|---|
 | `×5` | The standing bonus, active in Baiboon's data since **2025-01-28**. Encoded as [[../promotions/uob-world-points]]. |
+| `×0` | Petrol, foreign merchants billed in THB, and **e-wallet top-ups** (`2C2P *SHOPEEPAY (TOP …`; user, 2026-09-28): the `UOBCard` family and the `UOBWorldBonus` Bureau class both know them. |
 | `×2` | The card's **base** Thailand rate, and the fallback once the cycle's bonus quota is spent. Encoded as `points_default` on `scripts/repositories/cards/uob-world.yaml`. |
 
 The base is `×2`, not `×1` — an unboosted UOB World row still earns double. Leaving the multiplier unset means `×1` in Notion's `คะแนนที่ได้จริง` formula, which would under-report; hence the explicit card-level default. See [[../concepts/points-and-multipliers]].
@@ -39,14 +40,10 @@ Unlike [[uob-one]], this card has a real points balance that gets spent — e.g.
 
 ## Writing UOB World transactions
 
-`auto_classify: true` now handles this card correctly — it resolves `×5` normally, `×0` on petrol and foreign-in-THB, and `×2` for dates outside the promo window. The one thing it cannot know is the quota, so:
-
-1. Before writing a batch on a high-spend cycle, sum the cycle's eligible rows.
-2. If the total is near or past ฿20,000, override the affected rows to `multiplier: "×2"` per-tx and explain in `Note`.
+`auto_classify: true` now handles this card correctly — it resolves `×5` normally, `×0` on petrol and foreign-in-THB, and `×2` for dates outside the promo window. The one thing it cannot know is the quota. Since 2026-09-28 that doesn't need a manual step: after every write, [[../../.claude/skills/add-transaction/SKILL|/add-transaction]] (and `/update-transaction`, `/record-statement`) re-syncs the cycle's `UOB World ×5` Bureau row. It sets rows past the ฿20,000 to `×2` with the quota Note, and sets the straddling row's `ใช้คะแนน` give-back ([[../concepts/promotion-bureau#Kept in step with the ledger]]). A cycle with no Bureau row yet isn't enforced; the write reports it as `missing`.
 
 ## Open questions
 
-- Is the ฿20,000 quota **per-card or shared across Takumi's UOB account**? [[../future-app/product-shape]] anticipates household-wide quotas, which would change the arithmetic.
 - Does Takumi hold this card as a primary in his own Cards DB? [[_stubs]] marks Takumi `✓` but his DB hasn't been enumerated row-by-row.
 - The bonus may be older than `2025-01-01` — that date is the conservative boundary before the first observed `×5` row, not a sourced start date.
 

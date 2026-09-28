@@ -78,7 +78,9 @@ class UOBWorldBonus(BasePromotion):
     )
     rules = (
         Rule("Petrol stations, Makro in-store, MEA/PEA electricity and MWA water, utility bills "
-             "(MCC 4900), top-ups into an e-wallet"),
+             "(MCC 4900)"),
+        Rule("Top-ups into an e-wallet (`… (TOP` on the statement)",
+             test=lambda tx: promotions.looks_wallet_top_up(tx.merchant)),
         Rule("Baht charges at foreign merchants or foreign-registered sites"),
         Rule("Funds, unit-linked insurance, unbilled installments, cash advances, Fund Transfer, "
              "currency exchange, interest and fees, cancelled charges, business spend"),
@@ -110,7 +112,7 @@ class UOBWorldBonus(BasePromotion):
     def category(self, tx: Tx) -> str | None:
         """'bonus', 'base' or 'zero' when the merchant string settles it, else None."""
         m = tx.merchant
-        if promotions.looks_petrol(m) or _ZERO.search(m):
+        if promotions.looks_petrol(m) or promotions.looks_wallet_top_up(m) or _ZERO.search(m):
             return "zero"
         if promotions.looks_foreign_in_thb(m):
             return "bonus" if _FX_NOTE.search(tx.note) else "zero"   # real FX vs baht-at-foreign

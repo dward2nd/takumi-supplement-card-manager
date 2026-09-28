@@ -87,6 +87,10 @@ The card moved from the retired `lotus` pattern (day 28, +20d) onto `krungsri` (
 - Inference has no notion of a dated pattern change, so it now answers with day-5 for *every* date. **Backdating a row into a pre-switch cycle must pass explicit `bill_cycle` + `due_date`.**
 - The shared pattern key does **not** make this a Krungsri-family card for reward purposes — it stays exempt from the 7-11 / TrueMoney points exclusion. See [[krungsri-truemoney-711-exclusion]].
 
+### A statement's printed date can sit off the cycle
+
+The printed `STATEMENT DATE` / `PAYMENT DUE DATE` aren't always the cycle's. UOB printed 27 Sep / 19 Oct 2026 on the statement for the cycle that closed 25 Sep: the last posting date on it is 25 Sep, and 25 Sep purchases went onto the next statement. The user: "they just shifted BC/DD on paper". The ledger keeps the card's cycle (25 Sep / 15 Oct). `/record-statement` maps a printed date within 5 days of a cycle date onto that cycle (`lib.statements.record.ledger_cycle`), and puts the printed dates in the bill's Note. It refuses anything further off. When the printed date *is* the cycle date, the printed due date is kept (UOB's August statement: 25 Aug, due 18 Sep).
+
 ## UOB exceptions — weekend / Thai public holiday shifts
 
 The nominal cycle is **day 25** with a due date **20 days later**. Both dates are then shifted independently if they land on a non-working day:

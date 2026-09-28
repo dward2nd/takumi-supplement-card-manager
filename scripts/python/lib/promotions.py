@@ -332,6 +332,16 @@ def looks_petrol(merchant_name: str) -> bool:
     return any(tok in upper for tok in _PETROL_TOKENS)
 
 
+# An e-wallet top-up. UOB cuts the descriptor short: `2C2P *SHOPEEPAY (TOP BANGKOK`
+# (user, 2026-09-28: "those are the top-up rows … should give no points").
+# `TMN 7-11` is a TrueMoney *payment* at 7-Eleven, not a top-up, and doesn't match.
+_WALLET_TOP_UP = re.compile(r"\(TOP\b|\bTOP ?-?UP\b")
+
+
+def looks_wallet_top_up(merchant_name: str) -> bool:
+    return bool(_WALLET_TOP_UP.search(merchant_name.upper()))
+
+
 def looks_truemoney_or_711(merchant_name: str) -> bool:
     """True for TrueMoney (`TMN `/`TMN*` prefix) or 7-Eleven merchant strings."""
     upper = merchant_name.strip().upper()

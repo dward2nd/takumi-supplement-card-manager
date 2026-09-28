@@ -1,4 +1,4 @@
-"""Shape the sync-promotion envelope: flagged rows, row-field mismatches, the boundary, drift.
+"""Shape a Bureau sync's envelope: flagged rows, row-field mismatches, the boundary, drift.
 
 deterministic + idempotent — pure formatting of already-computed values.
 """
@@ -8,8 +8,9 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
-from lib.bureau import ELIGIBLE, Allocation, BasePromotion, LadderPromotion, Tx
-from lib.bureau.sync import line
+from .base import ELIGIBLE, Allocation, BasePromotion, Tx
+from .ladder import LadderPromotion
+from .sync import line
 
 
 def flagged(promo: BasePromotion, txs: list[Tx]) -> tuple[list[dict], set[str]]:
@@ -22,10 +23,11 @@ def flagged(promo: BasePromotion, txs: list[Tx]) -> tuple[list[dict], set[str]]:
             continue
         ids.add(tx.id)
         g = groups.setdefault(reason, {"level": level, "reason": reason, "count": 0,
-                                       "amount": Decimal(0), "rows": []})
+                                       "amount": Decimal(0), "rows": [], "ids": []})
         g["count"] += 1
         g["amount"] += tx.amount
         g["rows"].append(line(tx))
+        g["ids"].append(tx.id)
     out = sorted(groups.values(), key=lambda g: -g["amount"])
     return [{**g, "amount": float(g["amount"])} for g in out], ids
 
@@ -67,7 +69,7 @@ def field_mismatches(promo: BasePromotion, alloc: Allocation) -> list[dict]:
                 update[key] = _plain(want)
         if (note := promo.suggested_note(r)) and not r.tx.note:
             update["note"] = note
-        out.append({"row": line(r.tx), "has": {k: _plain(_READ[k](r.tx)) for k in diff},
+        out.append({"id": r.tx.id, "row": line(r.tx), "has": {k: _plain(_READ[k](r.tx)) for k in diff},
                     "want": {k: _plain(v) for k, v in diff.items()}, "update": update})
     return out
 

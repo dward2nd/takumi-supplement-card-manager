@@ -23,7 +23,7 @@ from ..cards import card_titles_by_id
 from ..holders import HOLDERS, PROMOTION_BUREAU_DS, Holder
 from ..transaction_read import project_transaction
 from ..transaction_write import VALID_MULTIPLIERS
-from .base import Tx
+from .base import BasePromotion, Tx
 
 LINK = "Promotion"      # on every Transactions DS and every tracker
 TOTAL = "เงินคืนรวม"
@@ -105,6 +105,11 @@ def find_row(ref: str) -> BureauRow:
     return _parse_row(pages[0])
 
 
+def all_rows() -> list[BureauRow]:
+    """Every Bureau row (a handful per month)."""
+    return [_parse_row(pg) for pg in notion_client.query_all(PROMOTION_BUREAU_DS)]
+
+
 @cache
 def card_titles(holder_key: str) -> dict[str, str]:
     """{card page id → title} for one holder, read once per process."""
@@ -122,7 +127,8 @@ def _to_tx(h: Holder, page: dict) -> Tx:
               points_used=None if used is None else Decimal(str(used)),
               note=t["note"],
               card=card_titles(h.key).get(t["card_ids"][0], "") if t["card_ids"] else "",
-              bill_cycle=t["bill_cycle_date"])
+              bill_cycle=t["bill_cycle_date"],
+              posted=t["process_date"])
 
 
 def linked_txs(row: BureauRow, h: Holder) -> list[Tx]:
@@ -133,31 +139,22 @@ def linked_txs(row: BureauRow, h: Holder) -> list[Tx]:
     return [_to_tx(h, pg) for pg in pages]
 
 
-def unlinked_txs(row: BureauRow, h: Holder, card_ids: list[str], basis: str
+def unlinked_txs(row: BureauRow, h: Holder, card_ids: list[str], promo: BasePromotion
                  ) -> list[tuple[Tx, list[str]]]:
     """The cards' rows inside the period that aren't linked to the row, with each
-    one's existing `Promotion` links (to preserve when linking).
-
-    `basis` "transaction_date": dated start..end. "bill_cycle": billed on the
-    cycle closing on the row's End Date, which is how the ledger already sorts
-    rows into statements (late postings included).
-    """
+    one's existing `Promotion` links (to preserve when linking). The campaign
+    decides what "inside" means (`candidate_filter` to query, `covers` to keep)."""
     if not card_ids:
         return []
-    if basis == "bill_cycle":
-        period = [{"property": "Bill Cycle Date", "date": {"equals": row.end.isoformat()}}]
-    else:
-        period = [{"property": "Transaction Datetime", "date": {"on_or_after": row.start.isoformat()}},
-                  {"property": "Transaction Datetime", "date": {"on_or_before": row.end.isoformat()}}]
     pages = notion_client.query_all(h.transactions_ds, filter={"and": [
         {"or": [{"property": "Card", "relation": {"contains": c}} for c in card_ids]},
-        *period,
+        *promo.candidate_filter(row.start, row.end),
         {"property": LINK, "relation": {"does_not_contain": row.id}},
     ]})
     out = []
     for pg in pages:
         tx = _to_tx(h, pg)
-        if basis == "bill_cycle" or row.start.isoformat() <= tx.date[:10] <= row.end.isoformat():
+        if promo.covers(row.start, row.end, tx):
             out.append((tx, [r["id"] for r in pg["properties"][LINK]["relation"]]))
     return out
 
@@ -165,6 +162,11 @@ def unlinked_txs(row: BureauRow, h: Holder, card_ids: list[str], basis: str
 def link_tx(tx_id: str, existing: list[str], row_id: str) -> None:
     rel = [{"id": i} for i in [*existing, row_id]]
     notion_client.update_page_properties(tx_id, {LINK: {"relation": rel}})
+
+
+def set_links(tx_id: str, row_ids: list[str]) -> None:
+    """Replace a transaction's `Promotion` links (dropping one it no longer belongs to)."""
+    notion_client.update_page_properties(tx_id, {LINK: {"relation": [{"id": i} for i in row_ids]}})
 
 
 def write_numbers(row_id: str, values: dict[str, Decimal]) -> None:

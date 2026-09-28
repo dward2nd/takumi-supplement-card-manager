@@ -13,14 +13,18 @@ Reads a JSON spec from stdin (or --input <file>):
     "statement": { ... },                     // alternative to pdf+issuer: a Statement
                                               //   dict (lib.statements.model) transcribed
                                               //   by hand for an issuer with no parser
-    "attach_pdf": true                        // optional, default true when `pdf` is given
+    "attach_pdf": true,                       // optional, default true when `pdf` is given
+    "sync_promotions": true                   // optional, default true
   }
 
 For every card account on the statement it:
   - checks each supplement section against that holder's rows (reports gaps),
   - renames a friend's row that sits on the primary card to `[บัตรหลัก] …`,
   - writes Takumi's own primary-card lines (charges, bank credits, fees),
-  - creates Takumi's bill at the printed card total and attaches the PDF.
+  - creates Takumi's bill at the printed card total and attaches the PDF,
+  - re-syncs the Promotion Bureau rows the new and renamed rows count toward
+    and sets their `% cb` / multiplier to the split (`promotions`; skipped with
+    `sync_promotions: false`).
 Payments are never recorded — they settle the previous bill.
 
 Card numbers map to (card, holder) via `statement_numbers` in
@@ -69,7 +73,8 @@ def main(argv: list[str] | None = None) -> int:
         out = statement.to_dict()
     else:
         pdf = Path(spec["pdf"]).expanduser() if spec.get("pdf") and spec.get("attach_pdf", True) else None
-        out = record(statement, pdf=pdf, dry_run=args.dry_run)
+        out = record(statement, pdf=pdf, dry_run=args.dry_run,
+                     sync_promotions=spec.get("sync_promotions", True))
     json.dump(out, sys.stdout, ensure_ascii=False, indent=2)
     sys.stdout.write("\n")
     return 0

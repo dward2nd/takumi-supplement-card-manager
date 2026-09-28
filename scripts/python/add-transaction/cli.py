@@ -43,6 +43,12 @@ Input schema:
                                                     //   from lifetime; negative = add back).
                                                     //   Usually paired with amount=0 and
                                                     //   multiplier="×0".
+    "sync_promotions": true,                        // optional, default true. After writing,
+                                                    //   re-sync every Promotion Bureau row the
+                                                    //   rows can count toward and fix `% cb` /
+                                                    //   multiplier / `ใช้คะแนน` to the split
+                                                    //   (lib.bureau.follow); reported under
+                                                    //   `promotions`. A dry run only names them.
     "auto_classify": true,                          // optional, default false. When true,
                                                     //   each row is classified by
                                                     //   lib.promotions against the active
@@ -90,6 +96,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib import notion_client, promotions
 from lib.bill_cycle import active_cycle
+from lib.bureau import follow
 from lib.cards import find_card
 from lib.holders import resolve_holder
 from lib.transaction_write import build_transaction_properties
@@ -120,6 +127,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
 
     created: list[dict] = []
     classifications: list[dict] = []
+    written: list[follow.Written] = []
     for tx in spec["transactions"]:
         # Per-transaction spec wins over batch defaults wins over auto-classified values.
         tx_multiplier = tx.get("multiplier", batch_multiplier)
@@ -163,6 +171,8 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             entry = {"dry_run": True, "properties": props}
         else:
             page = notion_client.create_page(holder.transactions_ds, props)
+            written.append(follow.Written.of(page["id"], holder.key, card_page_id, tx["date"], bill_cycle,
+                                             name=tx["name"]))
             entry = {
                 "id": page["id"],
                 "url": page.get("url"),
@@ -188,6 +198,11 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     if auto_classify:
         out["auto_classified"] = True
         out["classifications"] = classifications
+    if spec.get("sync_promotions", True):
+        if dry_run:
+            written = [follow.Written.of(None, holder.key, card_page_id, tx["date"], bill_cycle, name=tx["name"])
+                       for tx in spec["transactions"]]
+        out["promotions"] = follow.follow_safely(written, dry_run=dry_run)
     return out
 
 

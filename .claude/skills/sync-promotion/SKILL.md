@@ -7,6 +7,14 @@ description: Bring one Promotion Bureau row (one quota period of a bank campaign
 
 One Bureau row ([[../../../docs/databases/promotion-bureau|Promotion Bureau]]) = one **quota period**: the window the bank counts a limit over. It's named `<year>M<month> — <campaign>`, where the month is the calendar month, the month of the statement cycle's closing date, or the campaign's first month ([[../../../docs/concepts/promotion-bureau|concept note]]). This skill keeps everything derived from that row consistent with the transactions linked to it.
 
+## Usually automatic
+
+[[../add-transaction/SKILL.md|/add-transaction]], [[../update-transaction/SKILL.md|/update-transaction]] and [[../record-statement/SKILL.md|/record-statement]] re-sync the Bureau rows their rows touch after every write (`lib.bureau.follow`; user, 2026-09-28). That follow-up runs this skill's core (`lib.bureau.runner.run`) with `link_candidates`, **applies** the `field_mismatches` instead of just listing them, and repeats until nothing changes. It never creates a Bureau row. So run this skill by hand to:
+
+- **create a new period's row.** The writers report it under `promotions.missing`, with the `create_with` spec ready to pass here.
+- **reconcile against the bank's figure** (`bank_spend`), or rewrite a page summary.
+- **re-sync after a change the writers don't cover**: archiving a row, editing in Notion directly, or `/add-installment` / `/populate-installment` / `/record-payment` rows.
+
 ## Primary execution path
 
 ```sh
@@ -19,7 +27,7 @@ Always dry-run first and show the user the shares, `flagged`, `unlinked_candidat
 | Field | Default | Meaning |
 |---|---|---|
 | `promotion` | — | Bureau row Name (exact), page ID or URL |
-| `start`, `end` | — | Create the row when no row has that Name. ISO dates; for a cycle quota, `end` is the BC date. Refused unless a campaign class matches the Name and period. A dry run previews the new period against a stand-in row (nothing is written) |
+| `start`, `end` | — | Create the row when no row has that Name. ISO dates; for a cycle quota, `start` is the previous BC date and `end` the day before this cycle's BC date (spend on the BC date lands on the next statement). Refused unless a campaign class matches the Name and period. A dry run previews the new period against a stand-in row (nothing is written) |
 | `bank_spend` | — | The total of the bank app's eligible-transactions list (Krungsri-family apps show one; other issuers unknown). Adds a `drift` block: per-date totals to read against the app, dates whose total equals the gap, repeated rows. (A single row equal to the gap is no lead: every even half of a split charge is one.) |
 | `link_candidates` | `false` | Link the campaign cards' **eligible** unlinked rows in the period (by transaction date, or by `Bill Cycle Date` for a cycle quota). Uncertain/excluded rows are never linked. Existing `Promotion` links on a row are kept |
 | `replace_summary` | `false` | Rewrite the page body even if it already has content (it's written automatically only when empty) |
@@ -30,8 +38,8 @@ Always dry-run first and show the user the shares, `flagged`, `unlinked_candidat
 2. **Reads linked rows** per holder from the Transactions side (a page's own relation list is cut off at 25) and checks them against the `ยอดจาก<name>` rollups.
 3. **Screens** each row: not a purchase, not counted by this quota (`qualifies`), or hit by one of the bank's `rules` → `flagged`. Informational only; links are the household's call.
 4. **Splits** the reward **first come, first served** by `Transaction Datetime` with the campaign's own `allocate`: ladder steps (NW3, EPW538), a per-row rate until a pooled credit cap (UOB One), or a points quota (UOB World). Same-time rows share a straddled boundary pro rata. `boundary` shows that group.
-5. **Cashback campaigns** write `เงินคืนรวม` and each `เงินคืนส่วน<name>`, then upsert trackers: one row per holder with a positive share, titled `tracker_title` (`UOB One 1% 26 Aug—25 Sep`), dated the period start, `Card` = the holder's campaign card (for a multi-card campaign, the one carrying most of their spend), `Promotion` = the Bureau row, `Expected Cashback` = the share. `เงินคืนรวม` follows the split while it equals Σ shares; a figure typed by hand is never overwritten, and a split that disagrees with it is held back with a warning. A ticked tracker row is never changed; a same-titled row without a `Promotion` link is reported, not duplicated. **Points campaigns** (UOB World) have no money and no trackers.
-6. **Checks every linked row's fields** against the split (`expected`): `% cb` for the card's own cashback (full rate inside the quota; unset on the partly paid boundary and after), or the multiplier and `ใช้คะแนน` for UOB World. An overlay campaign (EPW538, `marks_rows = False`) claims no row fields: a row can earn from several campaigns of the same bank, but it has one `% cb`. Disagreements come back under `field_mismatches`, each with a ready `/update-transaction` entry under `update` (a multiplier change unticks the old box via `properties`). Read-only: show them to the user, then pass the `update` entries to [[../update-transaction/SKILL.md|/update-transaction]].
+5. **Cashback campaigns** write `เงินคืนรวม` and each `เงินคืนส่วน<name>`, then upsert trackers: one row per holder with a positive share, titled `tracker_title` (`UOB One 1% 25 Aug—24 Sep`), dated the period start, `Card` = the holder's campaign card (for a multi-card campaign, the one carrying most of their spend), `Promotion` = the Bureau row, `Expected Cashback` = the share. `เงินคืนรวม` follows the split while it equals Σ shares; a figure typed by hand is never overwritten, and a split that disagrees with it is held back with a warning. A ticked tracker row is never changed; a same-titled row without a `Promotion` link is reported, not duplicated. **Points campaigns** (UOB World) have no money and no trackers.
+6. **Checks every linked row's fields** against the split (`expected`): `% cb` for the card's own cashback (full rate inside the quota; unset on the partly paid boundary and after), or the multiplier and `ใช้คะแนน` for UOB World. An overlay campaign (EPW538, `marks_rows = False`) claims no row fields: a row can earn from several campaigns of the same bank, but it has one `% cb`. Disagreements come back under `field_mismatches`, each with a ready `/update-transaction` entry under `update` (a multiplier change unticks the old box via `properties`). Here they're only reported: pass the `update` entries to [[../update-transaction/SKILL.md|/update-transaction]]. Its automatic follow-up re-syncs, so those fixes then settle any quota they feed. The writers' follow-up applies them directly.
 7. **Writes the page summary** when the page body is empty.
 
 ## Hard rules
