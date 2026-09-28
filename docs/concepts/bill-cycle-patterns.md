@@ -83,7 +83,7 @@ The match is on the card's title in the Cards DB. Looking up the `ธนาค�
 The card moved from the retired `lotus` pattern (day 28, +20d) onto `krungsri` (day 5, +20d), matching the rest of the Krungsri family.
 
 - **Pre-switch rows keep their old dates and were deliberately not migrated** (user instruction). The card's two existing rows stay on BC `2026-05-28` / DD `2026-06-17`.
-- The `lotus` key is retained in `lib.bill_cycle.PATTERNS` purely so that history reads correctly; no card points at it.
+- The `lotus` key (`LotusCycle`) is retained in `lib.bill_cycle.PATTERNS` purely so that history reads correctly; no card points at it.
 - Inference has no notion of a dated pattern change, so it now answers with day-5 for *every* date. **Backdating a row into a pre-switch cycle must pass explicit `bill_cycle` + `due_date`.**
 - The shared pattern key does **not** make this a Krungsri-family card for reward purposes — it stays exempt from the 7-11 / TrueMoney points exclusion. See [[krungsri-truemoney-711-exclusion]].
 

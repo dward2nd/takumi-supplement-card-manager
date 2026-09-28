@@ -24,7 +24,7 @@ from __future__ import annotations
 import datetime as _dt
 
 from . import installments, notion_client, promotions
-from .bill_cycle import PatternNotFoundError, active_cycle, cycle_for_month, pattern_for_card
+from .bill_cycle import PatternNotFoundError, active_cycle, cycle_for_month, due_date_for, pattern_for_card
 from .bills import explain_cycle, require_bills_ds
 from .cards import CardAmbiguousError, CardNotFoundError, card_title_text, card_titles_by_id, find_card
 from .holders import resolve_holder
@@ -216,11 +216,7 @@ def draft_bill(spec: dict, *, dry_run: bool = False) -> dict:
         # Derive the cycle's due date from the card's bank pattern so
         # appended rows carry the correct DD without depending on the
         # Bills DB which doesn't store DD on its own.
-        bc_date = _dt.date.fromisoformat(bill_cycle)
-        pattern = pattern_for_card(card_name)
-        cand_bc, cand_dd = cycle_for_month(pattern, bc_date.year, bc_date.month)
-        if cand_bc != bc_date:
-            cand_dd = pattern.due_date_shift(pattern.due_from_nominal_bc(bc_date))
+        cand_dd = due_date_for(card_name, _dt.date.fromisoformat(bill_cycle))
         installments_summary = installments.populate_for_cycle(
             holder_key=holder.key,
             transactions_ds=holder.transactions_ds,

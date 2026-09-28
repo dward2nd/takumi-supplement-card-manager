@@ -14,5 +14,5 @@ notes: |
   2025-06, and the day-2 rows are history rather than a separate pattern.
 
   If a fresh KTC statement shows day 2, this is wrong: add a `ktc_day2`
-  pattern to `lib.bill_cycle.PATTERNS` rather than editing `ktc`, which
+  `BillCycle` subclass to `lib.bill_cycle` rather than editing `ktc`, which
   Baiboon's and Nuta's live cards depend on.

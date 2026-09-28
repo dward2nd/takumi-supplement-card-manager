@@ -37,7 +37,7 @@ notes: |                       # optional — anything the schema doesn't captur
   the folds are a safety net, not a licence. See
   [[../../docs/concepts/known-divergences]] §11.
 - `issuer` — referenced by skill prose ("is this a UOB card?").
-- `bill_cycle_pattern` — key into `lib.bill_cycle.PATTERNS`. Drives `/add-transaction`'s auto BC/DD inference.
+- `bill_cycle_pattern` — key into `lib.bill_cycle.PATTERNS`, where each issuer's rule is a `BillCycle` subclass (`KrungsriCycle`, `UOBCycle` …). Drives `/add-transaction`'s auto BC/DD inference. A new rule is a new subclass.
 
 ### Sigil values
 

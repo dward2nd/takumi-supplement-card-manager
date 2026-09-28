@@ -39,7 +39,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib import installments
-from lib.bill_cycle import most_recent_closed_cycle, pattern_for_card, cycle_for_month
+from lib.bill_cycle import due_date_for, most_recent_closed_cycle
 from lib.cards import find_card
 from lib.holders import resolve_holder
 
@@ -72,12 +72,7 @@ def _validate(spec: dict) -> None:
 def _resolve_cycle(card_name: str, spec_bc: str | None) -> tuple[str, str]:
     if spec_bc:
         bc = _dt.date.fromisoformat(spec_bc)
-        pattern = pattern_for_card(card_name)
-        cand_bc, cand_dd = cycle_for_month(pattern, bc.year, bc.month)
-        if cand_bc != bc:
-            cand_dd = pattern.due_date_shift(pattern.due_from_nominal_bc(bc))
-            cand_bc = bc
-        return cand_bc.isoformat(), cand_dd.isoformat()
+        return bc.isoformat(), due_date_for(card_name, bc).isoformat()
     bc, dd = most_recent_closed_cycle(card_name, _dt.date.today())
     return bc.isoformat(), dd.isoformat()
 
