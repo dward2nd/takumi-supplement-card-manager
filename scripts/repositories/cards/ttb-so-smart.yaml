@@ -2,7 +2,6 @@ name: ttb so smart
 issuer: ttb
 bill_cycle_pattern: ttb
 points_default: "×0"
-petrol_exclusion: true
 notes: |
   Cashback card — earns NO reward points, so every row is ×0.
   1% cashback on eligible spend; encoded in

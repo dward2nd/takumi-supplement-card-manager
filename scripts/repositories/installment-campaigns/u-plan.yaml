@@ -33,7 +33,7 @@ notes: |
   rather than offered at checkout, so the merchant string cannot reveal it —
   hence a plan-level campaign rather than a card flag.
 
-  Relationship to the card-level `installment_rewards_upfront` flag on the four
+  Relationship to the Krungsri family's card-level rewards-paid-upfront rule on the four
   Krungsri cards: that flag already zeroes both points and cashback on Krungsri
   installment terms, because the rewards were granted in full at purchase time.
   U Plan is the narrower statement that the *points* are gone for good while

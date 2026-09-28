@@ -47,7 +47,7 @@ When a new promotion arrives, add it under [[../promotions/]] and link from the 
 
 ### Petrol stations
 
-UOB cards (One, World, Premier, Makro) and [[../cards/ttb-so-smart|ttb so smart]] earn nothing at petrol stations. No promotion has been seen to override this. The exclusion is **card-level** — driven by `petrol_exclusion: true` in `scripts/repositories/cards/<card>.yaml` — while "is this a petrol station?" is a shared merchant-string heuristic in `lib/promotions.py` (`_PETROL_TOKENS`).
+UOB cards (One, World, Premier, Makro) and [[../cards/ttb-so-smart|ttb so smart]] earn nothing at petrol stations. No promotion has been seen to override this. The exclusion is **card-level** — a rule of the UOB and ttb card classes (`lib/earning`), formerly `petrol_exclusion: true` in `scripts/repositories/cards/<card>.yaml` — while "is this a petrol station?" is a shared merchant-string heuristic in `lib/promotions.py` (`_PETROL_TOKENS`).
 
 **Krungsri JCB** is a points-only variant: Krungsri's year-long Thai-petrol campaign withholds reward **points** on fuel spend (user, 2026-09-27), so its petrol rows take `×0` with the Note `Petrol station (Bangchak/BSRC) — Krungsri's year-long Thai-petrol campaign withholds reward points on fuel spend.` It does *not* carry `petrol_exclusion: true`, because that flag withdraws cashback too; `auto_classify` therefore misses it and the `×0` is set by hand. [[../cards/_stubs|First Choice]] is the opposite case — petrol earns normally there (confirmed 2026-05-28).
 

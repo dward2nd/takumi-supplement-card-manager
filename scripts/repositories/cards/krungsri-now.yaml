@@ -3,9 +3,6 @@ issuer: Krungsri
 bill_cycle_pattern: krungsri
 statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; supplements named on the statement)
   "5655": takumi
-truemoney_711_points_exclusion: true
-installment_rewards_upfront: true   # Krungsri pays an installment's points + cashback in full
-                                    # at purchase, so each NN/NN term earns nothing on its own.
 notes: |
   Cashback policy (block-based, NOT expressible as the promotions/*.yaml % cb
   tier model — see below):

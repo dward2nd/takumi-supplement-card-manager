@@ -5,7 +5,6 @@ statement_numbers:            # last 4 digits on the statement → holder (seen 
   "9310": takumi
   "1009": baiboon
 points_default: "×2"
-petrol_exclusion: true
 notes: |
   Points card — earns NO cashback on any row; `% cb` stays unset always.
 

@@ -5,12 +5,6 @@ statement_numbers:            # last 4 digits on the statement → holder (seen 
   "9214": takumi
   "1285": nuta
   "1064": baiboon
-truemoney_711_points_exclusion: true
-installment_rewards_upfront: true   # every NN/NN term earns nothing — see installment_note
-                                    # for why First Choice's reason differs from its siblings'.
-installment_note: >-
-  Installment term — booked against First Choice's personal-loan credit line,
-  which earns no card points or cashback.
 notes: |
   Two simultaneous credit lines (user, 2026-08-10):
 
@@ -20,8 +14,8 @@ notes: |
 
   Because merchant installments leave the card line entirely, they earn NO
   points and NO cashback — not a reward exclusion so much as a different product
-  doing the lending. This is the reason behind `installment_rewards_upfront`
-  on this card, and why `installment_note` overrides the generic
+  doing the lending. This is why its terms earn nothing, and why its class
+  (lib.earning.FirstChoice) writes its own Note instead of the generic
   Krungsri "rewards paid upfront" wording.
 
   The other First Choice installment shape is U Plan: pay in full at the
@@ -35,4 +29,4 @@ notes: |
   no promotions/*.yaml for it. Its pooled monthly campaigns (NW3, Jul–Sep 2026)
   are BasePromotion classes in scripts/python/lib/bureau/ instead, tracked in
   the Promotion Bureau — see docs/promotions/first-choice-nw3.md.
-  Petrol earns normally here (confirmed 2026-05-28), so no petrol_exclusion flag.
+  Petrol earns normally here (confirmed 2026-05-28): the Krungsri family doesn't withhold fuel.

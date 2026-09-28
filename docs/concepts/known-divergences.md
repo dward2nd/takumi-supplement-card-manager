@@ -91,7 +91,7 @@ Found 2026-08-27 while adding a transaction to that card. It matters because the
 
 - `lib.cards.find_card` resolves the **Cards DS title** (exact) to build a transaction's `Card` relation → needs `Krungsri VISA`.
 - `/prepare-bill` validates against the **Bills SELECT** option list → needs `Krungsri Visa`.
-- `lib.card_repo.by_name` joins on the YAML `name` → and used to be case-sensitive, so `Krungsri VISA` silently missed, dropping the card's `bill_cycle_pattern` and its `truemoney_711_points_exclusion` / `installment_rewards_upfront` flags. A `TMN*` row or an `NN/NN` term on this card would then have earned points it shouldn't.
+- `lib.card_repo.by_name` joins on the YAML `name` → and used to be case-sensitive, so `Krungsri VISA` silently missed, dropping the card's `bill_cycle_pattern` and its Krungsri-family flags (`truemoney_711_points_exclusion` / `installment_rewards_upfront` flags. A `TMN*` row or an `NN/NN` term on this card would then have earned points it shouldn't.
 
 `/prepare-bill` needs **both** spellings in a single call — it validates the SELECT with `card_name` and then hands that same string to `find_card` — so until 2026-09-09 the card could not be drafted at all. The failure surfaced when the first Krungsri Visa bill was drafted (cycle 2026-09-05): `CardNotFoundError: no card titled exactly 'Krungsri Visa' … Substring candidates: ['Krungsri VISA']`.
 

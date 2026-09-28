@@ -207,7 +207,7 @@ A **points** card, not a cashback one — leave `% cb` unset on every row, alway
 
 - **`×5`** — the standing bonus ([[../../docs/promotions/uob-world-points|uob-world-points]], effective `2025-01-01` → open-ended).
 - **`×2`** — the card's *base* Thailand rate and the post-quota fallback (`points_default` on the card YAML). Note it is `×2`, not `×1`: an unboosted row still earns double.
-- **`×0`** — petrol (UOB-wide `petrol_exclusion`) and foreign-merchant-in-THB.
+- **`×0`** — petrol (UOB-wide, `UOBCard`) and foreign-merchant-in-THB.
 - **No 7-11 / TrueMoney exclusion.** That is Krungsri-family only, so `TMN 7-11` and `TMN ISERVICECCP` earn the full `×5` here. Don't copy the First Choice treatment across.
 
 **The one thing `auto_classify` gets wrong: the ≈฿20,000 per-cycle bonus quota.** Past that, rows drop to `×2`, but `lib.promotions.classify` is a pure function of (card, date, merchant) and cannot see cycle-to-date spend — so it returns `×5` regardless. On a high-spend cycle, sum the cycle's eligible rows first and override to `multiplier: "×2"` per-tx where needed, explaining in `Note`. The row straddling the boundary gets split by hand (one row, one checkbox). See [[../../docs/cards/uob-world|UOB World card note]].
@@ -229,7 +229,7 @@ The user runs First Choice cashback as short-duration promos and patches rows ma
 
 The other shape is **U Plan**: pay in full at the merchant (so it starts on the card line), then ask Krungsri to re-split into 0% over 3 months. Those rows earn no points but **may** earn cashback per the active promotion. U Plan is tracked as a plan-level campaign — see [[../../docs/concepts/installment-reward-campaigns]] and [[../add-installment/SKILL.md|/add-installment]]'s `campaign` key.
 
-### Installment terms on Krungsri cards earn nothing (`installment_rewards_upfront`)
+### Installment terms on Krungsri cards earn nothing (`KrungsriFamilyCard`)
 
 On four Krungsri cards — First Choice, Krungsri JCB, Krungsri NOW, Krungsri Visa (the ones carrying the flag) — an installment purchase's points and cashback are granted **in full at the moment of purchase**, not spread across the terms. Each `NN/NN` term therefore earns nothing on its own; crediting them would double-count the reward.
 
@@ -265,14 +265,14 @@ These apply across **every** card we manage (Takumi, Baiboon, Nuta) by **default
    - **Points-only, by hand**: **Krungsri JCB** — Krungsri's year-long Thai-petrol campaign withholds *points* on fuel (user, 2026-09-27). Set `multiplier: "×0"` per row with the Note `Petrol station (Bangchak/BSRC) — Krungsri's year-long Thai-petrol campaign withholds reward points on fuel spend.` Not encoded as `petrol_exclusion` (that flag zeroes cashback too), so `auto_classify` leaves these rows at `×1` — override them yourself.
    - **Unknown**: Krungsri Visa / Krungsri NOW / CardX / KTC / AEON / Lotus / SPayLater — surface to the user before applying or denying cashback.
 
-   The exclusion is card-level (`petrol_exclusion: true` in `scripts/repositories/cards/<card>.yaml`), so `auto_classify` applies it automatically for the confirmed cards — reason tag `petrol-exclusion`.
+   The exclusion is card-level (the `UOBCard` / `TTBCard` classes in `scripts/python/lib/earning/`), so `auto_classify` applies it automatically for the confirmed cards — reason tag `petrol-exclusion`.
 3. **7-11 and TrueMoney earn no *points* on Krungsri-family cards** (user, 2026-08-08; applied to rows dated 2026-08-01 onward). Covers direct 7-Eleven (`7-11 …`), 7-Eleven via TrueMoney (`TMN 7-11 …`), and **every** other TrueMoney charge — `TMN*PROMPTPAY30`, `TMN*LOTUS`, `TMN*FAST FOOD`, `TMN MAKRO`, etc. TrueMoney is matched on the `TMN ` / `TMN*` prefix.
    - **Points-only.** Cashback is *not* withdrawn — First Choice cashback promos still pay at these merchants, and the user adjusts First Choice cashback by hand. A row carrying both `% cb = 2%` and `×0` is correct, not a mistake.
    - **Confirmed excluding**: First Choice, Krungsri JCB, Krungsri NOW, Krungsri Visa (the cards carrying the flag — not every `issuer: Krungsri` card).
    - **Exempt**: **Lotus's Beyond** — Lotus's, 7-Eleven and TrueMoney are all CP ALL businesses, so those merchants keep earning there.
    - **Not in the family**: **CardX JCB** — CardX is SCB X group, unrelated to Krungsri. It shares only the `bill_cycle_pattern: krungsri` key (a BC/DD *shape*, day 5 + 20 days); don't read that as family membership.
 
-   Card-level flag (`truemoney_711_points_exclusion: true`), so `auto_classify` applies it automatically — reason tag suffix `+truemoney-711-points-exclusion`. Full rule: [[../../docs/concepts/krungsri-truemoney-711-exclusion]].
+   Card-level rule (`KrungsriFamilyCard` in `scripts/python/lib/earning/`), so `auto_classify` applies it automatically — reason tag suffix `+truemoney-711-points-exclusion`. Full rule: [[../../docs/concepts/krungsri-truemoney-711-exclusion]].
 4. The Notion **cashback formula** on Baiboon's and Nuta's transactions and the **realized-points formula** on every transaction already encode these rules where they can; but the formulas can't tell "foreign-merchant-in-THB" apart from a regular domestic THB charge, so the computed cashback/points on such transactions may overstate reality. Flag it when the user asks for a cashback total.
 
 ### A note on Notion percentage fields

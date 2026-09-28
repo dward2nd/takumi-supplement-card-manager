@@ -17,12 +17,12 @@ statement_numbers:            # last 4 digits on the statement → holder (seen 
 #     even though no card points at it any more.
 #   - Backdating a row into a pre-switch cycle must pass explicit bill_cycle +
 #     due_date; the inference now answers with the new pattern for every date.
-# truemoney_711_points_exclusion is deliberately ABSENT (user, 2026-08-08).
+# The 7-11 / TrueMoney points rule deliberately does NOT apply (user, 2026-08-08).
 # Krungsri-family cards earn no points at 7-11 / TrueMoney, but Lotus's Beyond
 # is exempt: Lotus's, 7-Eleven and TrueMoney are all CP ALL businesses, so those
-# merchants keep earning points here. Do not add the flag. The exclusion is
-# driven by the flag alone, never by `issuer`, so `issuer: Krungsri` (above)
-# doesn't pull it in.
+# merchants keep earning points here. lib.earning.BY_NAME maps this card to the
+# plain `Card` class, so `issuer: Krungsri` (above) doesn't pull in the
+# Krungsri family's rules.
 # Issuer switched Lotus → Krungsri on 2026-09-27 (user): the card is issued
 # through Lotus Money Service, a Krungsri Consumer partner, and Takumi has it on
 # auto-debit like the rest of the family, so its bill is paid with an

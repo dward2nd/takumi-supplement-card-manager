@@ -11,8 +11,8 @@ than a line in each card's file.
 
 | Mechanism | Scope | Points | Cashback | Where it's encoded |
 |---|---|:--:|:--:|---|
-| Rewards paid upfront | Krungsri family, card-level | ×0 | none | `installment_rewards_upfront` flag |
-| Personal-loan credit line | First Choice, card-level | ×0 | none | same flag + `installment_note` |
+| Rewards paid upfront | Krungsri family, card-level | ×0 | none | `KrungsriFamilyCard` (lib/earning) |
+| Personal-loan credit line | First Choice, card-level | ×0 | none | `FirstChoice` (same rule, its own note) |
 | **ดีจังผ่อน 0%** (Dee-Jang) | CardX, **plan-level** | ×0 | unaffected | `installment-campaigns/dee-jang.yaml` |
 | **U Plan 0%** | Krungsri / First Choice, **plan-level** | ×0 | varies by promo | `installment-campaigns/u-plan.yaml` |
 
@@ -37,21 +37,21 @@ earlier term. See [[#how-inheritance-works]].
 
 ### Krungsri pays installment rewards upfront
 
-On the four Krungsri cards carrying `installment_rewards_upfront` (First Choice, JCB, NOW, Visa), the points and cashback for an installment
+On the Krungsri family's cards (First Choice, JCB, Lady, NOW, Visa, Central The 1 Redz), the points and cashback for an installment
 purchase are granted **in full at the moment of purchase**, not spread across the
 terms (user, 2026-08-10). Each `NN/NN` term therefore earns nothing on its own —
 the reward already landed on the original charge, and crediting the terms too
 would double-count it.
 
-Flag: `installment_rewards_upfront: true` in the
-[[../../scripts/repositories/README|cards repository]]. It zeroes **both** axes,
+Code: `KrungsriFamilyCard` in `scripts/python/lib/earning/families.py` (a YAML
+flag, `installment_rewards_upfront`, until 2026-09-28). It zeroes **both** axes,
 unlike [[krungsri-truemoney-711-exclusion|the 7-11 / TrueMoney rule]] which is
 points-only.
 
 ### First Choice runs two credit lines
 
-First Choice is the same flag for a different reason, so it carries its own
-`installment_note`. The card operates **two simultaneous credit lines**:
+First Choice is the same rule for a different reason, so its class
+(`FirstChoice`) writes its own note. The card operates **two simultaneous credit lines**:
 
 1. **credit card** — a pay-in-full purchase lands here and earns normally;
 2. **personal loan** — a merchant-offered installment (0% interest, up to 10

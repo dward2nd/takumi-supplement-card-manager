@@ -29,7 +29,7 @@ Per account (Takumi + Baiboon together), counting every transaction, first come,
 
 ## Exclusions
 
-- **Petrol** → `×0`. `petrol_exclusion: true`; UOB carries this across its whole range. See [[../concepts/promotions]].
+- **Petrol** → `×0`. A rule of `UOBCard` (`lib/earning`); UOB carries this across its whole range. See [[../concepts/promotions]].
 - **Foreign merchant billed in THB** → `×0`, per the project-wide default rule. Observed on `APPLE.COM/BILL CORK IRL`, `Google YouTubePremium Mountain View USA`, `Flights on Booking.com Amsterdam NLD`.
 - **7-11 / TrueMoney** → **no exclusion.** That rule is Krungsri-family only; UOB is unrelated, so `TMN 7-11` and `TMN ISERVICECCP` rows earn at the full `×5`. Don't copy the First Choice treatment over.
 

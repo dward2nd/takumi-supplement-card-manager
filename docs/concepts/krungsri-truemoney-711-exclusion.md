@@ -74,14 +74,9 @@ promo result as step 6, overriding `points_override` to `×0` while passing
 
 ## How it's encoded
 
-Card-level flag in the [[../../scripts/repositories/README|cards repository]]:
-
-```yaml
-truemoney_711_points_exclusion: true
-```
-
-Read by `lib.card_repo.CardRepo.truemoney_711_points_exclusion` and applied by
-`lib.promotions.classify`, which tags the reason
+A rule of the Krungsri card family: `KrungsriFamilyCard` in
+`scripts/python/lib/earning/families.py` (until 2026-09-28 a YAML flag,
+`truemoney_711_points_exclusion`). `lib.promotions.classify` runs it and tags the reason
 `<base-reason>+truemoney-711-points-exclusion` and writes this `Note`:
 
 > 7-11 / TrueMoney — Krungsri-family cards earn no reward points at these merchants.

@@ -99,7 +99,7 @@ If the user explicitly wants one plan only, point them at the existing in-progre
 
 `auto_classify: true` (the default) runs `lib.promotions.classify` with `is_installment_override=True`, so the active promo's `installment_rule` decides the rate. For UOB One that's 1% per term and `×0` (the card never earns points). For First Choice, **don't** auto-classify cashback: pass `auto_classify: false` and ask the user — First Choice may credit installment cashback at purchase time only (see [[../add-transaction/SKILL.md|/add-transaction]] for the First Choice exception).
 
-On the four **Krungsri** cards, `classify` also applies the card-level `installment_rewards_upfront` rule: every term gets `×0` and **no** cashback, because Krungsri grants an installment's rewards in full at purchase. On **First Choice** the same flag fires for a different reason (a merchant installment is booked to the personal-loan credit line, which earns nothing at all) and writes that card-specific `Note`. A promo with an explicit `installment_rule` outranks the flag.
+On the four **Krungsri** cards, `classify` also applies the Krungsri family's rewards-paid-upfront rule (`KrungsriFamilyCard`): every term gets `×0` and **no** cashback, because Krungsri grants an installment's rewards in full at purchase. On **First Choice** the same flag fires for a different reason (a merchant installment is booked to the personal-loan credit line, which earns nothing at all) and writes that card-specific `Note`. A promo with an explicit `installment_rule` outranks the flag.
 
 ### 6. Campaigns must be declared at plan start — they're invisible later
 

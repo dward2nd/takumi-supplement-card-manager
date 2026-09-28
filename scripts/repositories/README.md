@@ -24,11 +24,6 @@ name: UOB One                  # required — exact Cards DS title (matches the 
 issuer: UOB                    # required — bank or company (matches the ธนาคาร/บริษัท select where present)
 bill_cycle_pattern: uob        # required — pattern key in lib.bill_cycle.PATTERNS
 points_default: "×0"           # optional — multiplier checkbox default. Omit if the card earns at the standard ×1 rate.
-petrol_exclusion: true         # optional, default false — when true, petrol-station merchants earn nothing on this card (the UOB-wide rule).
-truemoney_711_points_exclusion: true  # optional, default false — when true, 7-11 and TrueMoney merchants earn no *points* on this card (the Krungsri-family rule). Cashback is NOT affected.
-installment_rewards_upfront: true     # optional, default false — when true, `NN/NN` installment terms earn neither points nor cashback on this card. BOTH axes, unlike the flag above.
-installment_note: >-                  # optional — replaces the generic explanation this rule writes into `Note`. Use when the card's *reason* differs (First Choice: personal-loan credit line, not upfront crediting).
-  Installment term — ...
 notes: |                       # optional — anything the schema doesn't capture
   Free-form text.
 ```
@@ -47,9 +42,20 @@ notes: |                       # optional — anything the schema doesn't captur
 ### Sigil values
 
 - `points_default: "×0"` — string, matches the multiplier names. Any multiplier is meaningful, not just `×0`: it is the card's **base earning tier**, used when no promotion is active and as the fallback a promo-boosted card drops back to. `UOB World` sets `×2` because an unboosted row on that card still earns double, so omitting the field (⇒ Notion reads `×1`) would under-report.
-- `petrol_exclusion: true` — applies the petrol exclusion to this card.
-- `truemoney_711_points_exclusion: true` — applies the Krungsri-family 7-11 / TrueMoney **points** exclusion. Points-only: `lib.promotions.classify` forces `×0` and leaves the promo's `% cb` untouched. Set on First Choice, Krungsri JCB, Krungsri NOW and Krungsri Visa; deliberately absent on the other `issuer: Krungsri` cards, notably on `Lotus's Beyond` (CP ALL exemption) and on `CardX JCB` (SCB X group — shares only the `krungsri` bill-cycle pattern key, not the family). See [[../../docs/concepts/krungsri-truemoney-711-exclusion]].
-- `installment_rewards_upfront: true` — installment terms earn nothing on **both** axes. Set on First Choice, Krungsri JCB, Krungsri NOW and Krungsri Visa: Krungsri grants an installment's rewards in full at purchase, so crediting the terms would double-count. A promo with an explicit `installment_rule` outranks it. See [[../../docs/concepts/installment-reward-campaigns]].
+
+### Card rules are classes, not flags
+
+How a card earns beyond its promotions is code, one class per card family in `scripts/python/lib/earning/` (since 2026-09-28; the flags `petrol_exclusion`, `truemoney_711_points_exclusion`, `installment_rewards_upfront` and `installment_note` were retired):
+
+| Class | Cards | Rules |
+|---|---|---|
+| `UOBCard`, `TTBCard` | every UOB card; ttb so smart | petrol earns nothing, both axes |
+| `KrungsriFamilyCard` | Krungsri JCB/Lady/NOW/Visa, Central The 1 Redz | installment terms earn nothing (rewards paid at purchase); 7-11 / TrueMoney earn no **points** ([[../../docs/concepts/installment-reward-campaigns]], [[../../docs/concepts/krungsri-truemoney-711-exclusion]]) |
+| `FirstChoice` | First Choice | the family's rules, with its personal-loan-line installment note |
+| `AEONCard` | every AEON card | the `points_excluded_merchants` below |
+| `Card` | everything else, incl. `Lotus's Beyond` (CP ALL exemption) and `CardX JCB` (SCB X group) | promotions only |
+
+`lib.earning.card_for` picks the class: an entry in `BY_NAME`, else `BY_ISSUER`, else `Card`.
 
 ### Merchant points exclusions
 
@@ -148,14 +154,15 @@ When `lib.promotions.classify(card, date, merchant, [is_installment])` runs agai
 
 1. **Installment rule** wins if the row looks like an installment and the promo declares one.
 2. **Foreign-in-THB** is checked next. Default-exclude promos return no cashback unless a per-merchant `override` matches.
-3. **UOB petrol exclusion** (general, card-level) fires on UOB-flagged cards. Forces `×0` on **both** axes — it does *not* inherit `points_default` from either the promo or the card, since a petrol row earns nothing by definition. (Fixed 2026-08-20; previously it inherited, which was latent until `UOB World` became the first petrol-excluding card with a non-`×0` default.)
+3. **Petrol exclusion** fires on cards whose family withholds fuel (UOB, ttb). Forces `×0` on **both** axes — it does *not* inherit `points_default` from either the promo or the card, since a petrol row earns nothing by definition. (Fixed 2026-08-20; previously it inherited, which was latent until `UOB World` became the first petrol-excluding card with a non-`×0` default.)
 4. **Tiers** are tried in order; first match wins.
 5. **No match** → no cashback (`% cb` left unset).
 
-Then two card-level rules are layered **on top of** that result, in this order:
+Then the card family's rules are layered **on top of** that result, in this order (`after_rules` in `lib.earning`):
 
-6. **`installment_rewards_upfront`** — installment rows get `×0` and no cashback. Skipped when step 1 fired (an explicit promo `installment_rule` is the more specific fact). Reason tag `<base>+installment-rewards-upfront`.
-7. **`truemoney_711_points_exclusion`** — forces `×0`, leaves `% cb` alone. Skipped when points are already `×0`, so it never double-notes on top of step 6. Reason tag `<base>+truemoney-711-points-exclusion`.
+6. **Installment rewards paid upfront** (Krungsri family) — installment rows get `×0` and no cashback. Skipped when step 1 fired (an explicit promo `installment_rule` is the more specific fact). Reason tag `<base>+installment-rewards-upfront`.
+7. **7-11 / TrueMoney points** (Krungsri family) — forces `×0`, leaves `% cb` alone. Skipped when points are already `×0`, so it never double-notes on top of step 6. Reason tag `<base>+truemoney-711-points-exclusion`.
+8. **MCC points exclusions** (AEON) — forces `×0` on the card's `points_excluded_merchants`. Reason tag `<base>+merchant-points-exclusion`.
 
 Plan-level installment campaigns sit **outside** `classify` entirely — they're applied by `lib.installments.populate_for_cycle` after classification, and override the points side and the `Note` while leaving `% cb` as classified.
 

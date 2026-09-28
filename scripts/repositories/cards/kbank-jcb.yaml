@@ -18,11 +18,10 @@ notes: |
   policy**: the card had zero transactions until 2026-08-30, so there is no
   history to infer points-per-baht, a cashback rate, or whether the petrol /
   TrueMoney carve-outs apply. Ask the user before writing a reward-bearing
-  row on this card, and fill in `points_default` /
-  `petrol_exclusion` / `truemoney_711_points_exclusion` here once known.
+  row on this card, and fill in `points_default` here (or a KBank class in
+  lib/earning for petrol / TrueMoney rules) once known.
 
   Deliberately NOT assumed:
-    - `petrol_exclusion` — confirmed only for the UOB cards and ttb so smart.
-    - `truemoney_711_points_exclusion` — Krungsri-family only; KBank is not
-      in that family.
-    - `installment_rewards_upfront` — Krungsri-only convention.
+    - fuel withheld — confirmed only for the UOB cards and ttb so smart.
+    - 7-11 / TrueMoney points — Krungsri-family only; KBank is not in that family.
+    - installment rewards paid upfront — Krungsri-only convention.

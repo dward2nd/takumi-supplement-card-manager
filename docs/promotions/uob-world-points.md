@@ -54,7 +54,7 @@ the row the quota ends in        → keeps ×5; ใช้คะแนน = ⌊ov
 The promo does not override the project-wide exclusions:
 
 - **Foreign merchant billed in THB** → `×0`. Fires before tier resolution.
-- **Petrol stations** → `×0`, via `petrol_exclusion: true` on the card. UOB carries this exclusion across its whole range.
+- **Petrol stations** → `×0`, a rule of `UOBCard` (`lib/earning`). UOB carries this exclusion across its whole range.
 
 The petrol path was **wrong until 2026-08-20**: it returned `promo.points_default or card_points_default`, which on this card meant a petrol row was classified `×5` while the very same branch wrote a Note saying it earned nothing. Latent for every other card because they all set `points_default: "×0"`. Now both petrol branches in `lib.promotions` force `×0` explicitly.
 

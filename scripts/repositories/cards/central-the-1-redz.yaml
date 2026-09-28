@@ -3,9 +3,6 @@ issuer: Krungsri
 bill_cycle_pattern: krungsri
 statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; supplements named on the statement)
   "2611": takumi
-truemoney_711_points_exclusion: true
-installment_rewards_upfront: true   # Krungsri pays an installment's points + cashback in full
-                                    # at purchase, so each NN/NN term earns nothing on its own.
 notes: |
   Held by BOTH Takumi and Baiboon — the only card outside the UOB/AEON sets
   with that shape. Missing from `docs/cards/_stubs.md` until 2026-09-23.

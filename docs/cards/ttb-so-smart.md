@@ -27,7 +27,7 @@ ttb's flat-rate cashback card. It is a **cashback card, not a points card** — 
 
 The policy is machine-applied by `lib.promotions.classify`, split across two repository files:
 
-- **`scripts/repositories/cards/ttb-so-smart.yaml`** — `points_default: "×0"` (no points, canonical) and `petrol_exclusion: true` (gas-station carve-out). `bill_cycle_pattern: ttb`.
+- **`scripts/repositories/cards/ttb-so-smart.yaml`** — `points_default: "×0"` (no points, canonical); the gas-station carve-out is `TTBCard` in `lib/earning`. `bill_cycle_pattern: ttb`.
 - **`scripts/repositories/promotions/ttb-so-smart-cashback.yaml`** — the 1% base tier (`patterns: ["*"]`, `exclude_patterns: ["TMN", "7-11"]`) and `installment_rule: { rate: 0.0 }` to zero installment rows. Modeled as an open-ended, ongoing card-level policy (`effective_start: 2026-01-01`, no `effective_end`).
 
 So `/add-transaction` with `auto_classify: true` fills `% cb`, the `×0` multiplier, and the exclusion Note automatically. Verified across mall / TMN / 7-11 / petrol / installment / foreign cases on 2026-07-21.

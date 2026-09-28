@@ -3,4 +3,3 @@ issuer: UOB
 bill_cycle_pattern: uob
 statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27)
   "4721": takumi
-petrol_exclusion: true

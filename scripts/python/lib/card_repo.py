@@ -3,11 +3,14 @@
 deterministic + idempotent — pure function of the on-disk YAML files.
 
 The Cards data sources in Notion hold per-holder card pages (title,
-network, premium tier, etc.); this module holds script-side policy
-flags that don't fit cleanly in Notion or that are needed without a
-Notion round-trip: bill-cycle pattern key, default points multiplier,
-petrol-station exclusion, 7-11/TrueMoney points exclusion, merchant
-points exclusions, issuer.
+network, premium tier, etc.); this module holds script-side facts that
+don't fit cleanly in Notion or that are needed without a Notion
+round-trip: issuer, bill-cycle pattern key, default points multiplier,
+statement card numbers, merchant points exclusions.
+
+Data only. How a card earns (fuel withheld, the Krungsri family's rules …)
+is a class per card family in `lib.earning` since 2026-09-28; the YAML flags
+that used to switch those rules on were retired.
 
 One YAML file per card under `scripts/repositories/cards/`. See
 `scripts/repositories/README.md` for the schema.
@@ -47,10 +50,6 @@ class CardRepo:
     issuer: str
     bill_cycle_pattern: str
     points_default: str | None
-    petrol_exclusion: bool
-    truemoney_711_points_exclusion: bool
-    installment_rewards_upfront: bool
-    installment_note: str | None
     notes: str | None
     source_path: Path
     # Last four digits printed on the issuer's statement → holder slug
@@ -74,14 +73,6 @@ def _parse_card(data: dict[str, Any], source: Path) -> CardRepo:
         issuer=str(data["issuer"]),
         bill_cycle_pattern=str(data["bill_cycle_pattern"]),
         points_default=data.get("points_default"),
-        petrol_exclusion=bool(data.get("petrol_exclusion", False)),
-        truemoney_711_points_exclusion=bool(
-            data.get("truemoney_711_points_exclusion", False)
-        ),
-        installment_rewards_upfront=bool(
-            data.get("installment_rewards_upfront", False)
-        ),
-        installment_note=data.get("installment_note"),
         notes=data.get("notes"),
         source_path=source,
         statement_numbers=_parse_statement_numbers(data.get("statement_numbers"), source),
