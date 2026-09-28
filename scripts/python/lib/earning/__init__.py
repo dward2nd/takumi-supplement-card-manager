@@ -15,11 +15,12 @@ from __future__ import annotations
 
 from .. import card_repo
 from .base import Card
-from .families import AEONCard, FirstChoice, KrungsriFamilyCard, TTBCard, UOBCard
+from .families import AEONCard, FirstChoice, KrungsriFamilyCard, KrungsriJCB, TTBCard, UOBCard
 
 # Cards whose rules differ from their issuer's family.
 BY_NAME: dict[str, type[Card]] = {
     "First Choice": FirstChoice,
+    "Krungsri JCB": KrungsriJCB,     # points-only petrol campaign
     "Lotus's Beyond": Card,        # Krungsri-issued partner card; CP ALL merchants keep earning
 }
 BY_ISSUER: dict[str, type[Card]] = {
@@ -38,5 +39,5 @@ def card_for(name: str) -> Card:
     return cls(name, repo)
 
 
-__all__ = ["AEONCard", "BY_ISSUER", "BY_NAME", "Card", "FirstChoice", "KrungsriFamilyCard", "TTBCard",
-           "UOBCard", "card_for"]
+__all__ = ["AEONCard", "BY_ISSUER", "BY_NAME", "Card", "FirstChoice", "KrungsriFamilyCard", "KrungsriJCB",
+           "TTBCard", "UOBCard", "card_for"]

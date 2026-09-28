@@ -72,6 +72,24 @@ class KrungsriFamilyCard(Card):
             "truemoney-711-points-exclusion")
 
 
+class KrungsriJCB(KrungsriFamilyCard):
+    """Krungsri's year-long Thai-petrol campaign withholds reward *points* on fuel
+    (user, 2026-09-27; seen on BSRC-… and BANGCHAK-… rows). Points only — the
+    card's cashback arrives as campaign credit rows, never `% cb` — so not the
+    UOB/ttb rule, which zeroes both axes."""
+
+    def after_rules(self) -> list[AfterRule]:
+        return [*super().after_rules(), self._petrol_points]
+
+    def _petrol_points(self, result: Classification, date: dt.date, merchant: str,
+                       inst: bool) -> Classification:
+        if not promos.looks_petrol(merchant) or result.points_override == "×0":
+            return result
+        return with_points_withheld(
+            result, "Petrol station — Krungsri's year-long Thai-petrol campaign withholds reward points "
+                    "on fuel spend.", "petrol-points-exclusion")
+
+
 class FirstChoice(KrungsriFamilyCard):
     """A merchant installment books to First Choice's personal-loan line, not the
     card line, so the reason its terms earn nothing is different (user, 2026-08-10)."""

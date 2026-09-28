@@ -52,6 +52,7 @@ How a card earns beyond its promotions is code, one class per card family in `sc
 | `UOBCard`, `TTBCard` | every UOB card; ttb so smart | petrol earns nothing, both axes |
 | `KrungsriFamilyCard` | Krungsri JCB/Lady/NOW/Visa, Central The 1 Redz | installment terms earn nothing (rewards paid at purchase); 7-11 / TrueMoney earn no **points** ([[../../docs/concepts/installment-reward-campaigns]], [[../../docs/concepts/krungsri-truemoney-711-exclusion]]) |
 | `FirstChoice` | First Choice | the family's rules, with its personal-loan-line installment note |
+| `KrungsriJCB` | Krungsri JCB | the family's rules, plus petrol earning no **points** (Krungsri's Thai-petrol campaign) |
 | `AEONCard` | every AEON card | the `points_excluded_merchants` below |
 | `Card` | everything else, incl. `Lotus's Beyond` (CP ALL exemption) and `CardX JCB` (SCB X group) | promotions only |
 

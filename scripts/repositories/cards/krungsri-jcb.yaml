@@ -10,8 +10,6 @@ notes: |
   BANGCHAK-… rows. Points-only; cashback is not in play (this card's cashback
   arrives as campaign credit rows, never `% cb`).
 
-  Deliberately NOT the UOB/ttb fuel rule: that zeroes BOTH axes and writes a
-  "no cashback / points" Note. Until a points-only petrol flag exists,
-  classify by hand — `×0` plus the Note
-  "Petrol station (Bangchak/BSRC) — Krungsri's year-long Thai-petrol campaign
-  withholds reward points on fuel spend."
+  Encoded since 2026-09-28 as lib.earning.KrungsriJCB: `×0` plus a Note on
+  petrol rows, cashback untouched. Deliberately NOT the UOB/ttb fuel rule,
+  which zeroes BOTH axes.
