@@ -56,3 +56,44 @@ So the multiplier set is a **lossy projection** of the underlying rules. Where t
 - **Krungsri Lady and Krungsri JCB** earn no points at petrol stations (the Thai-petrol campaign; `KrungsriPetrolCampaign`).
 - **KTC** has the longest exclusion list; see [[../promotions/ktc-forever]].
 
+## Statement balance rows
+
+A card's `คะแนนสะสม` is the sum of its ledger rows, and each ledger only goes back so far. Takumi's reset rows (2026-09-22, [[ledger-reset]]) zeroed his cards, and the friends' ledgers never held the whole account. So on **2026-09-29** each card's running points were set to what the bank prints, with one row per card and statement. [[../../.claude/skills/sync-points-balance/SKILL|`/sync-points-balance`]] writes and maintains these rows:
+
+| Property | Value |
+|---|---|
+| `Name` | `[ปรับคะแนน] ยอดคะแนนคงเหลือตามใบแจ้งยอด <statement BC>` ("points outstanding per the statement") |
+| `ยอดชำระ` | `0`, `×0` |
+| `ใช้คะแนน` | −(printed outstanding − the ledgers' points as of the statement). Negative adds points. |
+| `Transaction Datetime` / `Bill Cycle Date` / `Due Date` | the statement's cycle |
+| ledger | the account holder's: **Takumi's** for a pooled account (UOB, KBank, Krungsri); the card's own holder where the bank prints one statement per card number (KTC, CardX) |
+
+**The rule** (user, 2026-09-29): *the points total on a statement = Takumi's points + his friends' points.* The row is sized so that the sum over all three ledgers, as of the statement, equals the printed outstanding points. On a KTC or CardX statement, which covers one card number, that sum is the card number's own rows, plus friends' `[บัตรหลัก]` shares on Takumi's principal card.
+
+**As of the statement** uses `/audit-rewards`' period rule. For UOB, charges count if they *posted* before the statement's cycle date. For other issuers, rows count if they're billed on or before the statement's cycle. `Reset …` rows always count. Rows after the statement, such as open-cycle charges and a redemption made since, stay on top. So the card reads the bank's figure plus what has happened since.
+
+`/audit-rewards` and `/record-statement`'s rounding step leave these rows out (`BALANCE_ADJUSTMENT` in `lib/points_account.py`). They set an opening balance; they aren't points earned in the cycle. `/record-statement` already ignores `[ปรับคะแนน…` rows when matching statement lines.
+
+Rows written 2026-09-29 (the printed figures):
+
+| Card | Statement | Printed | Ledgers before | Row |
+|---|---|---:|---:|---:|
+| UOB World …9310 | 2026-09-25 | 17,618 | 1,020 | +16,598 |
+| UOB Premier …4721 | 2026-09-25 | 162 | 0 | +162 |
+| UOB Makro …1649 | 2026-09-25 | 1,545 | 1,540 | +5 |
+| KBank Shopee …0052 | 2026-09-25 | 5,792 | 1,003 | +4,789 |
+| KBank PLUSTINUM …3831 | 2026-09-25 | 4,004 | 3,811 | +193 |
+| Krungsri JCB …8391 | 2026-09-05 | 3,552 | 201 | +3,351 |
+| Krungsri Visa …7679 | 2026-09-05 | 2,678 | 230 | +2,448 |
+| KTC Digital VISA …0581 | 2026-08-27 | 4,932 | 71 | +4,861 |
+| KTC JCB …0059 | 2026-08-27 | 23 | 10 | +13 |
+| KTC UnionPay …1346 | 2026-08-27 | 1,964 | 53 | +1,911 |
+| KTC UnionPay …2310 (Baiboon) | 2026-08-27 | 235 | 238 | −3 |
+| CardX JCB …1265 (Nuta) | 2026-09-05 | 70 | 66 | +4 |
+
+KBank JCB, Krungsri Lady and Krungsri NOW already matched at 0. No row was written for:
+- **Lotus's Beyond**: the statement prints fractional coins (287.5), which the ledger's whole points can't hold.
+- **AEON, First Choice, Central The 1, ttb, UOB One**: their statements print no points, or the card earns none.
+- **KBank LINE Points, KTC Mastercard**: no points summary or statement is on file.
+
+Re-running `/sync-points-balance` recomputes each row and updates it in place. That matters if older rows are backfilled into a ledger later. After each new statement, a matching audit makes the new row `ok`, so no row is written.

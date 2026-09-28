@@ -88,6 +88,12 @@ def _refetch_internal_file(file_entry: dict, work_dir: pathlib.Path) -> tuple[st
     return str(dest), name
 
 
+def download_file(file_entry: dict, work_dir: str | pathlib.Path) -> tuple[str, str]:
+    """Download one Notion-hosted entry of a files property into `work_dir` →
+    (local path, file name). Read-only on Notion."""
+    return _refetch_internal_file(file_entry, pathlib.Path(work_dir))
+
+
 def append_files_to_page(
     page_id: str,
     property_name: str,

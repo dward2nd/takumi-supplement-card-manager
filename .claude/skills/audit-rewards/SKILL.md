@@ -1,6 +1,6 @@
 ---
 name: audit-rewards
-description: Reconcile a bank statement's printed reward-points summary against every holder's ledger — per card or account, per cycle — and point at the rows behind any gap. Read-only. Covers UOB (UOB Rewards), KBank (K Point), KTC (KTC FOREVER), Krungsri (Visa/JCB/Lady/NOW) and Lotus's (coins); First Choice, Central The 1 and AEON print no points. Use when the user says "audit the points", "do our points match the statement?", "check reward points for <card>", or after recording a statement (/record-statement).
+description: Reconcile a bank statement's printed reward-points summary against every holder's ledger — per card or account, per cycle — and point at the rows behind any gap. Read-only. Covers UOB (UOB Rewards), KBank (K Point), KTC (KTC FOREVER), Krungsri (Visa/JCB/Lady/NOW), CardX and Lotus's (coins); First Choice, Central The 1 and AEON print no points. Use when the user says "audit the points", "do our points match the statement?", "check reward points for <card>", or after recording a statement (/record-statement).
 ---
 
 # audit-rewards
@@ -14,7 +14,7 @@ echo '{"pdf":"/abs/MONTHLYSTATEMENT_….pdf","issuer":"UOB"}' \
   | uv run --project scripts/python scripts/python/audit-rewards/cli.py
 ```
 
-`issuer`: `UOB`, `KBank`, `KTC`, `Krungsri` or `Lotus`. For a PDF, use the statement on the Bills row's `ใบแจ้งยอด (PDF)` ([[../../../docs/concepts/billing-cycle|statements live on the bills]]). A paper-shifted statement date is mapped onto the card's cycle first, as `/record-statement` does. Read-only.
+`issuer`: `UOB`, `KBank`, `KTC`, `Krungsri`, `Lotus` or `CardX`. For a PDF, use the statement on the Bills row's `ใบแจ้งยอด (PDF)` ([[../../../docs/concepts/billing-cycle|statements live on the bills]]). A paper-shifted statement date is mapped onto the card's cycle first, as `/record-statement` does. Read-only.
 
 ## How the ledger side is counted
 
@@ -25,12 +25,13 @@ Each issuer's parser class states two facts. The engine is `lib/rewards_audit.py
 | UOB | `posting`: rows *posted* from the previous statement date to the day before this one (`Process Date`, else inferred). Points are credited as each charge posts. | `line`, like the ledger formula | Aug/Sep 2026 exact |
 | KBank, AEON | `cycle`: rows billed on the cycle. Points are credited per cycle, in the app the day after BC (user). | `cycle`: floor(Σ spend / ฿ per point) per multiplier | KBank Aug exact after rounding |
 | KTC, Krungsri, Lotus's | `cycle` (default) | `cycle` | KTC Aug, Krungsri Visa Sep exact |
+| CardX | `cycle` (default) | `line`: Sep 2026 printed 15; the rows give 15 one by one, 16 rounded once | Jun/Aug/Sep 2026 exact |
 
-- **Which rows:** every holder's rows on the card when points pool on the account (UOB, KBank, Krungsri, Lotus's). On KTC, where each card number gets its own PDF, only that card's own rows count, plus friends' `[บัตรหลัก]` shares on your principal card.
+- **Which rows:** every holder's rows on the card when points pool on the account (UOB, KBank, Krungsri, Lotus's). On KTC and CardX, where each card number gets its own PDF, only that card's own rows count, plus friends' `[บัตรหลัก]` shares on your principal card. Both rules are `PointsAccount` classes in `lib/points_account.py`, and the posting/cycle timing is a `PointsPeriod`, shared with [[../sync-points-balance/SKILL|/sync-points-balance]].
 - **Points:** the `คะแนนที่ได้จริง` formula per row ([[../../../docs/formulas/points-realized]], `lib/points.py`).
 - **`[ปรับคะแนน]` rows** are the split-line adjustments `/record-statement` writes, and count as earned.
 - **Other `ใช้คะแนน` rows** are redemptions, or hand adjustments when named `ปรับคะแนน…`.
-- **`Reset …` rows** are ledger bookkeeping and are left out (`left_out`).
+- **`Reset …` rows** and **`[ปรับคะแนน] ยอดคะแนนคงเหลือตามใบแจ้งยอด …` rows** (a card's balance set to a statement's printed outstanding points — [[../../../docs/concepts/points-and-multipliers#Statement balance rows|statement balance rows]]) are ledger bookkeeping and are left out (`left_out`).
 
 ## Reading the report
 

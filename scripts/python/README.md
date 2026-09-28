@@ -23,6 +23,8 @@ scripts/python/
 │   ├── earning/                     # Card, one class per card family (UOBCard, KrungsriFamilyCard, AEONCard …)
 │   ├── bill_cycle.py                # BillCycle, one class per issuer's cycle rule
 │   ├── crediting/                   # Crediting, one class per card that gets credit rows (UOBOneCrediting)
+│   ├── points_account.py            # PointsAccount (pooled / principal card / supplement card) + PointsPeriod (posting / cycle)
+│   ├── rewards_audit.py, points_balance.py  # statement points vs ledgers; balance rows to the printed figure
 │   ├── bureau/                      # Promotion Bureau: payout shapes (ladder, credit cap, points) + campaigns;
 │   │                                #   runner = one row's sync, follow = re-sync after a ledger write
 │   └── statements/                  # StatementParser, one class per issuer; attribution; recording

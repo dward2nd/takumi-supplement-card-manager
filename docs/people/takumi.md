@@ -34,6 +34,8 @@ Takumi began a fresh record on his own cards using the [[../concepts/ledger-rese
 
 All sixteen cards now carry one, and every card reads 0 balance / 0 points. Takumi wrote four by hand on 2026-09-22; the remaining ten were written through `/add-transaction` on 2026-09-23, and two of the hand-written four needed correcting (a sign slip and a self-earned-points miss — see the concept note). `SPayLater` and `KTC JCB` were already at zero and got no row. The rows are identifiable by the exact title `Reset ยอดใช้จ่ายและคะแนน`.
 
+On 2026-09-29 the points side was brought forward to the banks' figures: a `[ปรับคะแนน] ยอดคะแนนคงเหลือตามใบแจ้งยอด <BC>` row per card sets each card's balance to its latest statement's outstanding points — see [[../concepts/points-and-multipliers#Statement balance rows]]. Balances stay reset.
+
 This was safe on Takumi's universe specifically — it was dormant, and he had no Bills DB for a reset row to leak into. (His Bills DB, added 2026-09-27, is statement-driven, so reset rows still don't reach a bill total.) The same move on [[baiboon]]'s or [[nuta]]'s live cards would erase genuinely-owed balances and corrupt the next bill draft. See the cautions in [[../concepts/ledger-reset]].
 
 ## Why the structure differs

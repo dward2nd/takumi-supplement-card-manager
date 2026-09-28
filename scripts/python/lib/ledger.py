@@ -55,6 +55,13 @@ def cycle_rows(transactions_ds: str, card_page_id: str, bill_cycle: str) -> list
     return [project_transaction(p) for p in cycle_pages(transactions_ds, card_page_id, bill_cycle)]
 
 
+def card_rows(transactions_ds: str, card_page_id: str) -> list[dict]:
+    """Every projected transaction row on a card — its whole history, which is what
+    the card's `ยอดค้างชำระ` / `คะแนนสะสม` rollups sum."""
+    return [project_transaction(p) for p in notion_client.query_all(
+        transactions_ds, filter={"property": "Card", "relation": {"contains": card_page_id}})]
+
+
 def is_bill_payment_row(row: dict) -> bool:
     """True if a projected row is a *bill payment* — STRICT, for bill totals.
 

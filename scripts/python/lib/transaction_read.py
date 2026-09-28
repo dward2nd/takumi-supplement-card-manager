@@ -74,5 +74,7 @@ def project_transaction(page: dict) -> dict[str, Any]:
         "cashback_percent": _number(props, "% cb"),
         "multiplier": checked_multiplier(props),        # None = ×1
         "points_redeemed": _number(props, "ใช้คะแนน"),
+        # `คะแนนที่ได้จริง` — what the row adds to the card's `คะแนนสะสม` (earning, Processed gate, less ใช้คะแนน).
+        "points_realized": _formula_number(props, "คะแนนที่ได้จริง"),
         "cashback": _formula_number(props, "cashback"),
     }

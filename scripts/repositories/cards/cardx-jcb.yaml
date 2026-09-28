@@ -1,6 +1,8 @@
 name: CardX JCB
 issuer: CardX
 bill_cycle_pattern: krungsri      # same BC/DD shape as the krungsri pattern (day 5, +20d) — a coincidence of shape only
+statement_numbers:            # last 4 digits on the statement → holder (CardX prints one PDF per card number)
+  "1265": nuta                # her own card's PDF, locked with her DOB, with its own points (seen 2026-09-29)
 # CardX is part of the SCB X group — a completely different financial group from
 # Krungsri (user, 2026-08-08). It shares only the bill-cycle pattern key above.
 # So Krungsri-family rules do NOT reach this card: lib.earning gives it the plain

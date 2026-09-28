@@ -5,13 +5,14 @@ deterministic + idempotent — reads only.
 For every points summary a statement prints (`Statement.rewards`, read by each
 issuer's parser), total what the ledgers say for the same card and period:
 
-  - which rows: every holder's rows on the card when the bank pools points on
-    the account (UOB, KBank, Krungsri, Lotus's); on a one-PDF-per-card issuer
-    (KTC) only that card's own rows — plus friends' `[บัตรหลัก]` shares when
-    it's the principal's card;
-  - which period (`StatementParser.points_timing`): "posting" — the rows posted
+  - which rows: the summary's `PointsAccount` (`lib.points_account`) — every
+    holder's rows on the card when the bank pools points on the account (UOB,
+    KBank, Krungsri, Lotus's); on a one-PDF-per-card issuer (KTC, CardX) only
+    that card's own rows — plus friends' `[บัตรหลัก]` shares when it's the
+    principal's card;
+  - which period: the parser's `PointsPeriod` — "posting", the rows posted
     from the previous statement date to the day before this one, `Process Date`
-    or inferred (UOB credits points as each charge posts) — or "cycle" — the
+    or inferred (UOB credits points as each charge posts) — or "cycle", the
     rows billed on the statement's cycle (KBank, AEON; the default);
   - how many points: the `คะแนนที่ได้จริง` formula per row (`lib.points`) — and,
     for a bank that rounds once per cycle (`points_rounding` "cycle": KBank, KTC,
@@ -21,8 +22,10 @@ issuer's parser), total what the ledgers say for the same card and period:
     ledger — split lines, and (`[ปรับคะแนน] ปัดเศษ…`) the cycle's rounding —
     and count toward earned; `[คะแนนพิเศษ]` rows are bonus points (vs the
     bank's bonus); other `ใช้คะแนน` rows are redemptions (or, named
-    `ปรับคะแนน…`, the household's hand adjustments); `Reset …` rows are ledger
-    bookkeeping and are left out. A coin programme (Lotus's) isn't compared:
+    `ปรับคะแนน…`, the household's hand adjustments); `Reset …` rows and
+    `[ปรับคะแนน] ยอดคะแนนคงเหลือ…` rows (a card's balance set to a statement's
+    printed outstanding points by /sync-points-balance) are ledger bookkeeping
+    and are left out. A coin programme (Lotus's) isn't compared:
     its fractional coins don't fit the ledger's whole points (user, 2026-09-28).
 
 A gap comes with the rows to look at: each row whose multiplier differs from
@@ -35,11 +38,12 @@ import datetime as dt
 from dataclasses import dataclass, field
 
 from . import promotions
-from .bill_cycle import posting_date, pattern_for_card
+from .bill_cycle import pattern_for_card
 from .cards import CardNotFoundError, find_card
-from .holders import HOLDERS, primary
-from .ledger import PRIMARY_PREFIX, cycle_rows
+from .holders import HOLDERS
+from .ledger import cycle_rows
 from .points import row_points
+from .points_account import account_for, is_bookkeeping, period_for
 from .statements.model import RewardSummary, Statement
 from .statements.parser import StatementParser
 
@@ -47,7 +51,6 @@ SPLIT_ADJUSTMENT = "[ปรับคะแนน]"
 ROUNDING_ADJUSTMENT = "[ปรับคะแนน] ปัดเศษ"   # the cycle's rounding, on the principal's ledger
 BONUS = "[คะแนนพิเศษ]"
 HAND_ADJUSTMENT = "ปรับคะแนน"
-RESET = "Reset "
 
 
 @dataclass
@@ -75,38 +78,19 @@ def _rows_for(holder_key: str, card: str, bill_cycles: list[str]) -> tuple[list[
     return rows, bpp
 
 
-def _in_period(r: dict, card: str, timing: str, previous_bc: dt.date, bc: dt.date) -> bool:
-    # Only charges post: redemption and adjustment rows (฿0 or less) belong to the cycle they're billed on.
-    if timing == "posting" and (r["amount"] or 0) > 0:
-        if not r["transaction_date"]:
-            return False
-        posted = posting_date(card, dt.date.fromisoformat(r["transaction_date"][:10]), r["name"], r["process_date"])
-        return previous_bc <= posted < bc
-    return (r["bill_cycle_date"] or "")[:10] == bc.isoformat()
-
-
 def tally(summary: RewardSummary, card: str, holder: str, parser: StatementParser, bc: dt.date) -> Tally:
-    principal = primary().key
-    if parser.separate_card_statements:
-        holders = {principal: None, **{h: "shares" for h in HOLDERS if h != principal}} if holder == principal \
-            else {holder: "own"}
-    else:
-        holders = {h: None for h in HOLDERS}
+    account, period = account_for(parser, card, holder), period_for(parser)
     previous_bc = pattern_for_card(card).closed(bc)[0]
-    cycles = [bc.isoformat()] + ([previous_bc.isoformat()] if parser.points_timing == "posting" else [])
+    cycles = period.bill_cycles(bc, previous_bc)
     t = Tally()
-    for h, only in holders.items():
+    for h in account.holders():
         rows, bpp = _rows_for(h, card, cycles)
         t.bpp = t.bpp or bpp
         for r in rows:
             name = r["name"] or ""
-            if only == "shares" and not name.startswith(PRIMARY_PREFIX):
+            if not account.counts(h, name) or not period.in_statement(r, card, previous_bc, bc):
                 continue
-            if only == "own" and name.startswith(PRIMARY_PREFIX):
-                continue
-            if not _in_period(r, card, parser.points_timing, previous_bc, bc):
-                continue
-            if name.startswith(RESET):
+            if is_bookkeeping(name):
                 t.left_out.append(f"{h} {r['transaction_date'][:10]} {name}")
                 continue
             used = int(r["points_redeemed"] or 0)

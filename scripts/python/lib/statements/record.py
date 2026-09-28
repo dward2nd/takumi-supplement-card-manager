@@ -41,7 +41,7 @@ import dataclasses
 import datetime as _dt
 from pathlib import Path
 
-from .. import card_repo, notion_client, notion_files, promotions
+from .. import card_repo, notion_client, notion_files, points_account, promotions
 from .. import notion_blocks as nb
 from ..bill_cycle import PatternNotFoundError, cycle_for_month, pattern_for_card
 from ..bill_draft import DRAFT_PREFIX, existing_bill, resolve_bill_card_name, select_options
@@ -243,7 +243,7 @@ def rounding_adjustments(statement: Statement) -> list[dict]:
         lost = rewards_audit.rounding_lost(t) - t.rounding_adjustments
         if lost <= 0:
             continue
-        account_holder = holder if parser.separate_card_statements else PRIMARY_KEY
+        account_holder = points_account.account_for(parser, card, holder).account_holder
         out.append({"card": card, "holder": account_holder, "points": lost, "number": s.number,
                     "name": ROUNDING_ADJUSTMENT + statement.statement_date[:7],
                     "note": (f"{card} …{s.number}, cycle {statement.statement_date}: the bank rounds points once on the "

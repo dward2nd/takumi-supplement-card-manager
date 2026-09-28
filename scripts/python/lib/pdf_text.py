@@ -34,6 +34,11 @@ class PdfText:
         return sep.join(out)
 
 
+def is_wrong_password(e: Exception) -> bool:
+    """Did `extract` fail because the password didn't open the PDF?"""
+    return "PDFPasswordIncorrect" in repr(e)
+
+
 def extract(pdf_path: str | Path, password: str | None = None) -> PdfText:
     """Read every page's text from a PDF and return them in order."""
     pages: list[str] = []

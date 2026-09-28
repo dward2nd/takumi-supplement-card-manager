@@ -62,6 +62,19 @@ def password_for_issuer(issuer: str, *, holder: str | None = None) -> str | None
     return str(entry)
 
 
+def passwords_for_issuer(issuer: str) -> list[str | None]:
+    """Every password registered for an issuer — the default first, then each
+    holder's override — for a PDF whose holder isn't known yet (CardX locks each
+    card number's PDF with its own holder's DOB). [None] if unregistered."""
+    entry = (_load().get("issuers") or {}).get(issuer)
+    if entry is None:
+        return [None]
+    if not isinstance(entry, dict):
+        return [str(entry)]
+    found = [entry.get("default"), *(entry.get("holders") or {}).values()]
+    return [str(p) for p in dict.fromkeys(found) if p is not None] or [None]
+
+
 def password_for_card(card_name: str, *, holder: str | None = None) -> str | None:
     """Resolve a card title to its statement password via its issuer."""
     card = card_repo.get(card_name)
