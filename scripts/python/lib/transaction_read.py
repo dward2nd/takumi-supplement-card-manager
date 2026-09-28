@@ -15,6 +15,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .points import checked_multiplier
+
 
 def _title(props: dict, name: str = "Name") -> str:
     return "".join(t.get("plain_text", "") for t in props.get(name, {}).get("title", []) or [])
@@ -70,5 +72,7 @@ def project_transaction(page: dict) -> dict[str, Any]:
         "card_ids": _relation_ids(props, "Card"),
         "promotion_ids": _relation_ids(props, "Promotion"),  # Promotion Bureau rows it's linked to
         "cashback_percent": _number(props, "% cb"),
+        "multiplier": checked_multiplier(props),        # None = ×1
+        "points_redeemed": _number(props, "ใช้คะแนน"),
         "cashback": _formula_number(props, "cashback"),
     }

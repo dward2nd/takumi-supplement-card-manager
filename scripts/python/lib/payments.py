@@ -28,7 +28,7 @@ from lib import notion_client
 from lib.ledger import cycle_rows, is_bill_payment_row  # noqa: F401 — re-exported for callers
 from lib.bill_cycle import due_date_for
 from lib.cards import find_card
-from lib.holders import Holder, resolve_holder
+from lib.holders import HOLDERS, Holder, resolve_holder
 from lib.transaction_write import build_transaction_properties
 
 # Default label per payment kind. Free-form Thai, matching the most common
@@ -37,6 +37,7 @@ PAYMENT_LABELS: dict[str, str] = {
     "full": "ชำระบิลเต็มจำนวน",  # paid the statement in full
     "partial": "ชำระบางส่วน",  # paid only part of the statement
     "advance": "ชำระบิลล่วงหน้า",  # paid ahead of the statement closing
+    "completing": "ชำระเพิ่มบางส่วนจนครบ",  # the payment that finishes a partly paid bill
 }
 
 # How close (in baht) an existing negative row must be to the target before
@@ -221,3 +222,75 @@ def record_payment(
     out["id"] = page["id"]
     out["url"] = page.get("url")
     return out
+
+
+def record_primary_payment(
+    holder_input: str | Holder,
+    card_name: str,
+    bill_cycle: str,
+    *,
+    amount: float,
+    bill_total: float,
+    payment_date: str,
+    memo: str | None = None,
+    covers: dict[str, float] | None = None,
+    due_date: str | None = None,
+    dry_run: bool = False,
+) -> dict:
+    """Takumi's payment of one of his (statement-driven) bills.
+
+    The bank bills the whole card, so his slip can pay his own charges and
+    his friends' shares at once. His ledger gets the payment row (−amount)
+    and, for each friend share the slip `covers`, a `โอนยอดจาก<name>` row
+    (+share) that moves that share onto his balance — the friend's own
+    ledger records their payment to him when they pay. The label follows
+    what's already paid on the bill: in full, partly, or the payment that
+    completes it. Idempotent: a payment row of the same amount and date, or
+    a transfer row of the same name, amount and date, is not written twice.
+    """
+    holder = resolve_holder(holder_input) if isinstance(holder_input, str) else holder_input
+    if not holder.statement_bills:
+        raise ValueError(f"{holder.key!r} isn't the primary holder; use record_payment")
+    covers = covers or {}
+    unknown = [h for h in covers if h not in HOLDERS or HOLDERS[h].statement_bills]
+    if unknown:
+        raise ValueError(f"covers names holders that aren't supplement holders: {unknown}")
+    target = round(abs(float(amount)), 2)
+    card_page_id = find_card(holder.cards_ds, card_name)["id"]
+    rows = cycle_rows(holder.transactions_ds, card_page_id, bill_cycle)
+    # Bill payments only (`ชำระ…`/`จ่าย…`, or the bank's `AUTO DEBIT`) — not refunds or credits.
+    paid = [p for p in rows if is_bill_payment_row(p) or (p.get("name") == "AUTO DEBIT" and (p.get("amount") or 0) < 0)]
+    paid_before = round(-sum(p["amount"] for p in paid), 2)
+    same = [p for p in paid if abs(p["amount"] + target) < 0.005 and (p.get("transaction_date") or "")[:10] == payment_date]
+    if same:
+        paid_before -= target   # this slip is already in the ledger
+    completes = paid_before + target >= float(bill_total) - _MATCH_TOLERANCE
+    kind = "full" if completes and paid_before < _MATCH_TOLERANCE else "completing" if completes else "partial"
+    due_date = due_date or _due_date_for_cycle(rows, card_name, bill_cycle)
+
+    writes: list[dict] = []
+    if not same:
+        writes.append({"name": PAYMENT_LABELS[kind], "amount": -target,
+                       "note": f"Slip memo: {memo}" if memo else None})
+    for h, share in covers.items():
+        name = f"โอนยอดจาก{HOLDERS[h].thai_name}"
+        share = round(float(share), 2)
+        if any(r["name"] == name and abs((r["amount"] or 0) - share) < 0.005
+               and (r.get("transaction_date") or "")[:10] == payment_date for r in rows):
+            continue
+        writes.append({"name": name, "amount": share,
+                       "note": f"{HOLDERS[h].thai_name}'s share of the card bill, paid to the bank by this slip."})
+
+    out = {"holder": holder.key, "card": card_name, "bill_cycle": bill_cycle, "kind": kind,
+           "paid_before": paid_before, "amount": -target, "already_recorded": bool(same),
+           "rows": [{k: v for k, v in w.items() if v is not None} for w in writes], "dry_run": dry_run}
+    if dry_run:
+        return out
+    for w in writes:
+        props = build_transaction_properties(
+            name=w["name"], amount=w["amount"], transaction_date=payment_date, bill_cycle_date=bill_cycle,
+            due_date=due_date, card_page_id=card_page_id, processed=True, note=w["note"])
+        w["id"] = notion_client.create_page(holder.transactions_ds, props)["id"]
+    out["rows"] = [{k: v for k, v in w.items() if v is not None} for w in writes]
+    return out
+

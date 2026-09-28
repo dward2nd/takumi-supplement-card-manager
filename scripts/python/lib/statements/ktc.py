@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import re
 
-from .model import CardAccount, CardSection, Statement, StatementLine, StatementParseError, parse_amount
+from .model import CardAccount, CardSection, RewardSummary, Statement, StatementLine, StatementParseError, parse_amount
 from .parser import StatementParser
 
 _PRODUCT = re.compile(r"TYPE OF CARD : (.+)")
@@ -95,10 +95,24 @@ def parse(text: str) -> Statement:
     )
 
 
+# `KTC FOREVER 53 0 0 1,964 0` = earned, adjusted, redeemed, outstanding, expiring.
+_POINTS = re.compile(r"^KTC FOREVER (-?[\d,]+) (-?[\d,]+) (-?[\d,]+) (-?[\d,]+) (-?[\d,]+)$")
+
+
 class KTCParser(StatementParser):
     key = issuer = "KTC"
     signature = "KRUNGTHAI CARD"
     separate_card_statements = True
+
+    def rewards(self, text: str, statement: Statement) -> tuple[RewardSummary, ...]:
+        """One card per PDF (supplements get their own, with their own points)."""
+        number = statement.accounts[0].sections[0].number if statement.accounts and statement.accounts[0].sections else None
+        for ln in text.splitlines():
+            if number and (m := _POINTS.match(ln.strip())):
+                n = [parse_amount(g) for g in m.groups()]
+                return (RewardSummary(number=number, program="KTC FOREVER", earned=n[0], adjusted=n[1],
+                                      redeemed=n[2], outstanding=n[3]),)
+        return ()
 
     def parse_text(self, text: str) -> Statement:
         return parse(text)

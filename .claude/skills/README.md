@@ -23,6 +23,7 @@ Each skill is `.claude/skills/<name>/SKILL.md` (the agent-facing contract) backe
 - `update-bill` — patch a Bills row (`จ่ายแล้ว`, slip/statement files, Note, finalize). Delegates payment-row creation to `record-payment` on slip upload.
 
 **Write — Promotion Bureau**
+- `audit-rewards` — reconcile a statement's printed points summary (UOB, KBank, KTC, Krungsri, Lotus's) against every holder's ledger per card per cycle, with each issuer's timing (posting vs cycle) and rounding (per line vs per cycle); read-only. *(New, 2026-09-28.)*
 - `sync-promotion` — bring one Bureau row up to date: screen linked rows, split the credit FCFS, write the shares + per-holder tracker rows, render the campaign summary into the page. Campaign rules are `lib.bureau.BasePromotion` subclasses. *(New, 2026-09-28.)* Its core is `lib.bureau.runner`. `/add-transaction`, `/update-transaction` and `/record-statement` delegate to it through `lib.bureau.follow` after every write, so running it by hand is mostly for creating a new period's row or reconciling against the bank.
 
 **Write — repositories**

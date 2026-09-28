@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import re
 
-from .model import CardAccount, CardSection, Statement, StatementLine, StatementParseError, parse_amount
+from .model import CardAccount, CardSection, RewardSummary, Statement, StatementLine, StatementParseError, parse_amount
 from .parser import StatementParser
 
 _AMT = r"(-?[\d,]+\.\d\d)"
@@ -158,9 +158,33 @@ def parse(text: str) -> Statement:
     return Statement(issuer="Krungsri", statement_date=statement_date, due_date=due_date, accounts=tuple(accounts))
 
 
+# `Credit Card Point Summary`, then `previous +earned -used outstanding` (First Choice
+# and Central The 1 print none). Lotus's prints coins instead:
+# `+normal +special ±adjusted +outstanding +expiring old-points`.
+_POINTS = re.compile(r"^([\d,]+) \+([\d,]+) -([\d,]+) ([\d,]+)$")
+_COINS = re.compile(r"^\+([\d,]+\.\d\d) \+([\d,]+\.\d\d) ([+-][\d,]+\.\d\d) \+([\d,]+\.\d\d) \+[\d,]+\.\d\d [\d,]+$")
+
+
+def _primary(statement: Statement) -> str | None:
+    return statement.accounts[0].sections[0].number if statement.accounts and statement.accounts[0].sections else None
+
+
 class KrungsriParser(StatementParser):
     key = issuer = "Krungsri"
     signature = "TOTAL PAYMENT DUE FOR CREDIT CARD"
+
+    def rewards(self, text: str, statement: Statement) -> tuple[RewardSummary, ...]:
+        lines = [l.strip() for l in text.splitlines()]
+        start = next((i for i, l in enumerate(lines) if "Credit Card Point Summary" in l), None)
+        number = _primary(statement)
+        if start is None or not number:
+            return ()
+        for ln in lines[start + 1:start + 6]:
+            if (m := _POINTS.match(ln)):
+                n = [parse_amount(g) for g in m.groups()]
+                return (RewardSummary(number=number, program="Krungsri points", earned=n[1],
+                                      redeemed=n[2], outstanding=n[3]),)
+        return ()
 
     def parse_text(self, text: str) -> Statement:
         return parse(text)
@@ -173,3 +197,12 @@ class LotusParser(KrungsriParser):
 
     key = "Lotus"
     signature = "LOTUS"
+
+    def rewards(self, text: str, statement: Statement) -> tuple[RewardSummary, ...]:
+        number = _primary(statement)
+        for ln in text.splitlines():
+            if number and (m := _COINS.match(ln.strip())):
+                n = [parse_amount(g.lstrip("+")) for g in m.groups()]
+                return (RewardSummary(number=number, program="Lotus's coins", earned=n[0], bonus=n[1],
+                                      adjusted=n[2], outstanding=n[3]),)
+        return ()

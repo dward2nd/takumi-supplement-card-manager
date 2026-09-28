@@ -29,6 +29,11 @@ Reads a JSON spec from stdin (or --input <file>):
                                               //   advance payments → use /record-payment.
     "payment_date":  "2026-05-29",            // optional slip date for the payment row
                                               //   (default today). Only used with a slip.
+    "payment_amount": 2742.29,                // Takumi's bills: the slip's amount (required to
+                                              //   record his payment row — a slip can pay part)
+    "payment_covers": {"baiboon": 2742.29},   // Takumi's bills: friends' shares the slip pays
+                                              //   → one โอนยอดจาก<name> row each
+    "slip_memo":     "2511—JCB (เว็บ)",        // Takumi's bills: the slip's memo line, for the Note
     "finalize":      true,                    // strips a leading `[DRAFT] ` from the
                                               //   title (no-op if already finalized)
     "auto_close_on_statement": true,          // default true. Attaching a statement PDF
@@ -79,6 +84,7 @@ without writing.
 from __future__ import annotations
 
 import argparse
+import datetime as _dt
 import json
 import sys
 from pathlib import Path
@@ -437,15 +443,28 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         if not (holder_key and card and bill_cycle):
             return None
         if statement_bills:
-            return {
-                "would_create": False,
-                "created": False,
-                "reason": (
-                    f"{holder_key}'s slip pays the bank for the whole card; no payment "
-                    f"row is recorded automatically (it needs โอนยอดจาก… rows for the "
-                    f"supplements' shares). Mark the bill paid with `paid: true`."
-                ),
-            }
+            # Takumi's slip: the CLI can't read the amount off the image, and it may
+            # pay only part of the card (his share) or friends' shares too — so the
+            # caller passes `payment_amount` and, for friends' shares, `payment_covers`.
+            if spec.get("payment_amount") is None:
+                return {
+                    "would_create": False,
+                    "created": False,
+                    "reason": (
+                        f"{holder_key}'s slip: pass `payment_amount` (the slip's amount) — plus "
+                        f"`payment_covers` for any friend's share it pays — to record his payment "
+                        f"row and the matching โอนยอดจาก… rows."
+                    ),
+                }
+            return payments.record_primary_payment(
+                holder_key, card, bill_cycle,
+                amount=float(spec["payment_amount"]),
+                bill_total=float(_bill_amount(page_id) or 0),
+                payment_date=spec.get("payment_date") or _dt.date.today().isoformat(),
+                memo=spec.get("slip_memo"),
+                covers=spec.get("payment_covers"),
+                dry_run=dry,
+            )
         amount = _bill_amount(page_id)
         if amount is None:
             return {

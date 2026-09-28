@@ -64,11 +64,25 @@ class CardAccount:
 
 
 @dataclass(frozen=True)
+class RewardSummary:
+    """The points (or coins) summary a statement prints for one card or account."""
+
+    number: str                      # last four digits of the card the summary is printed for
+    program: str                     # "UOB Rewards", "K Point", "KTC FOREVER", "Krungsri points", "Lotus's coins"
+    earned: float                    # regular points earned this cycle
+    bonus: float = 0.0               # bonus points, where printed separately (KBank, Lotus's special coins)
+    adjusted: float = 0.0            # the bank's adjustments (negative takes points off)
+    redeemed: float = 0.0
+    outstanding: float | None = None
+
+
+@dataclass(frozen=True)
 class Statement:
     issuer: str
     statement_date: str  # ISO — the bill cycle date
     due_date: str  # ISO — as printed
     accounts: tuple[CardAccount, ...] = field(default_factory=tuple)
+    rewards: tuple[RewardSummary, ...] = field(default_factory=tuple)   # printed points summaries
 
     def check(self) -> None:
         """Raise unless every account's lines reproduce its printed total."""
@@ -108,6 +122,7 @@ class Statement:
                 )
                 for a in d["accounts"]
             ),
+            rewards=tuple(RewardSummary(**r) for r in d.get("rewards", [])),
         )
 
 

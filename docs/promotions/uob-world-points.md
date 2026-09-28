@@ -32,6 +32,8 @@ Historical rows confirm both tiers in the user's own words — `UOB World defaul
 
 ## The ฿20,000 per-cycle quota — enforced by the Promotion Bureau
 
+Points are granted in real time as each charge posts; the statement counts them by posting window ([[../concepts/billing-cycle#Points: real-time or per cycle]]). Aug and Sep 2026 reproduce with the ledger formula; Sep's ledger was 27 short (Baiboon's `DQ-1457` dining rows marked `×2` instead of `×5`, 12 points; split `[บัตรหลัก]` TMN lines rounding down per share, 15 points).
+
 Settled with the user on 2026-09-28, and enforced since then by the [[../concepts/promotion-bureau|Promotion Bureau]] (`UOBWorldBonus` in `scripts/python/lib/bureau/uob_world.py`, one Bureau row per cycle, e.g. `2026M9 — UOB World ×5` for 25 Aug–24 Sep, billed 25 Sep):
 
 - **Per account, not per card**: Takumi's principal and Baiboon's supplement share one ฿20,000.

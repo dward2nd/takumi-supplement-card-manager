@@ -22,6 +22,10 @@ Writes, per account the plan marks `ready`:
   4. attach the statement PDF to it
   4a. stamp `Process Date` (the statement's posting date, where it prints one)
       on every row a line accounts for — new rows get it at creation
+  4b. for a line split between friends' shares and Takumi's remainder, add a
+      `[ปรับคะแนน] <line>` row to Takumi's ledger with the points the per-row
+      rounding lost (`split_adjustments`; user, 2026-09-28: the principal
+      holder carries the adjustment)
   5. re-sync the Promotion Bureau rows the created and renamed rows count
      toward, fixing `% cb` / multiplier to the split (`lib.bureau.follow`)
 """
@@ -42,11 +46,13 @@ from .. import holders
 from ..bureau import follow
 from ..holders import HOLDERS
 from ..ledger import cycle_rows
+from ..points import row_points
 from ..transaction_write import build_transaction_properties
 from .attribution import AccountPlan, plan_statement
 from .model import Statement, StatementLine
 
 THAI_NAMES = {h.key: h.thai_name for h in HOLDERS.values()} | {"unmonitored": "unmonitored supplement(s)"}
+PRIMARY_KEY = holders.primary().key
 
 
 def number_lookup(issuer: str, number: str) -> tuple[str, str] | None:
@@ -145,6 +151,55 @@ def _classify(card: str, line: StatementLine) -> tuple[str | None, str | None, f
     return c.points_override, c.note, c.cashback_percent or None
 
 
+POINTS_ADJUSTMENT = "[ปรับคะแนน] "
+
+
+def _baht_per_point(holder: str, card: str) -> float | None:
+    try:
+        page = find_card(HOLDERS[holder].cards_ds, card)
+    except CardNotFoundError:
+        return None
+    return (page["properties"].get("บาทต่อ 1 คะแนน") or {}).get("number")
+
+
+def split_adjustments(plan: AccountPlan, takumi_rows: list[dict]) -> list[dict]:
+    """Points a split line loses to rounding, per split, to add back on Takumi's ledger.
+
+    The bank awards a line's points once: floor(amount / baht per point) ×
+    multiplier. Split into a friend's `[บัตรหลัก]` share and Takumi's remainder,
+    each row rounds down on its own (TMN 7-11 ฿51 = 10 points at ×5; ฿27.50 +
+    ฿23.50 = 5). The difference goes on a `[ปรับคะแนน] <line>` row in Takumi's
+    ledger (user, 2026-09-28). A row already there (same name and date) is kept.
+    """
+    bpp = _baht_per_point(PRIMARY_KEY, plan.card)
+    if not bpp:
+        return []
+    out = []
+    for s in plan.splits:
+        line, (kind, rem) = s["line"], s["remainder"] or (None, None)
+        if kind == "new":
+            mult = _classify(plan.card, rem)[0]
+            rem_pts = row_points(rem.amount, bpp, mult)
+        elif kind == "row":
+            mult, rem_pts = rem.get("multiplier"), row_points(rem["amount"], bpp, rem.get("multiplier"))
+        else:
+            mult, rem_pts = s["rows"][0][1].get("multiplier"), 0
+        # A holder can own several shares of one line (Baiboon's ฿47 + ฿12 of a ฿59 TMN): sum per row.
+        shares = [(h, row_points(r["amount"], _baht_per_point(h, plan.card), r.get("multiplier"))) for h, r in s["rows"]]
+        bank = row_points(line.amount, bpp, mult)
+        lost = bank - sum(p for _, p in shares) - rem_pts
+        name = POINTS_ADJUSTMENT + line.name
+        if lost == 0 or any(r["name"] == name and (r["transaction_date"] or "")[:10] == line.date for r in takumi_rows):
+            continue
+        parts = " + ".join(f"{h} {p}" for h, p in shares) + f" + takumi {rem_pts}"
+        out.append({"line": line, "points": lost, "name": name,
+                    "note": (f"Points lost to rounding when the ฿{line.amount:,.2f} statement line of {line.date} "
+                             f"was split: the bank gives {bank} ({mult or '×1'}), the rows give {parts}. "
+                             f"{lost:+} points {'added back' if lost > 0 else 'taken off'} here "
+                             f"(ใช้คะแนน {-lost}); the principal holder carries split-line adjustments.")})
+    return out
+
+
 def bill_note(statement: Statement, plan: AccountPlan, printed: Statement | None = None) -> str:
     parts = []
     for holder in (*HOLDERS, "unmonitored"):
@@ -171,7 +226,8 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
     plans = plan_statement(statement, number_lookup, rows)
     takumi = holders.primary()
     out_accounts, warnings = [], list(shift_warnings)
-    counts = {"renamed": 0, "created": 0, "bills_created": 0, "pdfs_attached": 0, "process_dates": 0}
+    counts = {"renamed": 0, "created": 0, "bills_created": 0, "pdfs_attached": 0, "process_dates": 0,
+              "points_adjustments": 0}
     written: list[follow.Written] = []
 
     for plan in plans:
@@ -211,6 +267,10 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
                     for i, t in touched.items()]
         if plan.stamps:
             entry["process_dates"] = len(plan.stamps)
+        adjustments = split_adjustments(plan, rows.get((takumi.key, plan.card), [])) if takumi_card else []
+        if adjustments:
+            entry["points_adjustments"] = [{"date": a["line"].date, "line": a["line"].name,
+                                            "amount": a["line"].amount, "points": a["points"]} for a in adjustments]
         if dry_run:
             entry["creates"] = [_create_report(l, m, n, cb) for l, m, n, cb in creates]
             written += [follow.Written.of(None, takumi.key, takumi_card, l.date, bc, name=l.name, posted=l.posted)
@@ -237,6 +297,12 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
                                              name=line.name, posted=line.posted))
         counts["created"] += len(created)
         entry["creates"] = created
+        for a in adjustments:
+            notion_client.create_page(takumi.transactions_ds, build_transaction_properties(
+                name=a["name"], amount=0, transaction_date=a["line"].date,
+                bill_cycle_date=statement.statement_date, due_date=statement.due_date,
+                card_page_id=takumi_card, note=a["note"], multiplier="×0", points_redeemed=-a["points"]))
+            counts["points_adjustments"] += 1
 
         if bill is None:
             bill = notion_client.create_page(takumi.bills_ds, {

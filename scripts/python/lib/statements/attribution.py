@@ -40,7 +40,7 @@ FRIENDS = tuple(h.key for h in holders.supplements())  # supplement holders, in 
 UNMONITORED = "unmonitored"  # a real supplement no one tracks: billed, never recorded
 # Bracketed rows that are household bookkeeping, not statement lines: carry-forwards
 # (both spellings are in use) and debt takeovers.
-HOUSEHOLD_BRACKETS = ("[ยอดยกมา", "[ยกยอดมา", "[เว็บรับหนี้")
+HOUSEHOLD_BRACKETS = ("[ยอดยกมา", "[ยกยอดมา", "[เว็บรับหนี้", "[ปรับคะแนน")
 NEAR_DAYS = 3
 _TOL = 0.005
 
@@ -65,6 +65,10 @@ class AccountPlan:
     payments: list[StatementLine] = field(default_factory=list)
     # Rows a line accounts for whose `Process Date` differs from the line's posting date.
     stamps: list[dict] = field(default_factory=list)
+    # Primary lines split between friends' shares and Takumi's remainder:
+    # {"line", "rows": [(holder, row)], "remainder": ("new", StatementLine) | ("row", row) | None}.
+    # /record-statement checks each for points lost to per-row rounding.
+    splits: list[dict] = field(default_factory=list)
     split: dict[str, float] = field(default_factory=dict)  # holder → attributed amount
     carried: float = 0.0  # previous balance left after this statement's payments
     warnings: list[str] = field(default_factory=list)
@@ -248,10 +252,13 @@ def plan_account(
             _stamp(plan, h, r, line)
         rest = round(line.amount - sum(r["amount"] for _, r in claimed), 2)
         if claimed:
-            plan.shares.append(
-                {**_line(line), "friends": {h: r["amount"] for h, r in claimed}, PRIMARY: rest}
-            )
+            friends: dict[str, float] = {}
+            for h, r in claimed:   # a holder can own several shares of one line
+                friends[h] = round(friends.get(h, 0.0) + r["amount"], 2)
+            plan.shares.append({**_line(line), "friends": friends, PRIMARY: rest})
         if abs(rest) <= _TOL:
+            if claimed:
+                plan.splits.append({"line": line, "rows": claimed, "remainder": None})
             continue
         credit(PRIMARY, rest)
         if claimed:
@@ -259,13 +266,16 @@ def plan_account(
             if existing is not None:
                 plan.recorded += 1
                 _stamp(plan, PRIMARY, existing, line)
+                plan.splits.append({"line": line, "rows": claimed, "remainder": ("row", existing)})
                 continue
+            original = line
             shares = ", ".join(f"{h} ฿{r['amount']:,.2f}" for h, r in claimed)
             line = StatementLine(
                 date=line.date, name=line.name, amount=rest, kind=line.kind, posted=line.posted,
                 note=f"Takumi's remainder of the ฿{line.amount:,.2f} statement line; friends' share(s): {shares}."
                 + (f" {line.note}" if line.note else ""),
             )
+            plan.splits.append({"line": original, "rows": claimed, "remainder": ("new", line)})
         plan.creates.append(line)
 
     for h, pool in pools.items():

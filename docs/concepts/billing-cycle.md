@@ -67,3 +67,11 @@ UOB One's cashback periods count by **posting date** ([[../promotions/uob-one-20
   - **Other issuers:** the next day. They post on weekends and holidays.
   - **TrueMoney (`TMN …`) and Agoda charges:** the next working day on any card.
 
+### Points: real-time or per cycle
+
+**UOB grants reward points in real time**, as each charge posts (user, 2026-09-28). The app balance moves on posting day. The statement's `UOB REWARDS POINT SUMMARY` ("Regular Points Earned") counts the lines *posted* in the statement window, the same window as UOB One's cashback: a charge posted on the statement date shows on the next statement. Checked against UOB World and UOB Makro for Aug and Sep 2026: the ledger formula, `floor(ยอดชำระ / 25) × multiplier` per line, reproduces UOB's figures. Your Anthropic charge posted 25 Sep, so its 730 points belong on October's statement. Other issuers grant points per cycle, at the statement. Because granting is real-time, UOB can only enforce UOB World's ฿20,000 bonus cap after the fact. June's and July's negative "Points Adjustment" figures (−1,298 and −599) may be that clawback; this is to verify with May's statement.
+
+### How banks round points
+
+UOB rounds per statement line, `floor(line / 25) × multiplier`, exactly like the ledger formula. KBank, KTC and Krungsri round **once on the cycle's spend** at each rate: `floor(Σ / 25) × multiplier`. Checked 2026-09-28 against KBank (Aug), KTC (Aug) and Krungsri Visa (Sep). Because the ledger rounds each row down, it runs a few points short on those cards every cycle (KTC Digital VISA Aug: 65 against 71). [[../../.claude/skills/audit-rewards/SKILL|/audit-rewards]] reports this separately as `rounding`.
+

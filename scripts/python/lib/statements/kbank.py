@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import re
 
-from .model import CardAccount, CardSection, Statement, StatementLine, StatementParseError, parse_amount
+from .model import CardAccount, CardSection, RewardSummary, Statement, StatementLine, StatementParseError, parse_amount
 from .parser import StatementParser
 
 _HEADER = re.compile(r"^/ ACCOUNT DETAILS (.+?) \d{4} \d\dXX XXXX (\d{4})\b")
@@ -78,9 +78,28 @@ def parse(text: str) -> Statement:
     )
 
 
+# Each product's section carries its own K Point block: a header line with
+# `POINTS EARNED`, then `earned bonus redeemed outstanding [expiring expiring]`.
+# KBank LINE Points has none (its points go to LINE).
+_POINTS = re.compile(r"^([\d,]+) ([\d,]+) ([\d,]+) ([\d,]+)(?: [\d,]+ [\d,]+)?$")
+
+
 class KBankParser(StatementParser):
     key = issuer = "KBank"
     signature = "KBANK"
+    points_timing = "cycle"   # K Point is credited per cycle, in the app the day after BC (user, 2026-09-28)
+
+    def rewards(self, text: str, statement: Statement) -> tuple[RewardSummary, ...]:
+        lines, number, out = [l.strip() for l in text.splitlines()], None, []
+        for i, ln in enumerate(lines):
+            if (h := _HEADER.match(ln)):
+                number = h.group(2)
+            elif "POINTS EARNED" in ln and number and i + 1 < len(lines) and (m := _POINTS.match(lines[i + 1])):
+                n = [parse_amount(g) for g in m.groups()]
+                out.append(RewardSummary(number=number, program="K Point", earned=n[0], bonus=n[1],
+                                         redeemed=n[2], outstanding=n[3]))
+                number = None   # one block per product
+        return tuple(out)
 
     def parse_text(self, text: str) -> Statement:
         return parse(text)

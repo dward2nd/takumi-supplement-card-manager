@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import re
 
-from .model import CardAccount, CardSection, Statement, StatementLine, StatementParseError, parse_amount
+from .model import CardAccount, CardSection, RewardSummary, Statement, StatementLine, StatementParseError, parse_amount
 from .parser import StatementParser
 
 _MONTHS = {m: i for i, m in enumerate("JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC".split(), 1)}
@@ -115,9 +115,26 @@ def parse(text: str) -> Statement:
     )
 
 
+# `UOB REWARDS POINT SUMMARY`, one row per primary card:
+# `5432 15XX XXXX 9310 1,334 0 1,598 17,618 0 30 SEP 26`
+# = earned, adjustment, redeemed, outstanding balance, expiring points, expiring date.
+_POINTS = re.compile(r"^\d{4} \d\dXX XXXX (\d{4}) ([\d,]+) (-?[\d,]+) ([\d,]+) ([\d,]+) [\d,]+ \d\d [A-Z]{3} \d\d$")
+
+
 class UOBParser(StatementParser):
     key = issuer = "UOB"
     signature = "UOB"
+    points_timing = "posting"   # points are credited as each charge posts (user, 2026-09-28)
+    points_rounding = "line"    # per statement line, like the ledger formula (Aug/Sep 2026)
+
+    def rewards(self, text: str, statement: Statement) -> tuple[RewardSummary, ...]:
+        out = []
+        for ln in text.splitlines():
+            if (m := _POINTS.match(ln.strip())):
+                n = [parse_amount(g) for g in m.groups()[1:]]
+                out.append(RewardSummary(number=m.group(1), program="UOB Rewards", earned=n[0], adjusted=n[1],
+                                         redeemed=n[2], outstanding=n[3]))
+        return tuple(out)
 
     def parse_text(self, text: str) -> Statement:
         return parse(text)
