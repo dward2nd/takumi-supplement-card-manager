@@ -45,6 +45,8 @@ The issuers' campaign notes: [[../promotions/first-choice-2026h2]], [[../promoti
 
 **`% cb` follows the household's habit per card.** First Choice, UOB One, ttb and AEON Rabbit rows carry `% cb` (`marks_rows`). Krungsri, Lotus's and AEON World rows never did: the household tracked those credits in the trackers and the bank's `CB…` lines. Those campaigns set `marks_rows = False`. So does every fixed-per-slip credit, since ฿120 on a ฿4,045.50 slip isn't a rate.
 
+**Tracker dates.** A tracker row for a statement-cycle quota is dated with the statement date that bills it (`tracker_date`), e.g. `ttb so smart 1% Sep bill` on 27 Sep (user, 2026-09-29). The period's first day is the previous statement date, when nothing happened. Calendar-month and whole-campaign trackers keep the period's first day. A tracker is ticked when Takumi's slip is attached, or when the credit is a row in the holder's ledger; that row is then named in the tracker's `Note`.
+
 **A hand-made tracker is linked, not duplicated.** A sync finds a holder's tracker row through its `Promotion` link or by the exact title it would give. Baiboon's hand-made trackers use other titles (`SUP1 3% 1—30 Sep`, `Everyday with AEON 10 Sep`). So when a campaign got its first Bureau row, each matching hand-made tracker was linked to it first (2026-09-29). A ticked tracker is never changed; if it disagrees with the split, the sync only warns.
 
 A campaign class states the bank's terms in code: cards, dates, what counts (`qualifies`, `rules`), the payout, and the page text. Screening, the split and the Bureau page summary read those declarations, so the page and the screening can't drift apart. [[../../.claude/skills/sync-promotion/SKILL.md|/sync-promotion]] drives it.

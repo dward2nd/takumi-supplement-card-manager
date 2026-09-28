@@ -348,6 +348,13 @@ class BasePromotion(ABC):
                 else f"{start.day} {start:%b}—{end.day} {end:%b}")
         return f"{self.code} {self.headline} {span}"
 
+    def tracker_date(self, start: dt.date, end: dt.date) -> dt.date:
+        """The date a tracker row carries: for a statement-cycle quota, the statement
+        date that bills it (the BC date, as the household dates `ttb so smart 1% Sep
+        bill`: 27 Sep; user, 2026-09-29) — the period's first day is the previous
+        statement date, when nothing happened. Otherwise the period's first day."""
+        return cycle_billed_on(end) if self.period_basis == "bill_cycle" else start
+
     def summary_blocks(self) -> list[dict]:
         """The Bureau page body: ladder, what counts, exclusions, crediting, split."""
         first, last = self.campaign
