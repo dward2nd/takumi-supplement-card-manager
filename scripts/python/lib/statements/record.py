@@ -24,14 +24,14 @@ from .. import card_repo, notion_client, notion_files, promotions
 from ..bill_cycle import PatternNotFoundError, cycle_for_month, pattern_for_card
 from ..bill_draft import existing_bill, resolve_bill_card_name, select_options
 from ..cards import CardNotFoundError, find_card
+from ..bills import STATEMENT_PDF
 from ..holders import HOLDERS
-from ..transaction_read import project_transaction
+from ..ledger import cycle_rows
 from ..transaction_write import build_transaction_properties
 from .attribution import AccountPlan, plan_statement
 from .model import Statement, StatementLine
 
 THAI_NAMES = {"takumi": "เว็บ", "baiboon": "ใบบุญ", "nuta": "นุตา", "unmonitored": "unmonitored supplement(s)"}
-_STATEMENT_PROP = "ใบแจ้งยอด (PDF)"
 
 
 def number_lookup(issuer: str, number: str) -> tuple[str, str] | None:
@@ -58,18 +58,7 @@ def fetch_rows(statement: Statement) -> tuple[dict, dict]:
             except CardNotFoundError:
                 continue
             card_ids[(key, card)] = page["id"]
-            rows[(key, card)] = [
-                project_transaction(r)
-                for r in notion_client.query_all(
-                    holder.transactions_ds,
-                    filter={
-                        "and": [
-                            {"property": "Card", "relation": {"contains": page["id"]}},
-                            {"property": "Bill Cycle Date", "date": {"equals": statement.statement_date}},
-                        ]
-                    },
-                )
-            ]
+            rows[(key, card)] = cycle_rows(holder.transactions_ds, page["id"], statement.statement_date)
     return rows, card_ids
 
 
@@ -180,9 +169,9 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
             counts["bills_created"] += 1
             entry["bill"] = {"status": "created", "id": bill["id"], "ยอดชำระ": plan.total}
         if pdf is not None:
-            names = {f.get("name") for f in bill["properties"].get(_STATEMENT_PROP, {}).get("files", [])} if "properties" in bill else set()
+            names = {f.get("name") for f in bill["properties"].get(STATEMENT_PDF, {}).get("files", [])} if "properties" in bill else set()
             if Path(pdf).name not in names:
-                notion_files.append_files_to_page(bill["id"], _STATEMENT_PROP, [pdf])
+                notion_files.append_files_to_page(bill["id"], STATEMENT_PDF, [pdf])
                 counts["pdfs_attached"] += 1
                 entry["bill"]["pdf"] = "attached"
             else:

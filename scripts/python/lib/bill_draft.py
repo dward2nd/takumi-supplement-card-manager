@@ -23,12 +23,12 @@ from __future__ import annotations
 
 import datetime as _dt
 
-from . import installments, notion_client, promotions
+from . import installments, notion_client
 from .bill_cycle import PatternNotFoundError, active_cycle, cycle_for_month, due_date_for, pattern_for_card
 from .bills import explain_cycle, require_bills_ds
 from .cards import CardAmbiguousError, CardNotFoundError, card_title_text, card_titles_by_id, find_card
 from .holders import resolve_holder
-from .payments import is_bill_payment_row
+from .ledger import amount_due, cycle_pages, title_text
 from .transaction_read import project_transaction
 
 DRAFT_PREFIX = "[DRAFT] "
@@ -126,42 +126,20 @@ def existing_bill(ds_id: str, card: str, bill_cycle: str) -> dict | None:
 def sum_cycle(
     transactions_ds: str, card_page_id: str, bill_cycle: str
 ) -> tuple[float, int, list[dict]]:
-    rows = notion_client.query_all(
-        transactions_ds,
-        filter={
-            "and": [
-                {"property": "Card", "relation": {"contains": card_page_id}},
-                {"property": "Bill Cycle Date", "date": {"equals": bill_cycle}},
-            ]
-        },
-    )
+    rows = cycle_pages(transactions_ds, card_page_id, bill_cycle)
     # Bill-payment rows (`ชำระ…` / `จ่าย…`) are excluded: `ยอดชำระ` is the
     # cycle's *amount due*, not its remaining balance. Including them would
     # net the payment into the total and make the result order-dependent — a
     # cycle drafted before its payment was recorded would read differently
     # from the same cycle drafted after. Cashback credits, refunds and
     # `[…]`-prefixed adjustments DO count; they change what is owed.
-    # See lib.payments.is_bill_payment_row.
-    total = 0.0
-    for r in rows:
-        projected = project_transaction(r)
-        if is_bill_payment_row(projected):
-            continue
-        amt = projected.get("amount")
-        if amt is not None:
-            total += amt
-    return round(total, 2), len(rows), rows
+    # See lib.ledger.is_bill_payment_row.
+    return amount_due([project_transaction(r) for r in rows]), len(rows), rows
 
 
 def has_cashback_credit_rows(rows: list[dict]) -> bool:
     """Heuristic: at least one row whose `Name` mentions CASHBACK."""
-    for r in rows:
-        props = r.get("properties", {})
-        title = props.get("Name") or {}
-        text = "".join(t.get("plain_text", "") for t in title.get("title", []) or [])
-        if "CASHBACK" in text.upper():
-            return True
-    return False
+    return any("CASHBACK" in title_text(r).upper() for r in rows)
 
 
 def draft_bill(spec: dict, *, dry_run: bool = False) -> dict:

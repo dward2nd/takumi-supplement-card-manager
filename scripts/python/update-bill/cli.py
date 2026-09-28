@@ -86,16 +86,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib import installments, notion_client, notion_files, payments
-from lib.bill_draft import draft_bill
-from lib.bills import BillNotFoundError, explain_cycle, find_bill
+from lib.bill_draft import DRAFT_PREFIX, draft_bill
+from lib.bills import STATEMENT_PDF, BillNotFoundError, explain_cycle, find_bill
+from lib.ledger import amount_due, cycle_rows, is_bill_payment_row, title_text
 from lib.cards import CardNotFoundError, find_card
 from lib.holders import HOLDERS, resolve_holder
-from lib.transaction_read import project_transaction
 
 
 _SLIP_PROP = "หลักฐานการชำระ"
-_STATEMENT_PROP = "ใบแจ้งยอด (PDF)"
-_DRAFT_PREFIX = "[DRAFT] "
 # A satang-level shortfall between recorded payments and `ยอดชำระ` still
 # counts as settled — banks round, and a ฿0.30 gap never means "unpaid".
 _SETTLE_TOLERANCE = 0.5
@@ -106,7 +104,7 @@ def _payment_coverage(holder_key: str, card_name: str, bill_cycle: str) -> float
 
     Used to confirm a transfer slip's amount: `จ่ายแล้ว` means the peer has
     transferred their share to Takumi, and attaching that slip records a
-    matching `ชำระ…`/`จ่าย…` row (see `lib.payments.is_bill_payment_row`). When
+    matching `ชำระ…`/`จ่าย…` row (see `lib.ledger.is_bill_payment_row`). When
     those rows cover the bill's `ยอดชำระ`, the recorded transfer matches the
     amount due. Returns None when the (holder, card) can't resolve a Cards-DB
     page (e.g. id-only bill lookup).
@@ -118,32 +116,12 @@ def _payment_coverage(holder_key: str, card_name: str, bill_cycle: str) -> float
         card = find_card(holder.cards_ds, card_name)
     except CardNotFoundError:
         return None
-    raw = notion_client.query_all(
-        holder.transactions_ds,
-        filter={
-            "and": [
-                {"property": "Card", "relation": {"contains": card["id"]}},
-                {"property": "Bill Cycle Date", "date": {"equals": bill_cycle}},
-            ]
-        },
-    )
-    projected = [project_transaction(r) for r in raw]
-    return round(
-        sum(
-            -float(r.get("amount") or 0.0)
-            for r in projected
-            if payments.is_bill_payment_row(r)
-        ),
-        2,
-    )
+    projected = cycle_rows(holder.transactions_ds, card["id"], bill_cycle)
+    return round(sum(-float(r.get("amount") or 0.0) for r in projected if is_bill_payment_row(r)), 2)
 
 
 def _current_title(page_id: str) -> str:
-    page = notion_client.get_page(page_id)
-    for prop in page.get("properties", {}).values():
-        if prop.get("type") == "title":
-            return "".join(t.get("plain_text", "") for t in prop.get("title", []))
-    return ""
+    return title_text(notion_client.get_page(page_id))
 
 
 def _bill_amount(page_id: str) -> float | None:
@@ -234,29 +212,12 @@ def _refresh_from_transactions(
     except CardNotFoundError:
         return None
 
-    raw_rows = notion_client.query_all(
-        holder.transactions_ds,
-        filter={
-            "and": [
-                {"property": "Card", "relation": {"contains": card["id"]}},
-                {"property": "Bill Cycle Date", "date": {"equals": bill_cycle}},
-            ]
-        },
-    )
-    projected = [project_transaction(r) for r in raw_rows]
+    projected = cycle_rows(holder.transactions_ds, card["id"], bill_cycle)
     # Bill-payment rows are excluded from the total — `ยอดชำระ` is the cycle's
-    # *amount due*, not its remaining balance. See
-    # lib.payments.is_bill_payment_row and the mirror of this rule in
-    # prepare-bill's `_sum_cycle`. The Note still describes every row,
+    # *amount due*, not its remaining balance (lib.ledger.amount_due, the same
+    # rule /prepare-bill drafts with). The Note still describes every row,
     # payments included.
-    total = round(
-        sum(
-            float(r.get("amount") or 0.0)
-            for r in projected
-            if not payments.is_bill_payment_row(r)
-        ),
-        2,
-    )
+    total = amount_due(projected)
     note = explain_cycle(projected)
     return total, len(projected), note
 
@@ -359,8 +320,8 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     finalized_title: str | None = None
     if finalize:
         current = _current_title(page_id)
-        if current.startswith(_DRAFT_PREFIX):
-            finalized_title = current[len(_DRAFT_PREFIX):]
+        if current.startswith(DRAFT_PREFIX):
+            finalized_title = current[len(DRAFT_PREFIX):]
             simple_props["title"] = {"title": [{"text": {"content": finalized_title}}]}
             actions.append("title (finalized)")
         else:
@@ -551,8 +512,8 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         actions.append(_SLIP_PROP)
 
     if statements:
-        notion_files.append_files_to_page(page_id, _STATEMENT_PROP, statements)
-        actions.append(_STATEMENT_PROP)
+        notion_files.append_files_to_page(page_id, STATEMENT_PDF, statements)
+        actions.append(STATEMENT_PDF)
 
     # Record the payment row after the slip is attached (evidence first).
     payment = _maybe_record_payment(False)

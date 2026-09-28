@@ -57,24 +57,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib import bill_cycle, notion_client
-from lib.cards import find_card
+from lib.cards import card_titles_by_id, find_card
 from lib.holders import resolve_holder
 from lib.transaction_audit import diagnose
 from lib.transaction_read import project_transaction
-
-
-def _card_name_map(cards_ds: str) -> dict[str, str]:
-    """Build {card_page_id: card_title} for one holder's Cards DS."""
-    pages = notion_client.query_all(cards_ds)
-    out: dict[str, str] = {}
-    for p in pages:
-        title = ""
-        for prop in p.get("properties", {}).values():
-            if prop.get("type") == "title":
-                title = "".join(t.get("plain_text", "") for t in prop.get("title", []))
-                break
-        out[p["id"]] = title.strip()
-    return out
 
 
 def _to_date(s: str | None) -> dt.date | None:
@@ -93,7 +79,7 @@ def run(spec: dict) -> dict:
         card_filter_id = card["id"]
         card_filter_title = card_name
 
-    card_names = _card_name_map(holder.cards_ds)
+    card_names = card_titles_by_id(holder.cards_ds)
 
     filter_payload = (
         {"property": "Card", "relation": {"contains": card_filter_id}}

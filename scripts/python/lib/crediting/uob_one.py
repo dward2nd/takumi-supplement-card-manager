@@ -24,9 +24,9 @@ from __future__ import annotations
 import datetime as dt
 from decimal import ROUND_HALF_UP, Decimal
 
-from .. import bill_cycle, installments, notion_client
+from .. import bill_cycle, installments
 from ..holders import Holder
-from ..transaction_read import project_transaction
+from ..ledger import cycle_rows
 from .base import CreditPlan, CreditRow, Crediting
 
 SATANG = Decimal("0.01")
@@ -61,10 +61,7 @@ class UOBOneCrediting(Crediting):
         plan = CreditPlan(holder.key, self.card, detail={"bill_cycle": bc.isoformat(), "due_date": dd.isoformat()})
 
         simulated = self._populate_installments(holder, card_page_id, bc, dd, spec, write, plan)
-        rows = [project_transaction(p) for p in notion_client.query_all(holder.transactions_ds, filter={"and": [
-            {"property": "Card", "relation": {"contains": card_page_id}},
-            {"property": "Bill Cycle Date", "date": {"equals": bc.isoformat()}},
-        ]})]
+        rows = cycle_rows(holder.transactions_ds, card_page_id, bc.isoformat())
         if not rows and not simulated:
             raise CreditingError(f"no transactions in cycle {bc} for {holder.key}/{self.card}; "
                                  f"nothing to compute cashback against")

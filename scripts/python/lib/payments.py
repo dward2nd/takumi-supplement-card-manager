@@ -25,10 +25,10 @@ from __future__ import annotations
 import datetime as _dt
 
 from lib import notion_client
+from lib.ledger import cycle_rows, is_bill_payment_row  # noqa: F401 — re-exported for callers
 from lib.bill_cycle import due_date_for
 from lib.cards import find_card
 from lib.holders import Holder, resolve_holder
-from lib.transaction_read import project_transaction
 from lib.transaction_write import build_transaction_properties
 
 # Default label per payment kind. Free-form Thai, matching the most common
@@ -70,55 +70,6 @@ def is_payment_row(row: dict) -> bool:
     if name.startswith("["):
         return False
     return True
-
-
-# Thai verbs that open every bill-payment row name in the data: ชำระ ("settle")
-# and จ่าย ("pay"). Observed variants include ชำระบิลเต็มจำนวน, ชำระเต็มจำนวน,
-# ชำระบิลล่วงหน้า, ชำระบางส่วน, ชำระบิลบางส่วน, ชำระล่วงหน้า,
-# ชำระล่วงหน้าบางส่วน, ชำระเพิ่มบางส่วนจนครบ, ชำระเต็มจำนวนอย่างล่าช้า,
-# จ่ายเต็มจำนวน, จ่ายบิลเต็มจำนวน, จ่ายก่อนบิลมา, จ่ายบิลล่วงหน้าบางส่วน,
-# จ่ายส่วนขาดเพิ่มเติม. No non-payment row in the data starts with either.
-# `AUTO DEBIT` is Takumi's bank-side auto-debit row (the Krungsri family pays
-# that way; his 2025 UOB rows read `AUTO DEBIT - <card>`). Only his ledger
-# carries it.
-_PAYMENT_NAME_PREFIXES: tuple[str, ...] = ("ชำระ", "จ่าย", "AUTO DEBIT")
-
-
-def is_bill_payment_row(row: dict) -> bool:
-    """True if a projected row is a *bill payment* — STRICT, for bill totals.
-
-    A bill's `ยอดชำระ` is the cycle's **amount due**, so `/prepare-bill`'s
-    `_sum_cycle` and `/update-bill`'s `refresh_from_transactions` exclude
-    these rows from the sum. Without that the total silently nets its own
-    payment and becomes order-dependent: the same cycle would read 388.10
-    or 152.00 depending only on whether the payment was recorded before or
-    after the bill was drafted.
-
-    Matches on the Thai payment-verb prefix rather than "negative and not
-    obviously something else" (see `is_payment_row`, which is too loose for
-    this job). Everything that genuinely changes what is owed keeps
-    counting: cashback credits (`Cashback …`, `CB …`, `UOB ONE CASHBACK …`),
-    merchant refunds, `[ยกเลิก]` cancellations, `[เว็บรับหนี้…]` takeovers
-    and `[ยอดยกมา…]` carry-forwards.
-    """
-    if (row.get("amount") or 0.0) >= 0:
-        return False
-    name = (row.get("name") or "").strip()
-    return name.startswith(_PAYMENT_NAME_PREFIXES)
-
-
-def _cycle_rows(holder: Holder, card_page_id: str, bill_cycle: str) -> list[dict]:
-    """All projected transaction rows on (Card, Bill Cycle Date)."""
-    raw = notion_client.query_all(
-        holder.transactions_ds,
-        filter={
-            "and": [
-                {"property": "Card", "relation": {"contains": card_page_id}},
-                {"property": "Bill Cycle Date", "date": {"equals": bill_cycle}},
-            ]
-        },
-    )
-    return [project_transaction(r) for r in raw]
 
 
 def _coverage_match(existing_payments: list[dict], target: float) -> str | None:
@@ -214,7 +165,7 @@ def record_payment(
     payment_date = payment_date or _dt.date.today().isoformat()
     label = name or PAYMENT_LABELS[kind]
 
-    rows = _cycle_rows(holder, card_page_id, bill_cycle)
+    rows = cycle_rows(holder.transactions_ds, card_page_id, bill_cycle)
     existing = [p for p in rows if is_payment_row(p)]
     match = _coverage_match(existing, target)
 

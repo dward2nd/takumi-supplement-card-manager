@@ -29,6 +29,7 @@ from itertools import groupby
 from typing import Any, ClassVar
 
 from .. import notion_blocks as nb
+from ..ledger import PRIMARY_PREFIX
 
 ELIGIBLE, UNCERTAIN, EXCLUDED = "eligible", "uncertain", "excluded"
 CASHBACK, POINTS = "cashback", "points"
@@ -37,7 +38,7 @@ SATANG = Decimal("0.01")
 # A household prefix that still marks a real card purchase: the friend's share
 # of a charge on Takumi's primary card. Any other `[…]` prefix (`[ยกเลิก]`,
 # `[ยกยอด…]`, `[เว็บรับหนี้…]`) marks a ledger adjustment, not spend.
-_PURCHASE_PREFIX = "[บัตรหลัก]"
+_PURCHASE_PREFIX = PRIMARY_PREFIX
 _THAI = re.compile(r"[฀-๿]")
 # Household ledger entries that start in Latin script: the bank's auto-debit
 # payment, and the balance-and-points reset (docs/concepts/ledger-reset.md).

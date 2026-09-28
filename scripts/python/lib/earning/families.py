@@ -13,6 +13,7 @@ from __future__ import annotations
 import datetime as dt
 
 from .. import promotions as promos
+from ..ledger import PRIMARY_PREFIX
 from ..promotions import Classification
 from .base import AfterRule, Card, with_points_withheld
 
@@ -112,7 +113,7 @@ class AEONCard(Card):
                                     inst: bool) -> Classification:
         if not self.repo or result.points_override == "×0":
             return result
-        name = merchant.strip().removeprefix("[บัตรหลัก]").strip().upper()
+        name = merchant.strip().removeprefix(PRIMARY_PREFIX).strip().upper()
         for ex in self.repo.points_excluded_merchants:
             if date >= ex.effective_from and (ex.prefix == "*" or name.startswith(ex.prefix.upper())):
                 return with_points_withheld(result, ex.note, "merchant-points-exclusion")

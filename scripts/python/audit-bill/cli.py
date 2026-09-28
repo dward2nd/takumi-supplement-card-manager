@@ -68,11 +68,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib import notion_client
 from lib.bill_cycle import most_recent_closed_cycle
 from lib.cards import find_card
 from lib.holders import resolve_holder
-from lib.transaction_read import project_transaction
+from lib.ledger import cycle_rows
 
 from matching import match
 
@@ -81,17 +80,6 @@ class AuditBillError(RuntimeError):
     pass
 
 
-def _query_cycle(transactions_ds: str, card_page_id: str, bill_cycle: str) -> list[dict]:
-    pages = notion_client.query_all(
-        transactions_ds,
-        filter={
-            "and": [
-                {"property": "Card", "relation": {"contains": card_page_id}},
-                {"property": "Bill Cycle Date", "date": {"equals": bill_cycle}},
-            ]
-        },
-    )
-    return [project_transaction(p) for p in pages]
 
 
 def _validate_statement_rows(rows: list[dict]) -> list[dict]:
@@ -145,7 +133,7 @@ def run(spec: dict) -> dict:
         bill_cycle = bc_date.isoformat()
 
     statement_rows = _validate_statement_rows(spec["statement_transactions"])
-    notion_rows = _query_cycle(holder.transactions_ds, card["id"], bill_cycle)
+    notion_rows = cycle_rows(holder.transactions_ds, card["id"], bill_cycle)
 
     result = match(statement_rows, notion_rows)
 

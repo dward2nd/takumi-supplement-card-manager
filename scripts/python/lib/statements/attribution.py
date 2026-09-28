@@ -30,11 +30,11 @@ import re
 from dataclasses import dataclass, field
 from typing import Callable
 
-from ..bills import _is_cashback_row
-from ..payments import is_bill_payment_row
+from .. import ledger
+from ..ledger import is_bill_payment_row, is_cashback_row
 from .model import CardAccount, Statement, StatementLine
 
-PRIMARY_PREFIX = "[บัตรหลัก] "
+PRIMARY_PREFIX = ledger.PRIMARY_PREFIX + " "   # as written into a friend's row name
 UNMONITORED = "unmonitored"  # a real supplement no one tracks: billed, never recorded
 # Bracketed rows that are household bookkeeping, not statement lines: carry-forwards
 # (both spellings are in use) and debt takeovers.
@@ -90,7 +90,7 @@ def is_statement_line_row(row: dict, holder: str) -> bool:
         return False
     if name.startswith(HOUSEHOLD_BRACKETS):
         return False
-    if holder != "takumi" and _is_cashback_row(row):
+    if holder != "takumi" and is_cashback_row(row):
         return False
     return True
 

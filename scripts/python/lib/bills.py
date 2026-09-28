@@ -18,10 +18,13 @@ it is. Used by both /prepare-bill (on draft) and /update-bill (on refresh).
 
 from __future__ import annotations
 
-import re
 from collections import defaultdict
 
-from . import installments, notion_client, payments
+from . import installments, notion_client
+from .ledger import is_bill_payment_row, is_cashback_row
+
+# The Bills property that holds the bank statement PDF(s).
+STATEMENT_PDF = "ใบแจ้งยอด (PDF)"
 from .holders import Holder
 
 
@@ -92,39 +95,11 @@ def find_bill(holder: Holder, card: str, bill_cycle: str) -> dict:
 #      scripts/repositories/cards/krungsri-now.yaml) and on several of
 #      Takumi's cards.
 #
-# The separator after `CB` varies — a space, a hyphen before a batch number, or
-# a digit opening a campaign code — so this is a character class rather than a
-# `startswith("CB ")`. `payments.is_bill_payment_row` already documents `CB …`
-# as a cashback convention; this is the same fact, applied to bucketing.
-_CB_PREFIX_RE = re.compile(r"^CB[\s\-_0-9]")
-
-
-def _is_cashback_row(row: dict) -> bool:
-    """True when a row is a cashback credit under either naming convention.
-
-    The `CB`-prefix branch also requires a **negative** amount. `CB` is only
-    two letters and could plausibly open a real merchant string, and every
-    cashback row in all three holders' data is a credit — so the sign costs
-    nothing and keeps a hypothetical `CB…` merchant out of the bucket.
-
-    The CASHBACK-substring branch is deliberately left sign-agnostic: it is
-    specific enough on its own, and a positive `Cashback …` row (a clawback of
-    previously-credited cashback) still belongs here rather than in
-    'manual-adjustment'.
-    """
-    name = (row.get("name") or "").strip().upper()
-    if "CASHBACK" in name:
-        return True
-    if not _CB_PREFIX_RE.match(name):
-        return False
-    return (row.get("amount") or 0.0) < 0
-
-
 def _categorize_row(row: dict) -> str:
     """Tag a transaction row by what it represents in the bill.
 
     Categories:
-      - 'cashback'           — credit row; see `_is_cashback_row` for the two
+      - 'cashback'           — credit row; see `ledger.is_cashback_row` for the two
                                naming conventions it recognizes.
       - 'installment-new'    — first term of a plan (term == 1).
       - 'installment-cont'   — second or later term of a plan.
@@ -143,7 +118,7 @@ def _categorize_row(row: dict) -> str:
     a legitimate merchant string that starts with `(` and should stay in
     `regular`.
 
-    The 'bill-payment' test delegates to `payments.is_bill_payment_row`, the
+    The 'bill-payment' test delegates to `ledger.is_bill_payment_row`, the
     same predicate `/prepare-bill`'s `_sum_cycle` and `/update-bill`'s
     `refresh_from_transactions` use to drop these rows from the sum. Sharing
     the predicate is the point: when the two disagreed, the Note listed the
@@ -154,7 +129,7 @@ def _categorize_row(row: dict) -> str:
     name = (row.get("name") or "").strip()
     # Ahead of the installment test on purpose: a credit row that names the
     # installment it refunds (`CB … 03/10`) is a cashback credit, not a term.
-    if _is_cashback_row(row):
+    if is_cashback_row(row):
         return "cashback"
     parsed = installments.parse(name)
     if parsed is not None:
@@ -167,7 +142,7 @@ def _categorize_row(row: dict) -> str:
     # swallow every payment row into 'manual-adjustment'. Strict on the Thai
     # payment-verb prefix, so cashback credits, refunds and `[…]` rows are
     # untouched.
-    if payments.is_bill_payment_row(row):
+    if is_bill_payment_row(row):
         return "bill-payment"
     amount = row.get("amount") or 0.0
     if amount < 0:
