@@ -17,6 +17,7 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib.transaction_write import VALID_MULTIPLIERS
+from lib.holders import resolve_holder
 
 
 class SpecError(ValueError):
@@ -34,6 +35,19 @@ def _check_multiplier(value: Any, field: str) -> None:
         raise SpecError(
             f"{field}={value!r} must be one of {sorted(VALID_MULTIPLIERS)} or null"
         )
+
+
+def _check_holder_multipliers(spec: dict) -> None:
+    """A multiplier box must exist on the holder's DS (×3 is the primary's only)."""
+    try:
+        holder = resolve_holder(spec["holder"])
+    except KeyError:
+        return   # an unknown holder is reported by the caller
+    used = [spec.get("multiplier"), *((t or {}).get("multiplier") for t in spec.get("transactions") or [])]
+    for m in used:
+        if m is not None and m not in holder.multipliers:
+            raise SpecError(f"multiplier {m!r} doesn't exist on {holder.key}'s Transactions DS "
+                            f"(it has {sorted(holder.multipliers)})")
 
 
 def _check_cashback_percent(value: Any, field: str) -> None:
@@ -97,10 +111,9 @@ def validate_spec(spec: dict[str, Any]) -> None:
         raise SpecError("auto_classify must be a boolean")
 
     _check_multiplier(spec.get("multiplier"), "multiplier")
+    _check_holder_multipliers(spec)
     _check_cashback_percent(spec.get("cashback_percent"), "cashback_percent")
     _check_points_redeemed(spec.get("points_redeemed"), "points_redeemed")
-
-    holder = spec["holder"]
 
     txs = spec["transactions"]
     if not isinstance(txs, list) or not txs:

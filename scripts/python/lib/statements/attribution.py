@@ -30,11 +30,13 @@ import re
 from dataclasses import dataclass, field
 from typing import Callable
 
-from .. import ledger
+from .. import holders, ledger
 from ..ledger import is_bill_payment_row, is_cashback_row
 from .model import CardAccount, Statement, StatementLine
 
 PRIMARY_PREFIX = ledger.PRIMARY_PREFIX + " "   # as written into a friend's row name
+PRIMARY = holders.primary().key                      # whose accounts the statement is for
+FRIENDS = tuple(h.key for h in holders.supplements())  # supplement holders, in registry order
 UNMONITORED = "unmonitored"  # a real supplement no one tracks: billed, never recorded
 # Bracketed rows that are household bookkeeping, not statement lines: carry-forwards
 # (both spellings are in use) and debt takeovers.
@@ -90,7 +92,7 @@ def is_statement_line_row(row: dict, holder: str) -> bool:
         return False
     if name.startswith(HOUSEHOLD_BRACKETS):
         return False
-    if holder != "takumi" and is_cashback_row(row):
+    if holder != PRIMARY and is_cashback_row(row):
         return False
     return True
 
@@ -154,9 +156,9 @@ def plan_account(
     card = plan.card
     pools = {
         h: [r for r in rows.get((h, card), []) if is_statement_line_row(r, h)]
-        for h in ("takumi", "baiboon", "nuta")
+        for h in (PRIMARY, *FRIENDS)
     }
-    friends = ("baiboon", "nuta")
+    friends = FRIENDS
     # One statement per card number (StatementParser.separate_card_statements):
     # a friend with no section here has only their [บัตรหลัก] rows to find on
     # it; their own card's rows belong to their own statement.
@@ -179,7 +181,7 @@ def plan_account(
                 plan.payments.append(line)
                 plan.carried += line.amount
                 continue
-            if holder == "takumi":
+            if holder == PRIMARY:
                 primary_lines.append(line)
                 continue
             credit(holder, line.amount)
@@ -207,7 +209,7 @@ def plan_account(
         remaining = []
         for line in primary_lines:
             owner, row = None, None
-            for h in ("takumi", *friends):
+            for h in (PRIMARY, *friends):
                 row = _take(pools[h], line.date, line.amount, line.name, near=near)
                 if row is not None:
                     owner = h
@@ -219,7 +221,7 @@ def plan_account(
             plan.recorded += 1
             if near:
                 plan.near_matches.append({"holder": owner, "row_id": row["id"], "row_date": row["transaction_date"], **_line(line)})
-            if owner != "takumi" and not row["name"].startswith(PRIMARY_PREFIX.strip()):
+            if owner != PRIMARY and not row["name"].startswith(PRIMARY_PREFIX.strip()):
                 plan.renames.append(
                     {"holder": owner, "id": row["id"], "old": row["name"], "new": PRIMARY_PREFIX + row["name"], **_line(line)}
                 )
@@ -232,13 +234,13 @@ def plan_account(
         rest = round(line.amount - sum(r["amount"] for _, r in claimed), 2)
         if claimed:
             plan.shares.append(
-                {**_line(line), "friends": {h: r["amount"] for h, r in claimed}, "takumi": rest}
+                {**_line(line), "friends": {h: r["amount"] for h, r in claimed}, PRIMARY: rest}
             )
         if abs(rest) <= _TOL:
             continue
-        credit("takumi", rest)
+        credit(PRIMARY, rest)
         if claimed:
-            existing = _take(pools["takumi"], line.date, rest, line.name, near=True)
+            existing = _take(pools[PRIMARY], line.date, rest, line.name, near=True)
             if existing is not None:
                 plan.recorded += 1
                 continue
@@ -293,7 +295,7 @@ def _guess_owners(account: CardAccount, unknown: list[str], card: str, rows: dic
     for num in unknown:
         lines = [l for s in account.sections if s.number == num for l in s.lines if l.kind != "payment"]
         best = []
-        for h in ("baiboon", "nuta", "takumi"):
+        for h in (*FRIENDS, PRIMARY):
             pool = [r for r in rows.get((h, card), []) if is_statement_line_row(r, h)]
             hits = sum(1 for l in lines if _take(pool, l.date, l.amount, l.name, near=False))
             if hits:

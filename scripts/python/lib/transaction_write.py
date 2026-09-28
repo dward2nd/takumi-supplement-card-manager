@@ -12,7 +12,8 @@ from __future__ import annotations
 
 
 # Mutually exclusive — at most one per transaction. Unchecked = ×1 (default).
-# ×3 exists only on Takumi's Transactions DB; the others are universal.
+# Every multiplier box any holder has; which ones a holder's DS actually has is
+# `Holder.multipliers` (×3 is the primary's only).
 VALID_MULTIPLIERS = frozenset({"×0", "×2", "×3", "×4", "×5", "÷4"})
 
 
@@ -41,9 +42,8 @@ def build_transaction_properties(
 
     `cashback_percent`, if given, is a raw fraction in [0, 1]. Notion
     stores percent-formatted numbers as the raw fraction (0.05 displays
-    as 5%). The destination property is `% cb`, which exists on
-    Baiboon's and Nuta's Transactions DSes but not Takumi's — the
-    caller is responsible for not passing this for Takumi.
+    as 5%). The destination property is `% cb`, on all three holders'
+    Transactions DSes (Takumi's since 2026-09-28).
 
     `points_redeemed`, if given, writes to `ใช้คะแนน` (a `number`
     property on all three holders' Transactions DSes). Positive values

@@ -136,8 +136,6 @@ def _validate(spec: dict) -> None:
             raise SpecError("cashback_percent must be a number (raw fraction)")
         if not (0 <= cb <= 1):
             raise SpecError("cashback_percent must be in [0, 1] — 0.05 == 5%")
-        if spec["holder"] == "takumi":
-            raise SpecError("cashback_percent does not exist on Takumi's Transactions DS")
 
 
 def _resolve_cycle(card_name: str, spec_bc: str | None) -> tuple[str, str]:

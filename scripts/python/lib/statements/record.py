@@ -25,13 +25,14 @@ from ..bill_cycle import PatternNotFoundError, cycle_for_month, pattern_for_card
 from ..bill_draft import existing_bill, resolve_bill_card_name, select_options
 from ..cards import CardNotFoundError, find_card
 from ..bills import STATEMENT_PDF
+from .. import holders
 from ..holders import HOLDERS
 from ..ledger import cycle_rows
 from ..transaction_write import build_transaction_properties
 from .attribution import AccountPlan, plan_statement
 from .model import Statement, StatementLine
 
-THAI_NAMES = {"takumi": "เว็บ", "baiboon": "ใบบุญ", "nuta": "นุตา", "unmonitored": "unmonitored supplement(s)"}
+THAI_NAMES = {h.key: h.thai_name for h in HOLDERS.values()} | {"unmonitored": "unmonitored supplement(s)"}
 
 
 def number_lookup(issuer: str, number: str) -> tuple[str, str] | None:
@@ -92,7 +93,7 @@ def _classify(card: str, line: StatementLine) -> tuple[str | None, str | None, f
 
 def bill_note(statement: Statement, plan: AccountPlan) -> str:
     parts = []
-    for holder in ("takumi", "baiboon", "nuta", "unmonitored"):
+    for holder in (*HOLDERS, "unmonitored"):
         if holder in plan.split:
             parts.append(f"{THAI_NAMES[holder]} ฿{plan.split[holder]:,.2f}")
     if abs(plan.carried) > 0.005:
@@ -109,7 +110,7 @@ def bill_note(statement: Statement, plan: AccountPlan) -> str:
 def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool = False) -> dict:
     rows, card_ids = fetch_rows(statement)
     plans = plan_statement(statement, number_lookup, rows)
-    takumi = HOLDERS["takumi"]
+    takumi = holders.primary()
     out_accounts, warnings = [], []
     counts = {"renamed": 0, "created": 0, "bills_created": 0, "pdfs_attached": 0}
 
@@ -120,7 +121,7 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
             continue
         warnings.extend(w for w in cycle_warnings(statement, plan.card) if w not in warnings)
         warnings.extend(plan.warnings)
-        takumi_card = card_ids.get(("takumi", plan.card))
+        takumi_card = card_ids.get((takumi.key, plan.card))
         if takumi_card is None and plan.creates:
             entry["status"] = "blocked"
             entry["reason"] = f"{plan.card!r} isn't in Takumi's Cards DB — add it, then re-run"

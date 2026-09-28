@@ -74,7 +74,7 @@ These IDs are data source IDs for the 2025-09-03 API: `GET /v1/data_sources/{id}
 
 Notable schema quirks worth knowing before you touch the data:
 
-- Takumi's Bills DB (added 2026-09-27) is **statement-driven**: each row is the bank's per-card total — principal plus every supplement section — not a sum of his own rows. `Holder.statement_bills` makes `/prepare-bill`, bill refresh and automatic payment rows refuse him. See `docs/databases/takumi-bills.md`.
+- Takumi's Bills DB (added 2026-09-27) is **statement-driven**: each row is the bank's per-card total — principal plus every supplement section — not a sum of his own rows. Takumi is a `PrimaryHolder` (`lib/holders.py`, `statement_bills = True`), which makes `/prepare-bill`, bill refresh and automatic payment rows refuse him. See `docs/databases/takumi-bills.md`.
 - Bills' `Card` field is a **SELECT (text)**, not a relation to the Cards DB. Deliberate denormalization. Don't try to "fix" it in Notion; document it.
 - All three Transactions DSes have `% cb` (writable `number`, percent display — raw fraction in storage so `0.05` shows as `5%`) and `cashback` (read-only formula = `% cb` × `ยอดชำระ`). Takumi's were added 2026-09-28, copied from Baiboon's; his cashback figures only exist on rows from then on (first: AEON Rabbit).
 - Takumi's transactions uniquely include a `หมวดหมู่` (category) relation and a `×3` multiplier checkbox.

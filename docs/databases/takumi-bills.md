@@ -20,7 +20,7 @@ A supplement holder's bill is **computed**: the sum of *their own* Transactions 
 - The title has no `[DRAFT] ` prefix; there is no pre-statement estimate.
 - `จ่ายแล้ว` means *Takumi paid the bank*, not *a friend paid Takumi*.
 
-In code this is `Holder.statement_bills = True` (`scripts/python/lib/holders.py`). The flag makes three automations refuse him: `/prepare-bill` (a sum of his own rows would understate the bill), `/update-bill`'s `refresh_from_transactions` (same reason), and the automatic full-bill payment row that `/update-bill` and `/record-payment` write on a slip (see *Payments* below). Slips, statement PDFs, `Note` and an explicit `paid: true` all work through `/update-bill` as usual.
+In code Takumi is a `PrimaryHolder` (`scripts/python/lib/holders.py`), whose `statement_bills` is `True`; Baiboon and Nuta are `SupplementHolder`s. That makes three automations refuse him: `/prepare-bill` (a sum of his own rows would understate the bill), `/update-bill`'s `refresh_from_transactions` (same reason), and the automatic full-bill payment row that `/update-bill` and `/record-payment` write on a slip (see *Payments* below). Slips, statement PDFs, `Note` and an explicit `paid: true` all work through `/update-bill` as usual.
 
 ## Every statement line lives in exactly one ledger
 
