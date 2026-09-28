@@ -88,6 +88,22 @@ def fetch_rows(statement: Statement) -> tuple[dict, dict]:
     return rows, card_ids
 
 
+def fetch_later_rows(statement: Statement, card_ids: dict) -> dict:
+    """{(friend, card): projected rows in the cycle after this one} — where a
+    friend books a bank credit that landed after their bill was settled."""
+    bc = _dt.date.fromisoformat(statement.statement_date)
+    later: dict[tuple[str, str], list[dict]] = {}
+    for (key, card), page_id in card_ids.items():
+        if key == holders.primary().key:
+            continue
+        try:
+            next_bc = pattern_for_card(card).active(bc + _dt.timedelta(days=1))[0]
+        except PatternNotFoundError:
+            continue
+        later[(key, card)] = cycle_rows(HOLDERS[key].transactions_ds, page_id, next_bc.isoformat())
+    return later
+
+
 # How far a printed statement date may sit from the card's cycle date and still
 # be taken as that cycle (a paper shift); further than this is a real question.
 MAX_PAPER_SHIFT_DAYS = 5
@@ -260,7 +276,7 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
     printed = statement
     statement, shift_warnings = ledger_cycle(printed)
     rows, card_ids = fetch_rows(statement)
-    plans = plan_statement(statement, number_lookup, rows)
+    plans = plan_statement(statement, number_lookup, rows, fetch_later_rows(statement, card_ids))
     takumi = holders.primary()
     out_accounts, warnings = [], list(shift_warnings)
     counts = {"renamed": 0, "created": 0, "bills_created": 0, "pdfs_attached": 0, "process_dates": 0,

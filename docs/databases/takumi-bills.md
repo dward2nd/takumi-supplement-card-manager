@@ -112,7 +112,9 @@ With the transfers in place, every paid card nets to zero. First batch, same day
 
 `/record-statement` currently books every bank credit to Takumi, because `is_statement_line_row` skips a friend's cashback-like rows. On the first statements that duplicated three Krungsri credits Baiboon already had: `CB88_SAV1` on NOW (−100), `CB15_ SUP1` on Visa (−120), and `CB12_BC3P` on JCB (−24, spelled `…1AUG26-31AUG` in her ledger). It also put two AEON credits in his ledger that were earned by friends: `CASH BACK - CREDIT CARD PROMOTION` on AEON UnionPay (−10.05, Nuta's) and on AEON World Mastercard (−120.00, Baiboon's). His Krungsri copies were archived. The AEON pair moved to `[บัตรหลัก] CASH BACK - CREDIT CARD PROMOTION` in the friends' BC 2026-10-10 cycle, because their 2026-09 bills were already paid.
 
-His own credits stayed with him: Krungsri Lady `CB12_BC3P` (his card), First Choice `เครดิตเงินคืน` −21.32 (his remainder after the split), and Lotus's Beyond's `CB…` rows. Takumi is building something to manage this attribution. Until it lands, check each new statement run for cashback a friend already carries before trusting the split. Re-running `/record-statement` on the 2026-09-05 Krungsri or 2026-09-10 AEON statement would recreate the archived rows.
+His own credits stayed with him: Krungsri Lady `CB12_BC3P` (his card), First Choice `เครดิตเงินคืน` −21.32 (his remainder after the split), and Lotus's Beyond's `CB…` rows.
+
+Since 2026-09-28 the attribution handles this itself. A friend's row that carries the bank's credit text *is* that primary-section line, booked in their ledger. A match needs the same leading words (`CB12_BC3P CAMPAIGN`, so a truncated date range still matches), the same amount and a date within 3 days. The row can sit in the statement's cycle or, if the credit landed after their bill was paid, in the next one (the AEON pair). It's matched as-is, without the `[บัตรหลัก]` rename, and Takumi gets no copy. A credit only Takumi carries (ttb `CB BANGCHAK`, which he pays Baiboon himself) stays his. Re-running every statement recorded so far plans no new rows.
 
 ### KTC — first statements (2026-09-27)
 

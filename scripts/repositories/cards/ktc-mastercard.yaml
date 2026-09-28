@@ -1,6 +1,8 @@
 name: KTC Mastercard
 issuer: KTC
 bill_cycle_pattern: ktc
+statement_numbers:            # last 4 digits → holder; "World Reward Mastercard" 5239-10xx-xxxx-5549 (payment slip, 2026-09-28)
+  "5549": takumi
 notes: |
   Takumi-only.
 

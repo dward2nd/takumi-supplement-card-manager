@@ -19,8 +19,15 @@ exactly one ledger.
 - Payments are never recorded here: they settle the previous bill.
 
 Matching is by transaction date and amount, exact first, then the same amount
-within NEAR_DAYS; a matching merchant stem breaks ties. Re-running over a
-statement already recorded finds every line and plans nothing.
+within NEAR_DAYS; a matching merchant stem breaks ties. A friend's cashback-style
+row is normally not a statement line (it's the household's own credit), except
+when it carries the bank's credit text (`CB15_ SUP1 CAMPAIGN …` — the same
+leading words, amount and date): then it *is* that line, booked in that
+friend's ledger — in this cycle, or the next one when the credit landed after
+their bill was settled (AEON's `CASH BACK - CREDIT CARD PROMOTION`) — and
+matches it without being renamed. ฿0 rows (points only)
+print no line and are left out. Re-running over a statement already recorded
+finds every line and plans nothing.
 """
 
 from __future__ import annotations
@@ -101,8 +108,8 @@ def is_statement_line_row(row: dict, holder: str) -> bool:
     friends only.
     """
     name = (row.get("name") or "").strip()
-    if not name or row.get("amount") is None or not row.get("transaction_date"):
-        return False
+    if not name or not row.get("amount") or not row.get("transaction_date"):
+        return False   # a ฿0 row (points only: redemptions, adjustments) prints no line
     if name.startswith(("Reset ", "โอนยอด")) or is_bill_payment_row(row):
         return False
     if name.startswith(HOUSEHOLD_BRACKETS):
@@ -119,6 +126,26 @@ def _stem(name: str) -> tuple[str, ...]:
 
 def _days(a: str, b: str) -> int:
     return abs((_dt.date.fromisoformat(a) - _dt.date.fromisoformat(b)).days)
+
+
+def _is_bank_credit_candidate(row: dict, holder: str) -> bool:
+    """A friend's row left out only for looking like cashback: it may be the
+    bank's own credit line, booked in their ledger (matched by its text)."""
+    return holder != PRIMARY and is_cashback_row(row) and is_statement_line_row(row, PRIMARY)
+
+
+def _take_bank_credit(pool: list[dict], line: StatementLine) -> dict | None:
+    """Remove and return the row carrying this credit line's text, if any: the
+    same leading words (households truncate the campaign's date range —
+    `CB12_BC3P CAMPAIGN 1AUG26-31AUG`), the same amount, a date within NEAR_DAYS."""
+    if line.amount >= 0:
+        return None
+    for r in pool:
+        if (_stem(r["name"]) == _stem(line.name) and abs((r["amount"] or 0) - line.amount) <= _TOL
+                and _days(r["transaction_date"], line.date) <= NEAR_DAYS):
+            pool.remove(r)
+            return r
+    return None
 
 
 def _take(pool: list[dict], line_date: str, amount: float, name: str, *, near: bool) -> dict | None:
@@ -143,9 +170,13 @@ def plan_account(
     account: CardAccount,
     lookup: NumberLookup,
     rows: dict[tuple[str, str], list[dict]],
+    later: dict[tuple[str, str], list[dict]] | None = None,
 ) -> AccountPlan:
     """Plan one card account. `rows[(holder, card)]` are that holder's rows on
-    the card in this statement's bill cycle (projected; absent = none)."""
+    the card in this statement's bill cycle (projected; absent = none);
+    `later[(friend, card)]` the friend's rows in the next cycle, where a bank
+    credit that landed after their bill was paid gets booked — searched only
+    for the bank's credit text."""
     plan = AccountPlan(product=account.product, total=account.total)
     if not account.has_activity():
         plan.status, plan.reason = "skipped", "no activity and nothing due"
@@ -173,6 +204,12 @@ def plan_account(
         h: [r for r in rows.get((h, card), []) if is_statement_line_row(r, h)]
         for h in (PRIMARY, *FRIENDS)
     }
+    bank_credits = {
+        h: [r for r in rows.get((h, card), []) if _is_bank_credit_candidate(r, h)]
+        + [r for r in (later or {}).get((h, card), [])   # any credit booked a cycle late
+           if (r["amount"] or 0) < 0 and (is_statement_line_row(r, h) or _is_bank_credit_candidate(r, h))]
+        for h in FRIENDS
+    }
     friends = FRIENDS
     # One statement per card number (StatementParser.separate_card_statements):
     # a friend with no section here has only their [บัตรหลัก] rows to find on
@@ -183,6 +220,7 @@ def plan_account(
         for h in friends:
             if h not in on_statement:
                 pools[h] = [r for r in pools[h] if r["name"].startswith(PRIMARY_PREFIX.strip())]
+                bank_credits[h] = [r for r in bank_credits[h] if r["name"].startswith(PRIMARY_PREFIX.strip())]
 
     def credit(holder: str, amount: float) -> None:
         plan.split[holder] = round(plan.split.get(holder, 0.0) + amount, 2)
@@ -204,7 +242,7 @@ def plan_account(
                 continue  # on the bill, in no ledger — nothing to check it against
             row = _take(pools[holder], line.date, line.amount, line.name, near=False) or _take(
                 pools[holder], line.date, line.amount, line.name, near=True
-            )
+            ) or _take_bank_credit(bank_credits.get(holder, []), line)
             if row is None:
                 plan.missing.append({"holder": holder, "number": section.number, **_line(line)})
                 continue
@@ -224,21 +262,27 @@ def plan_account(
     for near in (False, True):
         remaining = []
         for line in primary_lines:
-            owner, row = None, None
+            owner, row, bank_credit = None, None, False
             for h in (PRIMARY, *friends):
                 row = _take(pools[h], line.date, line.amount, line.name, near=near)
                 if row is not None:
                     owner = h
                     break
             if row is None:
+                for h in friends:   # the bank's credit text, booked in a friend's ledger
+                    row = _take_bank_credit(bank_credits[h], line)
+                    if row is not None:
+                        owner, bank_credit = h, True
+                        break
+            if row is None:
                 remaining.append(line)
                 continue
             credit(owner, line.amount)
             plan.recorded += 1
             _stamp(plan, owner, row, line)
-            if near:
+            if near or row["transaction_date"][:10] != line.date:
                 plan.near_matches.append({"holder": owner, "row_id": row["id"], "row_date": row["transaction_date"], **_line(line)})
-            if owner != PRIMARY and not row["name"].startswith(PRIMARY_PREFIX.strip()):
+            if owner != PRIMARY and not bank_credit and not row["name"].startswith(PRIMARY_PREFIX.strip()):
                 plan.renames.append(
                     {"holder": owner, "id": row["id"], "old": row["name"], "new": PRIMARY_PREFIX + row["name"],
                      "links": row.get("promotion_ids") or [], **_line(line)}
@@ -252,10 +296,10 @@ def plan_account(
             _stamp(plan, h, r, line)
         rest = round(line.amount - sum(r["amount"] for _, r in claimed), 2)
         if claimed:
-            friends: dict[str, float] = {}
+            by_friend: dict[str, float] = {}
             for h, r in claimed:   # a holder can own several shares of one line
-                friends[h] = round(friends.get(h, 0.0) + r["amount"], 2)
-            plan.shares.append({**_line(line), "friends": friends, PRIMARY: rest})
+                by_friend[h] = round(by_friend.get(h, 0.0) + r["amount"], 2)
+            plan.shares.append({**_line(line), "friends": by_friend, PRIMARY: rest})
         if abs(rest) <= _TOL:
             if claimed:
                 plan.splits.append({"line": line, "rows": claimed, "remainder": None})
@@ -334,5 +378,6 @@ def _line(line: StatementLine) -> dict:
     return {"date": line.date, "name": line.name, "amount": line.amount}
 
 
-def plan_statement(statement: Statement, lookup: NumberLookup, rows: dict) -> list[AccountPlan]:
-    return [plan_account(statement, a, lookup, rows) for a in statement.accounts]
+def plan_statement(statement: Statement, lookup: NumberLookup, rows: dict,
+                   later: dict | None = None) -> list[AccountPlan]:
+    return [plan_account(statement, a, lookup, rows, later) for a in statement.accounts]
