@@ -78,11 +78,13 @@ class KrungsriFamilyCard(Card):
             "truemoney-711-points-exclusion")
 
 
-class KrungsriJCB(KrungsriFamilyCard):
+class KrungsriPetrolCampaign(KrungsriFamilyCard):
     """Krungsri's year-long Thai-petrol campaign withholds reward *points* on fuel
     (user, 2026-09-27; seen on BSRC-… and BANGCHAK-… rows). Points only — the
-    card's cashback arrives as campaign credit rows, never `% cb` — so not the
-    UOB/ttb rule, which zeroes both axes."""
+    card's cashback arrives as campaign credit rows (`BANGCHAK SPECIAL DISCOUNT`,
+    `CB12_BC3P CAMPAIGN`), never `% cb` — so not the UOB/ttb rule, which zeroes
+    both axes. Krungsri JCB, and Krungsri Lady since the Sep 2026 statement paid
+    0 points on a ฿800 BANGCHAK row (user, 2026-09-28)."""
 
     def after_rules(self) -> list[AfterRule]:
         return [*super().after_rules(), self._petrol_points]
@@ -94,6 +96,9 @@ class KrungsriJCB(KrungsriFamilyCard):
         return with_points_withheld(
             result, "Petrol station — Krungsri's year-long Thai-petrol campaign withholds reward points "
                     "on fuel spend.", "petrol-points-exclusion")
+
+
+KrungsriJCB = KrungsriPetrolCampaign   # the name the registry first used
 
 
 class FirstChoice(KrungsriFamilyCard):
@@ -123,3 +128,39 @@ class AEONCard(Card):
             if date >= ex.effective_from and (ex.prefix == "*" or name.startswith(ex.prefix.upper())):
                 return with_points_withheld(result, ex.note, "merchant-points-exclusion")
         return result
+
+
+class KTCCard(Card):
+    """KTC FOREVER (docs/promotions/ktc-forever.md; KTC's terms, 2026-09-28): no
+    points at 7-Eleven in any channel or through TrueMoney (rule 3), nor on public
+    transport and expressway tolls (rule 17). Only what the merchant string shows is
+    encoded; MCC-only exclusions are marked by hand."""
+
+    def after_rules(self) -> list[AfterRule]:
+        return [*super().after_rules(), self._ktc_exclusions]
+
+    def _ktc_exclusions(self, result: Classification, date: dt.date, merchant: str,
+                        inst: bool) -> Classification:
+        if result.points_override == "×0":
+            return result
+        reason = self.excluded(merchant.removeprefix(PRIMARY_PREFIX).strip())
+        return with_points_withheld(result, f"{reason} — no KTC FOREVER points.", "ktc-points-exclusion") \
+            if reason else result
+
+    def excluded(self, merchant: str) -> str | None:
+        if promos.looks_truemoney_or_711(merchant):
+            return "7-Eleven / TrueMoney"
+        if promos.looks_transport_or_toll(merchant):
+            return "Public transport or expressway toll"
+        return None
+
+
+class KTCUnionPay(KTCCard):
+    """KTC UnionPay adds its own list (rule 16): supermarkets (5411), bakeries,
+    fast food, public hospitals, cinemas, education, government… Supermarkets
+    show in the name (user, 2026-07: JAMPHA SAVEMART); the others need the MCC."""
+
+    def excluded(self, merchant: str) -> str | None:
+        if promos.looks_supermarket(merchant):
+            return "Supermarket (KTC UnionPay)"
+        return super().excluded(merchant)

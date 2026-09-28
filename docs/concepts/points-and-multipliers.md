@@ -47,3 +47,12 @@ The `×0/×2/×3/×4/×5/÷4` set is **not** the issuer's real earning rule — 
 - **Conditional fall-back via the merchant string** — UOB Makro's `÷4` only applies when the transaction was physically read by Makro's in-store reader. TrueMoney intermediation (`TMN*…`) breaks that condition and reverts to the base rate. The checkbox alone doesn't encode the "TrueMoney breaks it" rule; the human entering the row has to know.
 
 So the multiplier set is a **lossy projection** of the underlying rules. Where the gap matters, the per-card narrative note is the source of truth (`docs/cards/<card>.md`), not the Notion checkbox. The phase-2 app models the underlying rules directly as `RewardRule` JSON entries on `Transaction` — see [[../future-app/data-model-target]] and [[promotions]].
+
+## Programme quirks the ledger lives with (2026-09-28)
+
+- **Rounding.** UOB rounds per statement line, like the ledger formula. KBank, KTC and Krungsri round once on the cycle's spend, so the ledger runs short each cycle. The difference goes on a `[ปรับคะแนน] ปัดเศษคะแนนรอบบิล YYYY-MM` row in the principal holder's ledger; `/record-statement` adds it (user). A charge split into `[บัตรหลัก]` shares loses points the same way: `[ปรับคะแนน] <line>` rows, also on the principal holder's ledger.
+- **Bonus points and redemptions outside a card.** KBank prints `BONUS POINTS` per product (Shopee +800 in Aug 2026, PLUSTINUM +1,000 in Sep 2026); these are recorded as `[คะแนนพิเศษ] KBank BONUS POINTS` rows. A `CASH REBATE` redemption can draw on bonus points that belong to no card; only the part a card pays shows on it (PLUSTINUM −69, `แลกคะแนน CASH REBATE 69 คะแนน`).
+- **Lotus's coins are fractional**: 0.25 coin per ฿50, or 1.5 coins per ฿50 at Lotus's (user). The household's points are whole numbers everywhere and stay that way, so Lotus's coins aren't audited.
+- **Krungsri Lady and Krungsri JCB** earn no points at petrol stations (the Thai-petrol campaign; `KrungsriPetrolCampaign`).
+- **KTC** has the longest exclusion list; see [[../promotions/ktc-forever]].
+

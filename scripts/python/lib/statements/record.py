@@ -22,6 +22,11 @@ Writes, per account the plan marks `ready`:
   4. attach the statement PDF to it
   4a. stamp `Process Date` (the statement's posting date, where it prints one)
       on every row a line accounts for — new rows get it at creation
+  4c. for a bank that rounds points once per cycle (KBank, KTC, Krungsri), add
+      a `[ปรับคะแนน] ปัดเศษคะแนนรอบบิล YYYY-MM` row with what the ledger's per-row
+      rounding loses on each printed points summary (`rounding_adjustments`;
+      user, 2026-09-28) — on the account holder's ledger: Takumi's for a pooled
+      account, the card's holder on a one-PDF-per-card issuer
   4b. for a line split between friends' shares and Takumi's remainder, add a
       `[ปรับคะแนน] <line>` row to Takumi's ledger with the points the per-row
       rounding lost (`split_adjustments`; user, 2026-09-28: the principal
@@ -200,6 +205,38 @@ def split_adjustments(plan: AccountPlan, takumi_rows: list[dict]) -> list[dict]:
     return out
 
 
+ROUNDING_ADJUSTMENT = "[ปรับคะแนน] ปัดเศษคะแนนรอบบิล "
+
+
+def rounding_adjustments(statement: Statement) -> list[dict]:
+    """Per printed points summary on a bank that rounds once per cycle: the points
+    the ledger's per-row flooring loses, less any rounding row already there."""
+    from .. import rewards_audit   # late: rewards_audit reads the statements package
+    from . import PARSERS
+    parser = next((p for p in PARSERS.values() if p.issuer == statement.issuer), None)
+    if parser is None or parser.points_rounding != "cycle":
+        return []
+    bc = _dt.date.fromisoformat(statement.statement_date)
+    out = []
+    for s in statement.rewards:
+        owner = number_lookup(statement.issuer, s.number)
+        if owner is None or "coins" in s.program.lower():
+            continue
+        card, holder = owner
+        t = rewards_audit.tally(s, card, holder, parser, bc)
+        lost = rewards_audit.rounding_lost(t) - t.rounding_adjustments
+        if lost <= 0:
+            continue
+        account_holder = holder if parser.separate_card_statements else PRIMARY_KEY
+        out.append({"card": card, "holder": account_holder, "points": lost, "number": s.number,
+                    "name": ROUNDING_ADJUSTMENT + statement.statement_date[:7],
+                    "note": (f"{card} …{s.number}, cycle {statement.statement_date}: the bank rounds points once on the "
+                             f"cycle's spend at each rate (floor(Σ ÷ baht per point) × multiplier) = "
+                             f"{t.earned + rewards_audit.rounding_lost(t)}; the ledger's rows round each one and give "
+                             f"{t.earned}. +{lost} added back here (ใช้คะแนน {-lost}).")})
+    return out
+
+
 def bill_note(statement: Statement, plan: AccountPlan, printed: Statement | None = None) -> str:
     parts = []
     for holder in (*HOLDERS, "unmonitored"):
@@ -333,6 +370,18 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
         "warnings": warnings,
         "accounts": out_accounts,
     }
+    rounding = rounding_adjustments(statement)
+    if rounding:
+        out["rounding_adjustments"] = [{k: r[k] for k in ("card", "holder", "number", "points")} for r in rounding]
+    if not dry_run:
+        for r in rounding:
+            h = HOLDERS[r["holder"]]
+            notion_client.create_page(h.transactions_ds, build_transaction_properties(
+                name=r["name"], amount=0, transaction_date=statement.statement_date,
+                bill_cycle_date=statement.statement_date, due_date=statement.due_date,
+                card_page_id=find_card(h.cards_ds, r["card"])["id"], note=r["note"], multiplier="×0",
+                points_redeemed=-r["points"]))
+            counts["points_adjustments"] += 1
     if sync_promotions and written:
         out["promotions"] = follow.follow_safely(written, dry_run=dry_run)
     return out

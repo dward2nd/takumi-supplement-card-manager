@@ -342,6 +342,22 @@ def looks_wallet_top_up(merchant_name: str) -> bool:
     return bool(_WALLET_TOP_UP.search(merchant_name.upper()))
 
 
+# Supermarkets and grocers (MCC 5411) whose names show it. KTC UnionPay earns no
+# points there (docs/promotions/ktc-forever.md, rule 16).
+_SUPERMARKET = re.compile(r"SAVEMART|LOTUS'?S|BIG ?C\b|\bTOPS\b|RIMPING|VILLA MARKET|GOURMET MARKET|MAX ?VALU|"
+                          r"FOODLAND|CP FRESH|TESCO")
+# Public transport and tolls (MCC 4111/4112/4131/4784): no KTC points (rule 17).
+_TRANSPORT_TOLL = re.compile(r"EXPRESSWAY|EASY ?PASS|\bM-?PASS\b|\bBTS\b|\bMRT\b|\bSRT\b|\bBMTA\b")
+
+
+def looks_supermarket(merchant_name: str) -> bool:
+    return bool(_SUPERMARKET.search(merchant_name.upper()))
+
+
+def looks_transport_or_toll(merchant_name: str) -> bool:
+    return bool(_TRANSPORT_TOLL.search(merchant_name.upper()))
+
+
 def looks_truemoney_or_711(merchant_name: str) -> bool:
     """True for TrueMoney (`TMN `/`TMN*` prefix) or 7-Eleven merchant strings."""
     upper = merchant_name.strip().upper()
