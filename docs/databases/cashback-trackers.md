@@ -33,4 +33,5 @@ Three identical DBs, one per holder. Each row is one promotion credit the holder
 
 - Baiboon's tracker predates the Bureau (rows from 2026-06). Its 31 earlier rows have no `Promotion` link; leave them as they are.
 - Takumi's and Nuta's were created 2026-09-28 as copies of Baiboon's. The copies had no `Promotion` column, and their `Card` relation still pointed at **Baiboon's** Cards DS. Both were fixed that day while the tables were empty: `Promotion` was added, and `Card` was retargeted to each holder's own Cards DS.
+- 2026-09-29: 26 unlinked rows backfill UOB's e-Wallet & e-Commerce campaign for Oct 2025 – Aug 2026 (`EPW913 …`, `EPW144 …`, `EPW243 …`, `EPW538 2% 1—31 Aug`), split in proportion to each holder's eligible spend on the bundled statements. Takumi's are ticked where the bank credit has posted. See [[../promotions/uob-epw538#The quarterly series]].
 - `/sync-promotion` writes Bureau-driven rows. It never touches a ticked row or one without a `Promotion` link.

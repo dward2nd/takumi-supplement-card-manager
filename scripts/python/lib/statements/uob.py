@@ -32,6 +32,9 @@ _LINE = re.compile(
     r"^(\d\d) ([A-Z]{3}) (\d\d) ([A-Z]{3}) (.+?) ([\d,]+\.\d\d)(?: (CR)| [\d,]+\.\d\d)?$"
 )
 _TOTAL = re.compile(r"^TOTAL BALANCE - (.+?) (-?[\d,]+\.\d\d)( CR)?$")
+# A page break can fall between a product heading and its first card number
+# (`UOB ONE` / `Page 3/9` / the column header / `5432 15XX XXXX 4672`, 26 Jul 2026).
+_PAGE_BREAK = re.compile(r"^(Page \d+/\d+|POST DATE TRANS DATE DESCRIPTION.*)$")
 # A foreign charge prints its original amount glued to the description:
 # `ANTHROPIC* CLAUDE SUB SAN FRANCISCO USD107.00 3,669.72` (seen 27 Sep 2026).
 _FOREIGN = re.compile(r"^(.*?) ((?:USD|EUR|GBP|JPY|CNY|HKD|MOP|TWD|KRW|SGD|MYR|VND|AUD|NZD|CAD|CHF|INR|IDR|PHP))"
@@ -71,7 +74,7 @@ def parse(text: str) -> Statement:
         )
 
     for i, ln in enumerate(lines):
-        nxt = lines[i + 1] if i + 1 < len(lines) else ""
+        nxt = next((l for l in lines[i + 1:] if l and not _PAGE_BREAK.match(l)), "")
         if _HEADING.match(ln) and _CARD.match(nxt):
             product, sections = ln, []
             continue

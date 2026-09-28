@@ -4,6 +4,7 @@ bill_cycle_pattern: uob
 statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27)
   "9310": takumi
   "1009": baiboon
+  "4488": takumi              # the primary's number until the Apr 2026 statement; 9310 from May 2026
 points_default: "×2"
 notes: |
   Points card — earns NO cashback on any row; `% cb` stays unset always.

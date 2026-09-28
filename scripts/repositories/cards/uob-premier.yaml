@@ -3,3 +3,4 @@ issuer: UOB
 bill_cycle_pattern: uob
 statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27)
   "4721": takumi
+  "6040": baiboon             # her Premier supplement; statements Oct 2025 – Apr 2026, active to Jan 2026
