@@ -13,7 +13,23 @@ Modules:
              and CashbackPromotion (baht shares, trackers, the `% cb` rule)
   ladder     LadderPromotion: steps of pooled spend
   capped     CreditCapPromotion: a per-row rate until a pooled credit cap
+  slips      SlipCreditPromotion: a fixed credit per slip until a pooled cap
+  rights     DrawRightsPromotion: lucky-draw rights per slip, up to a count per month
+  accounts   CardAccount: a quota per primary card account (one Bureau row per card)
   nw3        Krungsri First Choice NW3 (ladder), Jul–Sep 2026
+  on3 / dlv3 / is3   First Choice online shopping, delivery, insurance (Jul/Sep 2026 –)
+  bts        BTS draw rights, Aug–Nov 2026: a First Choice pool and a Krungsri Card pool
+  onq3 / sup1 / ptt2  Krungsri Card online, supermarket, PTT — per card account
+  jdining    Krungsri JCB J Dining 3% per ฿1,000 restaurant slip, Jan–Sep 2026
+  eat        Krungsri Card EAT dining ("DN"), ฿100 for the month's 1st and 3rd slip — per card account
+  bangchak   Krungsri Card at Bangchak: the card's 1% per cycle, BC3P per slip — per card account
+  ttb_campaigns  ttb Caltex (CTG) and Bangchak (BCG) fuel, hypermarket (BMG)
+  krungsri_now  Krungsri NOW online ฿25 per ฿500 slip, ฿300 a month
+  aeon_unionpay  AEON UnionPay 3% in CNY/HKD/MOP/TWD, ฿2,500 a cycle
+  slip_count SlipCountPromotion: a credit for the Nth qualifying slip in a period
+  lbs3       Lotus's big-ticket categories (ladder), Sep–Dec 2026
+  ttb_so_smart  ttb so smart 1%, ฿2,000 a cycle (credit cap)
+  aeon_rabbit / aeon_world / ntw1  AEON Rabbit 5%, AEON World 5% supermarkets, Everyday with AEON
   epw538     UOB e-Commerce & e-Wallet EPW538 (ladder), Jul–Sep 2026
   uob_one    UOB One 10%/5% (monthly) and 1% (per cycle) (credit caps)
   uob_world  UOB World ×5 (a points quota per cycle)
@@ -32,17 +48,38 @@ from __future__ import annotations
 
 import datetime as dt
 
-from .base import (CASHBACK, ELIGIBLE, EXCLUDED, POINTS, UNCERTAIN, Allocation, BasePromotion,
+from . import bangchak, bts, eat, jdining, krungsri_now, onq3, ptt2, sup1
+from .accounts import CardAccount
+from .aeon_rabbit import AEONRabbitCashback
+from .aeon_unionpay import AEONUnionPayCashback
+from .aeon_world import AEONWorldCashback
+from .base import (CASHBACK, ELIGIBLE, EXCLUDED, POINTS, RIGHTS, UNCERTAIN, Allocation, BasePromotion,
                    CashbackPromotion, Rule, Tx, TxCredit)
+from .bts import BTSDrawPromotion
 from .capped import CreditCapPromotion
+from .dlv3 import DLV3Promotion
 from .epw538 import EPW538Promotion
+from .is3 import IS3Promotion
 from .ladder import LadderPromotion, Tranche
+from .lbs3 import LBS3Promotion
+from .ntw1 import NTW1Promotion
 from .nw3 import NW3Promotion
+from .on3 import ON3Promotion
+from .rights import DrawRightsPromotion
+from .slip_count import SlipCountPromotion
+from .slips import SlipCreditPromotion
+from .ttb_campaigns import TTBBangchakPromotion, TTBCaltexPromotion, TTBHypermarketPromotion
+from .ttb_so_smart import TTBSoSmartCashback
 from .uob_one import UOBOneBase, UOBOneBonus
 from .uob_world import UOBWorldBonus
 
 PROMOTIONS: tuple[type[BasePromotion], ...] = (
     NW3Promotion, EPW538Promotion, UOBOneBonus, UOBOneBase, UOBWorldBonus,
+    ON3Promotion, DLV3Promotion, IS3Promotion, *bts.POOLS,
+    *onq3.ACCOUNTS, *sup1.ACCOUNTS, *ptt2.ACCOUNTS, *jdining.ACCOUNTS, *eat.ACCOUNTS, *bangchak.ACCOUNTS,
+    *krungsri_now.ACCOUNTS, AEONUnionPayCashback,
+    TTBCaltexPromotion, TTBBangchakPromotion, TTBHypermarketPromotion,
+    LBS3Promotion, TTBSoSmartCashback, AEONRabbitCashback, AEONWorldCashback, NTW1Promotion,
 )
 
 
@@ -57,7 +94,11 @@ def promotion_for(bureau_name: str, start: dt.date, end: dt.date) -> BasePromoti
     return hits[0]()
 
 
-__all__ = ["CASHBACK", "ELIGIBLE", "EXCLUDED", "POINTS", "UNCERTAIN", "Allocation", "BasePromotion",
-           "CashbackPromotion", "CreditCapPromotion", "EPW538Promotion", "LadderPromotion",
-           "NW3Promotion", "PROMOTIONS", "Rule", "Tranche", "Tx", "TxCredit", "UOBOneBase",
-           "UOBOneBonus", "UOBWorldBonus", "promotion_for"]
+__all__ = ["CASHBACK", "ELIGIBLE", "EXCLUDED", "POINTS", "RIGHTS", "UNCERTAIN", "Allocation",
+           "AEONRabbitCashback", "AEONUnionPayCashback", "AEONWorldCashback", "BTSDrawPromotion", "BasePromotion", "CardAccount",
+           "CashbackPromotion", "CreditCapPromotion", "DLV3Promotion", "DrawRightsPromotion",
+           "EPW538Promotion", "IS3Promotion", "LBS3Promotion", "LadderPromotion", "NTW1Promotion",
+           "NW3Promotion", "ON3Promotion", "PROMOTIONS", "Rule", "SlipCountPromotion", "SlipCreditPromotion", "TTBBangchakPromotion", "TTBCaltexPromotion",
+           "TTBHypermarketPromotion",
+           "TTBSoSmartCashback", "Tranche", "Tx", "TxCredit", "UOBOneBase", "UOBOneBonus",
+           "UOBWorldBonus", "promotion_for"]

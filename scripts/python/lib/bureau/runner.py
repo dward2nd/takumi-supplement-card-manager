@@ -17,7 +17,7 @@ from decimal import Decimal
 from ..holders import HOLDERS
 from . import report, settle, store, sync
 from . import promotion_for
-from .base import CASHBACK
+from .base import CASHBACK, RIGHTS
 from .store import BureauRow
 from .sync import Writer
 
@@ -62,6 +62,12 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         if shares_ok:
             trackers, w = settle.trackers(row, promo, alloc, txs, adjustments, cards, write)
             warnings += w
+
+    if promo.reward == RIGHTS:
+        rights = sum(alloc.rights.values())
+        totals |= {"rights": rights, "rights_by_holder": dict(alloc.rights)}
+        if row.rights != rights:
+            write(f"Bureau {store.RIGHTS}={rights}", store.write_numbers, row.id, {store.RIGHTS: Decimal(rights)})
 
     body = [] if sync.is_stand_in(row) else store.body_block_ids(row.id)
     if not body or spec.get("replace_summary"):

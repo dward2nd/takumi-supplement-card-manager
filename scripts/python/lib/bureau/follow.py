@@ -38,7 +38,7 @@ from ..holders import HOLDERS
 from ..transaction_read import project_transaction
 from ..transaction_write import build_update_properties
 from . import PROMOTIONS, promotion_for, runner, store
-from .base import CASHBACK, BasePromotion, Tx
+from .base import CASHBACK, RIGHTS, BasePromotion, Tx
 from .store import LINK, BureauRow
 
 MAX_PASSES = 4
@@ -202,6 +202,8 @@ def _summary(out: dict, writes: list[str], mine: set[str]) -> dict:
     s: dict = {"bureau": out["promotion"]["name"]}
     if out["promotion"]["reward"] == CASHBACK:
         s["credit"], s["shares"] = out["totals"]["credit"], out["shares"]
+    elif out["promotion"]["reward"] == RIGHTS:
+        s["rights"] = out["totals"]["rights"]
     if writes:
         s["writes"] = writes
     not_linked = [{k: c[k] for k in ("row", "level", "reason")}

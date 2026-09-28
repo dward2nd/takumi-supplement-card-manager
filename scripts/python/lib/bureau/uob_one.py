@@ -190,7 +190,7 @@ class UOBOneBase(_UOBOne):
         pattern = bill_cycle.pattern_for_card(tx.card or "UOB One")
         bc, _ = pattern.active(posted_on(tx) + _DAY)   # the first statement date after it posted
         previous, _ = pattern.closed(bc)
-        return self._clip(previous, bc - _DAY)
+        return self._clip_cycle(previous, bc - _DAY)
 
     def rate(self, tx: Tx) -> Decimal | None:
         """1% rows, plus 10%/5% rows that ran past the month's ฿500 and are marked

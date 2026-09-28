@@ -75,6 +75,11 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 - [[promotions/uob-one-2026]] — UOB One 2026 cashback promotion (effective `2026-01-01` → `2026-12-31`).
 - [[promotions/first-choice-nw3]] — First Choice NW3 pooled cashback ladder (`2026-07-01` → `2026-09-30`), tracked in the Promotion Bureau.
 - [[promotions/uob-epw538]] — UOB e-Commerce & e-Wallet EPW538 (`2026-07-01` → `2026-09-30`), pooled across every UOB card, tracked in the Promotion Bureau.
+- [[promotions/first-choice-2026h2]] — First Choice ON3, DLV3, IS3 and the BTS lucky-draw rights (Krungsri VISA + First Choice), in the Promotion Bureau.
+- [[promotions/krungsri-card-2026]] — Krungsri Card ONQ3, SUP1, PTT2, EAT, Bangchak/BC3P, J Dining and NOW online, one Bureau row per card account.
+- [[promotions/lotuss-lbs3]] — Lotus's LBS3 big-ticket cashback (Sep–Dec 2026).
+- [[promotions/aeon-2026]] — AEON Rabbit 5%, AEON World 5% supermarkets, Everyday with AEON (NTW1), AEON UnionPay 3%, per AEON cycle.
+- [[promotions/ttb-2026]] — ttb so smart 1% (฿2,000 a cycle), and ttb's Caltex, Bangchak and hypermarket campaigns.
 
 ## Future application
 

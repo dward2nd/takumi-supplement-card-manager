@@ -24,3 +24,7 @@ notes: |
   It cannot express 500-THB block math, a 300-THB/month cap, an online-only basis,
   or the separate-CB-row recording model. Codifying it as a tier would make
   auto_classify write a wrong flat rate. See the proposal to extend the schema.
+# 2026-09-29: the 25-per-500 online cashback and its ฿300 monthly cap are enforced by the
+# Promotion Bureau (lib/bureau/krungsri_now.py, one row a month); the credit is still booked
+# as the bank's own `CB <merchant>` row, never as `% cb`. SUP1, PTT2 and EAT apply to this
+# card too (docs/promotions/krungsri-card-2026.md).

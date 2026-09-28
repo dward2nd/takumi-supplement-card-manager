@@ -16,3 +16,11 @@ notes: |
   The same notification also withholds points on some foreign-registered
   merchants (EU/EEA, China, UK) from 2025-12-11 and on 0% installments from
   2026-01-11. Neither is encoded here yet.
+
+  Cashback (read 2026-09-29, https://www.aeon.co.th/aeon/cards/aeon-world-mastercard):
+  5% at partner supermarkets (Big C, Lotus's, Foodland, Villa Market, Tops, Gourmet
+  Market & Home Fresh Mart, Central Food Hall, Makro Pro), ฿500 a statement cycle
+  per primary card, spend 2026-04-01 → 2027-01-31. And Takumi's Everyday with AEON
+  (NTW1) registration sits on this card. Both are Promotion Bureau classes
+  (lib/bureau/aeon_world.py, ntw1.py), not promotion YAML: the household keeps
+  `% cb` unset on these rows (docs/promotions/aeon-2026.md).

@@ -27,6 +27,7 @@ from .base import BasePromotion, Tx
 
 LINK = "Promotion"      # on every Transactions DS and every tracker
 TOTAL = "เงินคืนรวม"
+RIGHTS = "สิทธิ์ลุ้นรางวัล"   # draw rights a RIGHTS campaign's period earned (BTS; added 2026-09-29)
 SETTLED = ""            # the trackers' unnamed checkbox: the credit has reached the holder
 _PAGE_ID = re.compile(r"([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})\s*$")
 
@@ -53,6 +54,7 @@ class BureauRow:
     total: Decimal | None                    # `เงินคืนรวม` as entered
     shares: dict[str, Decimal | None]        # `เงินคืนส่วน<name>` per holder key
     rollups: dict[str, Decimal]              # `ยอดจาก<name>` per holder key
+    rights: int | None = None                # `สิทธิ์ลุ้นรางวัล`, on a draw-rights row
 
 
 def _money(value) -> Decimal | None:
@@ -78,6 +80,7 @@ def _parse_row(page: dict) -> BureauRow:
         shares={h.key: _money(p[share_prop(h)]["number"]) for h in HOLDERS.values()},
         rollups={h.key: _money(p[rollup_prop(h)]["rollup"].get("number")) or Decimal(0)
                  for h in HOLDERS.values()},
+        rights=None if (n := (p.get(RIGHTS) or {}).get("number")) is None else int(n),
     )
 
 

@@ -30,9 +30,22 @@ Campaign terms don't share a shape, so the shape is a class and each campaign su
 
 | Shape | How the reward is paid | Campaigns |
 |---|---|---|
-| `LadderPromotion` | steps of pooled spend: ฿200 per whole ฿10,000, ฿100 per ฿5,000 … | NW3, EPW538 |
-| `CreditCapPromotion` | each row earns its own rate until the period's pooled credit hits a cap | UOB One 10%/5%, UOB One 1% |
+| `LadderPromotion` | steps (or one-off bands) of pooled spend: ฿200 per whole ฿10,000, ฿40 from ฿3,000 … | NW3, EPW538, ON3, DLV3, ONQ3, LBS3, NTW1 |
+| `CreditCapPromotion` | each row earns its own rate until the period's pooled credit hits a cap | UOB One 10%/5%, UOB One 1%, ttb so smart 1%, AEON Rabbit, AEON World 5%, AEON UnionPay 3% |
+| `SlipCreditPromotion` (a credit cap) | a fixed credit per slip, by the slip's size, until the period's cap | IS3, SUP1, PTT2, BC3P, Bangchak 1%, J Dining, NOW online, ttb fuel and hypermarket |
+| `SlipCountPromotion` | a fixed credit for the Nth qualifying slip in the period | EAT |
 | `UOBWorldBonus` (its own shape) | points: ×5 on bonus categories inside the first ฿20,000 of a cycle | UOB World ×5 |
+| `DrawRightsPromotion` | lucky-draw rights: one per qualifying slip, up to a count per month | BTS (one pool per company: First Choice, Krungsri Card) |
+
+The issuers' campaign notes: [[../promotions/first-choice-2026h2]], [[../promotions/krungsri-card-2026]], [[../promotions/lotuss-lbs3]], [[../promotions/aeon-2026]], [[../promotions/ttb-2026]].
+
+**A quota per card account.** Krungsri caps its card campaigns per primary card account, and each card product is its own account: SUP1 paid ฿120 on Krungsri VISA, JCB, Lady and NOW alike in September 2026. Such a campaign mixes in `CardAccount` (`lib/bureau/accounts.py`) and has one subclass per card. The card name goes into the Bureau row's name and the tracker titles: `2026M9 — SUP1 Krungsri JCB cb 3%`.
+
+**Rights, not money.** A `RIGHTS` campaign (BTS) writes no shares, no trackers and no row fields. The month's count goes in the Bureau's `สิทธิ์ลุ้นรางวัล`.
+
+**`% cb` follows the household's habit per card.** First Choice, UOB One, ttb and AEON Rabbit rows carry `% cb` (`marks_rows`). Krungsri, Lotus's and AEON World rows never did: the household tracked those credits in the trackers and the bank's `CB…` lines. Those campaigns set `marks_rows = False`. So does every fixed-per-slip credit, since ฿120 on a ฿4,045.50 slip isn't a rate.
+
+**A hand-made tracker is linked, not duplicated.** A sync finds a holder's tracker row through its `Promotion` link or by the exact title it would give. Baiboon's hand-made trackers use other titles (`SUP1 3% 1—30 Sep`, `Everyday with AEON 10 Sep`). So when a campaign got its first Bureau row, each matching hand-made tracker was linked to it first (2026-09-29). A ticked tracker is never changed; if it disagrees with the split, the sync only warns.
 
 A campaign class states the bank's terms in code: cards, dates, what counts (`qualifies`, `rules`), the payout, and the page text. Screening, the split and the Bureau page summary read those declarations, so the page and the screening can't drift apart. [[../../.claude/skills/sync-promotion/SKILL.md|/sync-promotion]] drives it.
 

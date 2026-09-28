@@ -39,6 +39,12 @@ class CreditCapPromotion(CashbackPromotion):
     def qualifies(self, tx: Tx) -> bool:
         return self.rate(tx) is not None
 
+    def counts_linked(self, tx: Tx) -> bool:
+        """Does a *linked* row earn? By default what `qualifies`. A campaign whose
+        category the merchant string can't always show (restaurants) links only
+        what it recognises, and trusts a row the household linked by hand."""
+        return self.qualifies(tx)
+
     def allocate(self, txs: list[Tx]) -> Allocation:
         left = [self.cap]
 
@@ -50,6 +56,6 @@ class CreditCapPromotion(CashbackPromotion):
             share = granted / total if total else Decimal(0)
             return [TxCredit(t, t.amount * share, want[t.id] * share) for t in grp]
 
-        rows, boundary, warnings = self._walk([t for t in txs if self.qualifies(t)], take)
+        rows, boundary, warnings = self._walk([t for t in txs if self.counts_linked(t)], take)
         credit = sum((r.credit for r in rows), Decimal(0)).quantize(SATANG, rounding=ROUND_HALF_UP)
         return self._allocation(rows, boundary, warnings, credit=credit)

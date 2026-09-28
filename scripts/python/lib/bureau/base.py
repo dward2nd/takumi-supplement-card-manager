@@ -7,9 +7,11 @@ class too:
 
   BasePromotion            identity, matching, screening, the FCFS walk, the page
   ├── CashbackPromotion    baht shares, trackers, the `% cb` rule
-  │   ├── LadderPromotion      (ladder.py) tranches of pooled spend — NW3, EPW538
+  │   ├── LadderPromotion      (ladder.py) tranches of pooled spend — NW3, EPW538, ON3 …
   │   └── CreditCapPromotion   (capped.py) a per-row rate until a credit cap — UOB One
-  └── UOBWorldBonus        (uob_world.py) a points quota
+  │       └── SlipCreditPromotion  (slips.py) a fixed credit per slip until a cap — SUP1, PTT2, IS3
+  ├── UOBWorldBonus        (uob_world.py) a points quota
+  └── DrawRightsPromotion  (rights.py) lucky-draw rights per slip, up to a monthly count — BTS
 
 and each campaign subclasses its shape, stating the bank's terms in code:
 code, title, cards, campaign, source_url; what counts (`qualifies`, `rules`);
@@ -33,7 +35,7 @@ from ..bill_cycle import cycle_for_month, pattern_for_card
 from ..ledger import PRIMARY_PREFIX
 
 ELIGIBLE, UNCERTAIN, EXCLUDED = "eligible", "uncertain", "excluded"
-CASHBACK, POINTS = "cashback", "points"
+CASHBACK, POINTS, RIGHTS = "cashback", "points", "rights"   # RIGHTS: lucky-draw entries, no money
 SATANG = Decimal("0.01")
 
 # A household prefix that still marks a real card purchase: the friend's share
@@ -147,6 +149,7 @@ class Allocation:
     shares: dict[str, Decimal]      # per holder, to the satang, summing to `credit`
     boundary: list[TxCredit] = field(default_factory=list)  # the group the quota ends in
     warnings: list[str] = field(default_factory=list)
+    rights: dict[str, int] = field(default_factory=dict)    # draw rights per holder (RIGHTS campaigns)
 
 
 class BasePromotion(ABC):
@@ -157,7 +160,7 @@ class BasePromotion(ABC):
     source_url: ClassVar[str]
     headline: ClassVar[str]             # short rate for tracker titles, e.g. "2%"
 
-    reward: ClassVar[str]               # CASHBACK or POINTS
+    reward: ClassVar[str]               # CASHBACK, POINTS or RIGHTS
     period_basis: ClassVar[str] = "transaction_date"  # or "bill_cycle": End = the day before the BC date
     name_pattern: ClassVar[str | None] = None         # regex on the Bureau Name; default: the code
 
@@ -174,9 +177,18 @@ class BasePromotion(ABC):
     @classmethod
     def matches(cls, bureau_name: str, start: dt.date, end: dt.date) -> bool:
         """Does a Bureau row with this Name and period belong to this campaign?"""
-        first, last = cls.campaign
         pattern = cls.name_pattern or rf"\b{re.escape(cls.code)}\b"
-        return bool(re.search(pattern, bureau_name)) and first <= start and (last is None or end <= last)
+        return bool(re.search(pattern, bureau_name)) and cls.within_campaign(start, end)
+
+    @classmethod
+    def within_campaign(cls, start: dt.date, end: dt.date) -> bool:
+        """Does a period with these dates belong to the campaign? A cycle quota keeps
+        its true end (the day before its BC date) even when the campaign ends inside
+        the cycle, so for one only the start has to fall in the campaign."""
+        first, last = cls.campaign
+        if last is None:
+            return first <= start
+        return first <= start and (end <= last or (cls.period_basis == "bill_cycle" and start <= last))
 
     # -- periods ------------------------------------------------------------
     #
@@ -195,7 +207,9 @@ class BasePromotion(ABC):
     def covers(self, start: dt.date, end: dt.date, tx: Tx) -> bool:
         """Is `tx` in the Bureau row's period `start`–`end`?"""
         if self.period_basis == "bill_cycle":
-            return (tx.bill_cycle or "")[:10] == cycle_billed_on(end).isoformat()
+            first, last = self.campaign
+            return (tx.bill_cycle or "")[:10] == cycle_billed_on(end).isoformat() \
+                and first <= tx.day and (last is None or tx.day <= last)
         return start <= tx.day <= end
 
     def candidate_filter(self, start: dt.date, end: dt.date) -> list[dict]:
@@ -219,7 +233,7 @@ class BasePromotion(ABC):
             bc = dt.date.fromisoformat(tx.bill_cycle[:10])
             y, m = (bc.year, bc.month - 1) if bc.month > 1 else (bc.year - 1, 12)
             previous, _ = cycle_for_month(pattern_for_card(tx.card), y, m)
-            return self._clip(previous, bc - dt.timedelta(days=1))
+            return self._clip_cycle(previous, bc - dt.timedelta(days=1))
         return self._month(tx.day)
 
     def _month(self, day: dt.date) -> tuple[dt.date, dt.date] | None:
@@ -229,6 +243,13 @@ class BasePromotion(ABC):
             return None
         start = day.replace(day=1)
         return self._clip(start, (start + dt.timedelta(days=32)).replace(day=1) - dt.timedelta(days=1))
+
+    def _clip_cycle(self, start: dt.date, end: dt.date) -> tuple[dt.date, dt.date] | None:
+        """A statement cycle's dates, its start clipped to the campaign; its end is
+        kept, since the End Date is what names the cycle's BC date (`cycle_billed_on`)."""
+        first, last = self.campaign
+        start = max(start, first)
+        return (start, end) if last is None or start <= last else None
 
     def _clip(self, start: dt.date, end: dt.date) -> tuple[dt.date, dt.date] | None:
         first, last = self.campaign
