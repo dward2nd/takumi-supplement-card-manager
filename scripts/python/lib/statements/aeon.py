@@ -17,6 +17,7 @@ from __future__ import annotations
 import re
 
 from .model import CardAccount, CardSection, Statement, StatementLine, StatementParseError, parse_amount
+from .parser import StatementParser
 
 _DATE = re.compile(r"^(\d\d)/(\d\d)/(\d{4})$")
 _DUE = re.compile(r"^(\d\d) / (\d\d) / (\d{4})$")
@@ -123,3 +124,11 @@ def parse(text: str) -> Statement:
         due_date=f"{due.group(3)}-{due.group(2)}-{due.group(1)}",
         accounts=tuple(accounts),
     )
+
+
+class AEONParser(StatementParser):
+    key = issuer = "AEON"
+    signature = "AEON"
+
+    def parse_text(self, text: str) -> Statement:
+        return parse(text)

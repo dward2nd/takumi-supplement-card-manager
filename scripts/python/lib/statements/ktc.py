@@ -24,6 +24,7 @@ from __future__ import annotations
 import re
 
 from .model import CardAccount, CardSection, Statement, StatementLine, StatementParseError, parse_amount
+from .parser import StatementParser
 
 _PRODUCT = re.compile(r"TYPE OF CARD : (.+)")
 _NUMBER = re.compile(r"\b\d{4}-\d\dXX-XXXX-(\d{4})\b")
@@ -92,3 +93,12 @@ def parse(text: str) -> Statement:
             ),
         ),
     )
+
+
+class KTCParser(StatementParser):
+    key = issuer = "KTC"
+    signature = "KRUNGTHAI CARD"
+    separate_card_statements = True
+
+    def parse_text(self, text: str) -> Statement:
+        return parse(text)

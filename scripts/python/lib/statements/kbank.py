@@ -16,6 +16,7 @@ from __future__ import annotations
 import re
 
 from .model import CardAccount, CardSection, Statement, StatementLine, StatementParseError, parse_amount
+from .parser import StatementParser
 
 _HEADER = re.compile(r"^/ ACCOUNT DETAILS (.+?) \d{4} \d\dXX XXXX (\d{4})\b")
 _PREV = re.compile(r"^PREVIOUS BALANCE (-?[\d,]+\.\d\d)$")
@@ -75,3 +76,11 @@ def parse(text: str) -> Statement:
         due_date=f"{dd.group(3)}-{dd.group(2)}-{dd.group(1)}",
         accounts=tuple(accounts),
     )
+
+
+class KBankParser(StatementParser):
+    key = issuer = "KBank"
+    signature = "KBANK"
+
+    def parse_text(self, text: str) -> Statement:
+        return parse(text)

@@ -15,6 +15,7 @@ from __future__ import annotations
 import re
 
 from .model import CardAccount, CardSection, Statement, StatementLine, StatementParseError, parse_amount
+from .parser import StatementParser
 
 _MONTHS = {m: i for i, m in enumerate("JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC".split(), 1)}
 _DATE = r"(\d\d) ([A-Z]{3}) (\d{4})"
@@ -98,3 +99,11 @@ def parse(text: str) -> Statement:
         due_date=_iso(dd.group(1), dd.group(2), int(dd.group(3))),
         accounts=tuple(accounts),
     )
+
+
+class UOBParser(StatementParser):
+    key = issuer = "UOB"
+    signature = "UOB"
+
+    def parse_text(self, text: str) -> Statement:
+        return parse(text)

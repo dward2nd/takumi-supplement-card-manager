@@ -32,6 +32,7 @@ from __future__ import annotations
 import re
 
 from .model import CardAccount, CardSection, Statement, StatementLine, StatementParseError, parse_amount
+from .parser import StatementParser
 
 _AMT = r"(-?[\d,]+\.\d\d)"
 _JOB_DATE = re.compile(r"_(\d\d)(\d\d)(\d{4})_\d+ \(U\)")
@@ -155,3 +156,20 @@ def parse(text: str) -> Statement:
             section(owner)["lines"].append(_line(m))
 
     return Statement(issuer="Krungsri", statement_date=statement_date, due_date=due_date, accounts=tuple(accounts))
+
+
+class KrungsriParser(StatementParser):
+    key = issuer = "Krungsri"
+    signature = "TOTAL PAYMENT DUE FOR CREDIT CARD"
+
+    def parse_text(self, text: str) -> Statement:
+        return parse(text)
+
+
+class LotusParser(KrungsriParser):
+    """Lotus's Money Services is a Krungsri company: same layout, same PDF
+    password, and Lotus's Beyond carries `issuer: Krungsri` in the card repo.
+    Only the name and the signature differ."""
+
+    key = "Lotus"
+    signature = "LOTUS"

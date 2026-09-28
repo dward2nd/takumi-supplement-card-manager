@@ -36,11 +36,6 @@ from .model import CardAccount, Statement, StatementLine
 
 PRIMARY_PREFIX = "[บัตรหลัก] "
 UNMONITORED = "unmonitored"  # a real supplement no one tracks: billed, never recorded
-# Issuers that print one statement per card number, billing the principal and each
-# supplement separately (user, 2026-09-27). A friend with no section on such a
-# statement has only their [บัตรหลัก] rows to find on it; their own card's rows
-# belong to their own statement.
-SEPARATE_CARD_STATEMENTS = frozenset({"KTC"})
 # Bracketed rows that are household bookkeeping, not statement lines: carry-forwards
 # (both spellings are in use) and debt takeovers.
 HOUSEHOLD_BRACKETS = ("[ยอดยกมา", "[ยกยอดมา", "[เว็บรับหนี้")
@@ -162,7 +157,11 @@ def plan_account(
         for h in ("takumi", "baiboon", "nuta")
     }
     friends = ("baiboon", "nuta")
-    if statement.issuer in SEPARATE_CARD_STATEMENTS:
+    # One statement per card number (StatementParser.separate_card_statements):
+    # a friend with no section here has only their [บัตรหลัก] rows to find on
+    # it; their own card's rows belong to their own statement.
+    from . import separate_card_statements   # late: the package imports this module
+    if separate_card_statements(statement.issuer):
         on_statement = {o[1] for o in owners.values() if o}
         for h in friends:
             if h not in on_statement:
