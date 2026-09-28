@@ -12,19 +12,26 @@ scripts/python/
 ├── uv.lock                          # commit this
 ├── .python-version                  # in .gitignore
 ├── .venv/                           # in .gitignore
-├── lib/                             # shared utilities — imported by every CLI
-│   ├── __init__.py
+├── lib/                             # shared code — imported by every CLI
 │   ├── paths.py                     # REPO_ROOT, ENV_FILE, VERSION_FILE — repo-relative anchors
 │   ├── notion_client.py             # the single point of Notion HTTP access
-│   ├── holders.py                   # holder → data-source-ID routing
-│   ├── cards.py                     # exact-title card resolution
-│   ├── transaction_read.py          # Notion page → flat dict (read side)
-│   └── transaction_write.py         # JSON spec → Notion properties (write side)
+│   ├── holders.py                   # PrimaryHolder (Takumi) / SupplementHolder (Baiboon, Nuta) + DS routing
+│   ├── cards.py, card_repo.py       # card-page resolution; card YAML (data only)
+│   ├── ledger.py                    # a cycle's rows, amount due, payment / cashback row tests
+│   ├── transaction_read.py / _write.py
+│   ├── promotions.py                # promotion YAML + merchant heuristics + classify() (delegates to earning)
+│   ├── earning/                     # Card, one class per card family (UOBCard, KrungsriFamilyCard, AEONCard …)
+│   ├── bill_cycle.py                # BillCycle, one class per issuer's cycle rule
+│   ├── crediting/                   # Crediting, one class per card that gets credit rows (UOBOneCrediting)
+│   ├── bureau/                      # Promotion Bureau: payout shapes (ladder, credit cap, points) + campaigns
+│   └── statements/                  # StatementParser, one class per issuer; attribution; recording
 └── <skill-name>/                    # one folder per skill, dir name = skill name
     ├── __init__.py
     ├── cli.py                       # entry point (stdin/stdout JSON)
     └── ...                          # additional files as the skill grows
 ```
+
+**One class per case** (user, 2026-09-28): where banks, cards, issuers or campaigns differ, the difference is a subclass of an abstract base, not a flag on a shared function. Data that's genuinely data (tier lists, statement numbers, IDs) stays in YAML.
 
 Why this shape: skills can be flexible (the agent calls them), but scripts must be **deterministic** and **reusable**. Putting one folder per skill lets a skill split its logic across files without exploding the sandbox, while `lib/` keeps Notion access — the thing most likely to change when phase 2 begins — isolated to one file.
 
