@@ -22,6 +22,7 @@ Statement passwords are the exception — a **single gitignored file** holding r
 ```yaml
 name: UOB One                  # required — exact Cards DS title (matches the Notion page)
 issuer: UOB                    # required — bank or company (matches the ธนาคาร/บริษัท select where present)
+brand: Krungsri Card           # optional — who the card is run as, where that isn't `issuer`; defaults to `issuer`
 bill_cycle_pattern: uob        # required — pattern key in lib.bill_cycle.PATTERNS
 points_default: "×0"           # optional — multiplier checkbox default. Omit if the card earns at the standard ×1 rate.
 notes: |                       # optional — anything the schema doesn't capture
@@ -38,6 +39,10 @@ notes: |                       # optional — anything the schema doesn't captur
   [[../../docs/concepts/known-divergences]] §11.
 - `issuer` — referenced by skill prose ("is this a UOB card?").
 - `bill_cycle_pattern` — key into `lib.bill_cycle.PATTERNS`, where each issuer's rule is a `BillCycle` subclass (`KrungsriCycle`, `UOBCycle` …). Drives `/add-transaction`'s auto BC/DD inference. A new rule is a new subclass.
+
+### Optional fields
+
+- `brand` — who the card is run as, where that differs from `issuer`. The Krungsri family is one `issuer` (`Krungsri`: one statement parser, one PDF password, one set of earning rules), but it is four brands: `Krungsri Card` (Visa, JCB, Lady, NOW), `First Choice`, `Lotus's Money` (Lotus's Beyond) and `Central The 1` (user, 2026-10-01). It is the Promotion Bureau's `Issuer` (`BasePromotion.issuer`). Omit it everywhere else.
 
 ### Sigil values
 

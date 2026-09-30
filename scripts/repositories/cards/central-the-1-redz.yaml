@@ -1,5 +1,6 @@
 name: Central The 1 Redz
 issuer: Krungsri
+brand: Central The 1
 bill_cycle_pattern: krungsri
 statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; supplements named on the statement)
   "2611": takumi

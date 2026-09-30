@@ -5,7 +5,7 @@ deterministic + idempotent — pure function of the on-disk YAML files.
 The Cards data sources in Notion hold per-holder card pages (title,
 network, premium tier, etc.); this module holds script-side facts that
 don't fit cleanly in Notion or that are needed without a Notion
-round-trip: issuer, bill-cycle pattern key, default points multiplier,
+round-trip: issuer, brand, bill-cycle pattern key, default points multiplier,
 statement card numbers, merchant points exclusions.
 
 Data only. How a card earns (fuel withheld, the Krungsri family's rules …)
@@ -48,6 +48,11 @@ class MerchantPointsExclusion:
 class CardRepo:
     name: str
     issuer: str
+    # Who the card is marketed and run as, where that isn't the issuer: the
+    # Krungsri family is one issuer (one statement format, one password) but
+    # four brands — Krungsri Card, First Choice, Lotus's Money, Central The 1.
+    # Defaults to `issuer`. The Promotion Bureau's `Issuer` column (user 2026-10-01).
+    brand: str
     bill_cycle_pattern: str
     points_default: str | None
     notes: str | None
@@ -71,6 +76,7 @@ def _parse_card(data: dict[str, Any], source: Path) -> CardRepo:
     return CardRepo(
         name=str(data["name"]),
         issuer=str(data["issuer"]),
+        brand=str(data.get("brand") or data["issuer"]),
         bill_cycle_pattern=str(data["bill_cycle_pattern"]),
         points_default=data.get("points_default"),
         notes=data.get("notes"),

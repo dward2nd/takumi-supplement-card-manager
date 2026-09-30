@@ -9,14 +9,14 @@ role: promotions
 One row per **quota period** (e.g. `2026M9 — NW3 cb 2%`), linking every holder's transactions that count toward it. Created by Takumi 2026-09-26; shared with the scripts' integration 2026-09-28. Concept: [[../concepts/promotion-bureau]].
 
 - **Collection ID**: `3e7cb755-f0f1-80f0-8c78-000b1d9f44cb` (data source; its database is `3e7cb755-f0f1-80ac-8556-dd408bc65947`). `PROMOTION_BUREAU_DS` in `scripts/python/lib/holders.py`.
-- **Last schema-verified**: 2026-09-30 (`Issuer` added; `Quotas Exceeded Date` added by the user; `สิทธิ์ลุ้นรางวัล` 2026-09-29)
+- **Last schema-verified**: 2026-10-01 (`Issuer`'s `Krungsri` split into four brands; `Issuer` added 2026-09-30; `Quotas Exceeded Date` added by the user; `สิทธิ์ลุ้นรางวัล` 2026-09-29)
 
 ## Schema
 
 | Property | Type | Meaning |
 |---|---|---|
 | `Name` | title | `<YYYY>M<m> — <campaign>`; the month rule is in [[../concepts/promotion-bureau]]. The name picks the `BasePromotion` class |
-| `Issuer` | select | who issues the campaign's cards: the cards' `issuer` in `scripts/repositories/cards/` (`BasePromotion.issuer`). `Krungsri` (First Choice, Krungsri Card, and Lotus's Beyond, which Krungsri Consumer issues), `UOB`, `AEON`, `ttb`, `KTC` (UnionPay QR: UnionPay's offer, on KTC cards). Added and filled 2026-09-30 (user); set on every new row, and a sync corrects it |
+| `Issuer` | select | who issues the campaign's cards: the cards' `brand` in `scripts/repositories/cards/` (`BasePromotion.issuer`), which is their `issuer` except inside the Krungsri family. That family is one issuer to the scripts (one statement format) but four brands here (user, 2026-10-01): `Krungsri Card` (Krungsri VISA/JCB/Lady/NOW), `First Choice`, `Lotus's Money` (Lotus's Beyond) and `Central The 1`. The other options are `UOB`, `AEON`, `ttb` and `KTC` (UnionPay QR: UnionPay's offer, on KTC cards). Added and filled 2026-09-30 (user). Every new row gets it, and a sync corrects it |
 | `Start Date` / `End Date` | date | the period: a calendar month, or a statement cycle — the previous BC date to the day before the BC date, since spend on the BC date lands on the next statement (user, 2026-09-28) |
 | `รายการใช้จ่ายจาก<name>` | relation (two-way) | the holder's linked Transactions rows; the synced side is `Promotion` on each Transactions DS |
 | `ยอดจาก<name>` | rollup | Σ `ยอดชำระ` (amount paid) of those rows |

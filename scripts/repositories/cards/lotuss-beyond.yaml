@@ -1,5 +1,6 @@
 name: Lotus's Beyond            # verbatim Cards DS title — ASCII apostrophe, matching the Notion page
 issuer: Krungsri              # Lotus Money Service, a Krungsri Consumer partner (user, 2026-09-27)
+brand: Lotus's Money
 bill_cycle_pattern: krungsri
 statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; supplements named on the statement)
   "3471": takumi

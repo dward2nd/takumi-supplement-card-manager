@@ -1,5 +1,6 @@
 name: First Choice
 issuer: Krungsri
+brand: First Choice
 bill_cycle_pattern: krungsri
 statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; supplements named on the statement)
   "9214": takumi

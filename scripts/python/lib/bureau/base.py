@@ -177,11 +177,12 @@ class BasePromotion(ABC):
 
     @classmethod
     def issuer(cls) -> str:
-        """Who issues the cards the campaign covers: the cards' `issuer` in
-        scripts/repositories/cards/ (the Bureau's `Issuer`, user 2026-09-30).
-        UnionPay QR is UnionPay's offer but on KTC cards, so KTC; LBS3 is on
-        Lotus's Beyond, which Krungsri Consumer issues, so Krungsri."""
-        issuers = {card_repo.by_name(c).issuer for c in cls.cards}
+        """Who issues the cards the campaign covers: the cards' `brand` in
+        scripts/repositories/cards/ (the Bureau's `Issuer`, user 2026-09-30),
+        which splits the Krungsri family into Krungsri Card, First Choice,
+        Lotus's Money and Central The 1 (user 2026-10-01). UnionPay QR is
+        UnionPay's offer but on KTC cards, so KTC."""
+        issuers = {card_repo.by_name(c).brand for c in cls.cards}
         if len(issuers) != 1:
             raise ValueError(f"{cls.__name__}'s cards {cls.cards} span issuers {sorted(issuers)}")
         return issuers.pop()
