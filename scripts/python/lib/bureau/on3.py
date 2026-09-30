@@ -36,6 +36,7 @@ _SHOPEE_FOOD = re.compile(r"SHOPEE ?FOOD")
 
 class ON3Promotion(LadderPromotion):
     code = "ON3"
+    icon = "🛍️"
     title = "ช้อปออนไลน์ได้คืนคุ้ม"
     cards = ("First Choice",)
     campaign = (dt.date(2026, 7, 1), dt.date(2026, 9, 30))

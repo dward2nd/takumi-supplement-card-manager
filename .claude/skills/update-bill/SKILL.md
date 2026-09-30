@@ -143,9 +143,11 @@ Phrasing: lead the report with the per-bill totals table (Notion vs statement vs
 | nuta     | `2a1cb755-f0f1-8193-982d-000bd4e3156c`     |
 | takumi   | `63dcb755-f0f1-83df-aaa8-871bb9069dae` (statement-driven) |
 
-### 2. The `Card` field is a SELECT, not a relation
+### 2. `Card` is a relation to the holder's Cards DB
 
-A bill's `Card` is a SELECT option keyed off the verbatim card name (see [[../../docs/databases/baiboon-bills]] for the option list). The script's `find_bill` matches `Card.select.equals` exactly — no substring, no inferring "First Choice" from "FC". If the spelling drifts, the lookup fails.
+Since 2026-09-30 a bill's `Card` is a one-way relation to a page in the **holder's own Cards DB** (Takumi's bills → his Cards, Baiboon's → hers, Nuta's → hers). `find_bill(holder, card, bill_cycle)` resolves the spec's `card` to that Cards page with `lib.cards.find_card`: exact title first, then a case-insensitive match that refuses ambiguity. It then queries the Bills DB for `Card` relation *contains* that page and `วันตัดรอบบิล` equals the cycle. There is no substring match and no inferring "First Choice" from "FC". A card that isn't in the holder's Cards DB fails the lookup, and the error carries `find_card`'s substring candidates.
+
+The old SELECT is still on the Bills DBs as **`Card (old select)`**, kept only so the household's Notion views keep working until they move to the relation. It is legacy: this skill neither reads nor writes it. Don't pass it in `properties`. See [[../../docs/concepts/known-divergences|known-divergences]] #1.
 
 ### 3. File appends preserve existing entries
 

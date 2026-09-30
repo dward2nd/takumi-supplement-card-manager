@@ -30,7 +30,7 @@ Each cardholder can be invited to *their* Notion page and see *only* their own d
 
 - One person, one Cards DB, one Transactions DB, optionally one Bills DB.
 - A Card row lives in exactly one person's Cards DB.
-- A Transaction row references its Card by relation. (Bills break this — they use a `Card` select. See [[known-divergences]].)
+- A Transaction row references its Card by relation. So does a Bills row, since 2026-09-30: a one-way relation to the holder's own Cards DB, where it used to be a `Card` select. See [[known-divergences]] #1.
 - Credit limit (`วงเงินที่ได้`) on a supplement Card row is the *holder's* allocated share of Takumi's underlying limit, not the full account limit.
 
 ## `[บัตรหลัก]` rows — primary-card charges on a supplement ledger

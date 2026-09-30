@@ -21,6 +21,7 @@ from functools import cache
 from .. import notion_client
 from ..cards import card_titles_by_id
 from ..holders import HOLDERS, PROMOTION_BUREAU_DS, Holder
+from ..icons.base import emoji
 from ..transaction_read import project_transaction
 from ..transaction_write import VALID_MULTIPLIERS
 from .base import BasePromotion, Tx
@@ -84,13 +85,13 @@ def _parse_row(page: dict) -> BureauRow:
     )
 
 
-def create_row(name: str, start: dt.date, end: dt.date) -> BureauRow:
-    """A new Bureau row for one quota period."""
+def create_row(name: str, start: dt.date, end: dt.date, *, icon: str | None = None) -> BureauRow:
+    """A new Bureau row for one quota period, with the campaign's page icon."""
     page = notion_client.create_page(PROMOTION_BUREAU_DS, {
         "Name": {"title": [{"text": {"content": name}}]},
         "Start Date": {"date": {"start": start.isoformat()}},
         "End Date": {"date": {"start": end.isoformat()}},
-    })
+    }, icon=emoji(icon) if icon else None)
     return _parse_row(notion_client.get_page(page["id"]))
 
 
@@ -211,14 +212,14 @@ def trackers(h: Holder, row: BureauRow, title: str) -> list[Tracker]:
 
 
 def create_tracker(h: Holder, *, title: str, date: dt.date, card_id: str | None, row_id: str,
-                   expected: Decimal) -> str:
+                   expected: Decimal, icon: str | None = None) -> str:
     page = notion_client.create_page(h.cashback_tracker_ds, {
         "Name": {"title": [{"text": {"content": title}}]},
         "Transaction Date": {"date": {"start": date.isoformat()}},
         "Card": {"relation": [{"id": card_id}] if card_id else []},
         LINK: {"relation": [{"id": row_id}]},
         "Expected Cashback": {"number": float(expected)},
-    })
+    }, icon=emoji(icon) if icon else None)
     return page["id"]
 
 

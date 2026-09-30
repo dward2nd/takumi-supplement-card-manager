@@ -31,6 +31,7 @@ _COUNTRY = re.compile(r"\b(CHN|HKG|MAC|TWN)$")
 
 class AEONUnionPayCashback(CreditCapPromotion):
     code = "AEON UnionPay"
+    icon = "🌏"
     name_pattern = r"\bAEON UnionPay cb 3%"
     title = "AEON-UnionPay Platinum เครดิตเงินคืน 3% จีน ฮ่องกง มาเก๊า ไต้หวัน"
     cards = ("AEON UnionPay",)

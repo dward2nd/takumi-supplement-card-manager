@@ -98,7 +98,7 @@ Three distinct flows feed into one mini-table entry surface:
 
 ## Bills & reconciliation
 
-- **Bills are independent rows** (not derived) — same model as current Notion ([[../databases/baiboon-bills|Baiboon Bills]] / [[../databases/nuta-bills|Nuta Bills]]). Resolves [[../concepts/known-divergences|divergence #1]]: `Bill.cardId` is a real FK in the new app, not a SELECT.
+- **Bills are independent rows** (not derived) — same model as current Notion ([[../databases/baiboon-bills|Baiboon Bills]] / [[../databases/nuta-bills|Nuta Bills]]). Resolves [[../concepts/known-divergences|divergence #1]]: `Bill.cardId` is a real FK in the new app, not a SELECT. Notion moved to a relation itself on 2026-09-30 (`Card` → the holder's Cards DB), so the migration can read `Card` as the FK directly.
 - **Reconciliation hint surfaced in UI**: per bill, show `sum(transactions on this cycle) vs. bill.amountBaht` and the delta. When non-zero, prompt the user to **either**:
   - Add an adjustment row (legit bank fee / interest the user didn't record), **or**
   - Review the transactions (most common case is the user missed or duplicated something — based on Takumi's real experience).

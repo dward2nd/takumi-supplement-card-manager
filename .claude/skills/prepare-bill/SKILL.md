@@ -66,7 +66,7 @@ The envelope has `counts` per status and one `results` entry per cycle:
 
 | `status` | Meaning |
 |----------|---------|
-| `created` / `would-create` | Drafted (or would be, under `--dry-run`). Carries `title`, `ยอดชำระ`, `tx_count`, and `installments_appended` / `new_select_option` when relevant. |
+| `created` / `would-create` | Drafted (or would be, under `--dry-run`). Carries `title`, `ยอดชำระ`, `tx_count`, and `installments_appended` when relevant. |
 | `exists` | A Bills row already has this `(Card, วันตัดรอบบิล)` — carries `bill_id`. Re-running a window is therefore idempotent. |
 | `off-pattern` | The rows' BC isn't the card's bank-pattern BC for that month: misdated rows (run [[../audit-transaction-dates/SKILL.md\|/audit-transaction-dates]]), or a genuine bank-side shift the holiday library missed — draft that one in single mode with an explicit `bill_cycle`. |
 | `blocked` | A guard refused; `reason` says which. The common one is **UOB One without cashback credits** — run [[../post-cashback-credits/SKILL.md\|/post-cashback-credits]] for that cycle, then re-run the window. |
@@ -78,7 +78,7 @@ Rows in the window with no `Card` relation are counted under `unassigned_rows` �
 ## What the script does
 
 1. Resolves `(holder, card)` to the right Bills DS + Cards page.
-2. Verifies the card name is a valid SELECT option on the Bills DS's `Card` field (no fuzzy matching).
+2. Resolves the card in the holder's **Cards DB** with `lib.cards.find_card` (exact title, then case-insensitive; no fuzzy matching). A typo aborts here with substring candidates. The bill links that Cards page.
 3. Resolves the bill cycle date — from `bill_cycle` if given, otherwise via `lib.bill_cycle.active_cycle(card_name, today)`.
 4. Checks the Bills DS for an existing row with that `(Card, วันตัดรอบบิล)` pair. If one exists (draft or final), **aborts** — never silently overwrites.
 5. **Populates in-progress installments** into this cycle (unless `skip_populate_installments: true`) — same idempotent logic as the standalone [[../populate-installment/SKILL.md|/populate-installment]] skill. The result is echoed back under `installments` in the response so the user can see which plans were extended.
@@ -86,7 +86,7 @@ Rows in the window with no `Card` relation are counted under `unassigned_rows` �
 7. Sums `ยอดชำระ` across those rows (a flat sum — see *Cashback handling* below).
 8. Creates the Bills row with:
    - **Title**: `[DRAFT] <Card> <YYYY-MM>` (YYYY-MM derived from the BC date).
-   - `Card`: SELECT, the verbatim card name.
+   - `Card`: relation to the card's page in the holder's Cards DB.
    - `วันตัดรอบบิล`: BC date.
    - `ยอดชำระ`: the computed sum, rounded to 2dp.
    - `จ่ายแล้ว`: unchecked.
@@ -148,13 +148,19 @@ For First Choice **during** an active promotion: the user currently manages thos
 | nuta     | `2a1cb755-f0f1-8193-982d-000bd4e3156c`     |
 | takumi   | *(statement-driven — rejected)*            |
 
-### 2. Card SELECT vs Card relation
+### 2. `Card` is a relation, on Bills and on Transactions
 
-A bill's `Card` is a SELECT keyed off the card's verbatim title (see [[../../docs/concepts/known-divergences|known-divergences]]). The CLI resolves the spec's `card` against the holder's **Cards DB** first — a typo aborts there with substring candidates — and only then maps it onto the SELECT: exact, then case-insensitive (the Cards title and the option can differ in case, known-divergences #11), so an existing option is always reused rather than duplicated by case.
+Since 2026-09-30 a bill's `Card` is a one-way relation to the card's page in the holder's own Cards DB, the same page the cycle's transactions point at. The CLI resolves the spec's `card` once, with `lib.cards.find_card`: exact title first, then case-insensitive, refusing ambiguity. A typo aborts there with substring candidates. That one page ID then drives everything:
 
-A card that is in the Cards DB but has **no SELECT option yet** has simply never been billed. The first bill is drafted anyway and Notion adds the option on create; the envelope flags it with `new_select_option: true`. (First hit 2026-09-27 on Baiboon's `KBank JCB`, which previously aborted the draft.)
+- the duplicate check (`existing_bill`: Bills `Card` relation *contains* the page, plus `วันตัดรอบบิล`),
+- the Transactions query (`Card.relation.contains`),
+- and the new row's `Card` relation.
 
-The Transactions DS uses a `Card` **relation** to the Cards DB. The CLI resolves the card name to its Cards page ID via the existing `lib.cards.find_card` (exact title equality), then filters Transactions by `Card.relation.contains`.
+The draft's title uses the Cards page title: `[DRAFT] <Card> <YYYY-MM>`.
+
+There are no SELECT options to mint any more, so the old `new_select_option` envelope flag is gone. A card that has never been billed just gets its first bill, as long as it exists in the holder's Cards DB. (Before the relation, a first bill had to add a SELECT option; first hit 2026-09-27 on Baiboon's `KBank JCB`.)
+
+The former SELECT survives as **`Card (old select)`**, kept only so the household's Notion views keep working until they move to the relation. The CLI neither reads nor writes it. See [[../../docs/concepts/known-divergences|known-divergences]] #1.
 
 ### 3. No duplicate bills
 

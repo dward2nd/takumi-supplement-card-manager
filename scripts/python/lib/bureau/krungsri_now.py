@@ -37,6 +37,7 @@ _TRAVEL_ETC = re.compile(r"AGODA|BOOKING|EXPEDIA|TRAVELOKA|TRIP\.COM|CTRIP|KLOOK
 
 class KrungsriNOWOnline(SlipCreditPromotion):
     code = "NOW"
+    icon = "🛍️"
     title = "บัตรเครดิต กรุงศรี นาว แพลทินัม — เครดิตเงินคืน 5% ช้อปออนไลน์"
     campaign = (dt.date(2026, 1, 1), dt.date(2026, 12, 31))
     source_url = "https://www.krungsricard.com/th/product/creditcard/now"

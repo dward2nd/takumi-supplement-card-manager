@@ -20,6 +20,7 @@ from .base import RIGHTS, Allocation, BasePromotion, Tx, TxCredit
 
 class DrawRightsPromotion(BasePromotion):
     reward = RIGHTS
+    icon = "🎟️"
     min_slip: ClassVar[Decimal]      # a slip earns a right at this amount or more
     max_rights: ClassVar[int]        # rights per period, per person
     ladder_title = "Draw rights"

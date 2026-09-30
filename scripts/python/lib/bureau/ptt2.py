@@ -30,6 +30,7 @@ _NOT_FUEL = re.compile(r"AMAZON|7-?ELEVEN|JIFFY")
 
 class PTT2Promotion(SlipCreditPromotion):
     code = "PTT2"
+    icon = "⛽"
     title = "ยิ่งเติมยิ่งคุ้ม ที่พีทีที สเตชั่น"
     campaign = (dt.date(2026, 7, 1), dt.date(2026, 10, 31))
     source_url = "https://www.krungsricard.com/th/promotion/ptt"

@@ -31,6 +31,7 @@ _STORES = re.compile(r"BIG ?C\b|BIGC|LOTUS|FOODLAND|VILLA|\bTOPS\b|GOURMET|HOME 
 
 class AEONWorldCashback(CreditCapPromotion):
     code = "AEON WM"
+    icon = "🛒"
     name_pattern = r"\bAEON WM cb 5%"
     title = "AEON World Mastercard เครดิตเงินคืน 5% ซูเปอร์มาร์เก็ต"
     cards = ("AEON World Mastercard",)

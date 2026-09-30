@@ -38,6 +38,7 @@ _NOT_RESTAURANT = re.compile(r"GRAB|LINE ?MAN|_LM_|SHOPEE ?FOOD|FOODLAND|FOOD ?H
 
 class JDiningPromotion(SlipCreditPromotion):
     code = "J Dining"
+    icon = "🍽️"
     title = "Krungsri JCB — เครดิตเงินคืน 3% ร้านอาหารทั่วโลก"
     campaign = (dt.date(2026, 1, 1), dt.date(2026, 9, 30))
     source_url = "https://www.krungsricard.com/th/product/creditcard/krungsri-jcb"

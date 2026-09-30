@@ -35,6 +35,7 @@ _DELIVERY = re.compile(r"GRAB|LINE ?MAN|_LM_|PF_LM|SHOPEE ?FOOD|ROBINHOOD|\bBOLT
 
 class ONQ3Promotion(LadderPromotion):
     code = "ONQ3"
+    icon = "🛍️"
     title = "สายช้อปออนไลน์ ช้อปคุ้มมีคืน"
     campaign = (dt.date(2026, 8, 7), dt.date(2026, 11, 30))
     source_url = "https://www.krungsricard.com/th/promotion/online-shopping-cashback"

@@ -38,6 +38,7 @@ _WALLET = r"^TMN[ *]|TRUE ?MONEY|^LINEPAY\*|^LPTH\*|SHOPEEPAY"
 
 
 class _TTBFuel(SlipCreditPromotion):
+    icon = "⛽"
     cards = ("ttb so smart",)
     campaign = (dt.date(2026, 7, 1), dt.date(2026, 12, 31))
     headline = "3%"
@@ -97,6 +98,7 @@ _TIERS = ((Decimal(100_000), Decimal(1_500)), (Decimal(20_000), Decimal(450)),
 
 class TTBHypermarketPromotion(SlipCreditPromotion):
     code = "BMG"
+    icon = "🛒"
     title = "ttb — ช้อป Big C, Go Wholesale และ Makro Pro ที่สาขาและออนไลน์"
     cards = ("ttb so smart",)
     campaign = (dt.date(2026, 7, 1), dt.date(2026, 9, 30))

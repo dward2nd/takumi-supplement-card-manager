@@ -37,7 +37,7 @@ Two ways a transaction is tied to a billing period:
 1. `Bill Cycle Date` on the Transaction (a date) — the cycle cut-off.
 2. The `Bills` row whose `วันตัดรอบบิล` matches that date for that card.
 
-These are linked *by convention*, not by a Notion relation (Bills' `Card` is a SELECT, not a relation — see [[known-divergences]]). A reconciliation script could verify "for each Bill, the sum of unpaid Transactions in the matching cycle equals `ยอดชำระ`". Such a script would belong in `scripts/`.
+The bill and its card are linked by a Notion relation: since 2026-09-30 Bills' `Card` is a one-way relation to the holder's Cards DB (it used to be a SELECT; see [[known-divergences]] #1). The bill and its *transactions* are still linked only *by convention*: there is no Bills ⟷ Transactions relation, so a cycle's rows are the ones whose `Card` is the bill's card and whose `Bill Cycle Date` equals its `วันตัดรอบบิล`. A reconciliation script could verify "for each Bill, the sum of unpaid Transactions in the matching cycle equals `ยอดชำระ`". Such a script would belong in `scripts/`.
 
 ## Phase 2 model (resolved 2026-05-21)
 

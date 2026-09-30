@@ -43,6 +43,7 @@ _EXCLUDED = re.compile(r"FOODPANDA|GRAB|LINE ?MAN|_LM_|ROBINHOOD|SHOPEE ?FOOD|^T
 
 class EATPromotion(SlipCountPromotion):
     code = "EAT"
+    icon = "🍽️"
     title = "อิ่มคุ้มฟิน เปิดโหมดพร้อมกิน"
     campaign = (dt.date(2026, 7, 1), dt.date(2026, 10, 31))
     source_url = "https://www.krungsricard.com/th/promotion/dining-cashback-deal"

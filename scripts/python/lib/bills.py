@@ -2,10 +2,11 @@
 
 deterministic + idempotent — safe to re-run.
 
-Bills uniquely identify by (Card SELECT, วันตัดรอบบิล date). The Card
-field is a SELECT (not a relation — see docs/concepts/known-divergences),
-so card matching here is on the verbatim select-option string. Bill
-cycle dates are ISO date strings.
+Bills uniquely identify by (Card, วันตัดรอบบิล date). `Card` is a relation
+to the holder's own Cards DS (since 2026-09-30; before that a SELECT, now
+kept as `Card (old select)` — see docs/concepts/known-divergences), so a
+card is matched by its Cards page, found by title through `cards.find_card`.
+Bill cycle dates are ISO date strings.
 
 All three holders have a Bills DB. Takumi's holds statement-driven bills
 (`Holder.statement_bills`); lookups work the same way on it.
@@ -20,14 +21,38 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from notion_client.errors import APIResponseError
-
 from . import installments, notion_client
+from .cards import CardAmbiguousError, CardNotFoundError, find_card
 from .ledger import is_bill_payment_row, is_cashback_row
 
 # The Bills property that holds the bank statement PDF(s).
 STATEMENT_PDF = "ใบแจ้งยอด (PDF)"
+# The bill's card: a one-way relation to the holder's own Cards DS (user, 2026-09-30).
+CARD = "Card"
+# The SELECT it replaced, renamed and kept until the household's views move over.
+OLD_CARD_SELECT = "Card (old select)"
+# A bill not yet final: drafted from transactions, or a placeholder awaiting the statement.
+DRAFT_PREFIX = "[DRAFT] "
 from .holders import Holder
+
+
+def card_relation(card_page_id: str) -> dict:
+    """The `Card` property value linking a bill to its Cards page."""
+    return {"relation": [{"id": card_page_id}]}
+
+
+def bill_card_id(page: dict) -> str | None:
+    """The Cards page a Bills row links to, or None."""
+    rel = (page.get("properties", {}).get(CARD) or {}).get("relation") or []
+    return rel[0]["id"] if rel else None
+
+
+def bills_for(bills_ds: str, card_page_id: str, bill_cycle: str) -> list[dict]:
+    """Every Bills row for (card page, วันตัดรอบบิล) — normally zero or one."""
+    return notion_client.query_all(bills_ds, filter={"and": [
+        {"property": CARD, "relation": {"contains": card_page_id}},
+        {"property": "วันตัดรอบบิล", "date": {"equals": bill_cycle}},
+    ]})
 
 
 class BillNotFoundError(RuntimeError):
@@ -53,25 +78,16 @@ def require_bills_ds(holder: Holder) -> str:
 def find_bill(holder: Holder, card: str, bill_cycle: str) -> dict:
     """Return the single Bills page for (card, bill_cycle) on this holder.
 
-    `card` matches the `Card` SELECT option verbatim. `bill_cycle` is
-    the value of `วันตัดรอบบิล` (ISO date).
+    `card` is the card's title in the holder's Cards DS (case-insensitive
+    fallback, as `cards.find_card`). `bill_cycle` is the value of
+    `วันตัดรอบบิล` (ISO date).
     """
     ds = require_bills_ds(holder)
     try:
-        pages = notion_client.query_all(
-            ds,
-            filter={
-                "and": [
-                    {"property": "Card", "select": {"equals": card}},
-                    {"property": "วันตัดรอบบิล", "date": {"equals": bill_cycle}},
-                ]
-            },
-        )
-    except APIResponseError as e:
-        # A card never billed has no SELECT option yet, and Notion rejects the filter.
-        if "select option" not in str(e):
-            raise
-        pages = []
+        card_page = find_card(holder.cards_ds, card)
+    except (CardNotFoundError, CardAmbiguousError) as e:
+        raise BillNotFoundError(f"no bill on {holder.key}'s Bills DB for card={card!r}: {e}") from e
+    pages = bills_for(ds, card_page["id"], bill_cycle)
     if not pages:
         raise BillNotFoundError(
             f"no bill on {holder.key}'s Bills DB for card={card!r}, "

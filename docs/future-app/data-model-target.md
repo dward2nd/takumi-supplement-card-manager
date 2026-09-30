@@ -56,7 +56,7 @@ The future application replaces Notion entirely. This note sketches the target r
                           ┌────────────────────┐
                           │  Bill              │
                           │  - id              │
-                          │  - cardId          │  ← FK (not select!)
+                          │  - cardId          │  ← FK (Notion: `Card` relation since 2026-09-30)
                           │  - cycleDate       │
                           │  - amountBaht      │
                           │  - paid: bool      │
@@ -82,7 +82,7 @@ The future application replaces Notion entirely. This note sketches the target r
 
 ## Key differences from Notion-as-built
 
-1. **`Bill.cardId` is a real FK**, not a SELECT. Resolves [[../concepts/known-divergences|divergence #1]].
+1. **`Bill.cardId` is a real FK**, not a SELECT. Resolves [[../concepts/known-divergences|divergence #1]]. Notion itself moved to a relation on 2026-09-30: each Bills DB's `Card` is a one-way relation to the holder's Cards DB, so the migration can read it as the FK directly. Ignore the legacy `Card (old select)`.
 2. **`Card` is a child of `PrimaryAccount`** (a missing entity in Notion). One PrimaryAccount holds many Cards (primary + supplements), each belonging to a `Person`.
 3. **Reward rules are first-class**, replacing the parallel checkbox columns and `% cb` with a polymorphic structure. A `Transaction` carries zero or more `RewardRule` applications (`{type: "multiplier", value: 5}`, `{type: "cashback", percent: 1.0}`).
 4. **One `Transaction.status` enum** replaces three boolean flags (`Processed` / `ชำระแล้ว` / `Credit Return`). The state diagram in [[../concepts/payment-lifecycle]] becomes the enum's transition rules.

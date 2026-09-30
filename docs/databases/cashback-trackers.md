@@ -14,7 +14,7 @@ Three identical DBs, one per holder. Each row is one promotion credit the holder
 | Baiboon | `374cb755-f0f1-80b2-97cc-000b0105e43e` |
 | Nuta | `2e4cb755-f0f1-838a-9317-877c67577916` |
 
-`Holder.cashback_tracker_ds` in `scripts/python/lib/holders.py`. **Last schema-verified**: 2026-09-28.
+`Holder.cashback_tracker_ds` in `scripts/python/lib/holders.py`. **Last schema-verified**: 2026-09-30.
 
 ## Schema
 
@@ -28,6 +28,16 @@ Three identical DBs, one per holder. Each row is one promotion credit the holder
 | *(unnamed)* | checkbox | ticked once the credit has reached the holder (named `""` in the API) |
 | `Note` | rich_text | the household's own status note, e.g. `รวมไปในบิลของรอบบิล 5 ตุลาคม` ("included in the 5 Oct bill") |
 | `Slip` | files | a transfer slip, when the credit was paid out in cash |
+| `Slip Transaction` | relation → the holder's own Transactions DS (one-way) | the ledger row that *is* the credit, when the bank paid it onto the card (added 2026-09-30) |
+
+## How a row is settled
+
+Either way, the unnamed checkbox is ticked once the credit has reached the holder:
+
+- **Paid out by transfer.** Takumi transfers the money and attaches the slip to `Slip`.
+- **Paid by the bank onto the card.** The credit is already a row in the holder's own ledger. It might be the bank's line (`BANGCHAK SPECIAL DISCOUNT OF 1 %`, `CB15_ SUP1 …`) or the household's credit row (`UOB ONE CASHBACK 1%`). That row goes in `Slip Transaction` (user, 2026-09-30). Before this column existed, the row was written into `Note` as `บันทึกในบัญชีแล้ว: <name> ฿<amt> · <card> ของ<ชื่อ> <date>`, with a link. The four trackers settled that way on 2026-09-29 keep their Note, and were linked through `Slip Transaction` on 2026-09-30.
+
+The relation only reaches the holder's own ledger. A friend's credit that landed on Takumi's primary card is in his ledger, not theirs, so their tracker is settled by his transfer slip.
 
 ## History
 

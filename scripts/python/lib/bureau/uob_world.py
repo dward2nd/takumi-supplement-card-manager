@@ -58,6 +58,7 @@ class UOBWorldBonus(BasePromotion):
     source_url = "https://www.uob.co.th/personal/credit-cards/rewards/uob-world-credit-card.page"
     headline = "×5"
     reward = POINTS
+    icon = "📈"
     period_basis = "bill_cycle"
 
     ladder_title = "Points"

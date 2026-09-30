@@ -23,20 +23,29 @@ from __future__ import annotations
 
 import datetime as _dt
 
-from . import installments, notion_client
+from . import card_repo, installments, notion_client
 from . import notion_blocks as nb
 from .bill_cycle import PatternNotFoundError, active_cycle, cycle_for_month, due_date_for, pattern_for_card
-from .bills import explain_cycle, require_bills_ds
+from .bills import DRAFT_PREFIX, bills_for, card_relation, explain_cycle, require_bills_ds
 from .cards import CardAmbiguousError, CardNotFoundError, card_title_text, card_titles_by_id, find_card
 from .holders import resolve_holder
 from .ledger import amount_due, cycle_pages, title_text
 from .transaction_read import project_transaction
 
-DRAFT_PREFIX = "[DRAFT] "
 
 
 class BillDraftError(RuntimeError):
     pass
+
+
+def bill_title_card(card_page: dict) -> str:
+    """The card as bill titles spell it (`<Card> <YYYY-MM>`): its card YAML `name`,
+    which is what the bills have always carried and what /record-statement titles
+    with (`Krungsri Visa`, where the Cards page says `Krungsri VISA`), else the
+    Cards page title. Bill naming stays as it was (user, 2026-09-30)."""
+    title = card_title_text(card_page)
+    repo = card_repo.get(title)
+    return repo.name if repo else title
 
 
 class BillExistsError(BillDraftError):
@@ -91,50 +100,24 @@ def draft_statement_bill(holder, card: str, bill_cycle: str, *, dry_run: bool = 
     if not on_pattern:
         raise BillDraftError(f"{bill_cycle} isn't a cycle date of {card!r}'s bank pattern")
     ds = require_bills_ds(holder)
-    name, new_option = resolve_bill_card_name(select_options(ds), card, card_title_text(card_page))
-    if not new_option and (page := existing_bill(ds, name, bill_cycle)) is not None:
+    name = bill_title_card(card_page)
+    if (page := existing_bill(ds, card_page["id"], bill_cycle)) is not None:
         raise BillExistsError(page, holder.key, name, bill_cycle)
     title = f"{DRAFT_PREFIX}{name} {bill_cycle[:7]}"
     note = ("Drafted from the payment slip before the statement arrived. "
             "ยอดชำระ and the split come from the statement (/record-statement completes this row).")
     out = {"holder": holder.key, "card": name, "bill_cycle": bill_cycle, "title": title,
-           "statement_pending": True, "new_select_option": new_option}
+           "statement_pending": True}
     if dry_run:
         return {**out, "id": None, "dry_run": True}
     page = notion_client.create_page(ds, {
         "title": {"title": [{"text": {"content": title}}]},
-        "Card": {"select": {"name": name}},
+        "Card": card_relation(card_page["id"]),
         "วันตัดรอบบิล": {"date": {"start": bill_cycle}},
         "จ่ายแล้ว": {"checkbox": False},
         "Note": {"rich_text": nb.text(note)},
     })
     return {**out, "id": page["id"]}
-
-
-def resolve_bill_card_name(
-    options: list[str], card_name: str, cards_title: str
-) -> tuple[str, bool]:
-    """Map a card onto the Bills `Card` SELECT spelling → (name, is_new).
-
-    Exact match first, then case-insensitive: the Cards DS title and the
-    SELECT option can disagree on case (known-divergences #11, `Krungsri
-    VISA` vs `Krungsri Visa`), and minting a second option that differs only
-    in case would split the card's bill history in two.
-
-    No match at all means the card has never been billed. The name is then
-    the Cards DS title verbatim and `is_new` is True — Notion adds the
-    option when the first bill is created with it.
-    """
-    if card_name in options:
-        return card_name, False
-    folded = [o for o in options if o.casefold() == card_name.strip().casefold()]
-    if len(folded) == 1:
-        return folded[0], False
-    if len(folded) > 1:
-        raise BillDraftError(
-            f"card {card_name!r} matches several Bills SELECT options by case: {folded}"
-        )
-    return cards_title.strip(), True
 
 
 def cards_with_crediting() -> frozenset[str]:
@@ -147,26 +130,9 @@ def cards_with_crediting() -> frozenset[str]:
     return frozenset(CREDITINGS)
 
 
-def select_options(ds_id: str) -> list[str]:
-    """SELECT options on a Bills DS's `Card` property (verbatim strings)."""
-    client = notion_client.get_client()
-    ds = client.data_sources.retrieve(data_source_id=ds_id)
-    card_prop = ds.get("properties", {}).get("Card", {})
-    if card_prop.get("type") != "select":
-        raise BillDraftError("Bills DS `Card` is not a SELECT — schema drift?")
-    return [opt.get("name") for opt in card_prop.get("select", {}).get("options", [])]
-
-
-def existing_bill(ds_id: str, card: str, bill_cycle: str) -> dict | None:
-    pages = notion_client.query_all(
-        ds_id,
-        filter={
-            "and": [
-                {"property": "Card", "select": {"equals": card}},
-                {"property": "วันตัดรอบบิล", "date": {"equals": bill_cycle}},
-            ]
-        },
-    )
+def existing_bill(ds_id: str, card_page_id: str, bill_cycle: str) -> dict | None:
+    """The Bills row for (card page, วันตัดรอบบิล), if one exists."""
+    pages = bills_for(ds_id, card_page_id, bill_cycle)
     return pages[0] if pages else None
 
 
@@ -207,13 +173,9 @@ def draft_bill(spec: dict, *, dry_run: bool = False) -> dict:
     reject_statement_bills(holder)
 
     # The Cards DB is the authority on whether the card exists — a typo
-    # raises here with substring candidates. Only then is the name mapped
-    # onto the Bills SELECT, so a card that has never been billed is a
-    # first bill, not an error.
+    # raises here with substring candidates. The bill links to that page.
     card = find_card(holder.cards_ds, spec["card"])
-    card_name, new_select_option = resolve_bill_card_name(
-        select_options(bills_ds), spec["card"], card_title_text(card)
-    )
+    card_name = card_title_text(card)
 
     if (bc := spec.get("bill_cycle")):
         # Validate ISO format eagerly so we fail loud.
@@ -223,9 +185,7 @@ def draft_bill(spec: dict, *, dry_run: bool = False) -> dict:
         bc_date, _ = active_cycle(card_name, _dt.date.today())
         bill_cycle = bc_date.isoformat()
 
-    # A SELECT option that doesn't exist yet can't have a bill behind it —
-    # and querying on it is a 400, not an empty result.
-    existing = None if new_select_option else existing_bill(bills_ds, card_name, bill_cycle)
+    existing = existing_bill(bills_ds, card["id"], bill_cycle)
     if existing is not None:
         raise BillExistsError(existing, holder.key, card_name, bill_cycle)
 
@@ -272,7 +232,7 @@ def draft_bill(spec: dict, *, dry_run: bool = False) -> dict:
             )
 
     bc_date = _dt.date.fromisoformat(bill_cycle)
-    title = f"{DRAFT_PREFIX}{card_name} {bc_date.strftime('%Y-%m')}"
+    title = f"{DRAFT_PREFIX}{bill_title_card(card)} {bc_date.strftime('%Y-%m')}"
 
     # Auto-generate the Note explaining special rows in this cycle (cashback
     # credits, manual adjustments, installment terms). Skip when the user
@@ -285,7 +245,7 @@ def draft_bill(spec: dict, *, dry_run: bool = False) -> dict:
 
     properties = {
         "title": {"title": [{"text": {"content": title}}]},
-        "Card": {"select": {"name": card_name}},
+        "Card": card_relation(card["id"]),
         "วันตัดรอบบิล": {"date": {"start": bill_cycle}},
         "ยอดชำระ": {"number": total},
         "จ่ายแล้ว": {"checkbox": False},
@@ -306,8 +266,6 @@ def draft_bill(spec: dict, *, dry_run: bool = False) -> dict:
         "ยอดชำระ": total,
         "tx_count": tx_count,
     })
-    if new_select_option:
-        out["new_select_option"] = True
     if installments_summary is not None:
         out["installments"] = installments_summary
     if auto_note:
@@ -478,8 +436,6 @@ def draft_bills_in_window(spec: dict, *, dry_run: bool = False) -> dict:
             })
             if not dry_run:
                 entry["bill_id"] = out["id"]
-            if out.get("new_select_option"):
-                entry["new_select_option"] = True
             appended = (out.get("installments") or {}).get("count_appended")
             if appended:
                 entry["installments_appended"] = appended

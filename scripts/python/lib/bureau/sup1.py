@@ -33,6 +33,7 @@ _MAKRO_IN_STORE = re.compile(r"^MAKRO_")
 
 class SUP1Promotion(SlipCreditPromotion):
     code = "SUP1"
+    icon = "🛒"
     title = "ช้อปซูเปอร์มาร์ชั้นนำ รับเครดิตเงินคืนสูงสุด 3%"
     campaign = (dt.date(2026, 8, 1), dt.date(2026, 10, 31))
     source_url = "https://www.krungsricard.com/th/promotion/supermarket-shopping"

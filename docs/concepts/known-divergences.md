@@ -8,7 +8,13 @@ Inconsistencies between the three card universes (Takumi / Baiboon / Nuta) and b
 
 ## 1. Bills' `Card` is a SELECT, not a relation
 
-The single biggest divergence. In all three Transactions databases, `Card` is a **relation** to the corresponding Cards DB. In both Bills databases (Baiboon, Nuta), `Card` is a **`select`** with a hardcoded option list.
+**Resolved 2026-09-30.** The user asked for the SELECT to be replaced with a relation. In all three Bills DBs ([[../databases/takumi-bills|Takumi]], [[../databases/baiboon-bills|Baiboon]], [[../databases/nuta-bills|Nuta]]), `Card` is now a **one-way relation** (`single_property`) to the **holder's own Cards DB**. It is one-way so the Cards DBs stay unchanged, with no back-link column. All 172 existing bills were linked (Takumi 28, Baiboon 109, Nuta 35). Each was checked to link exactly the Cards page its old select named; the only spelling mismatch was case (#11), matched case-insensitively.
+
+The old SELECT was renamed **`Card (old select)`** and kept, so the household's Notion views that group or filter by it keep working until they are moved to the relation. It will be deleted later, when the user says so. Scripts no longer read or write it. Bill titles keep their `<Card> <YYYY-MM>` naming.
+
+The history below is kept for context.
+
+The single biggest divergence. In all three Transactions databases, `Card` is a **relation** to the corresponding Cards DB. In the Bills databases, `Card` was a **`select`** with a hardcoded option list.
 
 Consequences:
 
@@ -19,7 +25,7 @@ Consequences:
 
 Why it's like this (inferred): Notion's relation UI is heavier than a select for what's essentially a one-pick-from-known-list value, and Bills don't need bidirectional analytics the way Transactions do.
 
-**Resolve in phase 2**: foreign key from Bill → Card.
+**Phase 2**: foreign key from Bill → Card. The migration can now read `Card` as that key directly. See [[../future-app/data-model-target]].
 
 ## 2. Takumi has no Bills DB
 
@@ -61,6 +67,8 @@ The relation property on [[../databases/nuta-cards]] is internally labelled `ร
 
 ## 8. `Card` SELECT option lists differ between Baiboon and Nuta
 
+**Resolved 2026-09-30** with #1. A bill now links a page in its holder's own Cards DB, so the choices are that holder's cards and there is no option list to keep in step. The old lists survive on `Card (old select)` until that property is deleted. The history below is kept for context.
+
 The hardcoded option lists in the two Bills DBs aren't identical — Baiboon's includes `Krungsri NOW`, `Lotus's Beyond`, `ttb so smart`; Nuta's includes `AEON UnionPay`, `CardX JCB`. That's actually correct (each person has different cards) but reinforces why a relation would be preferable to a select.
 
 ## 9. Takumi's Cards DB omits `ธนาคาร/บริษัท`
@@ -78,6 +86,15 @@ There is no point fixing this in Notion — the multiplier-checkbox shape can't 
 **Resolved in phase 2**: `RewardRule.value` is a plain number (no integer constraint). See [[../future-app/data-model-target]] and the `RewardRule` shape in [[../future-app/product-shape]].
 
 ## 11. A card's title is spelled twice, and the two can disagree on case
+
+**Resolved 2026-09-30 on the Bills side.** With #1, a bill links its Cards page instead of naming the card, so the Bills leg of this divergence is gone. The migration that linked the old bills matched `Krungsri Visa` to the `Krungsri VISA` Cards page case-insensitively. `Card (old select)` still reads `Krungsri Visa`, but nothing reads that property any more.
+
+What remains:
+
+- **The card YAML still differs by case.** Its `name` is `Krungsri Visa` and the Cards title is `Krungsri VISA`. The case-insensitive fallbacks below still resolve either spelling. The YAML `name` is now also the spelling bill titles use (below), so it stays `Krungsri Visa`.
+- **Bill titles keep their spelling.** Bill naming stays as it was (user, 2026-09-30). `/prepare-bill` titles a draft with the card's YAML `name` (`lib.bill_draft.bill_title_card`), and `/record-statement` already did, so new bills read `Krungsri Visa <YYYY-MM>` like the old ones. Lookups go through the relation, never the title.
+
+The history below is kept for context.
 
 A card's name lives in two independent places in Notion: the **Cards DS page title** and the **Bills `Card` SELECT option** (divergence 1 is why there are two at all). Nothing keeps them in sync, and for one card they differ:
 

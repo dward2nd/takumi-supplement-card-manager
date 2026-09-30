@@ -53,6 +53,7 @@ _RULES = (
 
 class BangchakCardBenefit(SlipCreditPromotion):
     code = "Bangchak"
+    icon = "⛽"
     title = "เติมเซฟกว่าเคย ตั้งแต่สลิปแรก ที่ปั๊มบางจาก — ต่อ 1 (สิทธิประโยชน์บัตร)"
     campaign = CAMPAIGN
     source_url = SOURCE
@@ -83,6 +84,7 @@ class BangchakCardBenefit(SlipCreditPromotion):
 
 class BC3PPromotion(SlipCreditPromotion):
     code = "BC3P"
+    icon = "⛽"
     title = "เติมเซฟกว่าเคย ตั้งแต่สลิปแรก ที่ปั๊มบางจาก — ต่อ 2 พิเศษรับเพิ่ม"
     campaign = CAMPAIGN
     source_url = SOURCE

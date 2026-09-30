@@ -40,6 +40,7 @@ def _step_credit(amount: Decimal) -> Decimal | None:
 
 class IS3Promotion(SlipCreditPromotion):
     code = "IS3"
+    icon = "🛡️"
     title = "ชำระค่าเบี้ยประกันทุกหมวด รับเครดิตเงินคืน"
     cards = ("First Choice",)
     campaign = (dt.date(2026, 7, 1), dt.date(2026, 9, 30))

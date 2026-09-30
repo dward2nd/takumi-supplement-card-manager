@@ -77,6 +77,9 @@ class AccountPlan:
     # /record-statement checks each for points lost to per-row rounding.
     splits: list[dict] = field(default_factory=list)
     split: dict[str, float] = field(default_factory=dict)  # holder → attributed amount
+    # Whose bill the statement is: Takumi's, except a supplement's own statement
+    # on an issuer that bills each card number separately (KTC, CardX).
+    bill_holder: str = PRIMARY
     carried: float = 0.0  # previous balance left after this statement's payments
     warnings: list[str] = field(default_factory=list)
 
@@ -211,16 +214,29 @@ def plan_account(
         for h in FRIENDS
     }
     friends = FRIENDS
-    # One statement per card number (StatementParser.separate_card_statements):
-    # a friend with no section here has only their [บัตรหลัก] rows to find on
-    # it; their own card's rows belong to their own statement.
+    # One statement per card number (StatementParser.separate_card_statements).
+    # On the principal's statement, a friend has only their [บัตรหลัก] rows to
+    # find; their own card's rows belong to their own statement. A statement
+    # without the principal's number is a supplement's own (Baiboon's KTC
+    # …2310): the bill is theirs, their [บัตรหลัก] shares sit on the
+    # principal's statement, and no one else's rows are on it.
     from . import separate_card_statements   # late: the package imports this module
     if separate_card_statements(statement.issuer):
         on_statement = {o[1] for o in owners.values() if o}
-        for h in friends:
-            if h not in on_statement:
-                pools[h] = [r for r in pools[h] if r["name"].startswith(PRIMARY_PREFIX.strip())]
-                bank_credits[h] = [r for r in bank_credits[h] if r["name"].startswith(PRIMARY_PREFIX.strip())]
+        principal_card = PRIMARY in on_statement
+        if not principal_card and len(on_statement) == 1:
+            plan.bill_holder = next(iter(on_statement))
+
+        def keep(h: str, r: dict) -> bool:
+            share = r["name"].startswith(PRIMARY_PREFIX.strip())
+            if h in on_statement:
+                return h == PRIMARY or not share
+            return principal_card and share
+
+        for h in (PRIMARY, *friends):
+            pools[h] = [r for r in pools[h] if keep(h, r)]
+            if h in bank_credits:
+                bank_credits[h] = [r for r in bank_credits[h] if keep(h, r)]
 
     def credit(holder: str, amount: float) -> None:
         plan.split[holder] = round(plan.split.get(holder, 0.0) + amount, 2)

@@ -9,8 +9,9 @@ role: bills
 One row per card per **bank statement** — the amount [[../people/takumi|Takumi]] actually pays the issuer. Created by Takumi on 2026-09-27 when he started keeping his own ledger again, and shared with the scripts' integration the same day.
 
 - **Collection ID**: `63dcb755-f0f1-83df-aaa8-871bb9069dae` (data source; its database is `3e3cb755-f0f1-80a0-80be-f0151b47a900`)
-- **Schema**: identical to [[baiboon-bills]] — untitled title property, `Card` (SELECT), `วันตัดรอบบิล` (bill cycle date), `ยอดชำระ` (amount due), `จ่ายแล้ว` (paid), `ใบแจ้งยอด (PDF)` (statement), `หลักฐานการชำระ` (payment evidence), `Note`. It started as a copy of Baiboon's, so its `Card` options began as her list; new cards add their option on first use.
-- **Last schema-verified**: 2026-09-27
+- **Schema**: identical to [[baiboon-bills]] — untitled title property, `Card` (one-way relation → [[takumi-cards]]), `Card (old select)` (legacy SELECT), `วันตัดรอบบิล` (bill cycle date), `ยอดชำระ` (amount due), `จ่ายแล้ว` (paid), `ใบแจ้งยอด (PDF)` (statement), `หลักฐานการชำระ` (payment evidence), `Note`.
+- **`Card`**: a relation to Takumi's own Cards DB since 2026-09-30. Before that it was a SELECT whose options began as Baiboon's list, because the DB started as a copy of hers. That SELECT was renamed `Card (old select)` and kept so existing views still work; it will be deleted once the views move to the relation, and scripts ignore it. All 28 existing bills were linked, each to the Cards page its old select named. `/record-statement` links the bills it creates to his Cards page. See [[../concepts/known-divergences]] #1.
+- **Last schema-verified**: 2026-09-30
 
 ## Different in kind from the supplement holders' Bills
 
@@ -128,4 +129,18 @@ Closing 2026-08-27, due 2026-09-11. Each PDF holds only Takumi's principal card;
 | KTC Digital VISA 2026-08 (0581) | 1,841.90 | Takumi |
 | KTC JCB 2026-08 (0059) | 269.00 | Takumi |
 
-KTC's rule that the supermarket earns no points was applied by hand to Takumi's two `RIMPING` rows on UnionPay. Petrol on KTC (`BANGCHAK …` ฿940) is still undecided and was left at `×1`.
+KTC's rule that the supermarket earns no points was applied by hand to Takumi's two `RIMPING` rows on UnionPay. Petrol on KTC (`BANGCHAK …` ฿940) was left at `×1`; the September statement showed it earns (below).
+
+### KTC — 2026-09 statements (recorded 2026-09-29)
+
+Closing 2026-09-27, due 2026-10-12. Takumi paid all three from slips on 28 Sep, before the PDFs arrived, so `/record-statement` completed the slip-first placeholders.
+
+| Bill | `ยอดชำระ` | Split | Paid |
+|---|---:|---|---|
+| KTC UnionPay 2026-09 (1346) | 3,797.96 | Takumi 1,907.26 + Baiboon `[บัตรหลัก]` 1,890.70 | ฿1,907.26 (two `ชำระบางส่วน`); Baiboon's share open |
+| KTC Mastercard 2026-09 (5549) | 1,545.30 | Takumi | ✓ |
+| KTC Digital VISA 2026-09 (0581) | 20.00 | Takumi | ✓ |
+
+- `โอนยอดจากใบบุญ` +1,890.70 was added at statement time, as the KTC rule above says. Baiboon pays her 1346 share to KTC herself (August: `Payment-BAY Internet` −376.00 on 6 Sep), so the bill stays open until she does.
+- Baiboon's own statement (…2310, ฿7,906.68) went on **her** KTC UnionPay bill with the 1346 PDF, as in August: ฿9,797.38 = 7,906.68 + her 1,890.70 of `[บัตรหลัก]` shares. Three of its lines (฿514.00) were missing from her ledger and were added.
+- Points: `CNX BC DOM L2 LS(6110)` (Bonchon at Chiang Mai airport, ฿478.46, split Takumi 281.06 / Baiboon 197.40) earned nothing: fast food, MCC 5814, KTC UnionPay rule (16). Both halves are `×0`. The petrol lines (`BANGCHAK …` ฿940, `BSRC-…` ฿686.20) earned, so KTC UnionPay has no petrol exclusion (see [[../promotions/ktc-forever|ktc-forever]]).

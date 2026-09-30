@@ -14,7 +14,8 @@ import hashlib
 from pathlib import Path
 
 from lib import card_repo, notion_client, notion_files
-from lib.bills import STATEMENT_PDF
+from lib.bills import STATEMENT_PDF, bill_card_id
+from lib.cards import card_titles_by_id
 from lib.holders import HOLDERS
 from lib.statements import PARSERS, load_card_pdf
 from lib.statements.model import Statement
@@ -30,9 +31,10 @@ def _latest_bills() -> list[tuple[str, str, dict]]:
         if not holder.bills_ds:
             continue
         latest: dict[str, tuple[str, dict]] = {}
+        titles = card_titles_by_id(holder.cards_ds)
         for page in notion_client.query_all(holder.bills_ds):
             props = page["properties"]
-            card = ((props.get("Card") or {}).get("select") or {}).get("name")
+            card = titles.get(bill_card_id(page) or "")
             bc = ((props.get("วันตัดรอบบิล") or {}).get("date") or {}).get("start")
             if card and bc and (props.get(STATEMENT_PDF) or {}).get("files") and bc > latest.get(card, ("",))[0]:
                 latest[card] = (bc, page)

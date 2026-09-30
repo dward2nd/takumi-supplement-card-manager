@@ -27,8 +27,8 @@ def _row(spec: dict, write: Writer) -> BureauRow:
     if not (spec.get("start") and spec.get("end")):
         return store.find_row(spec["promotion"])
     start, end = dt.date.fromisoformat(spec["start"]), dt.date.fromisoformat(spec["end"])
-    promotion_for(spec["promotion"], start, end)  # refuse a row no campaign class would match
-    return sync.ensure_row(spec["promotion"], start, end, write)
+    promo = promotion_for(spec["promotion"], start, end)  # refuse a row no campaign class would match
+    return sync.ensure_row(spec["promotion"], start, end, write, icon=promo.icon)
 
 
 def run(spec: dict, *, dry_run: bool = False) -> dict:

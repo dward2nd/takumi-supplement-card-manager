@@ -25,6 +25,7 @@ scripts/python/
 │   ├── crediting/                   # Crediting, one class per card that gets credit rows (UOBOneCrediting)
 │   ├── points_account.py            # PointsAccount (pooled / principal card / supplement card) + PointsPeriod (posting / cycle)
 │   ├── rewards_audit.py, points_balance.py  # statement points vs ledgers; balance rows to the printed figure
+│   ├── icons/                       # page icons for new rows (create_page asks here); backfill for old ones
 │   ├── bureau/                      # Promotion Bureau: payout shapes (ladder, credit cap, points) + campaigns;
 │   │                                #   runner = one row's sync, follow = re-sync after a ledger write
 │   └── statements/                  # StatementParser, one class per issuer; attribution; recording

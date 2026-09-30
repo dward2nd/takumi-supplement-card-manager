@@ -29,6 +29,7 @@ PER_TX_CAP = Decimal(50)
 
 class AEONRabbitCashback(CreditCapPromotion):
     code = "AEON Rabbit"
+    icon = "🚆"
     name_pattern = r"\bAEON Rabbit cb 5%"
     title = "AEON Rabbit Platinum เครดิตเงินคืน"
     cards = ("AEON Rabbit",)

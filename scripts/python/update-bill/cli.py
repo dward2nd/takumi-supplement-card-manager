@@ -97,6 +97,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from lib import installments, notion_client, notion_files, payments
 from lib import notion_blocks as nb
 from lib.bill_draft import DRAFT_PREFIX, draft_bill, draft_statement_bill
+from lib.icons.bills import bill_icon
 from lib.bills import STATEMENT_PDF, BillNotFoundError, explain_cycle, find_bill
 from lib.ledger import amount_due, cycle_rows, is_bill_payment_row, title_text
 from lib.cards import CardNotFoundError, find_card
@@ -531,7 +532,9 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         return out
 
     if simple_props:
-        notion_client.update_page_properties(page_id, simple_props)
+        new_title = "".join(t["text"]["content"] for t in simple_props["title"]["title"]) if "title" in simple_props else None
+        notion_client.update_page_properties(page_id, simple_props,
+                                             icon=bill_icon(new_title) if new_title is not None else None)
 
     if slips:
         notion_files.append_files_to_page(page_id, _SLIP_PROP, slips)

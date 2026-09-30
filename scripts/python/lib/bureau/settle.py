@@ -65,7 +65,7 @@ def trackers(row: BureauRow, promo: BasePromotion, alloc: Allocation, txs: list[
             if share > 0:
                 write(f"create {h.key} tracker {title!r} expecting ฿{share}{net}", store.create_tracker, h,
                       title=title, date=promo.tracker_date(row.start, row.end), card_id=tracker_card(h.key, cards[h.key], txs),
-                      row_id=row.id, expected=share)
+                      row_id=row.id, expected=share, icon=promo.icon)
         elif len(found) > 1 or not found[0].linked:
             warnings.append(f"{h.key}: tracker rows {[t.name for t in found]} need a look — more than "
                             f"one, or titled {title!r} without a Promotion link; left alone")

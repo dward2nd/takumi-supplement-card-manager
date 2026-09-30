@@ -65,13 +65,27 @@ def query_page(data_source_id: str, *, page_size: int = 100, **query_kwargs) -> 
     return resp.get("results", [])
 
 
-def create_page(data_source_id: str, properties: dict) -> dict:
-    """Create a row under the given data source."""
+def create_page(data_source_id: str, properties: dict, *, icon: dict | None = None) -> dict:
+    """Create a row under the given data source.
+
+    Every row gets a page icon: `icon` when the caller passes one, otherwise
+    whatever `lib.icons` picks for that data source (none for the Cards DBs).
+    """
+    if icon is None:
+        from . import icons   # late: icons reads the Cards DBs through this module
+        icon = icons.for_new_page(data_source_id, properties)
     client = get_client()
     return client.pages.create(
         parent={"type": "data_source_id", "data_source_id": data_source_id},
         properties=properties,
+        **({"icon": icon} if icon else {}),
     )
+
+
+def set_icon(page_id: str, icon: dict) -> dict:
+    """Replace a page's icon."""
+    client = get_client()
+    return client.pages.update(page_id=page_id, icon=icon)
 
 
 def archive_page(page_id: str) -> dict:
@@ -80,10 +94,10 @@ def archive_page(page_id: str) -> dict:
     return client.pages.update(page_id=page_id, archived=True)
 
 
-def update_page_properties(page_id: str, properties: dict) -> dict:
-    """Patch one or more property values on an existing page."""
+def update_page_properties(page_id: str, properties: dict, *, icon: dict | None = None) -> dict:
+    """Patch one or more property values on an existing page (and its icon, when given)."""
     client = get_client()
-    return client.pages.update(page_id=page_id, properties=properties)
+    return client.pages.update(page_id=page_id, properties=properties, **({"icon": icon} if icon else {}))
 
 
 def get_page(page_id: str) -> dict:

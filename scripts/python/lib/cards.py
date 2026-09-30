@@ -38,15 +38,13 @@ def find_card(cards_ds: str, card_name: str) -> dict:
     1. exact, case-sensitive match;
     2. case-insensitive match, when pass 1 finds nothing.
 
-    Pass 2 exists because a card's title is spelled independently in two
-    places in Notion — the Cards DS page title and the Bills `Card` SELECT
-    option — and the two do not always agree on case. `Krungsri VISA`
-    (Cards DS) vs `Krungsri Visa` (Bills SELECT, and the YAML repo) was
-    found 2026-08-27; see docs/concepts/known-divergences.md #11. Without
-    it, `/prepare-bill` cannot draft that card at all: it validates the
-    Bills SELECT with one spelling and then resolves the Cards relation
-    with the other, and no single string satisfies both. `card_repo.by_name`
-    already carries the same case-insensitive fallback for the same reason.
+    Pass 2 exists because a card's name is spelled independently in more
+    than one place, and they do not always agree on case: `Krungsri VISA`
+    (Cards DS title) vs `Krungsri Visa` (the YAML repo, and the Bills `Card`
+    SELECT before it became a relation on 2026-09-30); see
+    docs/concepts/known-divergences.md #11. A caller passing either spelling
+    must land on the same page. `card_repo.by_name` carries the same
+    case-insensitive fallback for the same reason.
 
     Case folding cannot reintroduce the confusion strictness guards against
     — `UOB One` and `UOB World` differ by more than case — and an ambiguous

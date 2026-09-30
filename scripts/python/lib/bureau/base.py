@@ -159,6 +159,7 @@ class BasePromotion(ABC):
     campaign: ClassVar[tuple[dt.date, dt.date | None]]  # None = open-ended
     source_url: ClassVar[str]
     headline: ClassVar[str]             # short rate for tracker titles, e.g. "2%"
+    icon: ClassVar[str] = "🤑"          # page icon for its Bureau rows and trackers (lib.icons)
 
     reward: ClassVar[str]               # CASHBACK, POINTS or RIGHTS
     period_basis: ClassVar[str] = "transaction_date"  # or "bill_cycle": End = the day before the BC date

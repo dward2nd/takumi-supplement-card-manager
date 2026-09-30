@@ -43,6 +43,7 @@ _STORES = re.compile(
 
 class LBS3Promotion(LadderPromotion):
     code = "LBS3"
+    icon = "🛒"
     title = "ช้อปของใหญ่จัดเต็ม"
     cards = ("Lotus's Beyond",)
     campaign = (dt.date(2026, 9, 1), dt.date(2026, 12, 31))

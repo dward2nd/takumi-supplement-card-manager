@@ -35,6 +35,7 @@ _APPS = re.compile(r"GRAB|LINE ?MAN|LINEMAN|_LM_|\bLM\b|\bBOLT\b|SHOPEE ?FOOD|RO
 
 class DLV3Promotion(LadderPromotion):
     code = "DLV3"
+    icon = "🛵"
     title = "สั่งเดลิเวอรี่คุ้ม"
     cards = ("First Choice",)
     campaign = (dt.date(2026, 9, 1), dt.date(2026, 12, 31))

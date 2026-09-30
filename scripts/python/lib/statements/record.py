@@ -20,6 +20,9 @@ Writes, per account the plan marks `ready`:
      cashback for credits and fees)
   3. create Takumi's Bills row at the printed total, with the split in `Note`
   4. attach the statement PDF to it
+     (3–4 are skipped for a supplement's own statement on an issuer that bills
+     each card number separately — Baiboon's KTC …2310: the bill is hers, and
+     /update-bill attaches the PDF to it. The report says so under `bill`.)
   4a. stamp `Process Date` (the statement's posting date, where it prints one)
       on every row a line accounts for — new rows get it at creation
   4c. for a bank that rounds points once per cycle (KBank, KTC, Krungsri), add
@@ -44,9 +47,10 @@ from pathlib import Path
 from .. import card_repo, notion_client, notion_files, points_account, promotions
 from .. import notion_blocks as nb
 from ..bill_cycle import PatternNotFoundError, cycle_for_month, pattern_for_card
-from ..bill_draft import DRAFT_PREFIX, existing_bill, resolve_bill_card_name, select_options
+from ..bill_draft import DRAFT_PREFIX, existing_bill
 from ..cards import CardNotFoundError, find_card
-from ..bills import STATEMENT_PDF
+from ..bills import STATEMENT_PDF, card_relation
+from ..icons.bills import bill_icon
 from .. import holders
 from ..bureau import follow
 from ..holders import HOLDERS
@@ -302,11 +306,13 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
             note = " ".join(n for n in (line.note, cnote) if n) or None
             creates.append((line, mult, note, cb))
 
-        bill_name, new_option = resolve_bill_card_name(
-            select_options(takumi.bills_ds), plan.card, plan.card
-        )
-        bill = None if new_option else existing_bill(takumi.bills_ds, bill_name, statement.statement_date)
-        entry["bill"] = _bill_report(bill, plan) if bill else {"status": "would-create" if dry_run else "created"}
+        own_bill = plan.bill_holder == takumi.key
+        if own_bill:
+            bill_name = plan.card
+            bill = existing_bill(takumi.bills_ds, takumi_card, statement.statement_date) if takumi_card else None
+            entry["bill"] = _bill_report(bill, plan) if bill else {"status": "would-create" if dry_run else "created"}
+        else:
+            entry["bill"] = _friend_bill_report(statement, plan)
 
         bc = statement.statement_date
         # Renamed and re-dated rows are followed; a row both renamed and stamped once.
@@ -357,10 +363,12 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
                 card_page_id=takumi_card, note=a["note"], multiplier="×0", points_redeemed=-a["points"]))
             counts["points_adjustments"] += 1
 
+        if not own_bill:
+            continue
         if bill is None:
             bill = notion_client.create_page(takumi.bills_ds, {
                 "title": {"title": [{"text": {"content": f"{bill_name} {statement.statement_date[:7]}"}}]},
-                "Card": {"select": {"name": bill_name}},
+                "Card": card_relation(takumi_card),
                 "วันตัดรอบบิล": {"date": {"start": statement.statement_date}},
                 "ยอดชำระ": {"number": plan.total},
                 "จ่ายแล้ว": {"checkbox": False},
@@ -371,11 +379,12 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
         elif _pending_draft(bill):
             # Drafted from a payment slip before the statement arrived
             # (lib.bill_draft.draft_statement_bill): the statement completes it.
+            final_title = f"{bill_name} {statement.statement_date[:7]}"
             notion_client.update_page_properties(bill["id"], {
-                "title": {"title": [{"text": {"content": f"{bill_name} {statement.statement_date[:7]}"}}]},
+                "title": {"title": [{"text": {"content": final_title}}]},
                 "ยอดชำระ": {"number": plan.total},
                 "Note": {"rich_text": nb.text(bill_note(statement, plan, printed))},
-            })
+            }, icon=bill_icon(final_title))
             counts["bills_completed"] += 1
             entry["bill"] = {"status": "draft completed", "id": bill["id"], "ยอดชำระ": plan.total}
         if pdf is not None:
@@ -449,6 +458,15 @@ def _bill_report(bill: dict, plan: AccountPlan) -> dict:
     if amount is None or abs(amount - plan.total) > 0.005:
         r["warning"] = f"existing bill says {amount}, statement prints {plan.total:,.2f} — left unchanged"
     return r
+
+
+def _friend_bill_report(statement: Statement, plan: AccountPlan) -> dict:
+    """A supplement's own statement (one PDF per card number): the bill is theirs."""
+    return {"status": "not Takumi's", "holder": plan.bill_holder,
+            "next": (f"{THAI_NAMES[plan.bill_holder]}'s own {plan.card} statement: {statement.issuer} bills each "
+                     f"card number separately, so the bill is theirs, not Takumi's. Attach this PDF — and the "
+                     f"principal's, when they have [บัตรหลัก] shares on it — to their Bills row with /update-bill; "
+                     f"/audit-bill diffs it.")}
 
 
 def _create_report(line: StatementLine, mult: str | None, note: str | None, cb: float | None = None) -> dict:

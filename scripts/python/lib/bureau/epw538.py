@@ -38,6 +38,7 @@ _APPS = re.compile(r"SHOPEE|LAZADA|TIKTOK|LINE ?PAY|^LPTH\*|LINE SHOPPING|CENTRA
 
 class EPW538Promotion(LadderPromotion):
     code = "EPW538"
+    icon = "🛍️"
     title = "ช้อปออนไลน์ คุ้มทุกคลิก"
     cards = ("UOB One", "UOB World", "UOB Premier", "UOB Makro")
     campaign = (dt.date(2026, 7, 1), dt.date(2026, 9, 30))

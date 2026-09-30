@@ -43,3 +43,12 @@ KTC paid 61 points. Rounded per cycle, the ledger's `×1` rows give 90 (85 per r
 - Fast-food or food-shop rows (MCC 5814 / 5499) for the rest.
 
 Which food rows those are can't be pinned down without MCCs, so the ledger is left as it is (reconcile, don't correct).
+
+## Sep 2026 statements (2026-09-27)
+
+- **Takumi's …1346:** KTC paid 68. Only one subset of the ×1 lines gives exactly that: `BANGCHAK …` ฿940 + `BSRC-…` ฿686.20 + `AUFU` ฿89.30 = ฿1,715.50 → floor(÷25) = 68. So:
+  - **Petrol earns** on KTC UnionPay (up to the ฿30,000 monthly cap). No petrol exclusion on this card.
+  - `CNX BC DOM L2 LS(6110) CHIANGMAI THA` (฿478.46) earned nothing. It's **Bonchon**, the fried-chicken chain, at the Chiang Mai airport domestic terminal (user, 2026-09-29): fast food, MCC 5814, rule (16). The airport isn't the reason; no KTC rule names airports, and airport merchants earn elsewhere (`KFC-12335(C.AIRPORT CH …)` at ×5 on another card). Takumi's ฿281.06 and Baiboon's `[บัตรหลัก]` ฿197.40 halves are `×0` with a Note. With them at ×0 the ledger gives 67 + a 1-point cycle-rounding row = 68, exact.
+  - The descriptor doesn't say Bonchon (`BC`), so the classifier can't see it. Mark it by hand if it recurs.
+- **Takumi's …5549 (Mastercard) and …0581 (Digital VISA):** exact (61 and 0). KTC also moved 2,000 points from 0581 to 5549 and 22 from 1346 to 2310 (`adjusted` on each summary). `/sync-points-balance` set every card to its printed balance.
+- **Baiboon's …2310:** KTC paid 50; her rows give 77 once the three lines missing from her ledger were added (BCM LAMPHUN HOSPITAL ฿50, BCM CHAING KAN ฿380 + ฿84). Still open, like August. The Lamphun Hospital rows (฿30, ฿67.68, ฿50) are likely MCC 8062; the rest needs MCCs.

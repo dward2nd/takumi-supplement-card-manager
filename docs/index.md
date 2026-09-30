@@ -56,6 +56,7 @@ Each note opens with a live Notion URL, collection ID, and the full property sch
 - [[concepts/card-network]] — JCB / Mastercard / VISA / UnionPay
 - [[concepts/ledger-reset]] — `Reset ยอดใช้จ่ายและคะแนน`: zeroing a card's balance and points without deleting history
 - [[concepts/known-divergences]] — schema inconsistencies worth knowing
+- [[concepts/page-icons]] — every script-created row gets an emoji page icon: row kind, then merchant category; bills show 📝 draft / 🧾 final; Cards DBs untouched
 
 ## Formulas
 
@@ -68,7 +69,7 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 
 ## Cards
 
-- [[cards/_stubs]] — list of all card products observed in SELECT options; individual notes are promoted lazily as we discuss each card's rules.
+- [[cards/_stubs]] — list of all card products observed in the Cards DBs and the Bills' legacy `Card (old select)` options; individual notes are promoted lazily as we discuss each card's rules.
 
 ## Promotions
 
