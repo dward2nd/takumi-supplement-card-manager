@@ -22,13 +22,17 @@ campaign class from `lib.bureau` that matches it:
 6. Writes the campaign summary into the page body when it's empty (or always,
    with `replace_summary`).
 
+A campaign with a nationwide pool (UnionPay QR) first reads the bank's page
+and records the day the pool ran out in `Quotas Exceeded Date` (lib.bureau.quota).
+
 Spec (stdin or --input):
   {
     "promotion":       "2026M9 — NW3 cb 2%",  // Bureau row Name, page ID or URL
     "start": "2026-09-01", "end": "2026-09-30",  // optional: create the row if missing
     "bank_spend":      36803.92,              // optional: the bank app's eligible total
     "link_candidates": false,                 // optional: link eligible unlinked rows
-    "replace_summary": false                  // optional: rewrite a non-empty page body
+    "replace_summary": false,                 // optional: rewrite a non-empty page body
+    "quota_gone":      "2026-09-12"           // optional: the day a nationwide pool ran out (UnionPay QR)
   }
 
 --dry-run computes and reports everything without writing.

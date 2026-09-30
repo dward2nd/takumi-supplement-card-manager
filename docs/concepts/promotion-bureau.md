@@ -36,10 +36,17 @@ Campaign terms don't share a shape, so the shape is a class and each campaign su
 | `SlipCountPromotion` | a fixed credit for the Nth qualifying slip in the period | EAT |
 | `UOBWorldBonus` (its own shape) | points: ×5 on bonus categories inside the first ฿20,000 of a cycle | UOB World ×5 |
 | `DrawRightsPromotion` | lucky-draw rights: one per qualifying slip, up to a count per month | BTS (one pool per company: First Choice, Krungsri Card) |
+| `InstantDiscountPromotion` (a cashback shape) | a discount taken off the charge itself, so the ledger holds the net amount and the discount is read back from it | UnionPay QR 6% |
 
-The issuers' campaign notes: [[../promotions/first-choice-2026h2]], [[../promotions/krungsri-card-2026]], [[../promotions/lotuss-lbs3]], [[../promotions/aeon-2026]], [[../promotions/ttb-2026]].
+The issuers' campaign notes: [[../promotions/first-choice-2026h2]], [[../promotions/krungsri-card-2026]], [[../promotions/lotuss-lbs3]], [[../promotions/aeon-2026]], [[../promotions/ttb-2026]], [[../promotions/unionpay-qr]].
 
 **A quota per card account.** Krungsri caps its card campaigns per primary card account, and each card product is its own account: SUP1 paid ฿120 on Krungsri VISA, JCB, Lady and NOW alike in September 2026. Such a campaign mixes in `CardAccount` (`lib/bureau/accounts.py`) and has one subclass per card. The card name goes into the Bureau row's name and the tracker titles: `2026M9 — SUP1 Krungsri JCB cb 3%`.
+
+**A quota per card number.** A card network counts per card number, and two holders' cards can share a title: Takumi's KTC UnionPay …1346 and Baiboon's own …2310 (user, 2026-09-30). Such a campaign mixes in `CardNumber` (`lib/bureau/accounts.py`), one subclass per number. Rows are placed the way KTC's statements split them (`lib.points_account`): the principal's number takes his rows and the friends' `[บัตรหลัก]` shares, a supplement's number that holder's other rows. The number goes into the name: `2026M9 — UnionPay QR …1346 cb 6%`.
+
+**A discount inside the charge.** UnionPay QR takes its 6% off at payment, so `ยอดชำระ` is already net and nothing is credited later (user, 2026-09-30). `InstantDiscountPromotion` sets no `% cb` and writes no tracker rows (`tracked = False`). The Bureau's `เงินคืน…` fields still show who saved what. The net amount also shows whether the discount was taken: 94% of a whole price was discounted, a whole price wasn't.
+
+**A pool that runs out: `Quotas Exceeded Date`.** A campaign whose bank caps it nationwide (UnionPay's 12,000 discounts a month) declares a `quota` source (`lib/bureau/quota.py`). Each sync reads the bank's page and, the first time it shows the pool used up inside the period, writes that day to the Bureau row's `Quotas Exceeded Date`. A day read off the bank's announcement goes in by hand (`quota_gone`). From that day the campaign pays nothing.
 
 **Rights, not money.** A `RIGHTS` campaign (BTS) writes no shares, no trackers and no row fields. The month's count goes in the Bureau's `สิทธิ์ลุ้นรางวัล`.
 

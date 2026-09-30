@@ -218,6 +218,10 @@ A **points** card, not a cashback one — leave `% cb` unset on every row, alway
 
 **The ≈฿20,000 per-cycle bonus quota is the Bureau's job, not `auto_classify`'s.** `lib.promotions.classify` is a pure function of (card, date, merchant). It can't see cycle-to-date spend, so it always returns `×5`. The Bureau sync after the write fixes that when the cycle has a `<year>M<month> — UOB World ×5` row. A row wholly past the quota becomes `×2` with the quota Note. The row the quota ends in keeps `×5` and gives the over-quota points back through `ใช้คะแนน` (`UOBWorldBonus`). If the cycle has no Bureau row, `promotions.missing` says so. See [[../../docs/cards/uob-world|UOB World card note]].
 
+### KTC UnionPay — UnionPay QR 6% off, already inside the charge
+
+Takumi (…1346) and Baiboon (her own …2310) pay with KTC UnionPay by UnionPay QR only, and UnionPay's monthly offer takes 6% off at payment (up to ฿60 a slip, one slip a card a day, ฿300 a card a month, until UnionPay's pool runs out). `ยอดชำระ` is **what KTC charged**, i.e. the net amount (฿67.68 for a ฿72 price). A receipt, or the app at payment time, may show the price before the discount: use the charged figure. Leave `% cb` unset, since nothing is credited later. The Bureau follow-up keeps `UnionPay QR …1346` / `…2310` in step and reports the month's pool under `quota`. See [[../../../docs/promotions/unionpay-qr|unionpay-qr]].
+
 ### CardX JCB — ongoing card-level policy (not yet framed as a dated promotion)
 
 - **Cashback**:

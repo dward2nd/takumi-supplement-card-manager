@@ -15,7 +15,7 @@ import datetime as dt
 from decimal import Decimal
 
 from ..holders import HOLDERS
-from . import report, settle, store, sync
+from . import quota, report, settle, store, sync
 from . import promotion_for
 from .base import CASHBACK, RIGHTS
 from .store import BureauRow
@@ -28,7 +28,7 @@ def _row(spec: dict, write: Writer) -> BureauRow:
         return store.find_row(spec["promotion"])
     start, end = dt.date.fromisoformat(spec["start"]), dt.date.fromisoformat(spec["end"])
     promo = promotion_for(spec["promotion"], start, end)  # refuse a row no campaign class would match
-    return sync.ensure_row(spec["promotion"], start, end, write, icon=promo.icon)
+    return sync.ensure_row(spec["promotion"], start, end, write, icon=promo.icon, issuer=promo.issuer())
 
 
 def run(spec: dict, *, dry_run: bool = False) -> dict:
@@ -37,11 +37,14 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     row = _row(spec, write)
     promo = promotion_for(row.name, row.start, row.end)
 
+    if not sync.is_stand_in(row) and row.issuer != promo.issuer():
+        write(f"Bureau {store.ISSUER}={promo.issuer()}", store.write_select, row.id, store.ISSUER, promo.issuer())
+    observed, quota_warnings = quota.observe(row, promo, write, given=spec.get("quota_gone"))
     cards = sync.campaign_cards(promo)
     txs, candidates, adjustments, warnings = sync.collect(
         row, promo, cards, link=bool(spec.get("link_candidates")), write=write)
     alloc = promo.allocate(txs)
-    warnings += alloc.warnings
+    warnings += quota_warnings + alloc.warnings
     flagged, flagged_ids = report.flagged(promo, txs)
     mismatched = report.field_mismatches(promo, alloc)
     if mismatched:
@@ -59,7 +62,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         shares_ok, w = settle.bureau_numbers(row, alloc, write)
         warnings += w
         held_back = not shares_ok
-        if shares_ok:
+        if shares_ok and promo.tracked:
             trackers, w = settle.trackers(row, promo, alloc, txs, adjustments, cards, write)
             warnings += w
 
@@ -83,6 +86,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         "shares": {k: float(v) for k, v in alloc.shares.items()},
         "held_back": held_back,
         "boundary": report.boundary(alloc),
+        **({"quota": observed} if observed is not None else {}),
         "field_mismatches": mismatched,
         "flagged": flagged,
         "unlinked_candidates": candidates,

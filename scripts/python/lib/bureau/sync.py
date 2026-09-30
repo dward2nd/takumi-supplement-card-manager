@@ -38,7 +38,8 @@ def is_stand_in(row: BureauRow) -> bool:
     return row.id == _STAND_IN_ID
 
 
-def ensure_row(name: str, start: dt.date, end: dt.date, write, *, icon: str | None = None) -> BureauRow:
+def ensure_row(name: str, start: dt.date, end: dt.date, write, *, icon: str | None = None,
+               issuer: str | None = None) -> BureauRow:
     """The Bureau row for a quota period: found, created, or (dry run) a stand-in."""
     try:
         return store.find_row(name)
@@ -49,7 +50,7 @@ def ensure_row(name: str, start: dt.date, end: dt.date, write, *, icon: str | No
         zero = {h.key: None for h in HOLDERS.values()}
         return BureauRow(id=_STAND_IN_ID, url="", name=name, start=start, end=end, total=None,
                          shares=zero, rollups={k: 0 for k in zero})
-    return store.create_row(name, start, end, icon=icon)
+    return store.create_row(name, start, end, icon=icon, issuer=issuer)
 
 
 def line(tx: Tx) -> str:

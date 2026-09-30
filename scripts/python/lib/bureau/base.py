@@ -10,6 +10,7 @@ class too:
   │   ├── LadderPromotion      (ladder.py) tranches of pooled spend — NW3, EPW538, ON3 …
   │   └── CreditCapPromotion   (capped.py) a per-row rate until a credit cap — UOB One
   │       └── SlipCreditPromotion  (slips.py) a fixed credit per slip until a cap — SUP1, PTT2, IS3
+  │   └── InstantDiscountPromotion (instant.py) a discount taken off the charge itself — UnionPay QR
   ├── UOBWorldBonus        (uob_world.py) a points quota
   └── DrawRightsPromotion  (rights.py) lucky-draw rights per slip, up to a monthly count — BTS
 
@@ -30,6 +31,7 @@ from decimal import ROUND_DOWN, Decimal
 from itertools import groupby
 from typing import Any, ClassVar
 
+from .. import card_repo
 from .. import notion_blocks as nb
 from ..bill_cycle import cycle_for_month, pattern_for_card
 from ..ledger import PRIMARY_PREFIX
@@ -172,6 +174,17 @@ class BasePromotion(ABC):
     inclusions: ClassVar[tuple[str, ...]] = ()
     crediting: ClassVar[tuple[str, ...]] = ()
     split_text: ClassVar[tuple[str, ...]] = ()           # how the household shares it (page text)
+
+    @classmethod
+    def issuer(cls) -> str:
+        """Who issues the cards the campaign covers: the cards' `issuer` in
+        scripts/repositories/cards/ (the Bureau's `Issuer`, user 2026-09-30).
+        UnionPay QR is UnionPay's offer but on KTC cards, so KTC; LBS3 is on
+        Lotus's Beyond, which Krungsri Consumer issues, so Krungsri."""
+        issuers = {card_repo.by_name(c).issuer for c in cls.cards}
+        if len(issuers) != 1:
+            raise ValueError(f"{cls.__name__}'s cards {cls.cards} span issuers {sorted(issuers)}")
+        return issuers.pop()
 
     # -- matching ---------------------------------------------------------
 
@@ -388,6 +401,9 @@ class CashbackPromotion(BasePromotion):
     # only the card's own cashback claims it. An overlay paid as a lump sum on
     # top (EPW538) sets this False and lives in the trackers alone.
     marks_rows: ClassVar[bool] = True
+    # Whether each holder's share is a credit still to come, kept in a tracker row.
+    # A discount taken off the charge itself (UnionPay QR) sets this False.
+    tracked: ClassVar[bool] = True
 
     def expected(self, r: TxCredit) -> dict[str, Any]:
         """The full rate when the whole row earns; `% cb` unset when only part of

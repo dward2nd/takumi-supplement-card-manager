@@ -204,6 +204,8 @@ def _summary(out: dict, writes: list[str], mine: set[str]) -> dict:
         s["credit"], s["shares"] = out["totals"]["credit"], out["shares"]
     elif out["promotion"]["reward"] == RIGHTS:
         s["rights"] = out["totals"]["rights"]
+    if out.get("quota"):
+        s["quota"] = out["quota"]
     if writes:
         s["writes"] = writes
     not_linked = [{k: c[k] for k in ("row", "level", "reason")}

@@ -1,0 +1,88 @@
+UnionPay International — "Get 6% off" at all merchants in Thailand accepting UnionPay QR
+Read from UnionPay's offer API on 2026-09-30 (Claude), for the offer page
+https://marketing.unionpayintl.com/offer-promote/?language=en&insCode=299990156&countryCode=764#/merchant?merchantNo=898463728627768
+Endpoints: h5Promote/v1/coupon/getMerchantCouponList (months), coupon/getCoupon (terms), coupon/flushProcess (pool left).
+
+Monthly offers listed (one coupon per month; each needs its own registration):
+  260722112617  2026-09-01 00:00:00 → 2026-09-30 23:59:59  Get 6% off  wallets: KTC Mobile, ICBC Mobile Banking, BOC TH Mobile Banking
+  260723112620  2026-10-01 00:00:00 → 2026-10-31 23:59:59  Get 6% off  wallets: KTC Mobile, ICBC Mobile Banking, BOC TH Mobile Banking
+  260723112621  2026-11-01 00:00:00 → 2026-11-30 23:59:59  Get 6% off  wallets: KTC Mobile, ICBC Mobile Banking, BOC TH Mobile Banking
+  260723112622  2026-12-01 00:00:00 → 2026-12-31 23:59:59  Get 6% off  wallets: KTC Mobile, ICBC Mobile Banking, BOC TH Mobile Banking
+  260723112623  2027-01-01 00:00:00 → 2027-01-31 23:59:59  Get 6% off  wallets: KTC Mobile, ICBC Mobile Banking, BOC TH Mobile Banking
+
+==============================================================================
+September 2026 offer (260722112617)
+==============================================================================
+
+-- offerContent --
+Promotion Mechanic: Get 6% off up to THB 60/ card/ sales slip/
+day, and up to THB 300/ card/ month when register and paying with UnionPay QR Code.
+Participating Merchants: Merchants that support
+UnionPay QR Code payments. Please check with the merchant staff before making a
+payment.
+Participating Wallets: KTC Mobile, ICBC Mobile Banking, BOC TH Mobile Banking
+How to register for the promotion:
+1. Click https://marketing.unionpayintl.com/offer-promote/?language=en&insCode=299990156#/offer?offerNo=260722112617
+2. Click “Register”
+3. Log in or click “Create and account” to register
+4. Click “Add UnionPay Card”
+5. Fill in card number, then click “Next Step”
+6. Click “Done”
+7. Select the card you want to register for the promotion
+8. Registered successful, then click “Understood”
+
+-- offerRule --
+1. To enjoy the discount, cardholders must first register with UnionPay and make payment at merchants supported UnionPay QR Code by using a registered UnionPay card.
+2. The promotion limited to 1 redemption/card/day, discount up to THB 60/card/sales slip and up to THB 300/card/month on a first-come, first-served basis.
+3. The promotion limited with a total quota of 12,000 redemptions /month throughout the promotion period.
+4. The amount shown on the receipt or banking app may reflect the pre-discount amount. The actual payment deducted will be based on the final amount charged by the issuing bank.
+5. This promotion is applicable only via the KTC Mobile, ICBC Mobile Banking, BOC TH Mobile Banking App that support UnionPay QR Code payments. Transactions must be processed through the UnionPay network to qualify.
+6. When multiple UnionPay promotions are available, cardholders are entitled to only one promotion. The system will automatically apply the promotion offering the highest discount or benefit.
+7. Some merchants may not participate in the promotion due to factors such as lack of UnionPay QR Code acceptance or internal operational limitations. If you do not receive the discount after making a purchase, you are advised to request a transaction cancellation at the store and contact UnionPay Customer Service via Facebook “UnionPay International – Thailand” for further investigation.
+8. In case of refunds or product returns, only the amount paid by the customer will be refunded. The discount amount is non-refundable.
+9. UnionPay International is neither vendors nor service providers, thus UnionPay International is not responsible for the products or services provided by the merchant. Any obligations and liabilities relating to such products or services and all auxiliary services shall be borne by the merchant.
+10. The promotional materials are permitted solely for promoting UnionPay activities and must be removed after the promotion ends. UnionPay International is not responsible for any unauthorized use thereafter.
+11. UnionPay International reserves the right to change, cancel, or amend the terms and conditions without prior notice. For more details, please visit the UnionPay website (https://www.unionpayintl.com/th) or Facebook page “UnionPay International – Thailand” (https://www.facebook.com/UnionPayThailand).
+
+==============================================================================
+October 2026 offer (260723112620); November–January read the same
+==============================================================================
+
+-- offerContent --
+Promotion Mechanic: Get 6% off up to THB 60/card/sales slip/day, and up to THB 300/card/month when register and paying with UnionPay QR Code.
+Participating Merchants: Merchants that support UnionPay QR Code payments. Please
+check with the merchant staff before making a payment.
+Participating Wallets: KTC Mobile,
+ICBC Mobile Banking, BOC TH Mobile Banking
+How to register for the promotion:
+1. Click https://marketing.unionpayintl.com/offer-promote/?language=en&insCode=299990156#/offer?offerNo=260723112620
+2. Click “Register”
+3. Log in or click “Create and account” to register
+4. Click “Add UnionPay Card”
+5. Fill in card number, then click “Next Step”
+6. Click “Done”
+7. Select the card you want to register for the promotion
+8. Registered successful, then click “Understood”
+For more promotions, please visit Facebook page
+"UnionPay International – Thailand" (https://www.facebook.com/UnionPayThailand)
+
+-- offerRule --
+1. To enjoy the discount, cardholders must first register with UnionPay and make payment at merchants supported UnionPay QR Code by using a registered UnionPay card.
+2. Limited to 1 redemption/card/day with a maximum discount of THB 60/sales slip and up to THB 300/card/month.
+3. The promotion is limited 12,000 redemptions/month, with a total quota of 144,000 redemptions throughout the promotion period on a first-come, first-served basis.
+4. The amount shown on the receipt or banking app may reflect the pre-discount amount. The actual payment deducted will be based on the final amount charged by the issuing bank.
+5. This promotion is applicable only via the KTC Mobile, ICBC Mobile Banking, BOC TH Mobile Banking App that support UnionPay QR Code payments. Transactions must be processed through the UnionPay network to qualify.
+6. When multiple UnionPay promotions are available, cardholders are entitled to only one promotion. The system will automatically apply the promotion offering the highest discount or benefit.
+7. Some merchants may not participate in the promotion due to factors such as lack of UnionPay QR Code acceptance or internal operational limitations. If you do not receive the discount after making a purchase, you are advised to request a transaction cancellation at the store and contact UnionPay Customer Service via Facebook “UnionPay International – Thailand” for further investigation.
+8. In case of refunds or product returns, only the amount paid by the customer will be refunded. The discount amount is non-refundable.
+9. UnionPay International is neither vendors nor service providers, thus UnionPay International is not responsible for the products or services provided by the merchant. Any obligations and liabilities relating to such products or services and all auxiliary services shall be borne by the merchant.
+10. The promotional materials are permitted solely for promoting UnionPay activities and must be removed after the promotion ends. UnionPay International is not responsible for any unauthorized use thereafter.
+11. UnionPay International reserves the right to change, cancel, or amend the terms and conditions without prior notice. For more details, please visit the UnionPay website https://www.unionpayintl.com/th) or Facebook page “UnionPay International – Thailand” (https://www.facebook.com/UnionPayThailand).
+
+==============================================================================
+UnionPay International – Thailand, Facebook, 12 Sep 2026 (screenshot from the user, 2026-09-30)
+==============================================================================
+📢 สิทธิ์ UnionPay QR เดือนก.ย. 69 เต็มแล้ว ❌
+ขอบคุณทุกท่านที่ให้การตอบรับเป็นอย่างดี 🙏
+เติมสิทธิ์อีกครั้ง 1 ต.ค. 69 …
+(The attached offer card: "Get 6% off — Registered! — The budget for today has been used up", Activity Period 2026-09-01 00:00 to 2026-09-30 23:59.)

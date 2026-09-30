@@ -81,6 +81,7 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 - [[promotions/lotuss-lbs3]] — Lotus's LBS3 big-ticket cashback (Sep–Dec 2026).
 - [[promotions/aeon-2026]] — AEON Rabbit 5%, AEON World 5% supermarkets, Everyday with AEON (NTW1), AEON UnionPay 3%, per AEON cycle.
 - [[promotions/ttb-2026]] — ttb so smart 1% (฿2,000 a cycle), and ttb's Caltex, Bangchak and hypermarket campaigns.
+- [[promotions/unionpay-qr]] — UnionPay QR 6% off on KTC UnionPay (monthly from Sep 2026), taken off the charge itself; one Bureau row per card number, `Quotas Exceeded Date` when UnionPay's pool runs out.
 
 ## Future application
 

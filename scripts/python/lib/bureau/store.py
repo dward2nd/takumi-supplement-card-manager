@@ -29,6 +29,8 @@ from .base import BasePromotion, Tx
 LINK = "Promotion"      # on every Transactions DS and every tracker
 TOTAL = "เงินคืนรวม"
 RIGHTS = "สิทธิ์ลุ้นรางวัล"   # draw rights a RIGHTS campaign's period earned (BTS; added 2026-09-29)
+ISSUER = "Issuer"       # who issues the campaign's cards (select; added 2026-09-30)
+QUOTA_GONE = "Quotas Exceeded Date"     # the day a campaign's shared pool ran out (UnionPay QR; added 2026-09-30)
 SETTLED = ""            # the trackers' unnamed checkbox: the credit has reached the holder
 _PAGE_ID = re.compile(r"([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})\s*$")
 
@@ -56,6 +58,8 @@ class BureauRow:
     shares: dict[str, Decimal | None]        # `เงินคืนส่วน<name>` per holder key
     rollups: dict[str, Decimal]              # `ยอดจาก<name>` per holder key
     rights: int | None = None                # `สิทธิ์ลุ้นรางวัล`, on a draw-rights row
+    quota_gone: dt.date | None = None        # `Quotas Exceeded Date`, on a row whose campaign has a shared pool
+    issuer: str | None = None                # `Issuer`
 
 
 def _money(value) -> Decimal | None:
@@ -82,15 +86,19 @@ def _parse_row(page: dict) -> BureauRow:
         rollups={h.key: _money(p[rollup_prop(h)]["rollup"].get("number")) or Decimal(0)
                  for h in HOLDERS.values()},
         rights=None if (n := (p.get(RIGHTS) or {}).get("number")) is None else int(n),
+        issuer=((p.get(ISSUER) or {}).get("select") or {}).get("name"),
+        quota_gone=dt.date.fromisoformat(d[:10]) if (d := ((p.get(QUOTA_GONE) or {}).get("date") or {}).get("start")) else None,
     )
 
 
-def create_row(name: str, start: dt.date, end: dt.date, *, icon: str | None = None) -> BureauRow:
-    """A new Bureau row for one quota period, with the campaign's page icon."""
+def create_row(name: str, start: dt.date, end: dt.date, *, icon: str | None = None,
+               issuer: str | None = None) -> BureauRow:
+    """A new Bureau row for one quota period, with the campaign's page icon and issuer."""
     page = notion_client.create_page(PROMOTION_BUREAU_DS, {
         "Name": {"title": [{"text": {"content": name}}]},
         "Start Date": {"date": {"start": start.isoformat()}},
         "End Date": {"date": {"start": end.isoformat()}},
+        **({ISSUER: {"select": {"name": issuer}}} if issuer else {}),
     }, icon=emoji(icon) if icon else None)
     return _parse_row(notion_client.get_page(page["id"]))
 
@@ -176,6 +184,14 @@ def set_links(tx_id: str, row_ids: list[str]) -> None:
 def write_numbers(row_id: str, values: dict[str, Decimal]) -> None:
     notion_client.update_page_properties(
         row_id, {k: {"number": float(v)} for k, v in values.items()})
+
+
+def write_select(row_id: str, prop: str, name: str) -> None:
+    notion_client.update_page_properties(row_id, {prop: {"select": {"name": name}}})
+
+
+def write_date(row_id: str, prop: str, day: dt.date) -> None:
+    notion_client.update_page_properties(row_id, {prop: {"date": {"start": day.isoformat()}}})
 
 
 # -- trackers ------------------------------------------------------------------

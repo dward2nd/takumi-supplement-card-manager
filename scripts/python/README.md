@@ -26,8 +26,9 @@ scripts/python/
 │   ├── points_account.py            # PointsAccount (pooled / principal card / supplement card) + PointsPeriod (posting / cycle)
 │   ├── rewards_audit.py, points_balance.py  # statement points vs ledgers; balance rows to the printed figure
 │   ├── icons/                       # page icons for new rows (create_page asks here); backfill for old ones
-│   ├── bureau/                      # Promotion Bureau: payout shapes (ladder, credit cap, points) + campaigns;
-│   │                                #   runner = one row's sync, follow = re-sync after a ledger write
+│   ├── bureau/                      # Promotion Bureau: payout shapes (ladder, credit cap, points, instant discount) + campaigns;
+│   │                                #   runner = one row's sync, follow = re-sync after a ledger write,
+│   │                                #   quota = a bank's nationwide pool (UnionPay's offer page)
 │   └── statements/                  # StatementParser, one class per issuer; attribution; recording
 └── <skill-name>/                    # one folder per skill, dir name = skill name
     ├── __init__.py
