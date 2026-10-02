@@ -36,6 +36,15 @@ Modules:
   ttb_so_smart  ttb so smart 1%, ฿2,000 a cycle (credit cap)
   aeon_rabbit / aeon_world / ntw1  AEON Rabbit 5%, AEON World 5% supermarkets, Everyday with AEON
   epw538     UOB e-Commerce & e-Wallet EPW538 (ladder), Jul–Sep 2026
+  spw796     its Q4 successor, Oct–Dec 2026
+  spw592     UOB supermarkets SPW592 (฿50 / ฿150 bands), Jul–Dec 2026
+  nw4 / on4 / is4   First Choice Q4 2026: NW3, ON3, IS3's successors (NW4 caps supermarket and fuel spend)
+  bxp        Krungsri Card at Bangchak from Oct 2026: the card's 1% and BXP, per ฿700 a slip — per card account
+  lotus_exclusive  Krungsri Card LOTA / LOTB at Lotus's, per slip, Aug–Oct 2026 — per card account
+  uniqlo     UNIQLO per slip, Oct 2026 – Feb 2027: UOB UNO, Krungsri UNQ (per card account), KBank UQN (per card), ttb UQCB
+  ttb_shopping  ttb MUJI (MUJC) and Big C / GO Wholesale (BGO), Oct–Dec 2026, one quota per campaign
+  cardx_hypermarket  CardX HY1 per hypermarket slip (monthly) and HYP ฿3,000 at ฿300k (campaign), Oct–Dec 2026
+  kbank_makro  KBank MKR at Makro (฿100/240 bands, and ฿1,500 per ฿300,000), Oct–Dec 2026 — per card
   uob_one    UOB One 10%/5% (monthly) and 1% (per cycle) (credit caps)
   uob_world  UOB World ×5 (a points quota per cycle)
   store      Notion reads/writes for Bureau rows, linked transactions, trackers
@@ -53,7 +62,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from . import bangchak, bts, eat, jdining, krungsri_now, onq3, ptt2, sup1, unionpay_qr
+from . import bangchak, bts, bxp, eat, jdining, kbank_makro, krungsri_now, lotus_exclusive, onq3, ptt2, sup1, uniqlo, unionpay_qr
 from .accounts import CardAccount, CardNumber
 from .aeon_rabbit import AEONRabbitCashback
 from .aeon_unionpay import AEONUnionPayCashback
@@ -62,19 +71,26 @@ from .base import (CASHBACK, ELIGIBLE, EXCLUDED, POINTS, RIGHTS, UNCERTAIN, Allo
                    CashbackPromotion, Rule, Tx, TxCredit)
 from .bts import BTSDrawPromotion
 from .capped import CreditCapPromotion
+from .cardx_hypermarket import CardXHypermarketBonus, CardXHypermarketPromotion
 from .dlv3 import DLV3Promotion
 from .epw538 import EPW538Promotion
 from .instant import InstantDiscountPromotion
 from .is3 import IS3Promotion
+from .is4 import IS4Promotion
 from .ladder import LadderPromotion, Tranche
 from .lbs3 import LBS3Promotion
 from .ntw1 import NTW1Promotion
 from .nw3 import NW3Promotion
+from .nw4 import NW4Promotion
 from .on3 import ON3Promotion
+from .on4 import ON4Promotion
 from .rights import DrawRightsPromotion
 from .slip_count import SlipCountPromotion
 from .slips import SlipCreditPromotion
+from .spw592 import SPW592Promotion
+from .spw796 import SPW796Promotion
 from .ttb_campaigns import TTBBangchakPromotion, TTBCaltexPromotion, TTBHypermarketPromotion
+from .ttb_shopping import TTBBigCGoPromotion, TTBMujiPromotion
 from .ttb_so_smart import TTBSoSmartCashback
 from .uob_one import UOBOneBase, UOBOneBonus
 from .uob_world import UOBWorldBonus
@@ -87,6 +103,11 @@ PROMOTIONS: tuple[type[BasePromotion], ...] = (
     TTBCaltexPromotion, TTBBangchakPromotion, TTBHypermarketPromotion,
     LBS3Promotion, TTBSoSmartCashback, AEONRabbitCashback, AEONWorldCashback, NTW1Promotion,
     *unionpay_qr.ACCOUNTS,
+    # From Oct 2026 (read 2026-10-01): Q4 successors and the new campaigns.
+    NW4Promotion, ON4Promotion, IS4Promotion, SPW796Promotion, SPW592Promotion,
+    *bxp.ACCOUNTS, *lotus_exclusive.ACCOUNTS, *uniqlo.PROMOTIONS,
+    TTBMujiPromotion, TTBBigCGoPromotion, *kbank_makro.ACCOUNTS,
+    CardXHypermarketPromotion, CardXHypermarketBonus,
 )
 
 
@@ -103,9 +124,10 @@ def promotion_for(bureau_name: str, start: dt.date, end: dt.date) -> BasePromoti
 
 __all__ = ["CASHBACK", "ELIGIBLE", "EXCLUDED", "POINTS", "RIGHTS", "UNCERTAIN", "Allocation",
            "AEONRabbitCashback", "AEONUnionPayCashback", "AEONWorldCashback", "BTSDrawPromotion", "BasePromotion", "CardAccount",
+           "CardXHypermarketBonus", "CardXHypermarketPromotion",
            "CardNumber", "CashbackPromotion", "CreditCapPromotion", "DLV3Promotion", "DrawRightsPromotion",
-           "EPW538Promotion", "IS3Promotion", "InstantDiscountPromotion", "LBS3Promotion", "LadderPromotion", "NTW1Promotion",
-           "NW3Promotion", "ON3Promotion", "PROMOTIONS", "Rule", "SlipCountPromotion", "SlipCreditPromotion", "TTBBangchakPromotion", "TTBCaltexPromotion",
-           "TTBHypermarketPromotion",
+           "EPW538Promotion", "IS3Promotion", "IS4Promotion", "InstantDiscountPromotion", "LBS3Promotion", "LadderPromotion", "NTW1Promotion",
+           "NW3Promotion", "NW4Promotion", "ON3Promotion", "ON4Promotion", "PROMOTIONS", "Rule", "SlipCountPromotion", "SlipCreditPromotion", "SPW592Promotion", "SPW796Promotion", "TTBBangchakPromotion", "TTBBigCGoPromotion", "TTBCaltexPromotion",
+           "TTBHypermarketPromotion", "TTBMujiPromotion",
            "TTBSoSmartCashback", "Tranche", "Tx", "TxCredit", "UOBOneBase", "UOBOneBonus",
            "UOBWorldBonus", "promotion_for"]

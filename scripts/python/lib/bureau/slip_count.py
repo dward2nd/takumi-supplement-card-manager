@@ -29,7 +29,7 @@ class SlipCountPromotion(CashbackPromotion):
     def counts_linked(self, tx: Tx) -> bool:
         return self.qualifies(tx)
 
-    def allocate(self, txs: list[Tx]) -> Allocation:
+    def split(self, txs: list[Tx]) -> Allocation:
         seen = [0]
 
         def take(lo: Decimal, hi: Decimal, grp: list[Tx]) -> list[TxCredit]:

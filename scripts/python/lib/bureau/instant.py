@@ -79,6 +79,9 @@ class InstantDiscountPromotion(CashbackPromotion):
 
     marks_rows = False   # the discount is inside ยอดชำระ already
     tracked = False      # and nothing is credited later: no tracker rows
+    # The terms: the discount isn't given back with a refund, so a refunded slip
+    # still used its discount. Refunds stay out; each slip counts as charged.
+    nets_refunds = False
 
     # The first day of the period with no discount left in the bank's pool: the
     # Bureau row's `Quotas Exceeded Date`, set by `lib.bureau.quota.observe` before `allocate`.
@@ -103,7 +106,7 @@ class InstantDiscountPromotion(CashbackPromotion):
             return True
         return False if net % 1 == 0 else None
 
-    def allocate(self, txs: list[Tx]) -> Allocation:
+    def split(self, txs: list[Tx]) -> Allocation:
         rows: list[TxCredit] = []
         boundary: list[TxCredit] = []
         warnings: list[str] = []

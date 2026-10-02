@@ -91,7 +91,8 @@ class TTBBangchakPromotion(_TTBFuel):
     )
 
 
-_HYPERMARKETS = re.compile(r"BIG ?C\b|BIGC|GO ?WHOLESALE|MAKRO ?PRO|WWW\.MAKRO\.PRO|MAKRO\.PRO")
+# GO Wholesale posts as `CFW-<branch> …` (Central Food Wholesale).
+_HYPERMARKETS = re.compile(r"BIG ?C\b|BIGC|GO ?WHOLESALE|\bCFW-|MAKRO ?PRO|WWW\.MAKRO\.PRO|MAKRO\.PRO")
 _TIERS = ((Decimal(100_000), Decimal(1_500)), (Decimal(20_000), Decimal(450)),
           (Decimal(5_000), Decimal(100)), (Decimal(3_000), Decimal(50)))
 

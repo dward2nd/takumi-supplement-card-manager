@@ -8,7 +8,7 @@ Krungsri First Choice's monthly cashback ladder on pooled full-amount spend. Tak
 
 > **Structured source of truth**: `scripts/python/lib/bureau/nw3.py` (`NW3Promotion`). The ladder, the exclusion list, the page text and the bank's worked examples all live there. The Bureau page body is rendered from them, so edit the class and re-render (`/sync-promotion` with `replace_summary`) rather than hand-editing the page.
 
-- **Campaign**: `2026-07-01` → `2026-09-30`; register once before spending (UCHOOSE app `NW3`, or SMS). Follows NW2 (Apr–Jun).
+- **Campaign**: `2026-07-01` → `2026-09-30`; register once before spending (UCHOOSE app `NW3`, or SMS). Follows NW2 (Apr–Jun). Followed by **NW4** (1 Oct – 31 Dec 2026): same ladder without the ฿200,000 bonus, ฿30,000-a-month caps on supermarket and fuel spend, MCC 5199 out; see [[first-choice-2026h2#Q4 2026 — NW4, ON4, IS4 (read 2026-10-01)]].
 - **Eligible list**: the First Choice app (UCHOOSE, as for every Krungsri-family card) shows which transactions count toward NW3, with their total. That list is the reference for linking rows to the Bureau, and its total is `/sync-promotion`'s `bank_spend`.
 - **Card**: First Choice (Krungsri First Choice Visa Platinum; see `scripts/repositories/cards/first-choice.yaml`).
 - **Source**: <https://www.firstchoice.co.th/promotion/cashback-firstchoice>, read 2026-09-28.

@@ -2,7 +2,7 @@
 tags: [promotion, first-choice, krungsri]
 ---
 
-# First Choice campaigns, H2 2026 — ON3, DLV3, IS3 and the BTS draw
+# First Choice campaigns, H2 2026 — ON3/ON4, DLV3, IS3/IS4, NW4 and the BTS draw
 
 Four Krungsri First Choice campaigns running beside [[first-choice-nw3|NW3]]. Each is tracked in the [[../concepts/promotion-bureau|Promotion Bureau]] with one row per calendar month. First Choice is one account (Takumi's primary, plus Baiboon's and Nuta's supplements), so every campaign pools the three holders' spend. Wired in 2026-09-29 (user): ON3, DLV3 and IS3 are tracked from September 2026; BTS from August 2026.
 
@@ -22,6 +22,24 @@ Four Krungsri First Choice campaigns running beside [[first-choice-nw3|NW3]]. Ea
 - **BTS pays rights, not money.** It's the Bureau's first `RIGHTS` campaign: the month's count goes in the Bureau's `สิทธิ์ลุ้นรางวัล`. There are no trackers and no row fields. Supplements' slips earn Takumi's rights, since they count toward the primary card number. **Each company is its own pool** (user, 2026-09-29): First Choice (one Visa card per principal) and Krungsri Card (possibly several Visa cards) each give up to 10 rights a month, 20 in all. So the Bureau keeps two rows a month. The household's only Krungsri Visa card is Krungsri VISA; Lady and NOW are Mastercard. Rights are given first come, first served, in `Transaction Datetime` order.
 - **BTS installment terms are only a maybe.** The bank counts the purchase slip, and the ledger holds monthly terms, so a `NN/NN` row is flagged, not linked.
 
+## Q4 2026 — NW4, ON4, IS4 (read 2026-10-01)
+
+NW3, ON3 and IS3 ended 30 Sep, and their successors run 1 Oct – 31 Dec 2026. DLV3 runs to 31 Dec unchanged. Each is still one row per calendar month, pooled over the three holders.
+
+> **Structured source of truth**: `nw4.py`, `on4.py`, `is4.py`.
+
+| Campaign | Class | Pays | Cap |
+|---|---|---|---|
+| **NW4**, รูดก็ได้เงินคืน | `NW4Promotion` (ladder) | ฿50 at ฿5,000–9,999; ฿200 per whole ฿10,000, up to ฿2,000. No ฿200,000 bonus any more | ฿2,000/month, ฿6,000 campaign |
+| **ON4**, Shopee / Lazada / TikTok | `ON4Promotion` (ladder) | ฿25 at ฿2,000–3,999; ฿60 per whole ฿4,000 under ฿15,000 (at most 3); from ฿15,000 ฿270 per whole ฿15,000 (at most 7, ฿1,890); +฿610 at ฿150,000 | ฿2,500/month |
+| **IS4**, insurance | `IS4Promotion` (per slip) | as IS3: ฿80 / ฿100 per ฿10,000, ฿1,000 per ฿100,000 by slip size | ฿5,000/month |
+
+- **NW4 caps two categories inside the ladder.** Supermarket spend and fuel each count only up to ฿30,000 a month per primary account. The part past that is left out, and the part up to it counts as usual. NW3 instead dropped single charges over ฿10,000 (supermarket) or ฿3,000 (fuel). `NW4Promotion.countable` gives each category its ฿30,000 first come, first served, and a same-time group crossing it shares pro rata. A row cut short keeps `% cb` unset, like the boundary row.
+- **NW4 leaves out MCC 5199, so `WWW.MAKRO.PRO` no longer counts.** `HTTPS://WWW.MAKRO.PRO/` (MCC 5411) is a supermarket and counts within the ฿30,000. Travel now belongs to TR3 (1 Sep – 31 Oct, not tracked) and insurance to IS4.
+- **NW4 enrolment**: NW4 registrants with more than ฿10,000 of NW3 spend in both Jul and Aug 2026 were enrolled for all of Oct–Dec. The household's July and August NW3 credits (฿1,000 and more) put it well past that.
+- **ON4's bank examples fix the joins**: ฿2,800 → ฿25, ฿17,500 → ฿270, ฿105,000 and ฿120,000 → ฿1,890, ฿150,000 → ฿2,500. It marks `% cb` like ON3; travel agents and airlines bought through the apps belong to TR3.
+- **IS4** is credited within 5 business days and can't also count toward NW4.
+
 ## Months
 
 | Month | Row | Result |
@@ -29,5 +47,7 @@ Four Krungsri First Choice campaigns running beside [[first-choice-nw3|NW3]]. Ea
 | Aug 2026 | `2026M8 — BTS First Choice 10 rights` / `— BTS Krungsri Card 10 rights` | 10 (the cap; Baiboon's slips 9, Takumi's 1) / 1 (Baiboon) |
 | Sep 2026 | `2026M9 — BTS First Choice …` / `— BTS Krungsri Card …` | 5 (Takumi's 3, Baiboon's 2) / 2 (Baiboon) |
 | Sep 2026 | `2026M9 — ON3 …`, `— DLV3 …`, `— IS3 …` | no qualifying First Choice spend yet |
+
+Q4 sources, read 2026-10-01: <https://www.firstchoice.co.th/promotion/firstchoice-cashback> (NW4), <https://www.firstchoice.co.th/promotion/online-shopping> (ON4), <https://www.firstchoice.co.th/promotion/delivery-cashback> (DLV3, unchanged), <https://www.firstchoice.co.th/promotion/insurance-creditcard> (IS4).
 
 Sources, read 2026-09-29: <https://www.firstchoice.co.th/promotion/shopping-online>, <https://www.firstchoice.co.th/promotion/delivery-cashback>, <https://www.firstchoice.co.th/promotion/insurance-credit-card>, <https://www.firstchoice.co.th/promotion/bts-world-tour-arirang-in-bangkok>.

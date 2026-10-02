@@ -18,6 +18,9 @@ and each campaign subclasses its shape, stating the bank's terms in code:
 code, title, cards, campaign, source_url; what counts (`qualifies`, `rules`);
 the payout; and the page text. `screen` and `summary_blocks` read the same
 `rules`, so the page and the screening can't drift apart.
+
+A refund counts too, as the charge it gives back: `allocate` nets it off its
+holder's own charge before the shape's `split` (`net_refunds`).
 """
 
 from __future__ import annotations
@@ -26,7 +29,7 @@ import datetime as dt
 import re
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import ROUND_DOWN, Decimal
 from itertools import groupby
 from typing import Any, ClassVar
@@ -34,7 +37,7 @@ from typing import Any, ClassVar
 from .. import card_repo
 from .. import notion_blocks as nb
 from ..bill_cycle import cycle_for_month, pattern_for_card
-from ..ledger import PRIMARY_PREFIX
+from ..ledger import CANCELLED_PREFIX_RE, PRIMARY_PREFIX, is_refund_row
 
 ELIGIBLE, UNCERTAIN, EXCLUDED = "eligible", "uncertain", "excluded"
 CASHBACK, POINTS, RIGHTS = "cashback", "points", "rights"   # RIGHTS: lucky-draw entries, no money
@@ -93,8 +96,8 @@ class Tx:
 
     @property
     def merchant(self) -> str:
-        """The bank's merchant string, upper-cased, without `[บัตรหลัก]`."""
-        return self.name.removeprefix(_PURCHASE_PREFIX).strip().upper()
+        """The bank's merchant string, upper-cased, without `[บัตรหลัก]` or `[ยกเลิก]`."""
+        return CANCELLED_PREFIX_RE.sub("", self.name.removeprefix(_PURCHASE_PREFIX).strip()).upper()
 
     @property
     def is_card_purchase(self) -> bool:
@@ -107,6 +110,18 @@ class Tx:
         name = self.name.removeprefix(_PURCHASE_PREFIX).strip()
         return self.amount > 0 and not name.startswith("[") and not _THAI.match(name) \
             and not name.upper().startswith(_LATIN_LEDGER_ENTRIES)
+
+    @property
+    def is_refund(self) -> bool:
+        """Money a merchant gave back for a charge (`lib.ledger.is_refund_row`)."""
+        return is_refund_row({"name": self.name, "amount": float(self.amount)})
+
+    @property
+    def as_charge(self) -> Tx:
+        """A refund as the charge it gives back: positive, and without `[ยกเลิก]`."""
+        primary = self.name.startswith(_PURCHASE_PREFIX)
+        name = CANCELLED_PREFIX_RE.sub("", self.name.removeprefix(_PURCHASE_PREFIX).strip())
+        return replace(self, name=f"{_PURCHASE_PREFIX} {name}" if primary else name, amount=-self.amount)
 
 
 @dataclass(frozen=True)
@@ -164,6 +179,7 @@ class BasePromotion(ABC):
     icon: ClassVar[str] = "🤑"          # page icon for its Bureau rows and trackers (lib.icons)
 
     reward: ClassVar[str]               # CASHBACK, POINTS or RIGHTS
+    nets_refunds: ClassVar[bool] = True # refunds count, netted off the charge they give back
     period_basis: ClassVar[str] = "transaction_date"  # or "bill_cycle": End = the day before the BC date
     name_pattern: ClassVar[str | None] = None         # regex on the Bureau Name; default: the code
 
@@ -285,8 +301,15 @@ class BasePromotion(ABC):
         return True
 
     def screen(self, tx: Tx) -> tuple[str, str | None]:
-        """(level, reason): not a purchase, not counted here, the first rule hit, or ELIGIBLE."""
-        if not tx.is_card_purchase:
+        """(level, reason): not a purchase, not counted here, the first rule hit, or ELIGIBLE.
+
+        A refund is screened as the charge it gives back, so it's linked
+        wherever that kind of charge counts."""
+        if tx.is_refund:
+            if not self.nets_refunds:
+                return EXCLUDED, f"a refund: {self.code} doesn't net refunds"
+            tx = tx.as_charge
+        elif not tx.is_card_purchase:
             return EXCLUDED, "not a card purchase (payment, credit, transfer or adjustment)"
         if not self.qualifies(tx):
             return EXCLUDED, f"not counted by {self.code} {self.headline}"
@@ -297,9 +320,54 @@ class BasePromotion(ABC):
 
     # -- the household split ----------------------------------------------
 
-    @abstractmethod
     def allocate(self, txs: list[Tx]) -> Allocation:
-        """Hand the period's reward out first come, first served (see `_walk`)."""
+        """Hand the period's reward out first come, first served: the linked
+        rows, refunds netted off their charges (`net_refunds`), through the
+        shape's `split`."""
+        if not self.nets_refunds:
+            return self.split([t for t in txs if not t.is_refund])
+        net, warnings = self.net_refunds(txs)
+        alloc = self.split(net)
+        alloc.warnings[:0] = warnings
+        return alloc
+
+    @abstractmethod
+    def split(self, txs: list[Tx]) -> Allocation:
+        """The shape's split of the period's charges (see `_walk`). Refunds are
+        already netted: each row's `amount` is what's left of the charge."""
+
+    def net_refunds(self, txs: list[Tx]) -> tuple[list[Tx], list[str]]:
+        """(the charges less what was refunded, warnings).
+
+        A refund cancels its own holder's charge on the same card in the
+        period, so nobody else's place in the queue moves. It takes, in turn:
+        a charge of exactly its amount on or before it (same merchant first,
+        latest first); else what's left of that holder's charges on the card,
+        same merchant first, then the nearest before it, then after it (the
+        bank counts net spend, so a refund of a charge from an earlier period
+        comes off this one). A fully refunded charge drops out; a part no
+        charge can take isn't netted, and a warning says so.
+        """
+        charges = sorted((t for t in txs if t.amount > 0), key=lambda t: t.when)
+        left = {t.id: t.amount for t in charges}
+        warnings: list[str] = []
+        for r in sorted((t for t in txs if t.is_refund), key=lambda t: t.when):
+            want = -r.amount
+            mine = [t for t in charges if t.holder == r.holder and t.card == r.card and left[t.id] > 0]
+            exact = [t for t in mine if left[t.id] == want and t.day <= r.day]
+            order = sorted(exact or mine, key=lambda t: (
+                t.merchant != r.merchant, t.day > r.day, abs((r.day - t.day).days), t.id))
+            for t in order:
+                take = min(left[t.id], want)
+                left[t.id] -= take
+                want -= take
+                if not want:
+                    break
+            if want:
+                warnings.append(f"{r.holder} {r.date[:10]} refund ฿{-r.amount:,.2f} {r.name}: ฿{want:,.2f} of it "
+                                f"has no {r.holder} charge on {r.card or 'the card'} left in the period to "
+                                f"come off; not netted")
+        return [replace(t, amount=left[t.id]) for t in charges if left[t.id] > 0], warnings
 
     def _walk(self, txs: list[Tx], take: Callable[[Decimal, Decimal, list[Tx]], list[TxCredit]]
               ) -> tuple[list[TxCredit], list[TxCredit], list[str]]:

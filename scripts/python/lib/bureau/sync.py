@@ -70,6 +70,7 @@ def collect(row: BureauRow, promo: BasePromotion, cards: dict[str, dict[str, str
     Adjustments are the period's ledger entries on the campaign's cards (never
     linked: they aren't purchases) — carry-forward legs and the like, which
     some campaigns net out of what reaches a holder (`adjustment_for`).
+    A refund is screened and linked like a charge; the split nets it.
     """
     txs: list[Tx] = []
     candidates: list[dict] = []
@@ -83,13 +84,13 @@ def collect(row: BureauRow, promo: BasePromotion, cards: dict[str, dict[str, str
             warnings.append(f"{store.rollup_prop(h)} shows ฿{row.rollups[h.key]:,.2f} but the linked "
                             f"rows sum to ฿{total:,.2f}")
         for tx, existing in store.unlinked_txs(row, h, list(cards[h.key].values()), promo):
-            if not tx.is_card_purchase:
+            if not (tx.is_card_purchase or tx.is_refund):
                 adjustments.append(tx)
                 continue
             level, reason = promo.screen(tx)
             if level == ELIGIBLE and link:
                 write(f"link {line(tx)}", store.link_tx, tx.id, existing, row.id)
                 txs.append(tx)
-            elif level == ELIGIBLE or promo.qualifies(tx):
+            elif level == ELIGIBLE or promo.qualifies(tx.as_charge if tx.is_refund else tx):
                 candidates.append({"id": tx.id, "row": line(tx), "level": level, "reason": reason})
     return txs, candidates, adjustments, warnings

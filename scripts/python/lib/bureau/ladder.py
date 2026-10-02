@@ -57,7 +57,7 @@ class LadderPromotion(CashbackPromotion):
     def cashback(self, pooled: Decimal) -> Decimal:
         return sum((t.credit for t in self.tranches(pooled)), Decimal(0))
 
-    def allocate(self, txs: list[Tx]) -> Allocation:
+    def split(self, txs: list[Tx]) -> Allocation:
         """Fill the tranches first come, first served; a row earns on the part of
         it that lands inside one."""
         pooled = sum((t.amount for t in txs if t.amount > 0), Decimal(0))

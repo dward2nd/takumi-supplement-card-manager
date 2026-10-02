@@ -48,8 +48,15 @@ The page **body** carries the campaign summary: ladder, what counts, exclusions,
 | `2026M9`/`2026M10 — ttb so smart cb 1%` | `TTBSoSmartCashback` | created 2026-09-29; per ttb cycle; [[../promotions/ttb-2026]] |
 | `2026M9`/`2026M10 — AEON Rabbit cb 5%`, `— AEON WM cb 5%`, `— NTW1 cb ฿120/340` | `AEONRabbitCashback`, `AEONWorldCashback`, `NTW1Promotion` | created 2026-09-29; per AEON cycle; [[../promotions/aeon-2026]] |
 | `2026M9`/`2026M10 — UnionPay QR …1346 cb 6%`, `— UnionPay QR …2310 cb 6%` | `UnionPayQR1346`, `UnionPayQR2310` | created 2026-09-30; per card number, calendar month; September's `Quotas Exceeded Date` 12 Sep (UnionPay's Facebook post); [[../promotions/unionpay-qr]] |
+| `2026M10 — NW4 cb 2%`, `— ON4 cb 1.25–1.8%`, `— IS4 cb 0.8–1%` | `NW4Promotion`, `ON4Promotion`, `IS4Promotion` | created 2026-10-01; First Choice Q4; [[../promotions/first-choice-2026h2]] |
+| `2026M10 — BXP/LOTA/UNQ <card> cb …`; `2026M10`/`2026M11 — Bangchak700 <card> cb 1%` (per cycle; M10 is the partial 1–4 Oct cycle) | `CardAccount` subclasses in `bxp.py`, `lotus_exclusive.py`, `uniqlo.py` | created 2026-10-01; [[../promotions/krungsri-card-2026]], [[../promotions/uniqlo-2026]] |
+| `2026M10 — SPW796 cb 2%`, `— UNO cb ฿150–800` | `SPW796Promotion`, `UOBUniqloPromotion` | created 2026-10-01; every UOB card; [[../promotions/uob-epw538]], [[../promotions/uniqlo-2026]] |
+| `2026M10 — BGO cb ฿50–1,500`, `— MUJC cb ฿40–500` (whole campaign, 1 Oct – 31 Dec); `2026M10 — UQCB cb ฿150–800` | `TTBBigCGoPromotion`, `TTBMujiPromotion`, `TTBUniqloPromotion` | created 2026-10-01; [[../promotions/ttb-2026]], [[../promotions/uniqlo-2026]] |
+| `2026M10 — MKR <KBank card> cb ฿100/240` (JCB, LINE Points, PLUSTINUM, Shopee) | `MKRKBank…` (`CardAccount`) | created 2026-10-01; one row per KBank card; [[../promotions/kbank-makro]] |
+| `2026M10 — UQN <KBank card> cb ฿100–600` (JCB, LINE Points, PLUSTINUM, Shopee) | `UQNKBank…` (`CardAccount`) | created 2026-10-01 (the JCB row first by an accidental live run, kept once the user registered); [[../promotions/uniqlo-2026]] |
+| `2026M10 — HY1 cb ฿40/200/720` | `CardXHypermarketPromotion` | created 2026-10-01; Nuta's CardX JCB; [[../promotions/cardx-hypermarket]] |
 
-Every campaign still running in October 2026 got its rows for the periods that overlap October on 2026-09-29, so the writers' follow-up keeps them filled. Campaigns ending 30 Sep (NW3, EPW538, ON3, IS3, BMG, J Dining, Krungsri Bangchak) got none: a successor (NW4 …) is a new campaign class once the user brings its terms.
+Every campaign still running in October 2026 got its rows for the periods that overlap October on 2026-09-29, so the writers' follow-up keeps them filled. Campaigns ending 30 Sep (NW3, EPW538, ON3, IS3, BMG, J Dining, Krungsri Bangchak) got none: a successor (NW4 …) is a new campaign class once the user brings its terms. Their successors (NW4, ON4, IS4, SPW796, BGO, BXP/Bangchak700) and the new registered campaigns (LOTA, UNQ, UNO, UQCB, MUJC) got their October rows on 2026-10-01. LOTB and SPW592 have classes but no rows: the household isn't registered for them (user, 2026-10-01). UQN was registered later that day and has its rows.
 
 ## Quirks
 

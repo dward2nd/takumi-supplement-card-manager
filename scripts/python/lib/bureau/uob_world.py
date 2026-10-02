@@ -99,7 +99,7 @@ class UOBWorldBonus(BasePromotion):
         "part through ใช้คะแนน: ⌊over × 3 / 25⌋.",
     )
 
-    def allocate(self, txs: list[Tx]):
+    def split(self, txs: list[Tx]):
         def take(lo: Decimal, hi: Decimal, grp: list[Tx]) -> list[TxCredit]:
             inside = max(min(hi, QUOTA) - lo, Decimal(0))
             size = hi - lo

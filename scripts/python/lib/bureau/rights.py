@@ -36,7 +36,7 @@ class DrawRightsPromotion(BasePromotion):
     def qualifies(self, tx: Tx) -> bool:
         return tx.amount >= self.min_slip
 
-    def allocate(self, txs: list[Tx]) -> Allocation:
+    def split(self, txs: list[Tx]) -> Allocation:
         left = [self.max_rights]
         warnings: list[str] = []
 

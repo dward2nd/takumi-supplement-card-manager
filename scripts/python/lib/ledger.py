@@ -33,6 +33,18 @@ _PAYMENT_NAME_PREFIXES: tuple[str, ...] = ("ชำระ", "จ่าย", "AUTO
 # `startswith("CB ")`.
 _CB_PREFIX_RE = re.compile(r"^CB[\s\-_0-9]")
 
+# The household's line for a charge the merchant cancelled: `[ยกเลิก] <merchant>`,
+# or `[ยกเลิกรายการใช้จ่าย] <merchant>` on the 2025 rows.
+CANCELLED_PREFIX_RE = re.compile(r"^\[ยกเลิก[^\]]*\]\s*")
+
+# Bank credits under a Latin name that no merchant gave back: rebates and
+# discounts (`CASH REBATE 1 POINTS`, `BANGCHAK SPECIAL DISCOUNT OF 2 %`), a typo'd
+# campaign credit (`CP12_BC3P CAMPAIGN …`), adjustments, payments, points
+# redemptions (`PWP: …`), interest and the ledger reset. Cashback has its own test.
+_BANK_CREDIT_RE = re.compile(
+    r"REBATE|SPECIAL DISCOUNT|^CP\d+_|ADJUSTMENT|^PAYMENT\b|PAYMENT THANK YOU|DIRECT DEBIT|"
+    r"\bPWP\b|^INTEREST\b|^RESET\b")
+
 
 def title_text(page: dict) -> str:
     """A page's title, whatever its title property is called."""
@@ -104,3 +116,25 @@ def is_cashback_row(row: dict) -> bool:
     if "CASHBACK" in name:
         return True
     return bool(_CB_PREFIX_RE.match(name)) and (row.get("amount") or 0.0) < 0
+
+
+def is_refund_row(row: dict) -> bool:
+    """True when a projected row is a merchant refund: money given back for a charge.
+
+    Either a negative row under the bank's merchant string
+    (`UNIONPAY MERCHANT BEIJING CHN`, `WWW.GRAB.COM BANGKOK TH`), `[บัตรหลัก]`
+    included, or the household's cancellation line `[ยกเลิก] <merchant>`.
+    Cashback credits, payments, points redemptions, interest, adjustments and
+    every other `[…]` or Thai-named ledger entry aren't refunds.
+    """
+    amount = row.get("amount") or 0.0
+    name = (row.get("name") or "").strip().removeprefix(PRIMARY_PREFIX).strip()
+    if amount >= 0 or not name:
+        return False
+    if CANCELLED_PREFIX_RE.match(name):
+        return True
+    if name.startswith("[") or re.match(r"[฀-๿]", name):
+        return False
+    upper = name.upper()
+    return not (is_cashback_row({"name": upper, "amount": amount}) or re.search(r"CASH ?BACK", upper)
+                or upper.startswith(_PAYMENT_NAME_PREFIXES) or _BANK_CREDIT_RE.search(upper))

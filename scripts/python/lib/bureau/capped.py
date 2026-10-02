@@ -45,7 +45,7 @@ class CreditCapPromotion(CashbackPromotion):
         what it recognises, and trusts a row the household linked by hand."""
         return self.qualifies(tx)
 
-    def allocate(self, txs: list[Tx]) -> Allocation:
+    def split(self, txs: list[Tx]) -> Allocation:
         left = [self.cap]
 
         def take(lo: Decimal, hi: Decimal, grp: list[Tx]) -> list[TxCredit]:

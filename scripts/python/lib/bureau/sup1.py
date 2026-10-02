@@ -27,7 +27,8 @@ from .accounts import CardAccount
 from .base import UNCERTAIN, Rule, Tx
 from .slips import SlipCreditPromotion
 
-_STORES = re.compile(r"BIG ?C\b|BIGC|\bTOPS\b|GOURMET|GO WHOLESALE|MAKRO")
+# GO Wholesale posts as `CFW-<branch> …` (Central Food Wholesale), e.g. `CFW-CHIANGMAI 1 CHIANGMAI TH`.
+_STORES = re.compile(r"BIG ?C\b|BIGC|\bTOPS\b|GOURMET|GO WHOLESALE|\bCFW-|MAKRO")
 _MAKRO_IN_STORE = re.compile(r"^MAKRO_")
 
 

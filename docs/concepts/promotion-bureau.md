@@ -30,17 +30,21 @@ Campaign terms don't share a shape, so the shape is a class and each campaign su
 
 | Shape | How the reward is paid | Campaigns |
 |---|---|---|
-| `LadderPromotion` | steps (or one-off bands) of pooled spend: ฿200 per whole ฿10,000, ฿40 from ฿3,000 … | NW3, EPW538, ON3, DLV3, ONQ3, LBS3, NTW1 |
+| `LadderPromotion` | steps (or one-off bands) of pooled spend: ฿200 per whole ฿10,000, ฿40 from ฿3,000 … | NW3/NW4, EPW538/SPW796, ON3/ON4, DLV3, ONQ3, LBS3, NTW1, SPW592, MKR |
 | `CreditCapPromotion` | each row earns its own rate until the period's pooled credit hits a cap | UOB One 10%/5%, UOB One 1%, ttb so smart 1%, AEON Rabbit, AEON World 5%, AEON UnionPay 3% |
-| `SlipCreditPromotion` (a credit cap) | a fixed credit per slip, by the slip's size, until the period's cap | IS3, SUP1, PTT2, BC3P, Bangchak 1%, J Dining, NOW online, ttb fuel and hypermarket |
+| `SlipCreditPromotion` (a credit cap) | a fixed credit per slip, by the slip's size, until the period's cap | IS3/IS4, SUP1, PTT2, BC3P/BXP, Bangchak 1% (and Bangchak700), J Dining, NOW online, LOTA, LOTB, ttb fuel, hypermarket (BMG/BGO) and MUJI (MUJC), the UNIQLO campaigns (UNO, UNQ, UQN, UQCB), CardX HY1 |
 | `SlipCountPromotion` | a fixed credit for the Nth qualifying slip in the period | EAT |
 | `UOBWorldBonus` (its own shape) | points: ×5 on bonus categories inside the first ฿20,000 of a cycle | UOB World ×5 |
 | `DrawRightsPromotion` | lucky-draw rights: one per qualifying slip, up to a count per month | BTS (one pool per company: First Choice, Krungsri Card) |
 | `InstantDiscountPromotion` (a cashback shape) | a discount taken off the charge itself, so the ledger holds the net amount and the discount is read back from it | UnionPay QR 6% |
 
-The issuers' campaign notes: [[../promotions/first-choice-2026h2]], [[../promotions/krungsri-card-2026]], [[../promotions/lotuss-lbs3]], [[../promotions/aeon-2026]], [[../promotions/ttb-2026]], [[../promotions/unionpay-qr]].
+The issuers' campaign notes: [[../promotions/first-choice-2026h2]], [[../promotions/krungsri-card-2026]], [[../promotions/lotuss-lbs3]], [[../promotions/aeon-2026]], [[../promotions/ttb-2026]], [[../promotions/unionpay-qr]], [[../promotions/uob-spw592]], [[../promotions/uniqlo-2026]], [[../promotions/kbank-makro]], [[../promotions/cardx-hypermarket]].
 
 **A quota per card account.** Krungsri caps its card campaigns per primary card account, and each card product is its own account: SUP1 paid ฿120 on Krungsri VISA, JCB, Lady and NOW alike in September 2026. Such a campaign mixes in `CardAccount` (`lib/bureau/accounts.py`) and has one subclass per card. The card name goes into the Bureau row's name and the tracker titles: `2026M9 — SUP1 Krungsri JCB cb 3%`.
+
+**KBank counts each card on its own** unless its terms say otherwise (user, 2026-10-01), even where a page says "per person" (UNIQLO's UQN: "600 บาท / ท่าน / เดือน"). So a KBank campaign mixes in `CardAccount` too: `2026M10 — UQN KBank JCB cb ฿100–600`.
+
+**A cap inside the ladder.** NW4 counts supermarket and fuel spend only up to ฿30,000 a month each, and the part past that is left out of the ladder. `NW4Promotion.countable` hands each category its ฿30,000 first come, first served, and the ladder runs over what's let through. A row cut short keeps its own amount, so its `% cb` is unset like a boundary row's (user's FCFS rules, 2026-09-28).
 
 **A quota per card number.** A card network counts per card number, and two holders' cards can share a title: Takumi's KTC UnionPay …1346 and Baiboon's own …2310 (user, 2026-09-30). Such a campaign mixes in `CardNumber` (`lib/bureau/accounts.py`), one subclass per number. Rows are placed the way KTC's statements split them (`lib.points_account`): the principal's number takes his rows and the friends' `[บัตรหลัก]` shares, a supplement's number that holder's other rows. The number goes into the name: `2026M9 — UnionPay QR …1346 cb 6%`.
 
@@ -76,6 +80,17 @@ Decided by the user 2026-09-28:
 Worked case, September 2026 (reconciled): pooled ฿36,803.92 → 3 steps → ฿600 on the first ฿30,000. The step ends on 2026-09-24 with ฿176.08 of room left. By the times the user looked up, `TMN*PROMPTPAY30` ฿35 (10:56) and `DUMPLINGS` ฿10 (18:47) come first. Hai Di Lao (21:21; Takumi ฿1,562.67 + Baiboon `[บัตรหลัก]` ฿781.33, one charge) takes the last ฿131.08, pro rata: Takumi ฿87.39, Baiboon ฿43.69.
 
 This replaced the July/August convention, in which each friend got a flat 2% of their own spend and Takumi kept the remainder (see the note on Takumi's `เครดิตเงินคืน NW3_1JUL26-31JUL26` row).
+
+### Refunds come off the charge they give back
+
+A refunded or cancelled charge doesn't earn (user, 2026-10-02, after AEON UnionPay's 3% kept paying on refunded CNY charges). Two kinds of row are refunds (`lib.ledger.is_refund_row`): a negative row under the bank's merchant string (`UNIONPAY MERCHANT BEIJING CHN` −฿1,128.62, `WWW.GRAB.COM BANGKOK TH` −฿75), `[บัตรหลัก]` included, and the household's cancellation line `[ยกเลิก] <merchant>` (`[ยกเลิกรายการใช้จ่าย] …` on the 2025 rows). Cashback credits (`CB …`, `UOB ONE CASHBACK …`), rebates and discounts, payments, `PWP:` redemptions, interest, adjustments and the other `[…]` entries are not.
+
+- **Linked like a charge.** A refund is screened as the charge it gives back, positive and without `[ยกเลิก]`, so it's linked wherever that kind of charge counts. The Bureau's rollups then show net spend.
+- **Netted before the split** (`BasePromotion.net_refunds`). A refund comes off its own holder's charge on the same card in the period, so nobody else's place in the queue moves. It takes a charge of exactly its amount on or before it (same merchant first, latest first). Otherwise it comes off that holder's other charges: same merchant first, then the nearest before it, then after it. A refund of a charge from an earlier period therefore comes off this period, as the bank counts net spend. A fully refunded charge drops out of the split; a part with nothing left to come off isn't netted, and a warning says so.
+- **`% cb` on refund rows is the household's.** The convention is the charge's rate on both rows (Grab refunds 5%, Nuta's CNY refunds 3%), so the `cashback` formula nets to zero. The split leaves refund rows and fully refunded charges alone; a partly refunded charge is checked on what's left of it.
+- **UnionPay QR is the exception** (`nets_refunds = False`). The discount isn't given back with a refund, so a refunded slip still used it.
+
+Before 2026-10-02 the walk skipped negative rows. Refunds were never linked and every campaign paid on gross spend. UOB One alone netted them, as a side effect of `adjustment_for` (written for carry-forward legs): in the tracker, not the share.
 
 ## Kept in step with the ledger
 

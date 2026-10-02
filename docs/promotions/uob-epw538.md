@@ -6,7 +6,7 @@ tags: [promotion, uob]
 
 A UOB campaign paid on the primary cardholder's pooled monthly spend in named apps and wallets, across **every UOB card** Takumi holds and every supplement on them. Tracked in the [[../concepts/promotion-bureau|Promotion Bureau]], one row per month.
 
-UOB runs the same campaign every quarter under a new code. The earlier runs (EPW913, EPW144, EPW243) are covered [[#The quarterly series|below]]. They live in the [[../databases/cashback-trackers|cashback trackers]] only, with no Bureau rows.
+UOB runs the same campaign every quarter under a new code. Q4 2026 is **SPW796** (1 Oct – 31 Dec 2026, read 2026-10-01): same ladder, same apps, same exclusions, registered again before spending; one Bureau row per month (`2026M10 — SPW796 cb 2%`). The earlier runs (EPW913, EPW144, EPW243) are covered [[#The quarterly series|below]]. They live in the [[../databases/cashback-trackers|cashback trackers]] only, with no Bureau rows.
 
 > **Structured source of truth**: `scripts/python/lib/bureau/epw538.py` (`EPW538Promotion`, a `LadderPromotion`). The Bureau page body is rendered from it.
 
@@ -47,6 +47,7 @@ Same ladder, same nine apps, same exclusions every quarter. What changes is the 
 | Jan–Mar 2026 | EPW144 | 26UA303 | `EC` | the page (`…/e-commerce-e-wallet-q126-epw144-0326.page`) renders blank; the terms are in its v1 JSON |
 | Apr–Jun 2026 | EPW243 | 26UA303 | `EC` | [page](https://www.uob.co.th/personal/credit-cards/promotions/shopping-lifestyle/e-commerce-e-wallet-epw243-0626.page), terms in its JSON |
 | Jul–Sep 2026 | EPW538 | — | `EC` | above |
+| Oct–Dec 2026 | **SPW796** | 26UA303 | `EC` | [page](https://www.uob.co.th/personal/credit-cards/promotions/shopping-lifestyle/shopping-online-spw796-1226.page), terms in its JSON; tracked in the Bureau (`SPW796Promotion`, a subclass of EPW538's class) |
 
 UOB's pages fill in their terms from JSON:
 
