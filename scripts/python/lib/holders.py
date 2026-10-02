@@ -65,6 +65,8 @@ class SupplementHolder(Holder):
 # The household-wide promotion ledger: one row per promotion period, linking
 # every holder's qualifying transactions (`รายการใช้จ่ายจาก<name>`).
 PROMOTION_BUREAU_DS = "3e7cb755-f0f1-80f0-8c78-000b1d9f44cb"
+# Promotion Catalogues (2026-09-30): a Thai reading page per merchant per month — every promotion + a spending plan.
+PROMOTION_CATALOGUES_DS = "3ebcb755-f0f1-80d5-a580-000bf9448d23"
 
 
 HOLDERS: dict[str, Holder] = {

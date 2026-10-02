@@ -495,6 +495,7 @@ dependencies = [
     { name = "holidays" },
     { name = "notion-client" },
     { name = "pdfplumber" },
+    { name = "pillow" },
     { name = "python-dotenv" },
     { name = "pyyaml" },
 ]
@@ -504,6 +505,7 @@ requires-dist = [
     { name = "holidays", specifier = ">=0.97" },
     { name = "notion-client", specifier = ">=3.1.0" },
     { name = "pdfplumber", specifier = ">=0.11.9" },
+    { name = "pillow", specifier = ">=12" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "pyyaml", specifier = ">=6.0" },
 ]

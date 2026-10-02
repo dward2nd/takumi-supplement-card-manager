@@ -48,9 +48,9 @@ Start from an existing skill (`/fetch-transactions`, `/summarize-overview`, `/ad
 
 The scripts authenticate as the Notion integration **"Claude Code's Automated Scripts"** with `NOTION_TOKEN` from the repo-root `.env`. A database invisible to that integration returns `ObjectNotFound` on query, and — more quietly — **relations pointing into it read back as an empty array**, which looks like unset data rather than an access error.
 
-All thirteen databases are shared as of 2026-09-28 (Takumi's Bills DB joined 2026-09-27; the Promotion Bureau and the three cashback trackers 2026-09-28). If a relation ever comes back empty across a whole table, suspect this before suspecting the data — that was the symptom while Takumi's Cards DS was still unshared. Confirm what the token can see with `client.search(filter={"property": "object", "value": "data_source"})`.
+All fourteen databases are shared as of 2026-09-30 (Takumi's Bills DB joined 2026-09-27; the Promotion Bureau and the three cashback trackers 2026-09-28; Promotion Catalogues 2026-09-30). If a relation ever comes back empty across a whole table, suspect this before suspecting the data — that was the symptom while Takumi's Cards DS was still unshared. Confirm what the token can see with `client.search(filter={"property": "object", "value": "data_source"})`.
 
-### The thirteen databases
+### The fourteen databases
 
 All under parent page **Personal Monetary Policy** (`b1989406427a4fb7b4c5ec1805bdbed8`):
 
@@ -69,6 +69,7 @@ All under parent page **Personal Monetary Policy** (`b1989406427a4fb7b4c5ec1805b
 | Baiboon | Cashback tracker | `374cb755-f0f1-80b2-97cc-000b0105e43e` |
 | Nuta    | Cashback tracker | `2e4cb755-f0f1-838a-9317-877c67577916` |
 | (all)   | Promotion Bureau | `3e7cb755-f0f1-80f0-8c78-000b1d9f44cb` |
+| (all)   | Promotion Catalogues | `3ebcb755-f0f1-80d5-a580-000bf9448d23` |
 
 These IDs are data source IDs for the 2025-09-03 API: `GET /v1/data_sources/{id}` for the schema (formula bodies included, inline as `expression`), `POST /v1/data_sources/{id}/query` for rows. `lib/holders.py` mirrors this table — edit both together.
 
@@ -79,6 +80,7 @@ Notable schema quirks worth knowing before you touch the data:
 - All three Transactions DSes have `% cb` (writable `number`, percent display — raw fraction in storage so `0.05` shows as `5%`) and `cashback` (read-only formula = `% cb` × `ยอดชำระ`). Takumi's were added 2026-09-28, copied from Baiboon's; his cashback figures only exist on rows from then on (first: AEON Rabbit).
 - Takumi's transactions uniquely include a `หมวดหมู่` (category) relation and a `×3` multiplier checkbox.
 - The **Promotion Bureau** (2026-09-28) pools campaigns that pay on the primary account's combined spend (NW3, UOB One's caps, UOB World ×5, EPW538): one row per **quota period** (`<year>M<month> — …`), two-way linked to every holder's transactions (`Promotion` on the Transactions side). Each payout shape is a class (`LadderPromotion`, `CreditCapPromotion`, …) and each campaign subclasses one in `scripts/python/lib/bureau/`, not YAML: bank terms don't share a shape. The credit is split **first come, first served** by `Transaction Datetime`. `/sync-promotion` drives it. `/add-transaction`, `/update-transaction` and `/record-statement` also re-sync the Bureau rows their rows touch after every write (`lib.bureau.follow`, 2026-09-28), and set linked rows' `% cb` / multiplier to the split. They never create a Bureau row. See `docs/concepts/promotion-bureau.md`.
+- **Promotion Catalogues** (2026-09-30) is reading material, not accounting: one Thai page per merchant per month (`Makro — Sep 2026`), a spending plan for the household's cards plus every promotion there, shown as a gallery with logo covers. `/write-catalogue` writes it. See `docs/databases/promotion-catalogues.md`.
 
 Full schema is documented in `docs/databases/`.
 

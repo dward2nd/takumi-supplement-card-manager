@@ -88,6 +88,12 @@ def set_icon(page_id: str, icon: dict) -> dict:
     return client.pages.update(page_id=page_id, icon=icon)
 
 
+def set_cover(page_id: str, cover: dict) -> dict:
+    """Replace a page's cover (e.g. `{"type": "file_upload", "file_upload": {"id": …}}`)."""
+    client = get_client()
+    return client.pages.update(page_id=page_id, cover=cover)
+
+
 def archive_page(page_id: str) -> dict:
     """Soft-delete a page (idempotent — re-archiving is a no-op)."""
     client = get_client()
