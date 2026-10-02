@@ -20,9 +20,12 @@ A coarse tier classification used for sorting/grouping and visual cues:
 - **`ธรรมดา (Platinum)`** — mid-tier "Platinum" products, the most common bucket.
 - **`ไม่มี`** — non-bank-tiered products: store cards, BNPL (`SPayLater`), loyalty cards (`Lotus's Beyond`). These aren't really "premium-tier" anything.
 
+**Network tiers above Platinum go to `สูง (Signature)`**: Visa Signature, World (Rewards) Mastercard, JCB Ultimate and UnionPay Diamond. That's how the KTC upgrade was filed (user, 2026-10-02): KTC Digital VISA Signature, KTC World Reward Mastercard, KTC JCB Ultimate and KTC UnionPay Diamond, on Takumi's four KTC rows and on Baiboon's and Nuta's KTC UnionPay supplements. **Card names stay short, without the tier** (`KTC Mastercard`, not `KTC World Reward Mastercard`); the tier lives here and in each card YAML's `notes`.
+
 Note that "Platinum" here is Thai-market positioning — many issuers in Thailand use "Platinum" as the entry tier above plain, with "Signature"/"Infinite" above that. This taxonomy reflects the user's mental model, not any single bank's.
 
 ## Used by
 
 - Cards DB views — usually as a visual grouping.
 - No formula depends on this (so far). It's a *label*, not a *computed input*.
+- **Network offers gated by tier** read it: the catalogue pages check it before listing a tier-only offer as usable. JCB Ultimate's free Yunomori Onsen Day Pass (`YUNOMORI26`) and Visa Signature's 50% spa discount both became usable with the KTC upgrade ([[../catalogues/campaigns|campaigns]]).

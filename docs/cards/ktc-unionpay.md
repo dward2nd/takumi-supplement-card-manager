@@ -1,13 +1,14 @@
 ---
 tags: [card, ktc, points, unionpay]
 issuer: KTC
-holders: [baiboon, nuta]
+holders: [takumi, baiboon, nuta]
+product: KTC UnionPay Diamond
 points: integer
 ---
 
 # KTC UnionPay
 
-KTC's UnionPay-network card, held by both [[../people/baiboon|Baiboon]] and [[../people/nuta|Nuta]]. It is a **points card**, but with a confirmed **category carve-out**: it earns **no points on supermarket transactions**.
+KTC's UnionPay-network card: Takumi's principal (…1346) and supplements held by [[../people/baiboon|Baiboon]] (…2310) and [[../people/nuta|Nuta]]. All three are **KTC UnionPay Diamond** since the upgrade (user, 2026-10-02; filed as `สูง (Signature)` in the Cards DBs, name unchanged). KTC FOREVER's rules cover every KTC UnionPay type, so the earning below didn't change. It is a **points card**, but with a confirmed **category carve-out**: it earns **no points on supermarket transactions**.
 
 ## Earning rules
 

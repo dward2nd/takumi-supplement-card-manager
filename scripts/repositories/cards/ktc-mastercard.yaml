@@ -5,6 +5,9 @@ statement_numbers:            # last 4 digits → holder; "World Reward Masterca
   "5549": takumi
 notes: |
   Takumi-only.
+  Product: KTC World Reward Mastercard (upgraded from Platinum; user, 2026-10-02). The name stays
+  short, without the tier. The statement numbers are the new cards' (seen on the
+  Sep 2026 statements); older statements may still show the pre-upgrade numbers.
 
   CYCLE CAVEAT: every dated row on this card through 2025-06 sits at BC day 2
   / due +15 (day 17), NOT the day 27 / +15 that the `ktc` pattern encodes.

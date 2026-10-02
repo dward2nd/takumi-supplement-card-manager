@@ -4,3 +4,11 @@ bill_cycle_pattern: ktc
 statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; KTC prints one PDF per card number)
   "1346": takumi
   "2310": baiboon               # her supplement's own PDF (and own KTC FOREVER points), seen 2026-09-28
+notes: |
+  Product: KTC UnionPay Diamond for all three holders, Takumi's principal and
+  Baiboon's and Nuta's supplements (upgraded from UnionPay Platinum; user,
+  2026-10-02). The name stays short, without the tier. KTC FOREVER's rules cover
+  every KTC UnionPay type, so earning is unchanged (rule 16: no points at
+  supermarkets, fast food, hospitals …). The statement numbers are the new
+  cards' (seen on the Sep 2026 statements); older statements may still show the
+  pre-upgrade numbers.

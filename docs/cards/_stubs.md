@@ -33,10 +33,10 @@ The two sources diverge most sharply on Nuta: her Bills DB offers **13** card op
 | Krungsri Lady                        | Krungsri          |    ✓    |      |        |
 | Krungsri NOW                         | Krungsri          |    ✓    |      |   ✓    |
 | Krungsri Visa                        | Krungsri          |    ✓    |  ✓   |   ✓    |
-| KTC Digital VISA                     | KTC               |         |      |   ✓    |
-| KTC JCB                              | KTC               |         |      |   ✓    |
-| KTC Mastercard                       | KTC               |         |      |   ✓    |
-| [[ktc-unionpay\|KTC UnionPay]]       | KTC               |    ✓    |  ✓   |   ✓    |
+| KTC Digital VISA (Visa Signature)    | KTC               |         |      |   ✓    |
+| KTC JCB (JCB Ultimate)               | KTC               |         |      |   ✓    |
+| KTC Mastercard (World Reward)        | KTC               |         |      |   ✓    |
+| [[ktc-unionpay\|KTC UnionPay]] (Diamond) | KTC          |    ✓    |  ✓   |   ✓    |
 | [[lotuss-beyond\|Lotus's Beyond]]    | Lotus             |    ✓    |      |        |
 | SPayLater                            | Shopee            |    ✓    |  ✓   |   ✓    |
 | [[ttb-so-smart\|ttb so smart]]       | ttb               |    ✓    |      |        |
@@ -48,6 +48,8 @@ The two sources diverge most sharply on Nuta: her Bills DB offers **13** card op
 `*` **KBank PLUSTINUM** is the one Takumi ✓ that does *not* come from his Cards DB — it has no row there. It's observed via statement audit (he is the primary holder; Baiboon uses it Makro-only). Either the Cards DB is missing a row, or Takumi tracks that card outside Notion. Worth asking.
 
 A blank Takumi cell is now a genuine negative — no row in his Cards DB — where before it was a `?` meaning unreadable. Blanks in the Baiboon / Nuta columns remain *observed-in-neither-source*, and a ✓ there still means *observed in at least one source*, not *currently held*.
+
+The KTC products in brackets are the tiers after the upgrade (user, 2026-10-02); the Cards DB names stay short. See [[../concepts/premium-tier|premium tier]].
 
 Last harvested: **2026-09-23**, from all three Cards DBs plus both Bills DBs' `Card` SELECT options. That sweep enumerated Takumi's column for the first time (his Cards DS became readable on 2026-09-22), adding six Takumi-only products — `AEON Rabbit`, `Grab PayLater`, `KTC Digital VISA`, `KTC JCB`, `KTC Mastercard` — and `Central The 1 Redz`, which turns out to be held by **both** Takumi and Baiboon and had been missing from this table entirely. Earlier: 2026-09-14 added `AEON World Mastercard` and `KBank JCB` and confirmed `Krungsri Lady`; `KBank PLUSTINUM` added 2026-07-28 from a statement audit; `UOB World` promoted to its own note 2026-08-20. Re-harvest after any Cards DB edits. The Bills options no longer change: they sit on the legacy `Card (old select)` since 2026-09-30.
 
