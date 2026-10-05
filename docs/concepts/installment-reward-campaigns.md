@@ -132,6 +132,8 @@ original charge and the bill still adds up:
   points, or without the campaign note, is flagged with the fix. Takumi's own
   pieces are written with `×0` and the campaign note.
 
+The first plan recorded this way: Nuta's First Choice `7-11 NAPHRU SOI 3 CHONBURI TH` ฿7,175.88 (3 Oct 2026), 0% over 3 terms of ฿2,391.96 (user, 2026-10-05). Its `01/03` went on the 5 Oct cycle. The request came on the BC date itself, and on that day `/add-installment`'s default still names the previous cycle, so the cycle was passed explicitly. `/record-statement` confirms which statement billed it.
+
 Older plans are left as they were. Baiboon's ICARE and FUTURE ELECTRONICS plans
 kept only the terms. Nuta's `CTRIP (THAILAND) CO., BANGKOK TH` ฿11,766.58
 (Apr 2026) kept the original charge, offset by a `[เว็บรับหนี้ไปบริหารต่อเอง]`

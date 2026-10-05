@@ -84,6 +84,8 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 - [[promotions/krungsri-card-2026]] — Krungsri Card ONQ3, SUP1, PTT2, EAT, Bangchak/BC3P (BXP and Bangchak700 from Oct 2026), LOTA/LOTB, J Dining and NOW online, one Bureau row per card account.
 - [[promotions/lotuss-lbs3]] — Lotus's LBS3 big-ticket cashback (Sep–Dec 2026).
 - [[promotions/lotuss-smp1]] — Lotus's SMP1 shopping ladder (Sep–Dec 2026) and SMT2 ฿200 at ฿2,000 (Oct 2026); registered.
+- [[promotions/lotuss-lan]] — Lotus's LAN ladder on spend at Lotus's itself, no e-wallet (Oct–Dec 2026); registered.
+- [[promotions/lotuss-qrt4]] — Lotus's QRT4: ฿10 per ฿100 slip at restaurants and four other categories by QR / TrueMoney, ฿40 a month (Jul–Dec 2026); the `CB TMN QR` credits.
 - [[promotions/aeon-2026]] — AEON Rabbit 5%, AEON World 5% supermarkets, Everyday with AEON (NTW1), AEON UnionPay 3%, per AEON cycle.
 - [[promotions/ttb-2026]] — ttb so smart 1% (฿2,000 a cycle), and ttb's Caltex, Bangchak, hypermarket (BMG → BGO) and MUJI campaigns.
 - [[promotions/uniqlo-2026]] — UNIQLO per slip, Oct 2026 – Feb 2027: UOB UNO, Krungsri UNQ, KBank UQN (per card), ttb UQCB, CardX UQC; KTC's and Krungsri JCB's bonus points.

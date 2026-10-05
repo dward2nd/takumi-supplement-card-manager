@@ -30,15 +30,15 @@ Campaign terms don't share a shape, so the shape is a class and each campaign su
 
 | Shape | How the reward is paid | Campaigns |
 |---|---|---|
-| `LadderPromotion` | steps (or one-off bands) of pooled spend: ฿200 per whole ฿10,000, ฿40 from ฿3,000 … | NW3/NW4, EPW538/SPW796, ON3/ON4, DLV3, ONQ3, LBS3, SMP1/SMT2, NTW1, SPW592, MKR |
+| `LadderPromotion` | steps (or one-off bands) of pooled spend: ฿200 per whole ฿10,000, ฿40 from ฿3,000 … | NW3/NW4, EPW538/SPW796, ON3/ON4, DLV3, ONQ3, LBS3, SMP1/SMT2, LAN, NTW1, SPW592, MKR |
 | `CreditCapPromotion` | each row earns its own rate until the period's pooled credit hits a cap | UOB One 10%/5%, UOB One 1%, ttb so smart 1%, AEON Rabbit, AEON World 5%, AEON UnionPay 3% |
-| `SlipCreditPromotion` (a credit cap) | a fixed credit per slip, by the slip's size, until the period's cap | IS3/IS4, SUP1, PTT2, BC3P/BXP, Bangchak 1% (and Bangchak700), J Dining, NOW online, LOTA, LOTB, ttb fuel, hypermarket (BMG/BGO) and MUJI (MUJC), the UNIQLO campaigns (UNO, UNQ, UQN, UQCB, UQC), CardX HY1 |
+| `SlipCreditPromotion` (a credit cap) | a fixed credit per slip, by the slip's size, until the period's cap | IS3/IS4, SUP1, PTT2, BC3P/BXP, Bangchak 1% (and Bangchak700), J Dining, NOW online, LOTA, LOTB, ttb fuel, hypermarket (BMG/BGO) and MUJI (MUJC), the UNIQLO campaigns (UNO, UNQ, UQN, UQCB, UQC), CardX HY1, Lotus's QRT4 |
 | `SlipCountPromotion` | a fixed credit for the Nth qualifying slip in the period | EAT |
 | `UOBWorldBonus` (its own shape) | points: ×5 on bonus categories inside the first ฿20,000 of a cycle | UOB World ×5 |
 | `DrawRightsPromotion` | lucky-draw rights: one per qualifying slip, up to a count per month | BTS (one pool per company: First Choice, Krungsri Card) |
 | `InstantDiscountPromotion` (a cashback shape) | a discount taken off the charge itself, so the ledger holds the net amount and the discount is read back from it | UnionPay QR 6% |
 
-The issuers' campaign notes: [[../promotions/first-choice-2026h2]], [[../promotions/krungsri-card-2026]], [[../promotions/lotuss-lbs3]], [[../promotions/aeon-2026]], [[../promotions/ttb-2026]], [[../promotions/unionpay-qr]], [[../promotions/uob-spw592]], [[../promotions/uniqlo-2026]], [[../promotions/kbank-makro]], [[../promotions/uob-makro-gold-mission]], [[../promotions/cardx-hypermarket]].
+The issuers' campaign notes: [[../promotions/first-choice-2026h2]], [[../promotions/krungsri-card-2026]], [[../promotions/lotuss-lbs3]], [[../promotions/lotuss-lan]], [[../promotions/lotuss-qrt4]], [[../promotions/aeon-2026]], [[../promotions/ttb-2026]], [[../promotions/unionpay-qr]], [[../promotions/uob-spw592]], [[../promotions/uniqlo-2026]], [[../promotions/kbank-makro]], [[../promotions/uob-makro-gold-mission]], [[../promotions/cardx-hypermarket]].
 
 **A quota per card account.** Krungsri caps its card campaigns per primary card account, and each card product is its own account: SUP1 paid ฿120 on Krungsri VISA, JCB, Lady and NOW alike in September 2026. Such a campaign mixes in `CardAccount` (`lib/bureau/accounts.py`) and has one subclass per card. The card name goes into the Bureau row's name and the tracker titles: `2026M9 — SUP1 Krungsri JCB cb 3%`.
 

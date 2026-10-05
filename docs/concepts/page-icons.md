@@ -68,7 +68,7 @@ A bill's icon follows its title. `/prepare-bill` and slip-first placeholders cre
 |---|---|
 | 🤑 | cashback in general: NW3, UOB One 10%/5% and 1%, ttb so smart 1%, NTW1 |
 | 🛍️ | online shopping: EPW538, ON3, ONQ3, Krungsri NOW 5%; Lotus's SMP1 (shopping categories) |
-| 🛒 | supermarkets and hypermarkets: SUP1, LBS3, AEON World 5%, ttb BMG |
+| 🛒 | supermarkets and hypermarkets: SUP1, LBS3, AEON World 5%, ttb BMG, Lotus's LAN |
 | ⛽ | fuel: Bangchak 1%, BC3P, PTT2, ttb Caltex / Bangchak |
 | 🍽️ | dining: EAT, J Dining |
 | 🛵 | delivery: DLV3 |
@@ -78,6 +78,7 @@ A bill's icon follows its title. `/prepare-bill` and slip-first placeholders cre
 | 📈 | points: UOB World ×5 |
 | 🎟️ | lucky-draw rights: BTS |
 | 🐦 | early-bird bonuses for the first N accounts: Lotus's SMT2 |
+| 📱 | pay by phone (QR / TrueMoney): Lotus's QRT4 |
 
 A new campaign class inherits 🤑 unless it sets `icon`.
 

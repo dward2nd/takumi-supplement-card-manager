@@ -61,6 +61,8 @@ Phone bills earn no coins but count toward [[../promotions/lotuss-smp1|SMP1 / SM
 
 - [[../promotions/lotuss-lbs3|LBS3]] — big-ticket categories, Sep–Dec 2026.
 - [[../promotions/lotuss-smp1|SMP1 / SMT2]] — shopping categories, Sep–Dec 2026 and October 2026; registered.
+- [[../promotions/lotuss-lan|LAN]] — spend at Lotus's itself (stores and Lotus's Shop Online, no e-wallet), Oct–Dec 2026; registered by 2 Oct.
+- [[../promotions/lotuss-qrt4|QRT4]] — ฿10 per ฿100 slip at restaurants and four other categories by QR / TrueMoney, ฿40 a month, Jul–Dec 2026. Its credits are the `CB TMN QR QRT4<MON><YY>` lines in Takumi's ledger.
 
 ## See also
 

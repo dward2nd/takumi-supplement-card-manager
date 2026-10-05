@@ -42,6 +42,8 @@ Modules:
   bxp        Krungsri Card at Bangchak from Oct 2026: the card's 1% and BXP, per ฿700 a slip — per card account
   lotus_exclusive  Krungsri Card LOTA / LOTB at Lotus's, per slip, Aug–Oct 2026 — per card account
   lotus_shopping  Lotus's SMP1 shopping ladder (Sep–Dec 2026) and SMT2 ฿200 at ฿2,000 (Oct 2026)
+  lotus_store  Lotus's LAN ladder at Lotus's and Lotus's Shop Online, Oct–Dec 2026
+  lotus_qr   Lotus's QRT4 ฿10 per ฿100 slip in five categories by QR / TrueMoney, ฿40 a month, Jul–Dec 2026
   uniqlo     UNIQLO per slip, Oct 2026 – Feb 2027: UOB UNO, Krungsri UNQ (per card account), KBank UQN (per card), ttb UQCB,
              CardX UQC
   ttb_shopping  ttb MUJI (MUJC) and Big C / GO Wholesale (BGO), Oct–Dec 2026, one quota per campaign
@@ -66,8 +68,8 @@ from __future__ import annotations
 
 import datetime as dt
 
-from . import (bangchak, bts, bxp, eat, jdining, kbank_makro, krungsri_now, lotus_exclusive, lotus_shopping, onq3, ptt2,
-               sup1, uniqlo, unionpay_qr, uob_makro)
+from . import (bangchak, bts, bxp, eat, jdining, kbank_makro, krungsri_now, lotus_exclusive, lotus_qr, lotus_shopping,
+               lotus_store, onq3, ptt2, sup1, uniqlo, unionpay_qr, uob_makro)
 from .accounts import CardAccount, CardNumber
 from .aeon_rabbit import AEONRabbitCashback
 from .aeon_unionpay import AEONUnionPayCashback
@@ -117,6 +119,8 @@ PROMOTIONS: tuple[type[BasePromotion], ...] = (
     *uob_makro.PROMOTIONS,
     # Read 2026-10-05: Lotus's SMP1 and SMT2 (both registered before Takumi's 1 Oct AIS bill).
     *lotus_shopping.PROMOTIONS,
+    # Read 2026-10-05: Lotus's LAN at Lotus's (registered by 2 Oct) and QRT4 per ฿100 slip (paying since Sep).
+    *lotus_store.PROMOTIONS, *lotus_qr.PROMOTIONS,
 )
 
 
