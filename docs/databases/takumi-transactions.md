@@ -36,7 +36,7 @@ Every individual purchase Takumi makes on his own cards.
 
 ### Point multiplier checkboxes — see [[../concepts/points-and-multipliers]]
 
-- `×0`, `×2`, **`×3`** (Takumi-only), `×4`, `×5`
+- `×0`, `×2`, **`×3`** (Takumi-only), `×4`, `×5`, `×6` (since 2026-10-05: Lotus's coins at Lotus's)
 
 Notably absent: `÷4` (which Baiboon and Nuta both have).
 
@@ -48,6 +48,7 @@ Notably absent: `÷4` (which Baiboon and Nuta both have).
 ### Rollup
 
 - `บาทต่อ 1 คะแนน` — from the related Card.
+- `คะแนนต่อ 1 หน่วย` — from the related Card (added 2026-10-05; empty = 1).
 
 ## Views
 

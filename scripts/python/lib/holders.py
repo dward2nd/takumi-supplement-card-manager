@@ -19,8 +19,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import ClassVar
 
-# Multiplier checkboxes every Transactions DS has; the primary's adds ×3.
-_MULTIPLIERS = frozenset({"×0", "×2", "×4", "×5", "÷4"})
+# Multiplier checkboxes every Transactions DS has; the primary's adds ×3. ×6 was
+# added to all three on 2026-10-05 (Lotus's coins at Lotus's).
+_MULTIPLIERS = frozenset({"×0", "×2", "×4", "×5", "×6", "÷4"})
 
 
 @dataclass(frozen=True)

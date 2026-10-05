@@ -55,7 +55,7 @@ from .. import holders
 from ..bureau import follow
 from ..holders import HOLDERS
 from ..ledger import cycle_rows
-from ..points import row_points
+from ..points import as_points, per_unit, row_points
 from ..transaction_write import build_transaction_properties
 from .attribution import AccountPlan, plan_statement
 from .model import Statement, StatementLine
@@ -184,12 +184,13 @@ def _classify(card: str, line: StatementLine) -> tuple[str | None, str | None, f
 POINTS_ADJUSTMENT = "[ปรับคะแนน] "
 
 
-def _baht_per_point(holder: str, card: str) -> float | None:
+def _points_rate(holder: str, card: str) -> tuple[float | None, float]:
+    """The card's `บาทต่อ 1 คะแนน` and `คะแนนต่อ 1 หน่วย` on the holder's Cards DB."""
     try:
         page = find_card(HOLDERS[holder].cards_ds, card)
     except CardNotFoundError:
-        return None
-    return (page["properties"].get("บาทต่อ 1 คะแนน") or {}).get("number")
+        return None, 1
+    return (page["properties"].get("บาทต่อ 1 คะแนน") or {}).get("number"), float(per_unit(page["properties"]))
 
 
 def split_adjustments(plan: AccountPlan, takumi_rows: list[dict]) -> list[dict]:
@@ -201,7 +202,7 @@ def split_adjustments(plan: AccountPlan, takumi_rows: list[dict]) -> list[dict]:
     ฿23.50 = 5). The difference goes on a `[ปรับคะแนน] <line>` row in Takumi's
     ledger (user, 2026-09-28). A row already there (same name and date) is kept.
     """
-    bpp = _baht_per_point(PRIMARY_KEY, plan.card)
+    bpp, unit = _points_rate(PRIMARY_KEY, plan.card)
     if not bpp:
         return []
     out = []
@@ -209,15 +210,18 @@ def split_adjustments(plan: AccountPlan, takumi_rows: list[dict]) -> list[dict]:
         line, (kind, rem) = s["line"], s["remainder"] or (None, None)
         if kind == "new":
             mult = _classify(plan.card, rem)[0]
-            rem_pts = row_points(rem.amount, bpp, mult)
+            rem_pts = row_points(rem.amount, bpp, mult, unit)
         elif kind == "row":
-            mult, rem_pts = rem.get("multiplier"), row_points(rem["amount"], bpp, rem.get("multiplier"))
+            mult, rem_pts = rem.get("multiplier"), row_points(rem["amount"], bpp, rem.get("multiplier"), unit)
         else:
             mult, rem_pts = s["rows"][0][1].get("multiplier"), 0
         # A holder can own several shares of one line (Baiboon's ฿47 + ฿12 of a ฿59 TMN): sum per row.
-        shares = [(h, row_points(r["amount"], _baht_per_point(h, plan.card), r.get("multiplier"))) for h, r in s["rows"]]
-        bank = row_points(line.amount, bpp, mult)
-        lost = bank - sum(p for _, p in shares) - rem_pts
+        shares = []
+        for h, r in s["rows"]:
+            h_bpp, h_unit = _points_rate(h, plan.card)
+            shares.append((h, row_points(r["amount"], h_bpp, r.get("multiplier"), h_unit)))
+        bank = row_points(line.amount, bpp, mult, unit)
+        lost = as_points(bank - sum(p for _, p in shares) - rem_pts)
         name = POINTS_ADJUSTMENT + line.name
         if lost == 0 or any(r["name"] == name and (r["transaction_date"] or "")[:10] == line.date for r in takumi_rows):
             continue
@@ -245,7 +249,7 @@ def rounding_adjustments(statement: Statement) -> list[dict]:
     out = []
     for s in statement.rewards:
         owner = number_lookup(statement.issuer, s.number)
-        if owner is None or "coins" in s.program.lower():
+        if owner is None:
             continue
         card, holder = owner
         t = rewards_audit.tally(s, card, holder, parser, bc)

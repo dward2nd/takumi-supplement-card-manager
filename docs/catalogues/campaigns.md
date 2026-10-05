@@ -66,7 +66,7 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | LBS3 | big-ticket ladder incl. Makro (every channel), Thai Watsadu, Power Buy | 1 Sep – 31 Dec | continues | M T | [[../promotions/lotuss-lbs3]] · `lbs3.py` |
 | LMK2 | ≥ ฿800,000 of Makro PRO → up to ฿5,000 (first 100) | 1 Sep – 31 Dec | continues | M | — |
 | LYY1 | online / delivery ladder (not registered) | 1 Sep – 31 Dec | continues | S L K | — |
-| SMP1 · **SMT2** | department stores, fashion (**names UNIQLO**), cosmetics, IT, B2S / OfficeMate ladder: ฿70 per ฿3,500 a month … · ฿200 at ≥ ฿2,000 in Oct (first 500, register before spending) | SMP1 1 Sep – 31 Dec | SMT2 new, Oct only; **neither registered** | T A U | — |
+| SMP1 · **SMT2** | department stores, fashion (**names UNIQLO**), cosmetics, IT and phone bills, B2S / OfficeMate ladder: ฿70 per ฿3,500 a month … · ฿200 at ≥ ฿2,000 in Oct (first 500, register before spending) | SMP1 1 Sep – 31 Dec | SMT2 new, Oct only; **both registered** before 1 Oct (user, 2026-10-05) | T A U | [[../promotions/lotuss-smp1]] · `lotus_shopping.py` |
 | **ช้อปฮีลใจ** (`SHJB40`–`SHJB43`) | invited only: 50% of one slip ≥ ฿200, ฿100 a week, at Watsons, UNIQLO, MR.D.I.Y, Grab Delivery, KFC, Sushiro; register every Sunday 10:00, first 800 | — | 4–25 Oct; Nov rounds 1–29 Nov for 3 slips 1–15 Oct | U | — |
 | LOTUSCR9 → **LOTUSCR10** → LOTUSCR11 | ShopeeFood ฿60 off ≥ ฿250 | Sep code | Oct code | S | — |
 | Shopping-bag promo | ฿70,000 of spend → a suitcase (invited) | 1 Sep – 30 Nov | continues | M | — |

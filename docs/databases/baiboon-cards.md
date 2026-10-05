@@ -24,6 +24,7 @@ The catalogue of supplement cards held by [[../people/baiboon|Baiboon]] on [[../
 | `Date`                    | date     |  |
 | `Note`                    | text     |  |
 | `บาทต่อ 1 คะแนน`            | number (baht) | Baht spent per 1 reward point |
+| `คะแนนต่อ 1 หน่วย`          | number | Points one `บาทต่อ 1 คะแนน` block earns at ×1; empty = 1. Only Lotus's Beyond sets it (`0.25`, since 2026-10-05). Applied after the formula's floors — see [[../formulas/points-realized]]. |
 | `ให้คะแนนตามรอบบิล`         | checkbox |  |
 | `วงเงินที่ได้`               | number (baht) | Credit limit |
 | `รายการใช้จ่ายผ่านบัตรของใบบุญ` | relation → [[baiboon-transactions]] |  |

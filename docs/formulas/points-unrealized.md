@@ -20,14 +20,15 @@ Read them through the Notion HTTP API instead — `GET /v1/data_sources/{id}` re
 
 ## Decoded body
 
-**Verified 2026-09-22.** As with [[points-realized]], the supplements carry an extra outer `floor` (for `÷4` = 0.25) and Takumi does not.
+**Verified 2026-10-05**, after `×6` and the `คะแนนต่อ 1 หน่วย` factor were added (see [[points-realized]]; before that, the same bodies without either). As with [[points-realized]], the supplements carry an extra outer `floor` (for `÷4` = 0.25) and Takumi does not.
 
 Takumi:
 
 ```
 if(prop("ยอดชำระ") > 0,
    floor(prop("ยอดชำระ") / sum(prop("บาทต่อ 1 คะแนน")))
-     * ifs(prop("×0"), 0, prop("×2"), 2, prop("×3"), 3, prop("×4"), 4, prop("×5"), 5, 1),
+     * ifs(prop("×0"), 0, prop("×2"), 2, prop("×3"), 3, prop("×4"), 4, prop("×5"), 5, prop("×6"), 6, 1)
+     * if(sum(prop("คะแนนต่อ 1 หน่วย")) > 0, sum(prop("คะแนนต่อ 1 หน่วย")), 1),
    0)
 + if(prop("Credit Return"), prop("คะแนนที่ได้จริง"), 0)
 ```
@@ -37,7 +38,8 @@ Baiboon and Nuta (identical to each other):
 ```
 if(prop("ยอดชำระ") > 0,
    floor(floor(prop("ยอดชำระ") / sum(prop("บาทต่อ 1 คะแนน")))
-     * ifs(prop("×0"), 0, prop("÷4"), 0.25, prop("×2"), 2, prop("×4"), 4, prop("×5"), 5, 1)),
+     * ifs(prop("×0"), 0, prop("÷4"), 0.25, prop("×2"), 2, prop("×4"), 4, prop("×5"), 5, prop("×6"), 6, 1))
+     * if(sum(prop("คะแนนต่อ 1 หน่วย")) > 0, sum(prop("คะแนนต่อ 1 หน่วย")), 1),
    0)
 + if(prop("Credit Return"), prop("คะแนนที่ได้จริง"), 0)
 ```

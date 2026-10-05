@@ -41,6 +41,7 @@ Modules:
   nw4 / on4 / is4   First Choice Q4 2026: NW3, ON3, IS3's successors (NW4 caps supermarket and fuel spend)
   bxp        Krungsri Card at Bangchak from Oct 2026: the card's 1% and BXP, per ฿700 a slip — per card account
   lotus_exclusive  Krungsri Card LOTA / LOTB at Lotus's, per slip, Aug–Oct 2026 — per card account
+  lotus_shopping  Lotus's SMP1 shopping ladder (Sep–Dec 2026) and SMT2 ฿200 at ฿2,000 (Oct 2026)
   uniqlo     UNIQLO per slip, Oct 2026 – Feb 2027: UOB UNO, Krungsri UNQ (per card account), KBank UQN (per card), ttb UQCB,
              CardX UQC
   ttb_shopping  ttb MUJI (MUJC) and Big C / GO Wholesale (BGO), Oct–Dec 2026, one quota per campaign
@@ -65,7 +66,8 @@ from __future__ import annotations
 
 import datetime as dt
 
-from . import bangchak, bts, bxp, eat, jdining, kbank_makro, krungsri_now, lotus_exclusive, onq3, ptt2, sup1, uniqlo, unionpay_qr, uob_makro
+from . import (bangchak, bts, bxp, eat, jdining, kbank_makro, krungsri_now, lotus_exclusive, lotus_shopping, onq3, ptt2,
+               sup1, uniqlo, unionpay_qr, uob_makro)
 from .accounts import CardAccount, CardNumber
 from .aeon_rabbit import AEONRabbitCashback
 from .aeon_unionpay import AEONUnionPayCashback
@@ -113,6 +115,8 @@ PROMOTIONS: tuple[type[BasePromotion], ...] = (
     CardXHypermarketPromotion, CardXHypermarketBonus,
     # Read 2026-10-03: UOB Makro's 26th-anniversary Gold Mission (registered that day).
     *uob_makro.PROMOTIONS,
+    # Read 2026-10-05: Lotus's SMP1 and SMT2 (both registered before Takumi's 1 Oct AIS bill).
+    *lotus_shopping.PROMOTIONS,
 )
 
 

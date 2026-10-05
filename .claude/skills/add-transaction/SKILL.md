@@ -45,7 +45,7 @@ JSON spec:
 
 **`bill_cycle` and `due_date` are optional.** Omit them and the CLI infers both from the card's bank pattern (see [[../../../docs/concepts/bill-cycle-patterns|bill-cycle-patterns]]): today is compared against this month's bill cycle date for the card, and the active cycle is this-month-or-next accordingly. Pass them explicitly whenever the transaction's cycle isn't today's active one — that covers both **backdating** (a row that belongs to a closed statement, e.g. a late-posted purchase) and **foredating** (a row scheduled into a future cycle, e.g. an installment term, a prepayment, or a row dated next month). They're "both or neither" — supplying only one is a spec error.
 
-`multiplier` is optional. At top level it applies to every transaction in the batch; per-transaction it overrides the batch default. Valid values: `"×0"`, `"×2"`, `"×3"` (Takumi only), `"×4"`, `"×5"`, `"÷4"`. **At most one** multiplier checkbox is set per page — that's a hard rule on the Notion side; if you tried to set two, the formulas would double-count. Omitting `multiplier` leaves all checkboxes false, which Notion's formula treats as **×1** (the default earning rate).
+`multiplier` is optional. At top level it applies to every transaction in the batch; per-transaction it overrides the batch default. Valid values: `"×0"`, `"×2"`, `"×3"` (Takumi only), `"×4"`, `"×5"`, `"×6"`, `"÷4"`. **At most one** multiplier checkbox is set per page — that's a hard rule on the Notion side; if you tried to set two, the formulas would double-count. Omitting `multiplier` leaves all checkboxes false, which Notion's formula treats as **×1** (the default earning rate).
 
 Output: a JSON envelope `{holder, card, card_page_id, bill_cycle, due_date, processed, count, created: [{id, url, name, amount, date}, ...], promotions}`. Surface the count + a compact list back to the user. Don't dump full URLs unless asked.
 
@@ -114,7 +114,7 @@ Always set `"Processed": "__YES__"`, regardless of the real processing status. T
 
 ### 4a. Multipliers are mutually exclusive
 
-Only **one** of `×0` / `×2` / `×3` / `×4` / `×5` / `÷4` can be checked per transaction page. If a card's policy says it always earns at a particular tier (e.g. UOB One = `×0`), pass `multiplier` once at the batch level and the CLI applies it to every entry. A page with **no** multiplier checkbox set is treated as `×1` (default earning) by Notion's `คะแนนที่ได้จริง` formula — never set `×1` manually because that field does not exist.
+Only **one** of `×0` / `×2` / `×3` / `×4` / `×5` / `×6` / `÷4` can be checked per transaction page. If a card's policy says it always earns at a particular tier (e.g. UOB One = `×0`), pass `multiplier` once at the batch level and the CLI applies it to every entry. A page with **no** multiplier checkbox set is treated as `×1` (default earning) by Notion's `คะแนนที่ได้จริง` formula — never set `×1` manually because that field does not exist.
 
 ### 4b. Cashback rate (`% cb`) on Baiboon's and Nuta's transactions
 
@@ -168,7 +168,7 @@ The Note exists so a future reviewer of the transactions can immediately see *wh
 
 **Off-cycle dating — backdate *and* foredate are both supported.** The CLI's default `bill_cycle` / `due_date` inference uses *today*, so whenever the transaction date sits in a cycle other than today's active one — a row dated three weeks ago that belongs to a closed statement (backdate), or a row dated for next month that should land in the upcoming cycle (foredate) — pass `bill_cycle` and `due_date` explicitly so the pair stays consistent with the card's bank pattern (see [[../../docs/concepts/bill-cycle-patterns]]). They're "both or neither". Same rule whether you're shifting earlier or later — the inference is just a default, never a constraint.
 
-Point-multiplier checkboxes (`×0` `×2` `×4` `×5` `÷4`, plus Takumi-only `×3`) are set explicitly via the spec's `multiplier` field — see *Rule 4a* and the card-specific policies below.
+Point-multiplier checkboxes (`×0` `×2` `×4` `×5` `×6` `÷4`, plus Takumi-only `×3`) are set explicitly via the spec's `multiplier` field — see *Rule 4a* and the card-specific policies below.
 
 **`% cb`** (all three holders) is a writable `number` property displayed as a percent — storage is the raw fraction, so `0.05` shows as `5%` in the Notion UI. The CLI accepts it as `cashback_percent` at batch level or per-tx. **`cashback`** (all three holders) is a read-only formula = `% cb` × `ยอดชำระ` — never write to it.
 
@@ -190,6 +190,10 @@ If you want to classify by hand (e.g. to override a heuristic the lib can't yet 
 - Subject to the [general earning exclusions](#general-earning-exclusions) below; the promo does not override either default exclusion.
 
 When in doubt about whether a particular merchant string falls into a tier, surface the ambiguity to the user — don't try to re-classify by editing the merchant name (that would violate Rule 1).
+
+### Lotus's Beyond — coins in quarters, `×6` at Lotus's (since 2026-10-05)
+
+The card earns Lotus's coins: 0.25 a whole ฿50 per statement line, 1.5 at Lotus's. The card's `คะแนนต่อ 1 หน่วย` is 0.25 at ฿50 a point, so `auto_classify` ticks **`×6`** on `LOTUS'S …` / `LOTUSS …` / `TMN*LOTUS HYPER …` rows (reason `+lotus-coins`), and **`×0` with a Note** on what the card's coin terms exclude and the merchant string shows: Bangchak, phone operators (AIS, TRUE, dtac), utilities, `WWW.MAKRO.PRO` (MCC 5199), AIA, transport and tolls, e-wallet top-ups, installments (`+lotus-coins-exclusion`). Leave `% cb` unset; Lotus's cashback campaigns ([[../../../docs/promotions/lotuss-lbs3|LBS3]], [[../../../docs/promotions/lotuss-smp1|SMP1 / SMT2]]) pay through the Bureau and Takumi's tracker, so a `×0` phone bill can still count toward SMP1. See [[../../../docs/cards/lotuss-beyond|card note]].
 
 ### AEON World Mastercard — `WWW.MAKRO.PRO` earns no points (from 2025-11-11)
 

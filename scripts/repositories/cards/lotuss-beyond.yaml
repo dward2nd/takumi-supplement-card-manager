@@ -18,6 +18,9 @@ statement_numbers:            # last 4 digits on the statement → holder (seen 
 #     even though no card points at it any more.
 #   - Backdating a row into a pre-switch cycle must pass explicit bill_cycle +
 #     due_date; the inference now answers with the new pattern for every date.
+# Coins (2026-10-05): 0.25 per whole ฿50 per line, 1.5 at Lotus's. Notion holds them via the
+# card's `คะแนนต่อ 1 หน่วย` = 0.25 and a `×6` box; the ×6 and coin-exclusion rules are code
+# (lib.earning.families.LotussBeyond), not YAML. See docs/cards/lotuss-beyond.md.
 # The 7-11 / TrueMoney points rule deliberately does NOT apply (user, 2026-08-08).
 # Krungsri-family cards earn no points at 7-11 / TrueMoney, but Lotus's Beyond
 # is exempt: Lotus's, 7-Eleven and TrueMoney are all CP ALL businesses, so those

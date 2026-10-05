@@ -23,6 +23,7 @@ The catalogue of every credit card and loan product that lists [[../people/takum
 | `Date`                    | date     | Card open/issue date (sparse) |
 | `Note`                    | text     | Free-form notes |
 | `บาทต่อ 1 คะแนน`            | number   | Baht spent per 1 reward point. Drives [[../formulas/points-realized]] via rollup. |
+| `คะแนนต่อ 1 หน่วย`          | number   | Points one `บาทต่อ 1 คะแนน` block earns at ×1; empty = 1. Only Lotus's Beyond sets it (`0.25`, since 2026-10-05). Applied after the formula's floors — see [[../formulas/points-realized]]. |
 | `ให้คะแนนตามรอบบิล`         | checkbox | If true, points are awarded per billing cycle rather than per transaction |
 | `วงเงินที่ได้`               | number (baht) | Credit limit assigned to this card (the user's share, since supplement holders share it) |
 | `รายการใช้จ่ายผ่านบัตรของเว็บ` | relation → Transactions | The two-way relation to [[takumi-transactions]] |

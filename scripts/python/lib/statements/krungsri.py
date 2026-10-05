@@ -259,6 +259,9 @@ class LotusParser(KrungsriParser):
 
     key = "Lotus"
     signature = "LOTUS"
+    # Coins per statement line: floor(amount / 50) blocks × 0.25, +1.25 at Lotus's
+    # (5 Sep 2026 statement, 2026-10-05) — the ledger formula's own shape.
+    points_rounding = "line"
 
     def rewards(self, text: str, statement: Statement) -> tuple[RewardSummary, ...]:
         number = _primary(statement)

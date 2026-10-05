@@ -33,7 +33,7 @@ Input schema:
                                                     //   bill_cycle (both or neither)
     "processed":   true,                            // optional, default true
     "multiplier":  "×0",                            // optional, batch-level default;
-                                                    //   one of ×0/×2/×3/×4/×5/÷4 or null
+                                                    //   one of ×0/×2/×3/×4/×5/×6/÷4 or null
     "cashback_percent": 0.01,                       // optional, batch-level default;
                                                     //   Baiboon + Nuta only (% cb does
                                                     //   not exist on Takumi's DS);

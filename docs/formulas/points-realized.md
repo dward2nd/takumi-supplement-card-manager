@@ -9,6 +9,7 @@ A formula property on every Transactions DB. Computes how many reward points thi
 - `ยอดชำระ` (transaction amount in baht)
 - `บาทต่อ 1 คะแนน` (baht per 1 point, rolled up from the related Card)
 - Multiplier checkboxes — see [[../concepts/points-and-multipliers]]
+- `คะแนนต่อ 1 หน่วย` (points per unit, rolled up from the related Card; empty = 1) — added 2026-10-05 for [[../cards/lotuss-beyond|Lotus's coins]]
 - `Processed` — points don't count until the bank posts the charge
 - `ใช้คะแนน` (points redeemed against this transaction)
 
@@ -28,14 +29,15 @@ Read them through the Notion HTTP API instead — `GET /v1/data_sources/{id}` re
 
 ## Decoded body
 
-**Verified 2026-09-22** against all three data sources. The three copies are *not* identical — the supplements carry an extra outer `floor`.
+**Verified 2026-10-05** against all three data sources, after the user added `×6` and the `คะแนนต่อ 1 หน่วย` factor in the Notion UI. The three copies are *not* identical — the supplements carry an extra outer `floor`.
 
 Takumi:
 
 ```
 if(prop("ยอดชำระ") > 0,
    floor(prop("ยอดชำระ") / sum(prop("บาทต่อ 1 คะแนน")))
-     * ifs(prop("×0"), 0, prop("×2"), 2, prop("×3"), 3, prop("×4"), 4, prop("×5"), 5, 1)
+     * ifs(prop("×0"), 0, prop("×2"), 2, prop("×3"), 3, prop("×4"), 4, prop("×5"), 5, prop("×6"), 6, 1)
+     * if(sum(prop("คะแนนต่อ 1 หน่วย")) > 0, sum(prop("คะแนนต่อ 1 หน่วย")), 1)
      * if(prop("Processed"), 1, 0),
    0)
 - if(empty(prop("ใช้คะแนน")), 0, prop("ใช้คะแนน"))
@@ -46,20 +48,24 @@ Baiboon and Nuta (identical to each other):
 ```
 if(prop("ยอดชำระ") > 0,
    floor(floor(prop("ยอดชำระ") / sum(prop("บาทต่อ 1 คะแนน")))
-     * ifs(prop("×0"), 0, prop("÷4"), 0.25, prop("×2"), 2, prop("×4"), 4, prop("×5"), 5, 1))
+     * ifs(prop("×0"), 0, prop("÷4"), 0.25, prop("×2"), 2, prop("×4"), 4, prop("×5"), 5, prop("×6"), 6, 1))
+     * if(sum(prop("คะแนนต่อ 1 หน่วย")) > 0, sum(prop("คะแนนต่อ 1 หน่วย")), 1)
      * if(prop("Processed"), 1, 0),
    0)
 - if(empty(prop("ใช้คะแนน")), 0, prop("ใช้คะแนน"))
 ```
 
+**Before 2026-10-05** (verified 2026-09-22) the bodies were the same without `prop("×6"), 6,` and without the `คะแนนต่อ 1 หน่วย` factor. Every row on a card whose `คะแนนต่อ 1 หน่วย` is empty evaluates exactly as before: a row-by-row snapshot of all 3,642 rows taken before the change and re-read after it differed only on Lotus's Beyond.
+
 ## What the body actually says
 
 1. **Only positive amounts earn.** `ยอดชำระ > 0` gates the whole earning term. Payment rows, cashback credits, and refunds — all entered as negative amounts — earn nothing. They still pass through the `ใช้คะแนน` subtraction below.
 2. **Integer division first.** `floor(ยอดชำระ / บาทต่อ 1 คะแนน)` — points are floored *before* the multiplier applies, so a `×5` card multiplies the already-floored base, not the exact quotient.
-3. **The multiplier is an `ifs` chain, so checkbox order is precedence.** `×0` wins over everything; then (supplements) `÷4`, then `×2`, `×4`, `×5`. Takumi's chain is `×0 → ×2 → ×3 → ×4 → ×5`. Ticking two boxes doesn't compound — the first match in that order wins. Unticked everywhere ⇒ `1`.
+3. **The multiplier is an `ifs` chain, so checkbox order is precedence.** `×0` wins over everything; then (supplements) `÷4`, then `×2`, `×4`, `×5`, `×6`. Takumi's chain is `×0 → ×2 → ×3 → ×4 → ×5 → ×6`. Ticking two boxes doesn't compound — the first match in that order wins. Unticked everywhere ⇒ `1`.
 4. **The supplements' outer `floor` exists because of `÷4`.** `0.25` is the only fractional multiplier in the household, and it's the only reason an outer `floor` is needed. Takumi has no `÷4`, so his copy doesn't have one. This is why a `÷4` row earning 3 base points yields `floor(0.75)` = **0**, not 1.
-5. **`Processed` gates earning, `Credit Return` does not.** The old hypothesis in this note guessed that a refunded row zeroes out. It doesn't — `Credit Return` appears only in [[points-unrealized]]. A refunded row keeps its realized points unless the user also unticks `Processed` or ticks `×0`.
-6. **`ใช้คะแนน` is subtracted unconditionally**, outside the `ยอดชำระ > 0` gate. It is the only lever that can push a row's realized points negative, and it works on a row of any amount — including zero or negative. See [[../concepts/ledger-reset]], which exploits exactly this.
+5. **`คะแนนต่อ 1 หน่วย` comes after that floor.** A card that earns fractions keeps them: Lotus's Beyond (0.25 a ฿50 block, `×6` at Lotus's) gives `floor(151 / 50) × 6 × 0.25` = **4.5**. Anything not above 0 (an empty field rolls up as 0) counts as 1, so the factor changes nothing on every other card.
+6. **`Processed` gates earning, `Credit Return` does not.** The old hypothesis in this note guessed that a refunded row zeroes out. It doesn't — `Credit Return` appears only in [[points-unrealized]]. A refunded row keeps its realized points unless the user also unticks `Processed` or ticks `×0`.
+7. **`ใช้คะแนน` is subtracted unconditionally**, outside the `ยอดชำระ > 0` gate. It is the only lever that can push a row's realized points negative, and it works on a row of any amount — including zero or negative. See [[../concepts/ledger-reset]], which exploits exactly this.
 
 ## Why three copies
 

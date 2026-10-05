@@ -26,7 +26,7 @@ one-PDF-per-card issuer). Output:
 
   { "dry_run", "statements": [{issuer, statement_date, printed?, source?}], "warnings": [...],
     "counts": {status: n}, "accounts": [ { number, program, card, holder, account_holder,
-      statement_date, status: ok|create|update|superseded|unmapped|not-comparable|no-outstanding,
+      statement_date, status: ok|create|update|superseded|unmapped|no-outstanding,
       printed, ledger, by_holder, since, adjust, balance_now, row_id?, was?, reason? } ] }
 """
 

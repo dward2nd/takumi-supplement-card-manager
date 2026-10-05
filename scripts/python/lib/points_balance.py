@@ -37,6 +37,7 @@ from . import notion_blocks as nb
 from .cards import CardNotFoundError, find_card
 from .holders import HOLDERS
 from .ledger import card_rows
+from .points import as_points
 from .points_account import BALANCE_ADJUSTMENT, RESET, account_for, balance_row_name, period_for
 from .statements.model import Statement
 from .statements.parser import StatementParser
@@ -47,7 +48,7 @@ from .transaction_write import build_transaction_properties
 class BalancePlan:
     number: str
     program: str
-    status: str                      # ok | create | update | superseded | unmapped | not-comparable | no-outstanding
+    status: str                      # ok | create | update | superseded | unmapped | no-outstanding
     card: str | None = None
     holder: str | None = None        # whose card number the summary is printed for
     account_holder: str | None = None  # whose ledger carries the balance row
@@ -56,9 +57,9 @@ class BalancePlan:
     ledger: float = 0                # the covered rows' points as of the statement
     by_holder: dict[str, float] = field(default_factory=dict)
     since: float = 0                 # points on the covered rows after the statement
-    adjust: int = 0                  # the balance row's points (−ใช้คะแนน)
+    adjust: float = 0                # the balance row's points (−ใช้คะแนน); coins keep their fraction
     row_id: str | None = None        # the balance row, existing or written
-    was: int | None = None           # an existing row's points before an update
+    was: float | None = None         # an existing row's points before an update
     reason: str | None = None
     note: str | None = None
     due_date: str | None = None
@@ -108,9 +109,9 @@ def _plan_one(p: BalancePlan, statement: Statement, parser: StatementParser) -> 
             else:
                 p.ledger += pts
                 p.by_holder[h] = p.by_holder.get(h, 0) + pts
-    p.adjust = int(round(p.printed - p.ledger))
+    p.adjust = as_points(p.printed - p.ledger)
     if existing is not None:
-        p.row_id, p.was = existing["id"], int(-(existing["points_redeemed"] or 0))
+        p.row_id, p.was = existing["id"], as_points(-(existing["points_redeemed"] or 0))
     if later:
         p.status, p.reason = "superseded", "a later statement's balance row is on the card: " + "; ".join(later)
     elif existing is None:
@@ -129,9 +130,6 @@ def plan(statement: Statement, parser: StatementParser, number_lookup) -> list[B
         owner = number_lookup(statement.issuer, s.number)
         if owner is None:
             p.status, p.reason = "unmapped", f"card …{s.number} isn't in any {statement.issuer} card's statement_numbers"
-        elif "coins" in s.program.lower():
-            p.card, p.holder = owner
-            p.status, p.reason = "not-comparable", "coins accrue in fractions; the ledger keeps whole points"
         elif s.outstanding is None:
             p.card, p.holder = owner
             p.status, p.reason = "no-outstanding", "the statement prints no outstanding points figure"

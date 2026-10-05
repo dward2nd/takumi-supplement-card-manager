@@ -75,7 +75,9 @@ The hardcoded option lists in the two Bills DBs aren't identical — Baiboon's i
 
 [[../databases/takumi-cards]] has no issuer column. Baiboon's and Nuta's do. Probably an oversight or "I know my own cards' issuers without a column".
 
-## 10. Notion does not support fractional points
+## 10. Notion does not support fractional points — resolved 2026-10-05
+
+**Resolved.** Each Cards DB gained `คะแนนต่อ 1 หน่วย` (points per unit, empty = 1) and each Transactions DB a `×6` box; the formula multiplies by the per-unit figure after its floors. Lotus's Beyond is set to 0.25 at ฿50 a point, so its rows earn quarter-coins, and every other card is unchanged. See [[../cards/lotuss-beyond#Notion encoding (since 2026-10-05)]]. The history below is kept.
 
 The point-earning side of the schema is integer-only. `บาทต่อ 1 คะแนน` (baht per 1 point) on Cards is a plain integer; the multiplier checkboxes (`×0 / ×2 / ×3 / ×4 / ×5 / ÷4`) only scale integers; the realised-points formula `คะแนนที่ได้จริง` rounds to an integer. There is no per-row field that encodes "this row earned 0.25 pts".
 

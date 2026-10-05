@@ -26,6 +26,7 @@ Schema is identical to [[baiboon-cards]] (modulo the relation target pointing at
 | `Date`                    | date     |  |
 | `Note`                    | text     |  |
 | `บาทต่อ 1 คะแนน`            | number (baht) |  |
+| `คะแนนต่อ 1 หน่วย`          | number | Points per `บาทต่อ 1 คะแนน` block at ×1; empty = 1 (added 2026-10-05; unused on Nuta's cards) |
 | `ให้คะแนนตามรอบบิล`         | checkbox |  |
 | `วงเงินที่ได้`               | number (baht) |  |
 | `รายการใช้จ่ายผ่านบัตรของใบบุญ` *(internal label, points at Nuta's transactions)* | relation → [[nuta-transactions]] | Note the property label still says "ใบบุญ" — likely a copy-paste artefact in Notion. |

@@ -25,8 +25,9 @@ issuer's parser), total what the ledgers say for the same card and period:
     `ปรับคะแนน…`, the household's hand adjustments); `Reset …` rows and
     `[ปรับคะแนน] ยอดคะแนนคงเหลือ…` rows (a card's balance set to a statement's
     printed outstanding points by /sync-points-balance) are ledger bookkeeping
-    and are left out. A coin programme (Lotus's) isn't compared:
-    its fractional coins don't fit the ledger's whole points (user, 2026-09-28).
+    and are left out. Lotus's coins are compared too since 2026-10-05: the card's
+    `คะแนนต่อ 1 หน่วย` (0.25) lets a row earn quarter-coins, so the bank's normal +
+    special coins line up with the rows' `คะแนนที่ได้จริง`.
 
 A gap comes with the rows to look at: each row whose multiplier differs from
 what the card's classifier gives (`lib.promotions.classify`).
@@ -42,7 +43,7 @@ from .bill_cycle import pattern_for_card
 from .cards import CardNotFoundError, find_card
 from .holders import HOLDERS
 from .ledger import cycle_rows
-from .points import row_points
+from .points import as_points, per_unit, row_points
 from .points_account import account_for, is_bookkeeping, period_for
 from .statements.model import RewardSummary, Statement
 from .statements.parser import StatementParser
@@ -55,27 +56,28 @@ HAND_ADJUSTMENT = "ปรับคะแนน"
 
 @dataclass
 class Tally:
-    earned: int = 0
-    split_adjustments: int = 0
-    rounding_adjustments: int = 0
-    bonus: int = 0
-    adjustments: int = 0
-    redeemed: int = 0
+    earned: float = 0
+    split_adjustments: float = 0
+    rounding_adjustments: float = 0
+    bonus: float = 0
+    adjustments: float = 0
+    redeemed: float = 0
     rows: list[dict] = field(default_factory=list)
     holders: dict[str, int] = field(default_factory=dict)   # rows counted per holder
     spend: dict = field(default_factory=dict)                # multiplier → Σ ยอดชำระ of earning rows
     bpp: float | None = None                                 # the card's baht per point
+    unit: float = 1                                          # the card's `คะแนนต่อ 1 หน่วย`
     left_out: list[str] = field(default_factory=list)
 
 
-def _rows_for(holder_key: str, card: str, bill_cycles: list[str]) -> tuple[list[dict], float | None]:
+def _rows_for(holder_key: str, card: str, bill_cycles: list[str]) -> tuple[list[dict], float | None, float]:
     try:
         page = find_card(HOLDERS[holder_key].cards_ds, card)
     except CardNotFoundError:
-        return [], None
+        return [], None, 1
     bpp = (page["properties"].get("บาทต่อ 1 คะแนน") or {}).get("number")
     rows = [r for bc in bill_cycles for r in cycle_rows(HOLDERS[holder_key].transactions_ds, page["id"], bc)]
-    return rows, bpp
+    return rows, bpp, float(per_unit(page["properties"]))
 
 
 def tally(summary: RewardSummary, card: str, holder: str, parser: StatementParser, bc: dt.date) -> Tally:
@@ -84,8 +86,9 @@ def tally(summary: RewardSummary, card: str, holder: str, parser: StatementParse
     cycles = period.bill_cycles(bc, previous_bc)
     t = Tally()
     for h in account.holders():
-        rows, bpp = _rows_for(h, card, cycles)
-        t.bpp = t.bpp or bpp
+        rows, bpp, unit = _rows_for(h, card, cycles)
+        if bpp and not t.bpp:
+            t.bpp, t.unit = bpp, unit
         for r in rows:
             name = r["name"] or ""
             if not account.counts(h, name) or not period.in_statement(r, card, previous_bc, bc):
@@ -93,8 +96,8 @@ def tally(summary: RewardSummary, card: str, holder: str, parser: StatementParse
             if is_bookkeeping(name):
                 t.left_out.append(f"{h} {r['transaction_date'][:10]} {name}")
                 continue
-            used = int(r["points_redeemed"] or 0)
-            pts = row_points(r["amount"], bpp, r["multiplier"])
+            used = as_points(r["points_redeemed"])
+            pts = row_points(r["amount"], bpp, r["multiplier"], unit)
             t.earned += pts
             if name.startswith(ROUNDING_ADJUSTMENT):
                 t.rounding_adjustments -= used
@@ -113,14 +116,14 @@ def tally(summary: RewardSummary, card: str, holder: str, parser: StatementParse
     return t
 
 
-def rounding_lost(t: Tally) -> int:
+def rounding_lost(t: Tally) -> float:
     """Points per-row flooring loses against a bank that rounds once per cycle."""
     return _cycle_rounded(t) - t.earned
 
 
-def _cycle_rounded(t: Tally) -> int:
+def _cycle_rounded(t: Tally) -> float:
     """Points on the cycle's spend rounded once per multiplier, as KBank/KTC/Krungsri do."""
-    return sum(row_points(total, t.bpp, m) for m, total in t.spend.items()) if t.bpp else t.earned
+    return sum(row_points(total, t.bpp, m, t.unit) for m, total in t.spend.items()) if t.bpp else t.earned
 
 
 def _suspects(rows: list[dict], card: str) -> list[dict]:
@@ -149,11 +152,6 @@ def audit(statement: Statement, parser: StatementParser, number_lookup) -> list[
                         "reason": f"card …{s.number} isn't in any {statement.issuer} card's statement_numbers"})
             continue
         card, holder = owner
-        if "coins" in s.program.lower():
-            out.append({**entry, "card": card, "holder": holder, "status": "not-comparable",
-                        "reason": "coins accrue in fractions (Lotus's: 0.25 per ฿50, 1.5 per ฿50 at Lotus's); "
-                                  "the ledger keeps whole points"})
-            continue
         t = tally(s, card, holder, parser, bc)
         base = t.earned + t.split_adjustments + t.bonus
         rounding = rounding_lost(t) if parser.points_rounding == "cycle" else 0
@@ -162,9 +160,9 @@ def audit(statement: Statement, parser: StatementParser, number_lookup) -> list[
                              "rounding_adjustments": t.rounding_adjustments, "bonus": t.bonus,
                              "adjustments": t.adjustments, "redeemed": t.redeemed, "rows_by_holder": t.holders},
                   "rounding": rounding,
-                  "delta_earned": base + t.rounding_adjustments - (s.earned + s.bonus),
-                  "delta_after_rounding": base + rounding - (s.earned + s.bonus),
-                  "delta_redeemed": t.redeemed - s.redeemed}
+                  "delta_earned": as_points(base + t.rounding_adjustments - (s.earned + s.bonus)),
+                  "delta_after_rounding": as_points(base + rounding - (s.earned + s.bonus)),
+                  "delta_redeemed": as_points(t.redeemed - s.redeemed)}
         entry["status"] = ("ok" if entry["delta_earned"] == 0 and entry["delta_redeemed"] == 0 else
                            "rounding" if entry["delta_after_rounding"] == 0 and entry["delta_redeemed"] == 0 else "gap")
         if t.left_out:

@@ -18,7 +18,7 @@ from . import notion_blocks as nb
 # Mutually exclusive — at most one per transaction. Unchecked = ×1 (default).
 # Every multiplier box any holder has; which ones a holder's DS actually has is
 # `Holder.multipliers` (×3 is the primary's only).
-VALID_MULTIPLIERS = frozenset({"×0", "×2", "×3", "×4", "×5", "÷4"})
+VALID_MULTIPLIERS = frozenset({"×0", "×2", "×3", "×4", "×5", "×6", "÷4"})
 
 
 def build_transaction_properties(

@@ -24,7 +24,7 @@ Reads a JSON spec from stdin (or --input <file>):
 Recognized convenience keys per update:
   - cashback_percent → writes Notion `% cb` (raw fraction); `null` clears
   - note            → writes Notion `Note`; `""` (empty string) clears
-  - multiplier      → writes one of `×0`/`×2`/`×3`/`×4`/`×5`/`÷4` to true
+  - multiplier      → writes one of `×0`/`×2`/`×3`/`×4`/`×5`/`×6`/`÷4` to true
   - points_redeemed → writes Notion `ใช้คะแนน`; `null` clears.
                       Positive = deduct from lifetime, negative = add back.
   - bill_cycle      → writes `Bill Cycle Date` (ISO date). Re-cycle a row

@@ -11,6 +11,8 @@ Which card belongs to which family is the registry in `__init__.py`.
 from __future__ import annotations
 
 import datetime as dt
+import re
+from dataclasses import replace
 
 from .. import promotions as promos
 from ..ledger import PRIMARY_PREFIX
@@ -164,3 +166,56 @@ class KTCUnionPay(KTCCard):
         if promos.looks_supermarket(merchant):
             return "Supermarket (KTC UnionPay)"
         return super().excluded(merchant)
+
+
+class LotussBeyond(Card):
+    """Lotus's coins: 0.25 a ฿50 block on every charge, 1.5 at Lotus's — counted
+    per statement line (decoded from the 5 Sep 2026 statement). The card's
+    `คะแนนต่อ 1 หน่วย` is 0.25 at ฿50 a point, so a Lotus's row is ×6. Lotus's
+    Beyond is a Krungsri partner card but not in the family: 7-Eleven, TrueMoney
+    and Lotus's are all CP ALL, so they keep earning here.
+
+    The card's coin terms (8 Jul 2025 – 31 Dec 2027, lotussmoney.com/credit-card/
+    platinum-beyond, pasted by the user 2026-10-05) withhold coins on a list of
+    spend; the ones a merchant string shows are `COIN_EXCLUSIONS`. The rest —
+    government MCCs, mutual funds, unit-linked insurance, crypto — are ×0 by hand."""
+
+    AT_LOTUS = re.compile(r"^(LOTUS'?S\b|TMN\*LOTUS HYPER)")
+    COIN_EXCLUSIONS: tuple[tuple[str, re.Pattern | None], ...] = (
+        ("Bangchak station", re.compile(r"BANGCHAK|^BCP\b|^BSRC\b")),
+        ("Phone / internet (MCC 4814)", re.compile(r"\bAIS\b|\bAWN\b|TRUE ?MOVE|TRUE ?ONLINE|TRUE ?ISERVICE|\bDTAC\b")),
+        ("Utility bill (MCC 4900)", re.compile(r"การไฟฟ้า|การประปา|\b(MEA|PEA|MWA|PWA)\b|ELECTRICITY AUTH|WATERWORKS")),
+        ("Wholesale non-durables (MCC 5199)", re.compile(r"^WWW\.MAKRO\.PRO\b")),
+        ("AIA insurance", re.compile(r"\bAIA\b")),
+        ("Public transport or expressway toll", None),   # promotions.looks_transport_or_toll
+        ("E-wallet top-up", None),                       # promotions.looks_wallet_top_up
+    )
+
+    def after_rules(self) -> list[AfterRule]:
+        return [*super().after_rules(), self._coin_exclusions, self._at_lotus]
+
+    def coin_exclusion(self, merchant: str) -> str | None:
+        """Why the card's coin terms withhold coins on this merchant string, or None."""
+        name = merchant.strip().removeprefix(PRIMARY_PREFIX).strip().upper()
+        if promos.looks_transport_or_toll(name):
+            return "Public transport or expressway toll"
+        if promos.looks_wallet_top_up(name):
+            return "E-wallet top-up"
+        return next((label for label, rx in self.COIN_EXCLUSIONS if rx and rx.search(name)), None)
+
+    def _coin_exclusions(self, result: Classification, date: dt.date, merchant: str,
+                         inst: bool) -> Classification:
+        if result.points_override == "×0":
+            return result
+        if inst:
+            return with_points_withheld(result, "Installment — no Lotus's coins (card terms).", "lotus-coins-exclusion")
+        reason = self.coin_exclusion(merchant)
+        return with_points_withheld(result, f"{reason} — no Lotus's coins (card terms).", "lotus-coins-exclusion") \
+            if reason else result
+
+    def _at_lotus(self, result: Classification, date: dt.date, merchant: str, inst: bool) -> Classification:
+        if result.points_override is not None or inst:
+            return result
+        if not self.AT_LOTUS.match(merchant.strip().removeprefix(PRIMARY_PREFIX).strip().upper()):
+            return result
+        return replace(result, points_override="×6", reason=f"{result.reason}+lotus-coins")

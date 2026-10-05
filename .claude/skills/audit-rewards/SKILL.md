@@ -24,11 +24,12 @@ Each issuer's parser class states two facts. The engine is `lib/rewards_audit.py
 |---|---|---|---|
 | UOB | `posting`: rows *posted* from the previous statement date to the day before this one (`Process Date`, else inferred). Points are credited as each charge posts. | `line`, like the ledger formula | Aug/Sep 2026 exact |
 | KBank, AEON | `cycle`: rows billed on the cycle. Points are credited per cycle, in the app the day after BC (user). | `cycle`: floor(Σ spend / ฿ per point) per multiplier | KBank Aug exact after rounding |
-| KTC, Krungsri, Lotus's | `cycle` (default) | `cycle` | KTC Aug, Krungsri Visa Sep exact |
+| KTC, Krungsri | `cycle` (default) | `cycle` | KTC Aug, Krungsri Visa Sep exact |
+| Lotus's | `cycle` (default) | `line`: coins per whole ฿50 of each line, 0.25 (+1.25 at Lotus's) | 5 Sep 2026: normal 14.00 + special 61.25 exact, per line |
 | CardX | `cycle` (default) | `line`: Sep 2026 printed 15; the rows give 15 one by one, 16 rounded once | Jun/Aug/Sep 2026 exact |
 
 - **Which rows:** every holder's rows on the card when points pool on the account (UOB, KBank, Krungsri, Lotus's). On KTC and CardX, where each card number gets its own PDF, only that card's own rows count, plus friends' `[บัตรหลัก]` shares on your principal card. Both rules are `PointsAccount` classes in `lib/points_account.py`, and the posting/cycle timing is a `PointsPeriod`, shared with [[../sync-points-balance/SKILL|/sync-points-balance]].
-- **Points:** the `คะแนนที่ได้จริง` formula per row ([[../../../docs/formulas/points-realized]], `lib/points.py`).
+- **Points:** the `คะแนนที่ได้จริง` formula per row ([[../../../docs/formulas/points-realized]], `lib/points.py`), the card's `คะแนนต่อ 1 หน่วย` included. Lotus's coins are compared since 2026-10-05: the bank's normal + special coins against the rows' quarter-coins. Its gap includes the untracked supplement …6524, which sits in Takumi's ledger as a `×0` `โอนยอดจากบัตรเสริม` lump (60 coins on 5 Sep 2026).
 - **`[ปรับคะแนน]` rows** are the split-line adjustments `/record-statement` writes, and count as earned.
 - **Other `ใช้คะแนน` rows** are redemptions, or hand adjustments when named `ปรับคะแนน…`.
 - **`Reset …` rows** and **`[ปรับคะแนน] ยอดคะแนนคงเหลือตามใบแจ้งยอด …` rows** (a card's balance set to a statement's printed outstanding points — [[../../../docs/concepts/points-and-multipliers#Statement balance rows|statement balance rows]]) are ledger bookkeeping and are left out (`left_out`).

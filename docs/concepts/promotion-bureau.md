@@ -30,7 +30,7 @@ Campaign terms don't share a shape, so the shape is a class and each campaign su
 
 | Shape | How the reward is paid | Campaigns |
 |---|---|---|
-| `LadderPromotion` | steps (or one-off bands) of pooled spend: ฿200 per whole ฿10,000, ฿40 from ฿3,000 … | NW3/NW4, EPW538/SPW796, ON3/ON4, DLV3, ONQ3, LBS3, NTW1, SPW592, MKR |
+| `LadderPromotion` | steps (or one-off bands) of pooled spend: ฿200 per whole ฿10,000, ฿40 from ฿3,000 … | NW3/NW4, EPW538/SPW796, ON3/ON4, DLV3, ONQ3, LBS3, SMP1/SMT2, NTW1, SPW592, MKR |
 | `CreditCapPromotion` | each row earns its own rate until the period's pooled credit hits a cap | UOB One 10%/5%, UOB One 1%, ttb so smart 1%, AEON Rabbit, AEON World 5%, AEON UnionPay 3% |
 | `SlipCreditPromotion` (a credit cap) | a fixed credit per slip, by the slip's size, until the period's cap | IS3/IS4, SUP1, PTT2, BC3P/BXP, Bangchak 1% (and Bangchak700), J Dining, NOW online, LOTA, LOTB, ttb fuel, hypermarket (BMG/BGO) and MUJI (MUJC), the UNIQLO campaigns (UNO, UNQ, UQN, UQCB, UQC), CardX HY1 |
 | `SlipCountPromotion` | a fixed credit for the Nth qualifying slip in the period | EAT |

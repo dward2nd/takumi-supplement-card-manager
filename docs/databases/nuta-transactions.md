@@ -34,7 +34,7 @@ Every purchase Nuta makes on her supplement cards. Schema mirrors Baiboon's — 
 
 ### Point multiplier checkboxes — see [[../concepts/points-and-multipliers]]
 
-- `×0`, `×2`, `×4`, `×5`, `÷4`
+- `×0`, `×2`, `×4`, `×5`, `×6`, `÷4` (`×6` since 2026-10-05: Lotus's coins at Lotus's)
 
 (No `×3` — that's Takumi-only.)
 
@@ -47,6 +47,7 @@ Every purchase Nuta makes on her supplement cards. Schema mirrors Baiboon's — 
 ### Rollup
 
 - `บาทต่อ 1 คะแนน` — from the related Card.
+- `คะแนนต่อ 1 หน่วย` — from the related Card (added 2026-10-05; empty = 1).
 
 ## Cashback parity with Baiboon
 

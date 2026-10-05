@@ -1,6 +1,6 @@
 ---
 name: sync-points-balance
-description: Set each card's running points balance (`คะแนนสะสม`) to the outstanding points its latest bank statement prints — statement total = Takumi's points + his friends' points — by writing one `[ปรับคะแนน] ยอดคะแนนคงเหลือตามใบแจ้งยอด <BC>` row per card per statement on the account holder's ledger. Idempotent: a re-run updates the row in place. Covers UOB, KBank, KTC, Krungsri and CardX; Lotus's coins are skipped. Use when the user says "adjust my points to the statements", "bring the points balances up to date", "set every card's points to the bank's figure", or after /record-statement when /audit-rewards shows a balance the ledger doesn't hold.
+description: Set each card's running points balance (`คะแนนสะสม`) to the outstanding points its latest bank statement prints — statement total = Takumi's points + his friends' points — by writing one `[ปรับคะแนน] ยอดคะแนนคงเหลือตามใบแจ้งยอด <BC>` row per card per statement on the account holder's ledger. Idempotent: a re-run updates the row in place. Covers UOB, KBank, KTC, Krungsri, CardX and Lotus's coins (fractions kept, since 2026-10-05). Use when the user says "adjust my points to the statements", "bring the points balances up to date", "set every card's points to the bank's figure", or after /record-statement when /audit-rewards shows a balance the ledger doesn't hold.
 ---
 
 # sync-points-balance
@@ -62,7 +62,6 @@ For each printed points summary, one row on the **account holder's** ledger:
 - `create` / `update`: the row that was, or will be, written. `was` is an existing row's previous figure.
 - `superseded`: a later statement's balance row is on the card. An older statement is never rewritten, because that would shift the later one.
 - `unmapped`: the card number isn't in any card YAML's `statement_numbers`. Add it first.
-- `not-comparable`: Lotus's coins. They accrue in fractions (0.25 per ฿50) and the ledger keeps whole points.
 - `no-outstanding`: the summary prints no balance.
 
 Statements that print no points (AEON, First Choice, Central The 1) produce no accounts. Neither do issuers with no parser (ttb, Grab, Shopee).
