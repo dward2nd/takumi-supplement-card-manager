@@ -108,13 +108,21 @@ Some plans belong to a bank campaign that changes how the whole plan earns:
 | `campaign` | Card / issuer | Terms | Points | Cashback |
 |---|---|:--:|:--:|---|
 | `dee-jang` | CardX (ดีจังผ่อน 0%) | 4 | `×0` | unaffected |
-| `u-plan` | Krungsri / First Choice (U Plan 0%) | 3 | `×0` | varies by promotion |
+| `u-plan` | Krungsri / First Choice (U Plan, 0% or with interest) | 3 at 0%; 4–10 with interest | `×0` | varies by promotion |
 
 Both are **post-purchase conversions** — the cardholder asks the bank to re-split an already-posted charge — so the merchant string is identical whether or not a plan was converted. No amount of classification logic can recover this, which is why it has to be declared here, on term 1.
 
 Passing `campaign` writes the campaign's exact `Note` and multiplier onto the first term. From then on [[../populate-installment/SKILL.md|/populate-installment]] **inherits** it for every later term by reading that note — so declaring it once is enough for the whole plan. Skip it and the plan silently earns full rewards for its entire life.
 
 An unknown id is rejected with the list of known ids rather than written silently. Registry: `scripts/repositories/installment-campaigns/`; full model in [[../../docs/concepts/installment-reward-campaigns]].
+
+**A U PLAN conversion is three writes, not one** (user, 2026-10-03). The charge stays on the card line, and the statement prints the charge, a reversal and the terms, so the ledger does too:
+
+1. the original charge (normally already in the ledger from the day it was spent): `/update-transaction` to `×0` with the U PLAN note: converted charges earn no points;
+2. `/add-transaction` a `REV-FC PLAN ON DEMAND: <merchant>` row at minus the full amount, dated like the charge and in the charge's cycle, `×0`, no `% cb`. The Bureau doesn't read it as a refund, so NW4 and the like still count the charge;
+3. this skill with `campaign: "u-plan"` for `01/NN`, in the cycle that bills it.
+
+`/record-statement` checks all three when the statement lands. A plan with interest runs 4–10 terms, so no `campaign_hint` flags it; on First Choice, ask whether any installment was set up at checkout (personal-loan line) or converted afterwards (U PLAN).
 
 **When the user announces a new installment, the term count is a prompt to ask.** A 4-term plan on CardX or a 3-term plan on First Choice comes back with `"campaign_hint": ["<id>"]` in the envelope when no `campaign` was passed. That's advisory only — nothing is applied — but it's the moment to ask "was this ดีจังผ่อน / U Plan?", because after this write nobody can tell from the data.
 

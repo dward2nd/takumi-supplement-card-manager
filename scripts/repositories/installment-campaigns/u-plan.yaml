@@ -1,5 +1,5 @@
 id: u-plan
-name: U Plan 0% (Krungsri self-requested installment conversion)
+name: U Plan (Krungsri self-requested installment conversion, 0% or with interest)
 issuer: Krungsri
 status: active
 
@@ -28,8 +28,17 @@ detect:
 
 notes: |
   U Plan is Krungsri's post-purchase conversion: the cardholder pays in full at
-  the merchant, then asks Krungsri to re-split the posted charge into 0%
-  interest over 3 months. Like ดีจังผ่อน on CardX, it is requested from the bank
+  the merchant, then asks Krungsri to re-split the posted charge, either into 0%
+  over 3 months where a promotion offers it, or with interest (0.39% a month on
+  the principal, 4–10 months; a term is principal ÷ terms + 0.39% of it, e.g.
+  Nuta's OMISE*ROOJAI 01/10 = 5,548.55 ÷ 10 + 21.64 = 576.49). Both lose the
+  points; the original charge still counts toward Krungsri's cashback
+  campaigns (NW4, IS4 …), once (user, 2026-10-03; unconfirmed with interest).
+
+  Recorded as the statement prints it (user, 2026-10-03): the original charge
+  at ×0 with this note, a `REV-FC PLAN ON DEMAND: <merchant>` reversal of the
+  same date and amount, and the terms. See
+  docs/concepts/installment-reward-campaigns.md. Like ดีจังผ่อน on CardX, it is requested from the bank
   rather than offered at checkout, so the merchant string cannot reveal it —
   hence a plan-level campaign rather than a card flag.
 

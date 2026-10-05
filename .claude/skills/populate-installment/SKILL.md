@@ -108,7 +108,7 @@ The new row is classified via `lib.promotions.classify` with `is_installment_ove
 
 ### 5. Campaign treatment is inherited from the plan's earlier terms
 
-Some installment plans belong to a bank campaign that changes how they earn — CardX's **ดีจังผ่อน 0%** and Krungsri's **U Plan 0%** both grant *no reward points* on every term. Both are post-purchase conversions, so **nothing in the merchant string reveals them**: two plans with identical merchant strings on the same card can earn differently. `classify` can't see it.
+Some installment plans belong to a bank campaign that changes how they earn — CardX's **ดีจังผ่อน 0%** and Krungsri's **U Plan** (0% or with interest) both grant *no reward points* on every term. Both are post-purchase conversions, so **nothing in the merchant string reveals them**: two plans with identical merchant strings on the same card can earn differently. `classify` can't see it.
 
 So the skill reads the plan's already-recorded terms. If any of them carries a campaign's marker substring in its `Note`, the campaign applies to the new term too — forcing its multiplier and re-writing its exact `Note`. `% cb` is left as classified.
 

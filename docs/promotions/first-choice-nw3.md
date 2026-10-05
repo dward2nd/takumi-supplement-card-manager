@@ -22,7 +22,7 @@ Krungsri First Choice's monthly cashback ladder on pooled full-amount spend. Tak
 - **Public organizations are excluded.** The bank excludes government-agency payments (หน่วยงานราชการ). The household reads that to include public organizations (องค์การมหาชน), so `MUSEUM SIAM` rows are left unlinked (user, 2026-09-28).
 - **ShopeeFood is excluded.** It falls under food delivery, even though the marketplace clause names it as an exception to *that* clause.
 - **TrueMoney rows count.** NW3 excludes e-wallet top-ups, but the app's NW3 eligible list for September included the household's `TMN*…` rows (`TMN*PROMPTPAY30`, `TMN*TMN 7-11`, `TMN*<merchant>`): 52 rows, ฿6,465.33, against a gap of only ฿105. So TrueMoney-routed card payments aren't top-ups to the bank, and the exclusion rule has no merchant test.
-- **Installments never count.** A merchant installment books to First Choice's personal-loan line (see the card YAML's notes).
+- **Merchant installments never count; U PLAN conversions do.** A merchant installment books to First Choice's personal-loan line (see the card YAML's notes). A full-amount charge converted later through U PLAN still counts, once, as the original charge: sure for 0% plans, unconfirmed for plans with interest (user, 2026-10-03). Billed terms (`NN/NN`) are never new spend. See [[../concepts/installment-reward-campaigns#U Plan — Krungsri / First Choice]].
 
 ## Months
 

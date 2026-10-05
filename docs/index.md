@@ -85,8 +85,9 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 - [[promotions/lotuss-lbs3]] — Lotus's LBS3 big-ticket cashback (Sep–Dec 2026).
 - [[promotions/aeon-2026]] — AEON Rabbit 5%, AEON World 5% supermarkets, Everyday with AEON (NTW1), AEON UnionPay 3%, per AEON cycle.
 - [[promotions/ttb-2026]] — ttb so smart 1% (฿2,000 a cycle), and ttb's Caltex, Bangchak, hypermarket (BMG → BGO) and MUJI campaigns.
-- [[promotions/uniqlo-2026]] — UNIQLO per slip, Oct 2026 – Feb 2027: UOB UNO, Krungsri UNQ, KBank UQN (per card), ttb UQCB; KTC's and Krungsri JCB's bonus points.
+- [[promotions/uniqlo-2026]] — UNIQLO per slip, Oct 2026 – Feb 2027: UOB UNO, Krungsri UNQ, KBank UQN (per card), ttb UQCB, CardX UQC; KTC's and Krungsri JCB's bonus points.
 - [[promotions/kbank-makro]] — KBank MKR at Makro (฿100/240 a month, +฿1,500 per ฿300,000), Oct–Dec 2026, one Bureau row per KBank card.
+- [[promotions/uob-makro-gold-mission]] — UOB Makro 26th "Gold Mission" `UMK26` (Makro stores monthly, Makro PRO app per slip, other spend ฿300 a month), Oct–Dec 2026.
 - [[promotions/cardx-hypermarket]] — CardX HY1 per hypermarket slip (฿40/200/720, ฿1,440 a month) and HYP ฿3,000 at ฿300,000, Oct–Dec 2026.
 - [[promotions/unionpay-qr]] — UnionPay QR 6% off on KTC UnionPay (monthly from Sep 2026), taken off the charge itself; one Bureau row per card number, `Quotas Exceeded Date` when UnionPay's pool runs out.
 

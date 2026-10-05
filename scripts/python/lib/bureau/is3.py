@@ -20,7 +20,7 @@ from decimal import Decimal
 from typing import ClassVar
 
 from .. import promotions
-from .base import UNCERTAIN, Rule, Tx
+from .base import Rule, Tx
 from .slips import SlipCreditPromotion
 
 _INSURANCE = re.compile(r"INSURANCE|ASSURANCE|INSURE|\bLIFE\b|ALLIANZ|\bFWD\b|TOKIO|VIRIYAH|DHIPAYA|"
@@ -77,8 +77,10 @@ class IS3Promotion(SlipCreditPromotion):
              "(LGIB) or Lotus's Life Assurance Broker (LLAB)", r"\bKGIB\b|\bLGIB\b|\bLLAB\b|KRUNGSRI GENERAL|"
              r"LOTUS'?S? (GENERAL|LIFE)"),
         Rule("Insurers registered abroad", test=lambda tx: promotions.looks_foreign_in_thb(tx.merchant)),
-        Rule("Converted to a 0% U PLAN installment", test=lambda tx: promotions.is_installment(tx.name),
-             level=UNCERTAIN, hint="the page withholds points on U PLAN, and says nothing of the cashback"),
+        # U PLAN takes the points only; the slip still counts (user, 2026-10-03).
+        Rule("Installment terms (`NN/NN`): the slip is the full-amount charge. One later converted through "
+             "U PLAN still counts, once, as that slip; a merchant installment on the personal-loan line "
+             "never does", test=lambda tx: promotions.is_installment(tx.name)),
         Rule("Charges cancelled later"),
     )
     crediting: ClassVar = (

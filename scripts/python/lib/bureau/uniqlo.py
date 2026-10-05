@@ -1,4 +1,4 @@
-"""UNIQLO card campaigns, 1 Oct 2026 – 28 Feb 2027 — UOB (UNO), Krungsri (UNQ), KBank (UQN), ttb (UQCB).
+"""UNIQLO card campaigns, 1 Oct 2026 – 28 Feb 2027 — UOB (UNO), Krungsri (UNQ), KBank (UQN), ttb (UQCB), CardX (UQC).
 
 deterministic + idempotent — declarations and pure functions only.
 
@@ -24,6 +24,11 @@ cap is the only one that binds (each campaign cap is 5 × the month's).
                   are bank bonus points: `[คะแนนพิเศษ]` rows when they post.
   UQCB (ttb)      as UNO: ฿150 per whole ฿3,000, ฿800 from ฿12,000; ฿800 a month
                   per person, primary and supplements pooled. Register once.
+  UQC  (CardX)    ฿120 per whole ฿3,000, ฿700 from ฿10,000; ฿700 a month per person.
+                  Register each card once. Read 2026-10-05 from CardX's own page
+                  (https://www.cardx.co.th/credit-card/promotion/uniqlo-oct26-usc06,
+                  through CardX's search index): UNIQLO's CardX page still shows
+                  the Jul–Sep round (฿100 per ฿3,000, ฿700 from ฿12,000).
 
 KTC's UNIQLO page is points only (KTC JCB ×2/×3/×5 on monthly spend at UNIQLO,
 MUJI, COMME des GARÇONS, ISSEY MIYAKE and BEAMS, 1 Jul – 31 Dec 2026, credited
@@ -221,6 +226,45 @@ class TTBUniqloPromotion(_UniqloSlips):
     )
 
 
+class CardXUniqloPromotion(_UniqloSlips):
+    code = "UQC"
+    cards = ("CardX JCB",)
+    source_url = "https://www.cardx.co.th/credit-card/promotion/uniqlo-oct26-usc06"
+    headline = "฿120–700"
+    cap = Decimal(700)
+
+    def slip_credit(self, tx: Tx) -> Decimal | None:
+        if not _UNIQLO.search(tx.merchant) or tx.amount < 3_000:
+            return None
+        return Decimal(700) if tx.amount >= 10_000 else tx.amount // 3_000 * Decimal(120)
+
+    ladder_rows: ClassVar = (
+        ("under ฿3,000", "nothing"),
+        ("every whole ฿3,000, under ฿10,000", "฿120 — up to ฿360"),
+        ("฿10,000 or more", "฿700"),
+        ("Cap", "฿700 a month and ฿3,500 for the campaign, per person (every CardX card together)"),
+    )
+    inclusions: ClassVar = (
+        "Full-amount spend at UNIQLO stores in Thailand and UNIQLO online, after discounts, on every "
+        "CardX and SCB WEALTH by CardX card; the household's only CardX card is Nuta's CardX JCB, "
+        "which CardX bills on its own, so the quota is that card's.",
+        "Per slip: slips never add up.",
+        "Register every card once: the CardX app or website, or SMS \"UQC <last 12 digits>\" to 4545777. "
+        "Only a registered card's spend counts; not registered as of 2026-10-05.",
+    )
+    rules: ClassVar = (
+        Rule("Installments of every kind: ดีจังแบ่งชำระ, and plans set up through the CardX app or call "
+             "centre", test=lambda tx: promotions.is_installment(tx.name)),
+        Rule("Business use; charges cancelled later"),
+    )
+    crediting: ClassVar = (
+        "In two rounds, shown on the next statement: spend 1 Oct – 30 Nov 2026 by 31 Jan 2027, spend "
+        "1 Dec 2026 – 28 Feb 2027 by 30 Apr 2027.",
+        "The points half (UQB: POINTX equal to the slip → 10%, by SMS every time) is a redemption, not "
+        "tracked here.",
+    )
+
+
 class UNQKrungsriVISA(CardAccount, KrungsriUniqloPromotion):
     cards = ("Krungsri VISA",)
 
@@ -256,6 +300,6 @@ class UQNKBankShopee(CardAccount, KBankUniqloPromotion):
     cards = ("KBank Shopee",)
 
 
-PROMOTIONS = (UOBUniqloPromotion, TTBUniqloPromotion,
+PROMOTIONS = (UOBUniqloPromotion, TTBUniqloPromotion, CardXUniqloPromotion,
               UNQKrungsriVISA, UNQKrungsriJCB, UNQKrungsriLady, UNQKrungsriNOW,
               UQNKBankJCB, UQNKBankLINEPoints, UQNKBankPLUSTINUM, UQNKBankShopee)

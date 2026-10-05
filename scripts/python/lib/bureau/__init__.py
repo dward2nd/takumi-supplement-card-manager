@@ -41,10 +41,13 @@ Modules:
   nw4 / on4 / is4   First Choice Q4 2026: NW3, ON3, IS3's successors (NW4 caps supermarket and fuel spend)
   bxp        Krungsri Card at Bangchak from Oct 2026: the card's 1% and BXP, per ฿700 a slip — per card account
   lotus_exclusive  Krungsri Card LOTA / LOTB at Lotus's, per slip, Aug–Oct 2026 — per card account
-  uniqlo     UNIQLO per slip, Oct 2026 – Feb 2027: UOB UNO, Krungsri UNQ (per card account), KBank UQN (per card), ttb UQCB
+  uniqlo     UNIQLO per slip, Oct 2026 – Feb 2027: UOB UNO, Krungsri UNQ (per card account), KBank UQN (per card), ttb UQCB,
+             CardX UQC
   ttb_shopping  ttb MUJI (MUJC) and Big C / GO Wholesale (BGO), Oct–Dec 2026, one quota per campaign
   cardx_hypermarket  CardX HY1 per hypermarket slip (monthly) and HYP ฿3,000 at ฿300k (campaign), Oct–Dec 2026
   kbank_makro  KBank MKR at Makro (฿100/240 bands, and ฿1,500 per ฿300,000), Oct–Dec 2026 — per card
+  uob_makro  UOB Makro Gold Mission UMK26 (MPW823), Oct–Dec 2026: Makro stores (monthly bands), Makro PRO
+             (per slip, one campaign quota), other spend (฿300 a month)
   uob_one    UOB One 10%/5% (monthly) and 1% (per cycle) (credit caps)
   uob_world  UOB World ×5 (a points quota per cycle)
   store      Notion reads/writes for Bureau rows, linked transactions, trackers
@@ -62,7 +65,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from . import bangchak, bts, bxp, eat, jdining, kbank_makro, krungsri_now, lotus_exclusive, onq3, ptt2, sup1, uniqlo, unionpay_qr
+from . import bangchak, bts, bxp, eat, jdining, kbank_makro, krungsri_now, lotus_exclusive, onq3, ptt2, sup1, uniqlo, unionpay_qr, uob_makro
 from .accounts import CardAccount, CardNumber
 from .aeon_rabbit import AEONRabbitCashback
 from .aeon_unionpay import AEONUnionPayCashback
@@ -108,6 +111,8 @@ PROMOTIONS: tuple[type[BasePromotion], ...] = (
     *bxp.ACCOUNTS, *lotus_exclusive.ACCOUNTS, *uniqlo.PROMOTIONS,
     TTBMujiPromotion, TTBBigCGoPromotion, *kbank_makro.ACCOUNTS,
     CardXHypermarketPromotion, CardXHypermarketBonus,
+    # Read 2026-10-03: UOB Makro's 26th-anniversary Gold Mission (registered that day).
+    *uob_makro.PROMOTIONS,
 )
 
 

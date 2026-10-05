@@ -20,11 +20,16 @@ notes: |
   Krungsri "rewards paid upfront" wording.
 
   The other First Choice installment shape is U Plan: pay in full at the
-  merchant (so the charge starts on the CARD line), then ask Krungsri to
-  re-split it into 0% over 3 months. Those rows earn no points but MAY earn
-  cashback depending on the active promotion, so they are tracked as a
-  plan-level campaign rather than by this flag —
-  see scripts/repositories/installment-campaigns/u-plan.yaml.
+  merchant, then ask Krungsri to re-split it (0% over 3 months, or with
+  interest). A full-amount charge stays on the CARD line for good; it can
+  never move to the personal-loan line (user, 2026-10-03). The statement shows
+  it there: the original charge, a `REV-FC PLAN ON DEMAND: <merchant>` reversal
+  under "รายละเอียดการเปลี่ยนรายการปกติเป็นผ่อนชำระ", and each term as
+  `FIRST CHOICE PLAN ON DEMAND <principal> 001/003 <term>` inside "Total
+  Payment Due For Credit Card" (Baiboon's ICARE and FUTURE ELECTRONICS plans,
+  Mar–May 2026). Those rows earn no points but MAY earn cashback depending on
+  the active promotion, so they are tracked as a plan-level campaign rather
+  than by this flag — see scripts/repositories/installment-campaigns/u-plan.yaml.
 
   Cashback on this card is promo-driven and hand-entered; there is deliberately
   no promotions/*.yaml for it. Its pooled monthly campaigns (NW3, Jul–Sep 2026)

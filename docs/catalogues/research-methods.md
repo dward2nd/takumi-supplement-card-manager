@@ -58,6 +58,7 @@ How the [[index|catalogue research]] got at each issuer's and merchant's terms (
 | **Mastercard Priceless** | `POST specials.priceless.com/website/api/v1/search` with `{"language":"TH","sourceMarketCountry":"TH","siteInfo":"TH-TH","offset":<page>,…}` | `offset` is a page index (9 offers a page). mastercard.co.th returns 403 to curl and r.jina.ai. A minimal body gets HTTP 400; send the full search body. A direct POST can be redirected by Akamai; send it as an in-page fetch from `specials.priceless.com/th-TH`. |
 | **Amex Thailand** | `americanexpress.com/th-th/benefits/promotions/*.html` with curl | |
 | **LINE BK** | `r.jina.ai/…/th/promotions/` | Cloudflare 403 to curl. The year listing reads through r.jina.ai. |
+| **uniqlo.com/th** (UNIQLO Thailand) | **`r.jina.ai/<url>`, one request at a time** (retry after ≈ 8 s; a reply under ≈ 2 KB is a block): the bank hub `special-feature/cp/promotion` and each `/promotion/<bank>`, the Digital Flyer, Limited Offers, App Benefits. Store list: `map.uniqlo.com/th/api/storelocator/v1/th/stores?limit=100&RESET=true&lang=local&offset=0&r=storelocator` with plain curl (mall, room, floor, `storeType`, Click & Collect flags, new/closed comments). FAQ (payment, coupons, delivery): `faq-th.uniqlo.com/pkb_Home_UQ_TH?id=<kA0…>&l=th` through r.jina.ai | Akamai 403s curl and headless Chrome from the Hong Kong egress, and parallel requests. Tier tables are in the banners on `im.uniqlo.com/global-cms/spa/<hash>fr.jpg` (curl works). The bank hub can lag: on 5 Oct its CardX page still showed the ended Q3 round, so read each bank's own page too. UNIQLO keeps no old event pages; KTC's UNIQLO pages (`uniqlo-special`, `uniqlo-arigato`) quote past 11.11 / Arigato / 12.12 windows. |
 
 ## Habits that paid off
 
@@ -67,3 +68,62 @@ How the [[index|catalogue research]] got at each issuer's and merchant's terms (
 - **Check for a Chiang Mai branch first.** The household's spending is in Chiang Mai (the ledgers are full of `… CHIANGMAI TH`, CMU, Rimping and CNX airport rows), so a merchant without a branch there (Yunomori, Oct 2026) gets a page for trips, and its plan says so up front.
 - **Read the merchant's own privilege pages.** Thaiticketmajor lists every bank and wallet deal it runs under `/privilege/`, with terms; three of them (KBank, CardX, ShopeePay) weren't findable from the banks' indexes by merchant name.
 - **Search by category, not just by name.** Most hospital and spa money comes from category campaigns (Lotus's LHB2, Central The 1 HBF, KTC Wellness Max) and from MCC-wide points cash-outs, not from offers naming the merchant. Check each campaign's hospital list against the merchant before counting it.
+
+## Apple products (3 Oct 2026)
+
+- **krungsricard.com listing JSON carries each promotion's card list** in `CardType` (pipe-separated product names) and `DocumentModifiedWhen`. The page's "บัตรเครดิตที่ร่วมรายการ" box is filled by script and is empty in the HTML, so read the JSON instead.
+- **First Choice tier tables hide in tall posters** under `/getattachment/<guid>/<name>.jpg` linked from the page body (e.g. the Power Buy iPhone ladder). `sips -c` crops around the centre, not from the top — view the whole image instead.
+- **centralthe1card.com posters**: each promotion's JSON `attachments` / `image` fields carry `/getattachment/<guid>/<name>_WEB1024.webp`; the tier tables (PWB3 ladders, SMS numbers) are only there. The `url` alias often belongs to an older promotion (`pwd-iphone18-202609` lives at a "LBC-CLINIC…" alias) — always open by `?modalId=<promotionCode>`.
+- **lotussmoney.com page body** starts after the second `บทความ` menu line and ends at `โปรโมชันที่เกี่ยวข้อง`. The sitemap lists `/promotion/credit-card/installment/iphone-18-*` pages; loan-card twins sit under `/promotion/loan-card/…`.
+- **KTC IT pages**: `sitemap-promotions-*.xml`, filter `/electronics-mobile/mobile-computer-tech-gadgets/`; a `-1` / `-3` suffix is usually the previous half-year's version. The registration syntax (`IP <16 digits>#<points>`) is only in the conditions text, not in the visible summary.
+- **AEON**: the rendered index's `<a class="package">` tiles carry period and card text, so a grep of the tile text finds the IT/installment pages without opening each.
+- **Apple Pay country list**: support.apple.com/en-us/102775 is plain HTML with a "Published Date"; grep for the country. apple.com/th product pages (`/th/shop/buy-iphone/<model>`) give prices to curl.
+- Housekeeping: run every `curl -o` from the scratchpad (or give absolute paths) — a bare `curl -o file` from the repo's working directory drops files into the repo root.
+- **apple.com/th** reads with curl: buy pages embed prices (`metrics` JSON / `prices`) and AppleCare+ prices (`APPLECARE_BOOTSTRAP`); `/th/newsroom/rss-feed.rss` lists launches.
+- **Apple's reseller locator**: `locate.apple.com/api/v1/grlui/th/th/<sales|service>?pt=<1 iPad · 3 iPhone · 4 Mac · 6 Watch · 12 AirPods>&lat=…&lon=…&maxrad=100&maxResult=99`. It lists authorised sellers near a point (a few rows are mis-geocoded). Power Buy isn't in it although it sells Apple.
+- **UOB's newer sub-pages have no `.json` twin** (the twin path returns ≈ 490 bytes): render headless with `--virtual-time-budget=15000`. Tier tables come out of the DOM as `|`-separated cells.
+- **ttbbank.com/link/<slug>** for the Oct 2026 Apple pages (`ip18-sep26`, `com7-oct26`, `applestore-aug26`) returned an almost empty `pageProps`; read them through the category listing instead (not done).
+- **Usage limits**: four parallel researchers at ≈ 450–600k tokens each ran into the session limit on 3 Oct; three left only raw dumps. Ask them to write the report early and extend it, not at the end.
+
+### Apple products — second pass (3 Oct)
+
+- **ttb pages**:
+  - The working URL for any slug is `ttbbank.com/th/promotion/credit-card/zero-pay-plan/<slug>`; it worked for every slug tried, shopping ones included, and returns the full content.
+  - Listing tiles (`props.pageProps.contents.contents[]`) carry an empty `detail_th`.
+  - On the page, the text is in `props.pageProps.content.payload.payload.components`, a tree of `data` objects with `th` strings. Walk it and keep the `th` values. The `a5_…` / `a11_…` names only appear in the `mapper`.
+  - Hub pages such as `ip18-sep26` are only tiles; the per-shop pages (`ip18<shop>-sep26`) are in the `href`s inside `detail_th`.
+- **CardX `template`**:
+  - It is a list of Strapi components; walk every string. Each hit appears twice, with `locale` `th-TH` and `en`.
+  - Shop × rate × SMS tables are often **images** (`table1_<slug>_….jpg` on `cdx-prod-ssc-frontend.cardx.co.th`; curl works). Find them in the `src=` attributes and read them.
+  - An empty `subProductCode` means no card restriction is recorded.
+- **KBank pages, faster**: one headless Chrome with `--remote-debugging-port`, navigating page after page over CDP and reading `document.body.innerText` after ≈ 16 s. The T&C tab's text is already in it, with no clicking. ≈ 15 s a page.
+- **KBank IT-shop pages exclude Apple** in one T&C line ("การแบ่งจ่ายสินค้า Apple ไม่สามารถร่วมรายการ…"). Grep for it before counting a KBank shop page for an Apple product.
+- **Same SMS code, two banks**: `NIP` is both KBank's iPhone 18 code (→ 4545888) and CardX's operator-shop code (→ 4545777). Always give the number with the code.
+- **centralthe1card.com**:
+  - A promotion appears in the list only once it's published. Check for `startDate` after today to see what's coming.
+  - A successor's code can surface first inside an older promotion's `conditionContent` (`PWB4` in `pwd-iphone18-202609`).
+- **Earlier dumps in the session scratchpad**: the KBank campaign list (`kb_all.json`) from an earlier researcher was reusable. Look in `scratchpad/*/campaigns/` before re-rendering.
+
+- **TrueMoney campaign pages** (`truemoney.com/a/<slug>/`) read fully through r.jina.ai. The **period and tier tables are only in the terms block** near the end ("เงื่อนไขการผ่อนชำระและรับเงินคืน"). The page's tile title can still show the previous campaign's dates (the `redirect-iphone` tile said 1 Jul – 30 Sep while the page ran 12 Sep – 30 Nov).
+- **iStudio by Copperwired and iStudio by SPVi are Shopify stores**: `/products.json?page=N` and `/collections/<c>/products.json` (via r.jina.ai) give every variant's `price`, `compare_at_price` and `available`. Filter on `vendor` = Apple to drop accessories.
+- **iStudio by UFicon** has its own API behind `uficon.com/<model>` (`price.base`, `discount`, `monthlyPrice`/`monthlyTerm`). Its CMS pages (`/pages/trade-in`, `/pages/ujoy`) come as JSON with the full content.
+- **Lazada's catalogue search data** (`mods.listItems`: `priceShow`, `originalPrice`, `sellerName`, icons such as "Voucher save 8%"). Several calls hit Lazada's punish/captcha page, so retry or space them.
+- **Power Buy**: the site search and promotion pages are blank to curl and r.jina.ai; headless Chrome with the desktop agent and `--virtual-time-budget=25000` renders `/th/brand/apple` with prices.
+- **ttb new-card listing**: `/th/promotion/credit-card/new-card?page=1` → `pageProps.contents.contents[]` (slug, dates). Each page's full terms are in `pageProps.content.payload.components[…].data.content.th`.
+- **CardX welcome offers**: search the index for `ลูกค้าใหม่` / `บัตรหลักใบแรก`; the terms are in `template[].detail` of the `tmp.condition-tmp` component.
+- **specialoffers.jcb** can refuse TLS from this machine (`SSL_ERROR_SYSCALL`) an hour after working. Save the listing JSON and detail pages the first time.
+- **UnionPay coupons**: the October QR 6% coupon and its Nov–Jan successors share consecutive numbers (`260723112620…23`). `getCoupon` returns each month's own caps.
+- **studio7thailand.com and bnn.in.th (Com7)** drop or block the Hong Kong egress, but plain curl works from a Thai IP (3 Oct, after the user switched networks; `ipinfo.io/country` shows the egress). Studio7's `/collection/<model>` and `/pages/<slug>` and BaNANA's `/mkt/<slug>` carry their text in the HTML. Studio7's per-bank pages (`/pages/uob-credit-card-promotion` and others) and BaNANA's search and voucher pages render client-side.
+- **Com7 (Studio7 / BaNANA / BKK / Kingkong) in-store bank terms are on monthly posters** ("APPLE PRODUCT … แบ่งจ่ายสบายๆ", 1–31 Oct 69), not in the sites' HTML. The user screenshots them when asked. **Buy Now, Trade Later** trade-in figures aren't published anywhere; staff quote them at the store (user, 2026-10-03).
+- **A site that blocks this machine**: ask the user to switch networks. On 3 Oct a Thai egress opened studio7thailand.com and bnn.in.th, which had dropped the Hong Kong one.
+
+## UNIQLO (5 Oct 2026)
+
+- **Some banks publish a merchant campaign only on the merchant's site.** UOB's `UNO` isn't in `data-promotion.json` and Krungsri's `UNQ` isn't in its listing JSON or sitemap; both live only on `uniqlo.com/th/th/special-feature/cp/promotion/<bank>`. Check the merchant's own bank hub before concluding a bank has nothing.
+- **Same code, different banks**: KTC's UNIQLO points code is also `UNQ` (→ 061-384-5000; Krungsri's → 081-927-9999). Always print the number with the code.
+- **Mall-wide points burns reach mall tenants that no list names.** Krungsri `all-plaza` (13% / 15% at every plaza-zone shop of Central malls) and KBank `BCB` (10% at shops in participating malls) cover a merchant through its mall. Check where the merchant's branches sit, then look for the mall's campaigns.
+- **A merchant's payment FAQ settles the network question first.** UNIQLO's card-logo image (Visa, Mastercard, JCB) ruled out every UnionPay and wallet offer before any bank page was read.
+- **"Not combinable" clauses sit in specific boxes.** On UNIQLO's Krungsri page the line is in the points boxes, not the cashback box; read which box carries it before telling the household two offers won't stack. Lotus's SMP1 page is the one place that spells out what the clause means (spend already counted in the same company's other promotions).
+- **Lotus's invited pages carry the SMS number only in a small banner** (`…-sms-(2).webp`; convert with `sips`), and the weekly codes (`SHJB40`–`SHJB43`) are in the page text.
+- **Visa Thailand's perks call is a POST**, and **WebFetch reached `specialoffers.jcb`** when curl and r.jina.ai couldn't on 5 Oct. Mastercard Priceless was down for maintenance all day.
+

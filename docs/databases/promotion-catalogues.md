@@ -50,6 +50,8 @@ Thai narrative, card and code names verbatim. Say where a figure is third-party 
 | `Sriphat Medical Center — Oct 2026` | 🏥 | 2026-10-02 |
 | `Yunomori Onsen & Spa — Oct 2026` | ♨️ | 2026-10-02 |
 | `Thaiticketmajor — Oct 2026` | 🎫 | 2026-10-03 |
+| `Apple Products — Oct 2026` | 🍎 | 2026-10-03 |
+| `UNIQLO — Oct 2026` | 👕 | 2026-10-05 |
 
 From October the Central The 1 page is **`The 1 — <Mon YYYY>`**. It covers the The 1 membership (points, member-only deals, network coupons in the The 1 app) as well as the Central The 1 credit card, and says where the two differ (user, 2026-10-01: "they overlap mostly but can be different in some aspects").
 
@@ -75,6 +77,10 @@ From October the Central The 1 page is **`The 1 — <Mon YYYY>`**. It covers the
 - **Sriphat posts as a hospital, not as government**, although KTC lists it as a government hospital: its ฿800 (Sep 2026) and CMEx's ฿450 counted in NW3, which was reconciled to UCHOOSE's eligible list. Its MCC isn't published; 8062 is the household's reading.
 - **Hospital earning traps**: every AEON card withholds points at MCC 8062 (from 11 Nov 2025); KTC UnionPay gets no points there either; Central The 1 REDZ and Lotus's earn nothing if a hospital posts as 9399, while Krungsri Card keeps hospitals even under government codes.
 - **Hospital and spa quotas are shared between pages**: HBF and LHB2 / LFS4 pool hospital and spa spend on one account, and the UnionPay QR 6% (฿300 per card a month) is shared with every QR merchant.
+- **UNIQLO takes only Visa, Mastercard and JCB** (Oct 2026): no UnionPay online (and none named in store), no QR paid from a credit card, e-wallets not officially supported, full payment only online. So KTC UnionPay, AEON UnionPay, the UnionPay QR 6%, Bangkok Bank's UnionPay 2% and every wallet route are out there.
+- **UNIQLO's bank campaigns pay per slip from ฿3,000 and never add slips up**: ฿150 per ฿3,000 (CardX ฿120, KBank ฿100), then a jump at ฿10,000 (Krungsri ฿700 / ฿800 on JCB, CardX ฿700) or ฿12,000 (UOB, ttb ฿800; KBank ฿600). A ฿100 UNIQLO coupon can pull a slip under a tier. The household's UNIQLO slips have been ฿600–2,000, below every tier.
+- **UNIQLO's Chiang Mai stores post under UNIQLO's own name** (`UNIQLO-C.FESTIVAL CHIA`, `UNIQLO-CENTRAL CHIANGMA`); uniqlo.com posts as `UNIQLO THAILAND CO.,LT Pathum Wan THA` and earned UOB World's online ×5.
 - **Yunomori has no Chiang Mai branch** (Sukhumvit 26, Sathorn 10, Pattaya), so its page is for trips; it ends with a short list of Chiang Mai spa offers.
 - **Thaiticketmajor charges 3% on every online method** (card, QR, TrueMoney, ShopeePay) plus ฿30 a ticket, none refundable (Oct 2026). A card only beats paying with no fee when its reward tops 3%; the merchant's own per-slip deals (CardX ฿200, KBank ฿120, Central The 1 ฿100, once a month each) do, so the plan splits a multi-ticket purchase into one order per card. Visa and Mastercard are certain there; JCB and UnionPay acceptance is unconfirmed. No TTM event is in Chiang Mai, so its page is for trips and TTM LIVE streams.
+- **Apple Products is a product page, not a merchant page** (user, 2026-10-03: "not specific to any merchants … mostly I'm looking for resellers who offer the best deal"). Its plan ranks card × reseller routes for a reference purchase (iPhone 18 Pro ฿48,900), and adds a short list for small items. apple.com/th takes only Visa, Mastercard and Amex, and its 0% plan leaves out KTC and AEON. The money is in the issuers' iPhone launch deals at resellers, mostly on installments, and in Shopee and Lazada codes.
 - Bank discount codes are one per order and "not combinable"; the net charge still counts toward the card's own accumulating campaigns.

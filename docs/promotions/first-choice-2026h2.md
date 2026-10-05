@@ -39,6 +39,7 @@ NW3, ON3 and IS3 ended 30 Sep, and their successors run 1 Oct – 31 Dec 2026. D
 - **NW4 enrolment**: NW4 registrants with more than ฿10,000 of NW3 spend in both Jul and Aug 2026 were enrolled for all of Oct–Dec. The household's July and August NW3 credits (฿1,000 and more) put it well past that.
 - **ON4's bank examples fix the joins**: ฿2,800 → ฿25, ฿17,500 → ฿270, ฿105,000 and ฿120,000 → ฿1,890, ฿150,000 → ฿2,500. It marks `% cb` like ON3; travel agents and airlines bought through the apps belong to TR3.
 - **IS4** is credited within 5 business days and can't also count toward NW4.
+- **A U PLAN conversion keeps the original charge counting** toward NW4 and IS4, once, as the full-amount slip; merchant installments (personal-loan line) never count, and no billed term is new spend (user, 2026-10-03). See [[../concepts/installment-reward-campaigns#U Plan — Krungsri / First Choice]].
 
 ## Months
 

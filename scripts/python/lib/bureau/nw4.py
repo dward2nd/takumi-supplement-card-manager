@@ -135,7 +135,10 @@ class NW4Promotion(NW3Promotion):
         "and Aug 2026 were enrolled for the whole of Oct–Dec.",
     )
     rules: ClassVar = (
-        Rule("Installments (ผ่อน) — including 0% merchant plans on the personal-loan line",
+        # The term rows never count; the original charge is what a U PLAN conversion keeps (user, 2026-10-03).
+        Rule("Merchant installments (ผ่อนกับร้านค้า), booked to the personal-loan line, and every billed term "
+             "(`NN/NN`). A full-amount charge later converted through U PLAN still counts, once, as the "
+             "original charge: sure for 0% plans, not yet confirmed for plans with interest",
              test=lambda tx: promotions.is_installment(tx.name)),
         Rule("Marketplaces: Shopee, Lazada, TikTok (ON4 covers them)", r"SHOPEE(?! ?FOOD)|LAZADA|TIKTOK"),
         Rule("Food delivery: LINE MAN, ShopeeFood, Robinhood, Bolt, and everything in the Grab app "

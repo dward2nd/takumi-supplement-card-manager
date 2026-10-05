@@ -37,7 +37,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Callable
 
-from .. import holders, ledger
+from .. import holders, installment_campaigns, ledger
 from ..ledger import is_bill_payment_row, is_cashback_row
 from .model import CardAccount, Statement, StatementLine
 
@@ -264,6 +264,8 @@ def plan_account(
                 continue
             plan.recorded += 1
             _stamp(plan, holder, row, line)
+            if (w := _conversion_warning(holder, row, line)):
+                plan.warnings.append(w)
             if row["transaction_date"] != line.date:
                 plan.near_matches.append({"holder": holder, "row_id": row["id"], "row_date": row["transaction_date"], **_line(line)})
             if row["name"].startswith(PRIMARY_PREFIX.strip()):
@@ -296,6 +298,8 @@ def plan_account(
             credit(owner, line.amount)
             plan.recorded += 1
             _stamp(plan, owner, row, line)
+            if (w := _conversion_warning(owner, row, line)):
+                plan.warnings.append(w)
             if near or row["transaction_date"][:10] != line.date:
                 plan.near_matches.append({"holder": owner, "row_id": row["id"], "row_date": row["transaction_date"], **_line(line)})
             if owner != PRIMARY and not bank_credit and not row["name"].startswith(PRIMARY_PREFIX.strip()):
@@ -388,6 +392,20 @@ def _guess_owners(account: CardAccount, unknown: list[str], card: str, rows: dic
                 best.append(f"{h} {hits}/{len(lines)}")
         hints.append(f"{num} matches " + (", ".join(best) if best else "no one's rows"))
     return "; ".join(hints)
+
+
+def _conversion_warning(holder: str, row: dict, line: StatementLine) -> str | None:
+    """A U PLAN charge or term recorded as if it earned points, or without the
+    campaign note later terms inherit (Nuta's Roojai term once read "personal-loan
+    line": only a checkout installment books there)."""
+    if line.conversion not in ("charge", "term"):
+        return None
+    u = installment_campaigns.by_id("u-plan")
+    if row.get("multiplier") == u.points_default and u.note_contains in (row.get("note") or ""):
+        return None
+    return (f"{holder}'s {row['name']!r} ({row['transaction_date']}, ฿{row['amount']:,.2f}) is a U PLAN "
+            f"{line.conversion} (PLAN ON DEMAND on the card line): set {u.points_default} and the note "
+            f"{u.note!r} with /update-transaction")
 
 
 def _line(line: StatementLine) -> dict:

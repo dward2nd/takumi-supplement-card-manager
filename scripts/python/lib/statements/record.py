@@ -44,7 +44,7 @@ import dataclasses
 import datetime as _dt
 from pathlib import Path
 
-from .. import card_repo, notion_client, notion_files, points_account, promotions
+from .. import card_repo, installment_campaigns, notion_client, notion_files, points_account, promotions
 from .. import notion_blocks as nb
 from ..bill_cycle import PatternNotFoundError, cycle_for_month, pattern_for_card
 from ..bill_draft import DRAFT_PREFIX, existing_bill
@@ -172,6 +172,11 @@ def _classify(card: str, line: StatementLine) -> tuple[str | None, str | None, f
     unset, per the household convention for rows that earn no cashback."""
     if line.kind != "charge":
         return "×0", None, None
+    if line.conversion:
+        # Re-split on the card line (U PLAN): neither the charge nor its terms earn
+        # points. /populate-installment inherits the plan from the campaign note.
+        u = installment_campaigns.by_id("u-plan")
+        return u.points_default, u.note, None
     c = promotions.classify(card, _dt.date.fromisoformat(line.date), line.name)
     return c.points_override, c.note, c.cashback_percent or None
 

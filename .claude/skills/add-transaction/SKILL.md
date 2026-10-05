@@ -237,7 +237,7 @@ The user runs First Choice cashback as short-duration promos and patches rows ma
 
 **Installments on First Choice earn nothing — two credit lines, not one.** The card runs a credit-card line *and* a personal-loan line simultaneously (user, 2026-08-10). A pay-in-full purchase lands on the card line and earns normally; a **merchant-offered installment** (0% interest, up to 10 months) is booked against the **personal-loan** line, which earns no points and no cashback at all. That's a different product doing the lending, not a reward exclusion — so there's no promo override to look for.
 
-The other shape is **U Plan**: pay in full at the merchant (so it starts on the card line), then ask Krungsri to re-split into 0% over 3 months. Those rows earn no points but **may** earn cashback per the active promotion. U Plan is tracked as a plan-level campaign — see [[../../docs/concepts/installment-reward-campaigns]] and [[../add-installment/SKILL.md|/add-installment]]'s `campaign` key.
+The other shape is **U Plan**: pay in full at the merchant, then ask Krungsri to re-split it; the charge stays on the card line for good (the statement's `FIRST CHOICE PLAN ON DEMAND` block), never the personal-loan line (0% over 3 months, or with interest over 4–10). Those rows earn no points but **may** earn cashback per the active promotion, and the original charge still counts toward NW4 and the like. U Plan is tracked as a plan-level campaign — see [[../../docs/concepts/installment-reward-campaigns]] and [[../add-installment/SKILL.md|/add-installment]]'s `campaign` key.
 
 ### Installment terms on Krungsri cards earn nothing (`KrungsriFamilyCard`)
 
@@ -250,7 +250,7 @@ Card-level flag, so `auto_classify` applies it automatically — reason tag `<ba
 Some plans belong to a bank campaign that withholds points for the plan's whole life. Both known campaigns are post-purchase conversions, so **the merchant string can't reveal them** and `auto_classify` cannot infer them:
 
 - **`dee-jang`** — CardX ดีจังผ่อน 0%, typically **4** terms, `×0` points, cashback unaffected. Only plans in this campaign lose points; other CardX JCB installments earn normally, which is why this is not a card flag.
-- **`u-plan`** — Krungsri U Plan 0%, **3** terms, `×0` points, cashback varies by promotion.
+- **`u-plan`** — Krungsri U Plan: 0% over **3** terms, or with interest over 4–10. `×0` points, cashback varies by promotion. The original charge still counts toward Krungsri's cashback campaigns (NW4, IS4), once.
 
 These are declared at plan start via [[../add-installment/SKILL.md|/add-installment]]'s `campaign` key and then inherited by [[../populate-installment/SKILL.md|/populate-installment]] from the `Note` on earlier terms. If you're writing an installment row through *this* skill instead, set `multiplier: "×0"` and copy the campaign's exact note from `scripts/repositories/installment-campaigns/<id>.yaml` — the note is what makes future terms inherit correctly.
 

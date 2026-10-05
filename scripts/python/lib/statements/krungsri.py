@@ -20,6 +20,20 @@ First Choice appends a personal-loan block (its second credit line) closing
 with `Total Payment Due For Personal Loan <total>`; it becomes its own account
 with section number `LOAN`.
 
+A charge re-split into installments on the card line (PLAN ON DEMAND, the
+household's U PLAN) stays in its card's section, followed by its reversal
+`REV-FC PLAN ON DEMAND: <merchant>` under the heading of conversions to
+installments. Its terms print after `Transaction Amount`, grouped by card under
+headers without the space (`4784 48XX XXXX 1064(BAIBOON BOONMAPA)`):
+
+  <charge posted> <billed> FIRST CHOICE PLAN ON DEMAND <principal left> 001/003 <term>
+  <merchant, cut to 26 characters>
+  ค่างวดต่อเดือน = <term>
+
+A term goes to its card's section, dated the day it's billed (as the household
+dates terms) and named `<merchant> 01/03`; the charge, the reversal and the
+term are tagged with their `conversion` part.
+
 Payments and adjustments belong to no card section; they're attached to the
 account's own card number — the first masked number in the text. Lines read
 `TRANS POSTING DESCRIPTION AMOUNT`, dated `DD/MM/YY` in either the Christian
@@ -30,7 +44,9 @@ amount in the description — `… CA (21.40 USD) 730.42` — which moves to the
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 
+from .. import installments
 from .model import CardAccount, CardSection, RewardSummary, Statement, StatementLine, StatementParseError, parse_amount
 from .parser import StatementParser
 
@@ -50,6 +66,11 @@ _ADJ_AMOUNT = re.compile(r"Adjustment Amount " + _AMT + "$")
 _CARD_TOTAL = re.compile(r"Total Payment Due For Credit Card " + _AMT + "$")
 _LOAN_TOTAL = re.compile(r"Total Payment Due For Personal Loan " + _AMT + "$")
 _JOB_CODE = re.compile(r"_([A-Z]{3})_\d{8}_")
+_PLAN_SECTION = re.compile(r"^\d{4} \d\dXX XXXX (\d{4}) ?\(.+\)$")
+_PLAN_TERM = re.compile(r"^(\d\d)/(\d\d)/(\d\d) (\d\d)/(\d\d)/(\d\d) (.+? PLAN ON DEMAND) ([\d,]+\.\d\d) "
+                        r"(\d{1,3})/(\d{1,3}) " + _AMT + "$")
+_PLAN_END = re.compile(r"^SUBTOTAL OF |PLAN ON DEMAND / Total")
+_PLAN_REVERSAL = re.compile(r"^REV-\w+ PLAN ON DEMAND\b")
 
 
 def _year(yy: str) -> int:
@@ -87,6 +108,33 @@ def _line(m: re.Match, kind: str | None = None) -> StatementLine:
     return StatementLine(date=_iso(m.group(1), m.group(2), m.group(3)), name=name, amount=amount, kind=kind, note=note)
 
 
+def _term(m: re.Match, merchant: str) -> StatementLine:
+    n, total = int(m.group(9)), int(m.group(10))
+    return StatementLine(
+        date=_iso(m.group(4), m.group(5), m.group(6)),
+        name=installments.format_name(merchant or m.group(7), n, total),
+        amount=parse_amount(m.group(11)),
+        kind="charge",
+        note=f"{m.group(7)} {n}/{total}, plan dated {_iso(m.group(1), m.group(2), m.group(3))}: "
+             f"฿{m.group(8)} of principal before this term.",
+        conversion="term",
+    )
+
+
+def _mark_conversions(lines: list[StatementLine]) -> list[StatementLine]:
+    """Tag each reversal, and the charge of the same date and amount it takes back."""
+    out = list(lines)
+    for i, r in enumerate(out):
+        if r.amount >= 0 or not _PLAN_REVERSAL.match(r.name):
+            continue
+        out[i] = replace(r, conversion="reversal")
+        for j, c in enumerate(out):
+            if c.conversion is None and c.kind == "charge" and c.date == r.date and abs(c.amount + r.amount) < 0.005:
+                out[j] = replace(c, conversion="charge")
+                break
+    return out
+
+
 def parse(text: str) -> Statement:
     lines = [l.strip() for l in text.splitlines()]
     statement_date, due_date = _dates(lines, text)
@@ -100,6 +148,7 @@ def parse(text: str) -> Statement:
     sections: dict[str, dict] = {}
     order: list[str] = []
     state, current, loan = "start", None, False
+    plan_owner: str | None = None   # whose installment terms are being listed
 
     def section(num: str) -> dict:
         if num not in sections:
@@ -113,12 +162,13 @@ def parse(text: str) -> Statement:
             CardAccount(
                 product=product,
                 total=total,
-                sections=tuple(CardSection(n, sections[n]["prev"], tuple(sections[n]["lines"])) for n in order),
+                sections=tuple(CardSection(n, sections[n]["prev"], tuple(_mark_conversions(sections[n]["lines"])))
+                               for n in order),
             )
         )
         sections, order = {}, []
 
-    for ln in lines:
+    for i, ln in enumerate(lines):
         if (m := _PREV.search(ln)):
             state = "payments"
             section("LOAN" if loan else account_number)["prev"] = parse_amount(m.group(1))
@@ -145,6 +195,18 @@ def parse(text: str) -> Statement:
         if (m := _SECTION.match(ln)) and state == "purchases":
             current = section(m.group(1))
             continue
+        if state == "adjustments":
+            if (m := _PLAN_SECTION.match(ln)):
+                plan_owner = m.group(1)
+                continue
+            if _PLAN_END.search(ln):
+                plan_owner = None
+                continue
+            if (m := _PLAN_TERM.match(ln)):
+                nxt = lines[i + 1] if i + 1 < len(lines) else ""
+                merchant = "" if _LINE.match(nxt) or re.match(r"[฀-๿]", nxt) else nxt
+                section(plan_owner or account_number)["lines"].append(_term(m, merchant))
+                continue
         if not (m := _LINE.match(ln)):
             continue
         owner = "LOAN" if loan else account_number

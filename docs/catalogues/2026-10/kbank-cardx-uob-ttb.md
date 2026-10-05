@@ -37,6 +37,7 @@ Confidence labels: **V** = verified on the issuer's official page or data; **V-i
 | 4 | **UOB EPW538** e-commerce/e-wallet | ended 30 Sep | Successor: **SPW796 "ช้อปออนไลน์ คุ้มทุกคลิก" (Q4)**. Same ladder (฿100 per ฿5,000 a month, ฿200/month, ฿600 campaign), same apps, same SMS **`EC`** → 4545111, same ref 26UA303. The registration window is 1 Oct–31 Dec, so re-register |
 | 5 | **UOB OLQ3** online 0% installments + cashback | ended 30 Sep | Successor: **`OLQ4`** (IPW756), 1 Oct–31 Dec, identical ladder ฿100–2,000 |
 | 6 | **UOB MPW692** (Makro PRO 37th) | ended 29 Sep | **No UOB Makro/Makro PRO campaign for October in UOB's index** (as of 1 Oct 03:00). Makro i-Plan MPW611 also ended 30 Sep with no successor |
+| 6a | **Update 3 Oct: UOB MPW823**, the UOB Makro 26th "Gold Mission" (1 Oct – 31 Dec, SMS `UMK26`) | new | It wasn't in the 1 Oct sweep; the user found it on 3 Oct. Terms in [[../campaigns]] (UOB) and on the `Makro — Oct 2026` page · [page](https://www.uob.co.th/personal/credit-cards/promotions/shopping-lifestyle/makro-26th-mpw823-1226.page) |
 | 7 | **ttb Hypermarket `BMG`** (Big C, GO, **Makro PRO**) | ended 30 Sep | Successor: **`BGO`** (1 Oct–31 Dec, same ฿50/100/450/1,500 tiers, ฿1,500 cap). **Big C + GO Wholesale only: Makro PRO dropped** |
 | 8 | **ttb Shopee code** | `TTBSEP` | **`TTBOCT`** ฿200 off ≥ ฿2,000. New: Shopee Premium `TTBPREM10` ฿650/฿2,500 and **`10TTBPREM` ฿1,800/฿6,000 on 10 Oct only** |
 | 9 | CardX Shopee | — | **`CARDXSAT`** every Saturday from 3 Oct (฿170 off ≥ ฿1,500) and Shopee Mall **`CXSPM10`** ฿300 off ≥ ฿2,000 |

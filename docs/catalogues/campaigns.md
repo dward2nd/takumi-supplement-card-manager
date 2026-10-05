@@ -9,8 +9,8 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 - **ended**: look for the successor;
 - **not published yet**: look again.
 
-- **Pages**: **M** Makro · **G** GO Wholesale · **S** Shopee · **T** The 1 (Central The 1 in Sep) · **L** Lazada · **K** TikTok Shop. Lazada and TikTok Shop were Sep only. · **H** Sriphat Medical Center · **Y** Yunomori Onsen & Spa (both from Oct 2026) · **E** Thaiticketmajor (event tickets, from 3 Oct 2026).
-- **Detail**: each month's research reports: [[2026-10/krungsri-group|Krungsri group]] · [[2026-10/the1|The 1]] · [[2026-10/kbank-cardx-uob-ttb|KBank / CardX / UOB / ttb]] · [[2026-10/ktc-aeon-other-banks-networks|KTC / AEON / other banks / networks]] · [[2026-10/merchants-wallets|merchants and wallets]] · [[2026-10/all-spend|offers that name no merchant]] · hospital and spa (2 Oct): [[2026-10/sriphat|Sriphat]] · [[2026-10/yunomori|Yunomori]] · [[2026-10/health-beauty-spa|health, beauty and spa campaigns]] · [[2026-10/all-spend-hospital-spa|offers that name no merchant, at a hospital and a spa]] · Thaiticketmajor (3 Oct): [[2026-10/thaiticketmajor|the merchant]] · [[2026-10/ticketing-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/ticketing-other-banks-networks|other banks and networks]] · [[2026-10/all-spend-ticketing|offers that name no merchant, at a ticket agency]].
+- **Pages**: **M** Makro · **G** GO Wholesale · **S** Shopee · **T** The 1 (Central The 1 in Sep) · **L** Lazada · **K** TikTok Shop. Lazada and TikTok Shop were Sep only. · **H** Sriphat Medical Center · **Y** Yunomori Onsen & Spa (both from Oct 2026) · **E** Thaiticketmajor (event tickets, from 3 Oct 2026) · **A** Apple Products (Apple and its resellers, from 3 Oct 2026) · **U** UNIQLO (from 5 Oct 2026).
+- **Detail**: each month's research reports: [[2026-10/krungsri-group|Krungsri group]] · [[2026-10/the1|The 1]] · [[2026-10/kbank-cardx-uob-ttb|KBank / CardX / UOB / ttb]] · [[2026-10/ktc-aeon-other-banks-networks|KTC / AEON / other banks / networks]] · [[2026-10/merchants-wallets|merchants and wallets]] · [[2026-10/all-spend|offers that name no merchant]] · hospital and spa (2 Oct): [[2026-10/sriphat|Sriphat]] · [[2026-10/yunomori|Yunomori]] · [[2026-10/health-beauty-spa|health, beauty and spa campaigns]] · [[2026-10/all-spend-hospital-spa|offers that name no merchant, at a hospital and a spa]] · Thaiticketmajor (3 Oct): [[2026-10/thaiticketmajor|the merchant]] · [[2026-10/ticketing-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/ticketing-other-banks-networks|other banks and networks]] · [[2026-10/all-spend-ticketing|offers that name no merchant, at a ticket agency]] · UNIQLO (5 Oct): [[2026-10/uniqlo|the merchant]] · [[2026-10/uniqlo-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/uniqlo-uob-kbank-ttb-others|UOB, KBank, ttb, CardX, other banks]] · [[2026-10/all-spend-uniqlo|offers that name no merchant, at UNIQLO]].
 - **Figures** are the October terms unless marked; the reports have every tier and source.
 
 ## First Choice and XU
@@ -49,7 +49,11 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | JSU | Krungsri JCB at Tops: ฿100 per slip ≥ ฿1,000 | 1 Aug – 31 Oct | last month | T | — |
 | CRD | Central Midnight Sale / Robinson Pay Day: store coupon + card cashback | 23 Sep – 4/5 Oct | ends 4–5 Oct | T | — |
 | **HHQ4** | Thai Watsadu / BnB per slip ฿130–4,100 | — | new, 1 Oct – 31 Dec | T | — |
-| LOTA / LOTB · UNQ | Lotus's / UNIQLO (outside these pages) | — | from Oct | — | `lotus_exclusive.py` · [[../promotions/uniqlo-2026]] |
+| LOTA / LOTB | Lotus's (outside these pages) | — | from Oct | — | `lotus_exclusive.py` |
+| **UNQ** | UNIQLO per slip ฿150 per ฿3,000 to ฿450; from ฿10,000 ฿800 on Krungsri JCB, ฿700 others; cap = the top tier per primary account a month; register once (081-927-9999); no "not combinable" line in its cashback box; Krungsri publishes no page of its own | — | new, 1 Oct 2026 – 28 Feb 2027; registered | U | [[../promotions/uniqlo-2026]] · `uniqlo.py` |
+| **J SHOPPING 3×** · JCB Ultimate 5× | Krungsri JCB Platinum 3× at UNIQLO and Japanese brands, ≤ 400 bonus points a month; JCB Ultimate 5× (1,600) from 21 Oct | — | 1 Oct 2026 – 31 Dec 2027; **UNIQLO only to 28 Feb 2027** | U | — |
+| **all-plaza** | points → 13% Mon–Thu / 15% Fri–Sun on a slip ≥ ฿1,000 at every plaza-zone shop of Central malls (both Chiang Mai Centrals), USSD `*465*12581*…#` the same day; not online | — | new, 1 Oct – 31 Dec | U | — |
+| **JCLD** | Krungsri JCB: 1 Japan-tour draw right per full-pay slip ≥ ฿1,000; register once | — | new, 1 Oct 2026 – 31 Jan 2027 | U | — |
 | Points: Online Lover, pay with points, PT26, Makro e-voucher | Shopee codes 899 → ฿100…; points → cashback ฿0.10; 1,100 → ฿100 Makro | all year | continues | M S | — |
 | **MED1 / MED2** | hospital per slip ฿170 (฿15k) … ฿5,500; +฿1,500 at ฿700k | — | new, 1 Oct – 31 Dec; Bangkok hospitals only | H | — |
 | **PT26** | points → cashback ฿0.10/pt at medical and personal-care MCCs (8062, 8011, 8099, 7230, 7297, 7298 …), primary cards | all 2026 | continues | H Y | — |
@@ -62,7 +66,8 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | LBS3 | big-ticket ladder incl. Makro (every channel), Thai Watsadu, Power Buy | 1 Sep – 31 Dec | continues | M T | [[../promotions/lotuss-lbs3]] · `lbs3.py` |
 | LMK2 | ≥ ฿800,000 of Makro PRO → up to ฿5,000 (first 100) | 1 Sep – 31 Dec | continues | M | — |
 | LYY1 | online / delivery ladder (not registered) | 1 Sep – 31 Dec | continues | S L K | — |
-| SMP1 · **SMT2** | department stores / B2S / OfficeMate ladder · ฿200 at ≥ ฿2,000 in Oct | SMP1 1 Sep – 31 Dec | SMT2 new, Oct only | T | — |
+| SMP1 · **SMT2** | department stores, fashion (**names UNIQLO**), cosmetics, IT, B2S / OfficeMate ladder: ฿70 per ฿3,500 a month … · ฿200 at ≥ ฿2,000 in Oct (first 500, register before spending) | SMP1 1 Sep – 31 Dec | SMT2 new, Oct only; **neither registered** | T A U | — |
+| **ช้อปฮีลใจ** (`SHJB40`–`SHJB43`) | invited only: 50% of one slip ≥ ฿200, ฿100 a week, at Watsons, UNIQLO, MR.D.I.Y, Grab Delivery, KFC, Sushiro; register every Sunday 10:00, first 800 | — | 4–25 Oct; Nov rounds 1–29 Nov for 3 slips 1–15 Oct | U | — |
 | LOTUSCR9 → **LOTUSCR10** → LOTUSCR11 | ShopeeFood ฿60 off ≥ ฿250 | Sep code | Oct code | S | — |
 | Shopping-bag promo | ฿70,000 of spend → a suitcase (invited) | 1 Sep – 30 Nov | continues | M | — |
 | LHB2 | health, beauty, spa, pets ladder: ฿65 at ฿5,000, ฿130 per ฿9,000 (≤ ฿520), up to ฿3,600; public and private hospitals | 1 Jul – 31 Oct | **last month**; successor not published; **not registered** | H Y | — |
@@ -117,7 +122,8 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | Double Day **DBD** | Shopee + Lazada + TikTok on 3 days: ฿70–1,600 (not the KBank Shopee card) | 8–10 Sep | **final round 9–11 Oct** | S L K | — |
 | PLUSTINUM Season 3 · monthly e-coupon | ≥ ฿30,000 → Starbucks ฿400 · ≥ ฿10,000 → a ฿200 coupon on the 15th | Aug–Oct | last month (re-register for Oct) | M G H Y | — |
 | KBank Shopee card | ×5 / ×10 K Point, Coins 1%, 1,000 K Point → ฿150 code | standing | continues | S | — |
-| UQN | UNIQLO per slip (not registered) | — | from Oct | — | [[../promotions/uniqlo-2026]] |
+| UQN | UNIQLO per slip ฿100 / 200 / 300 at ฿3,000 / 6,000 / 9,000, ฿600 from ฿12,000; +200 / 400 / 600 K Point; no "not combinable" line | — | new, 1 Oct 2026 – 28 Feb 2027; registered on every KBank card 1 Oct | U | [[../promotions/uniqlo-2026]] · `uniqlo.py` |
+| **BCB** | K Point → 10% at any shop in participating malls (Central Pattana included; names no shop); SMS every time | 1 Aug – 31 Dec | continues | U | — |
 | **LINE Points on-top** | KBank LINE Points card: +50 points at ฿5k–14,999 a month, +200 at ≥ ฿15k; +800 at ฿80k cumulative (on the card's 1% anywhere) | 1 Sep – 31 Dec | continues | H Y | — |
 | HP4 / MHP4 / HL · BD4 | hospital cashback (Bangkok lists) · Bangkok Hospital group installments 0% × 6 + ฿250–3,000 (Bangkok Hospital Chiang Mai) | — | new, 1 Oct – 31 Dec | H | — |
 | K PLUS hospital 0% | any MCC 8062 slip ≥ ฿50,000 → 0% for 3 months | — | 1 Oct – 31 Dec | H | — |
@@ -138,6 +144,7 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | CARDXOCT | ShopeeFood ฿50 off ≥ ฿280 | Sep code | Oct code | S | — |
 | **HPB** · `topmain-hospital` · hospital installments | per slip from ฿10k at listed hospitals (Bangkok Hospital Chiang Mai in HPB) | — | new, 1 Oct – 31 Dec | H | — |
 | NHP1–NHP5 | POINTX 1–5× the slip → 10–50% at participating MCC 8062 hospitals (฿0.10/pt) | 1 Apr – 31 Dec | continues | H | — |
+| UQC / UQB (Jul–Sep: ฿100 per ฿3,000, ฿700 from ฿12,000) → **UQC / UQB** | UNIQLO per slip ฿120 per ฿3,000, **฿700 from ฿10,000**, ฿700 a month per person; register once per card (→ 4545777); paid in two rounds (by 31 Jan / 30 Apr 2027) · UQB POINTX = slip → 10% (SCB WEALTH weekends 20%) | 1 Jul – 30 Sep | new round 1 Oct 2026 – 28 Feb 2027 (`uniqlo-oct26-usc06`); UNIQLO's own CardX page still shows Q3; **Nuta's CardX JCB not registered** | U | [[../promotions/uniqlo-2026]] · `uniqlo.py` (Bureau row from 2026-10-05) |
 | **BTP4** เติมเต็มความสวย · BTP1 | POINTX equal to the slip → 10% weekdays / 12% weekends at MCC 5947/5977/7298/7230 · BTP1 10% (terms name 5947 only) | BTP1 6 Jan – 31 Dec | BTP4 new, 1 Oct – 31 Jan | Y | — |
 | CDM3 (`cc-mone-…-oct-2026`) | ≥ ฿10k / ฿30k in October → Starbucks ฿200–600, invite-only | — | Oct only | — | — |
 
@@ -145,7 +152,8 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 
 | Campaign | Pays | Sep 2026 | Oct 2026 | Pages | Tracked |
 |---|---|---|---|---|---|
-| MPW692 · MPW765 · MPW611 | Makro PRO 37th · Makro PRO 9.9 · Makro i-Plan | ended 29–30 Sep | **none for Makro yet**; a 10.10 double day is possible, not published | M | — |
+| MPW692 · MPW765 · MPW611 | Makro PRO 37th · Makro PRO 9.9 · Makro i-Plan | ended 29–30 Sep | successor **MPW823** (below); a 10.10 double day is possible, not published | M | — |
+| **MPW823** UOB Makro 26th "Gold Mission" `UMK26` | UOB Makro card only. Mission 1: Makro stores, monthly ≥ ฿50k / 150k / 400k → ฿150 / 800 / 2,500 (cap ฿7,500). Mission 2: **Makro PRO app**, per slip ≥ ฿10k / 30k / 60k → ฿150 / 500 / 1,200 (cap ฿3,600). Mission 3: other spend, not MCC 5411, ≥ ฿10k a month → ฿300 (cap ฿900). All three → +฿1,000 Makro voucher. Gold-bar draw, 1 right per ฿1,000. Not combinable | — | new, 1 Oct – 31 Dec (published after the 1 Oct sweep; user, 3 Oct); **registered 3 Oct** | M | [[../promotions/uob-makro-gold-mission]] · `uob_makro.py` |
 | EPW538 → **SPW796** | e-commerce / e-wallet ฿100 per ฿5,000, ≤ ฿200/month | EPW538, ended 30 Sep | SPW796, 1 Oct – 31 Dec, SMS `EC` again; a named-app list, so a card payment on a ticket site doesn't count, only through ShopeePay / TrueMoney | S L K E | [[../promotions/uob-epw538]] · `spw796.py` |
 | OLQ3 → **OLQ4** | online 0% installments + ฿100–2,000 cashback | ended 30 Sep | OLQ4, 1 Oct – 31 Dec | S | — |
 | SPW592 | supermarkets ฿50 / ฿150 a month (SMS `SH` monthly; not registered) | 1 Jul – 31 Dec | continues | G T | [[../promotions/uob-spw592]] |
@@ -154,7 +162,8 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | UOB One 1% · 10%/5% · UOB World ×5 · UOB Makro ×2 on the 16th | standing card benefits; a Makro store paid **through TrueMoney** (`TMN MAKRO`) earns UOB One's 1% (reconciled) and probably UOB World's e-wallet ×5 | standing | continue; UOB World's ×5 follows the network's e-commerce flag, so thaiticketmajor.com earns it (Takumi's 2025 rows are ×5) | M G S H Y E | [[../promotions/uob-one-2026]] · [[../promotions/uob-world-points]] |
 | **UOB Premier 5% supermarkets** (`PRS`) | Tops, Central Food Hall, Gourmet, Home Fresh Mart, Villa, Foodland: 5% per slip ≥ ฿800, in store, ฿500/month; ×4 points at department stores | all 2026 | continues; **not registered**, since the household rarely shops at those stores (user, 2026-10-01) | T | — |
 | CEN · Central instant discount · RBS | Central / Robinson cashback and points | to 5 Oct / all year | continue | T | — |
-| UNO · FD4 | UNIQLO · food delivery | — | from Oct | — | [[../promotions/uniqlo-2026]] |
+| UNO · **PPF** | UNIQLO per slip ฿150 per ฿3,000 to ฿450, ฿800 from ฿12,000, ฿800 a month per cardholder (household pooled); SMS **every time**; excludes branches inside a department store (no list published; both Chiang Mai stores are mall units); the only UNIQLO campaign whose cashback says "not combinable"; on UNIQLO's site only, not in UOB's JSON · PPF points = slip → 10% (primary World / Premier only) | — | new, 1 Oct 2026 – 28 Feb 2027 | U | [[../promotions/uniqlo-2026]] · `uniqlo.py` |
+| FD4 | food delivery | — | from Oct | — | — |
 | **OPW806** HHP / UH | HHP ฿300 per ฿30k slip at Bangkok hospitals · UH: points equal to the slip → 10% at any MCC 8062 hospital, primary cards only (not UOB One/Makro, no supplements) | — | new, 1 Oct – 31 Dec | H | — |
 | Ticketmelon `TPW642` | T.O.P PRE-STUDIO 15%, In The Mood 10%; UOB Rewards → Ticketmelon e-voucher at ฿0.10 a point; not Thaiticketmajor | — | 1 Oct – 31 Dec | E | — |
 | UOB LIVE pre-sales | Ink Waruntorn, K-LIVE, Tiffany Young, Zara Larsson, So Ji Sub … | closed by 24 Sep | none open in Oct | E | — |
@@ -166,7 +175,8 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | Campaign | Pays | Sep 2026 | Oct 2026 | Pages | Tracked |
 |---|---|---|---|---|---|
 | BMG → **BGO** | hypermarket per slip ฿50 / 100 / 450 / 1,500, ฿1,500 per campaign | BMG 1 Jul – 30 Sep (Big C, GO, **Makro PRO**) | BGO 1 Oct – 31 Dec: Big C and GO only | M G | [[../promotions/ttb-2026]] · `ttb_shopping.py` |
-| **SPM** · **MUJC** · UQCB | supermarkets (Tops, Rimping) · MUJI · UNIQLO | — | new, Oct–Dec | T | `ttb_shopping.py` · [[../promotions/uniqlo-2026]] |
+| **SPM** · **MUJC** | supermarkets (Tops, Rimping) · MUJI | — | new, Oct–Dec | T | `ttb_shopping.py` |
+| UQCB · UQBP | UNIQLO per slip as UNO, ฿800 a month per person; register once, **every card number used** (supplements too) · UQBP points → 12% (so smart earns none) | — | new, 1 Oct 2026 – 28 Feb 2027 | U | [[../promotions/uniqlo-2026]] · `uniqlo.py` |
 | TTBSEP → **TTBOCT** | Shopee ฿200 off ≥ ฿2,000 | Sep code | Oct code | S | — |
 | **TTBPREM10** · **10TTBPREM** | Shopee Premium ฿650 off ≥ ฿2,500 · ฿1,800 off ≥ ฿6,000 on 10 Oct | — | new | S | — |
 | so smart 1% · CTG · BCG | standing 1% (฿2,000 a cycle) · Caltex / Bangchak fuel | standing / Jul – Dec | continue | M G S H Y | [[../promotions/ttb-2026]] |
@@ -182,6 +192,8 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | Supermarket points 13% | points = slip → 13%; Makro only via KTC Mobile scan or TrueMoney | 1 Aug – 31 Dec | continues | M G | [[../promotions/ktc-forever]] |
 | VISA Scan to Pay | 3 slips ≥ ฿1,000 at GO etc. → ฿150 | 1 Aug – 31 Dec | continues | G | — |
 | KTC09 → **KTC10** (+ `KTC10H`, new `KTC10HH`) | Shopee monthly codes | Sep codes | Oct codes | S | — |
+| KTC JCB ×2 / ×3 / ×5 | UNIQLO, MUJI, CdG, ISSEY MIYAKE, BEAMS monthly spend per card ฿3k / 10k / 100k; JCB Ultimate adds nothing | 1 Jul – 31 Dec | continues | U | [[../promotions/uniqlo-2026]] |
+| **UNQ (KTC)** points → cashback | UNIQLO slip ≥ ฿3,000 / 5,000 / 8,000 → 13% / 16% / 18% for points = slip; SMS `UNQ <16>#<amount>` → 061-384-5000 every slip (same letters as Krungsri's, other number); 20% top tier on 11.11 / Arigato / 12.12 in 2025 | — | new, 1 Oct 2026 – 28 Feb 2027 | U | [[../promotions/uniqlo-2026]] |
 | **KTCUPI10** / **KTCUPI10H** | KTC UnionPay Shopee: ฿200 off ≥ ฿1,200 five times a month; ฿1,000 off ≥ ฿8,000 | — | new, 1 Oct 2026 – 31 Jan 2027 | S | — |
 | **KTC VISA Mall** · KTCPREM10 · KTCAP10 | ฿500 off ≥ ฿3,300 · Shopee Premium ฿650 · Apple ฿4,000 | — | new, Oct–Dec | S | — |
 | KTCWED · KTC Mall · KTCPAYDAY · installment ฿1,400 | weekly / monthly Shopee codes | all year | continue | S | — |
@@ -227,6 +239,7 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | Bangkok International Festival of Dance & Music | 15% (Pinnacle, Infinite, Platinum Leader, M LEGEND/LUXE) or 10% (other BBL cards, Be1st debit) off shows booked on Thaiticketmajor; 20% early bird ended 24 Jun | 25 Jun – 17 Oct | ends 17 Oct | E | — |
 | Bangkok Bank hospital year-round (regional) | discounts + 12% points redemption at Chiang Mai Ram, Klai Mor, Chiangmai Hospital, Lanna | all 2026 | continues | H | — |
 | GSB `hospital69` · Welcome No.5 | 0% × 6 at MCC 8062/7298 … · ≥ ฿5,555 in 55 days → a suitcase | all 2026 / to 31 Dec | continue | H Y | — |
+| GSB `GSPD` | points → 13% at tenant shops of Fashion Island, Terminal 21 and Future Park / Zpell (no Chiang Mai mall) | — | Oct (period not re-read) | U | — |
 
 ## Card networks
 
@@ -277,3 +290,90 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | REMASTER CONCERT discounts | 15% off with a Dena UHT receipt or for Carrier members (show 10 Oct) | from 24 Jul | ends 10 Oct | E | — |
 | Card pre-sales on TTM | Mastercard Presale (5SOS, BABYMONSTER, LANY, Joji, Milli, Fujii Kaze; several World / World Elite only), KBank Visa (The Weeknd), Bangkok Bank no-fee discount (Moulin Rouge, to 27 Sep) | all past | **none open or announced** on 3 Oct; BLUE 25th has a Mastercard Presale (14–15 Oct) and a UOB Mastercard Presale (15 Oct) on ticketmaster.co.th, terms unread | E | — |
 | Fujii Kaze PREMA (26 Dec) | cancelled; refunds | — | refund window to 31 Oct | E | — |
+
+## Apple products (page A, from 3 Oct 2026)
+
+From [[2026-10/apple-krungsri-ktc-aeon]], [[2026-10/apple-uob]] and [[2026-10/all-spend-apple]]. Most are iPhone 18 launch deals on installment slips; next year's iPhone launch (Sep 2027) is where to look for their successors. Kept in its own table because it arrived after the issuer tables were laid out.
+
+| Campaign | Issuer | Pays | Period | Predecessor → successor |
+|---|---|---|---|---|
+| **NP18** | Krungsri Card, First Choice, Lotus's | iPhone 18 installment at Studio7/BaNANA/iStudio/.life: ฿700–2,400 per slip from ฿30,000, cap ฿10,000; First Choice ฿400–1,800 on > 10 months; 20-month plans pay nothing | 12 Sep 69 – 28 Feb 70 | new (iPhone 18) |
+| **MB18** | same | iPhone 18 installment at AIS/True/dtac/TG/Jaymart/JIB/IT City: ฿500–2,400 from ฿25,000; Advice ฿800–2,600 and JIB ฿500–2,500 to 31 Oct | 11/12 Sep 69 – 28 Feb 70 | new |
+| **IPN** | same | Apple Store / apple.com installment: ฿700–2,400 from ฿30,000; register before | 12 Sep – 31 Dec 69 | new |
+| **ST18 / TN18** · **CT18** | same · First Choice | trade-in ฿888 · First Choice Studio7/BaNANA 20-month trade-in ฿3,112, first 300 | 12 Sep 69 – 28 Feb 70 | new |
+| iPhone points burns | Krungsri Card, First Choice | 18% at Studio7/BaNANA/iStudio/.life; 15% at Apple/AIS/True/Advice/JIB/IT City; 12% Power Buy/Mall | 18% to 31 Oct → 10% 1–30 Nov → 15% again 1 Dec–31 Jan (Apple) | new |
+| **NPB1** (iPhone) | Krungsri Card, First Choice, Lotus's | Power Buy 5% off + cashback on 6-month 0% only | iPhone 12 Sep–31 Oct; store-wide 3 Sep–31 Jan | already listed (T) |
+| **KCC9AP10 → KCC9AP11 → KCC9AP12** | Krungsri Card | Shopee Apple stores ฿4,000 off ≥ ฿40,000, full pay, 100/month | Oct → Nov → Dec | new |
+| **KSCAP10 → KSCAP11 → KSCAP12** | First Choice | Shopee Apple stores ฿4,000 off ≥ ฿40,000, installment, 111/month | Oct → Nov → Dec | new |
+| **KCC9NPIH / KCC9NPIL**, **KSC9NPIH / KSC9NPIL** | Krungsri Card · group | Shopee iPhone 18 Pro/Pro Max ฿5,000 (20) / ฿3,500 (100) ≥ ฿35,000; full pay · installment | 12 Sep – 31 Oct | already in [[krungsri-group]] §3.3; ends 31 Oct |
+| Lazada iPhone 18 | Krungsri Consumer group | ฿5,000 off ≥ ฿30,000 installment at iStudio stores | 11/12 Sep – 31 Oct | new |
+| **MTC3** · First Choice Mobile IT | Krungsri Card · First Choice | Mobile/IT/camera installments ฿100–700 (Krungsri), cap ฿14,000; 0% up to 24 months (First Choice) | 1 Sep 69 – 28 Feb 70 | new |
+| `pwd-iphone18-202609` | Central The 1 card | iPhone 18 Pro at Power Buy: points burn 15% (REDZ), 5% off on installment, PWB cashback, 4 pts/฿50 | 12 Sep – 31 Oct | already listed (T) |
+| **PWB3 → PWB4** | Central The 1 card | Power Buy cashback ฿140–6,600 per installment slip | PWB3 9 Jul–7 Oct → PWB4 from 8 Oct, **not published** | already listed (T) |
+| `pwd-redeem-point-202609` | Central The 1 card | Power Buy points 15% Fri–Sun / 12.5% Mon–Thu, **excludes iPhone 18** | 11 Sep – 1 Nov | already listed (T); note the exclusion |
+| `cpn-x3-202308` | Central The 1 card | The 1 points on Apple products at iStudio by copperwired / DOTLife in Central malls | 1 Oct 68 – 31 Dec 69 | continues |
+| **SMP1** (mobile/IT) | Lotus's | ฿70/3,500 · ฿450/25,000 · ฿2,600 at 150,000 full pay at Com7, Banana, I-Studio, JIB, Advice, IT City …; not registered | 1 Sep – 31 Dec | already listed (T); add A |
+| **IP** (`iphone2026`) | KTC | iPhone 18 installment: 1–6% cashback (KTC VISA at Advice 6%) + points 18–30%; 3 slips/member | 12 Sep – 31 Oct | new (2025's iPhone 17 page is its predecessor, by the leftover text) |
+| **APO** (`applestore`) · **ITO** (`studio7-istudio`) | KTC | points 13% / 15% at Apple Store/apple.com · at Studio7/iStudio/dotlife (+0% 6 months) | 1 Jul – 31 Dec 69 | `applestore-1` / `studio7-istudio-1` (1 Jan–30 Jun) → these |
+| **IT / ITO** (`itinstore`) | KTC | Advice, BaNANA (Apple online only), IT City, JIB: ฿150–1,000 on ≥ 6-month installments, cap ฿24,000; points 13–15% | 1 Oct – 31 Dec 69 | Jul–Sep pages of the same slugs → these |
+| **ITF** | KTC | IT City Tech Playground at Central Westgate: ฿190–2,400, points 20% | 30 Sep – 13 Oct | new, one-off |
+| **TEL / TO** (`telco-operators`) | KTC | AIS/TRUE/DTAC points 13/15%, 0% up to 10 months | 1 Jul 69 – 31 Jan 70 | `telco-operators-3` (Jan–Jun) → this |
+| **KTCAP10 → KTCAP11 → KTCAP12** | KTC | Shopee Apple stores ฿4,000 off ≥ ฿40,000; 300 codes for Oct–Dec | Oct → Nov → Dec | already listed (S) |
+| KTC9NPI | KTC | Shopee iPhone ฿3,500 off ≥ ฿35,000 | to 31 Oct | **fully claimed** |
+| AEON iPhone 18 0% (`iphone18-*`), `apple-2026` | AEON | 0% 6/10 months on credit cards; no cashback | 12 Sep 69 – 28 Feb 70; Apple at Studio7 1 Jul–28 Feb | new |
+| **Lazada iPhone 18 (UOB)** `lpw784` | UOB | ฿5,000 off ≥ ฿30,000 full pay at the four iStudio stores on Lazada; 1 per card account; 100 rights for non-Lazada UOB cards | 12 Sep – 31 Oct | new |
+| **IP18** (`ipw703` / `ipw805`) | UOB | iPhone 18 in store, 0% 10 months: 1.7–4.5% by shop (8% Reserve/Infinite); Power Buy 5% off instead; ฿12,000/person | 12 Sep – 31 Oct | new |
+| **PPW723** · **PPW753** | UOB | Power Buy iPhone: 5% off on 6/10 months + ฿150–3,200 per slip, points 12.5% · store-wide 0% 24 months to ฿44,000 | 12 Sep – 31 Oct · 8 Oct – 6 Jan | PPW753 succeeds the Q3 Power Buy page (`ipw539`) |
+| **OIP18** (`ipw696`) · `ipw720` | UOB | online iPhone 1–3% on 10 months (฿6,000/person), points 12% (`18PRO`) · Apple Store 1% ≥ ฿30,000 + points 12% (`18BPO`) | 12 Sep – 31 Dec | new |
+| **SPW738** · **CPW741** | UOB | Studio7 / BaNANA online codes `CS8UOB250/500/1K5` (฿250 / 500 / 1,500 at ฿10k / 25k / 50k) | 1 Sep – 31 Dec | new |
+| `10KTCINS` / `10SPKTCVH` / `10SPKTCH` · `10TTBINS` | KTC · ttb | Shopee 10.10: ฿3,500 off ≥ ฿25k installment · ฿2,800 off ≥ ฿21k · ฿1,000 off ≥ ฿7,500 · ttb ฿3,750 off ≥ ฿25k installment (40 codes) | 10 Oct | KTC's 10.10 page exists after all (6–12 Oct) |
+| T1 MAGICAL DAY XL Pack `CRCT1` | Central The 1 card | one slip ≥ ฿4,000 at Central Retail incl. Power Buy → ฿1,000 Magic e-Voucher + ฿2,000 pack; first 2,500 | 1–13 Oct | already in [[2026-10/the1]] |
+| **SMT2** | Lotus's | ≥ ฿2,000 in SMP1's categories → ฿200 once; register before; first 500 | 1–31 Oct | new |
+
+### Apple products — KBank, CardX, ttb, wallets, networks (added 3 Oct, second pass)
+
+From [[2026-10/apple-kbank-cardx-ttb]] and [[2026-10/apple-wallets-networks-welcome]].
+
+| Code | Issuer | Pays | Period | Predecessor → successor |
+|---|---|---|---|---|
+| `TI7` / `NI7` (`electronic-com7-iphone18-installment`) | KBank | iPhone 18 Pro at Studio7 / BaNANA / Kingkong, 0% 10 mo, ≥ ฿30k: ฿4,000 with trade-in (500 rights) / ฿2,000 (1,700 + 100 online) | 12 Sep 69 – 31 Jan 70 (trade-in ฿4,000 from 1 Oct) | `TIC` (trade-in ฿5,000, 12–30 Sep) → `TI7` |
+| `NIC` / `NIS` / `NIU` (`electronic-istudio-iphone18-installment`) | KBank | iPhone 18 Pro at iStudio by Copperwired / SPVi / UFicon, ≥ ฿30k: ฿2,000 (550 / 400 / 250 rights) | 12 Sep 69 – 31 Jan 70 | — |
+| `NIP` (`electronic-iphone18-installment`) | KBank | iPhone 18 Pro, 0% 10 mo, 3% at AIS, True/dtac, IT City, JIB, Jaymart, TG Fone; 2% Advice; online `AO18`/`DO18`/`TO18` 3% cap ฿1,000 | 12 Sep 69 – 31 Jan 70 (Advice to 31 Dec) | — |
+| `AV4`, `BN4`, `JB4`, `JM4`, `SC4`, `TGF`, IT City | KBank | IT shops 0% 10 mo, ฿150–1,300 a slip, **Apple excluded** | 1 Oct – 31 Dec 69 | probably the Q3 `…3` codes (not checked) |
+| `ET3` (`electronic-chiangmai-siamtv`) | KBank | Siam TV, ฿300 / 700 / 1,100 on ฿10k / 20k / 30k | 1 Aug – 31 Oct 69 | — |
+| `PWB3` (`electronic-powerbuy-installment`) | KBank | Power Buy, ฿150–3,000 a slip, 400 rights | 1 Aug – 31 Oct 69 | → ? |
+| `DBD` (Double Day) | KBank | Shopee / Lazada / TikTok on 9–11 Oct, ฿70–1,600 | 7 Aug – 11 Oct 69 | — |
+| PLUSTINUM "ยิ่งใช้ยิ่งพลัสชัวร์" Season 3 (NCCS260972, ACCS260887) | KBank | ฿400 Starbucks per ≥ ฿30k month, 2 Coral Lounge passes at ฿150k | 1 Aug – 31 Oct 69 | earlier seasons not checked → ? |
+| `IPF` / `IPN` / `IPT` (`it-new-iphone-sep26`) | CardX | iPhone 18 Pro / Duo, 0% 10 mo, 3% in store / 2% online at Com7, iStudio, Advice, JIB, IT City | 12 Sep – 31 Oct 69 | → ? |
+| `NIP` / `OIP` (`telco-new-iphone-sep26`) | CardX | iPhone 18 Pro / Duo, 4% in store (5% WEALTH), 3% online at AIS, True, dtac, Jaymart, tg | 12 Sep – 30 Nov 69 | — |
+| `RN` + 5% (`pwb-new-iphone-oct26`) | CardX | Power Buy iPhone 18 Pro 5% off on 0% 10 mo | 12 Sep – 31 Oct 69 | cashback part = Rainy Delight (ended 30 Sep) |
+| `CE` (`electronic-ss-greeting-oct26`) | CardX | Power Buy / Power Mall, ฿220–4,200 a slip, cap ฿42k | 1 Oct – 31 Dec 69 | Electronic Rainy Delight 2026 (1 Jun – 30 Sep) → `CE` |
+| `YN` / `PX` (`electronic-yearend-oct26`) | CardX | appliance/IT dealers and department stores, ฿180–4,200 a slip | 1 Oct – 31 Dec 69 | Electronic Green Season 2026 (1 Jun – 30 Sep) → `YN` |
+| `NA4` / `NC4` / `RKA6` / `RP1` | CardX | non-18-Pro Apple and IT at Com7/iStudio (1–1.8%), Advice/JIB/IT City (฿250–1,800), operator shops (1–2.5%; other iPhones 1.5–3%) | 1 Oct – 31 Dec 69 (`RKA6`, `RP1` to 31 Jan 70) | — |
+| `CRX9NPIH` / `CRX9NPIL` | CardX | Shopee iPhone 18 Pro ฿5,000 / ฿3,500 off ≥ ฿35k | 12 Sep – 31 Oct 69 | **used up** by 3 Oct |
+| `RIPA`, `RIPC`, `RIPV`, `RIPT`, `RIPP`, `RIPI`, `RIPJ`, `RIPK`, `RIPS`, `RIPG`, `RIPU` (`ip18*-sep26`) | ttb | iPhone 18, 0% ≤ 10 mo, ≥ ฿30k: Advice 6%, Com7 4–5%, AIS/True 3–4%, others 3%; cap ฿3,000 per shop group | 12 Sep – 31 Dec 69 (higher rates to 31 Oct) | → Nov–Dec 3% |
+| `COME`, `COPT`, `TRIP`, `AISI` | ttb | shop-group 0% pages, ฿150–1,800 a slip | 1 Oct 69 – 31 Jan 70 (`TRIP`, `AISI` to 31 Dec) | new Q4 pages |
+| `ITOP` (`itgadgetnw-aug26`) | ttb | IT shops, ฿200–1,300 a slip | 1 Aug – 31 Oct 69 | → ? |
+| `QAPP` (`applestore-aug26`) | ttb | Apple Store / online, ฿250–1,300 a slip | 1 Aug – 31 Oct 69 | → ? |
+| `IPBW` (`pwb-jul26`) | ttb | Power Buy, ฿200–3,200 a slip | 9 Jul – 7 Oct 69 | → ? (not listed yet) |
+| `10TTBINS` | ttb | Shopee ฿3,750 off ≥ ฿25k on 0% ≤ 10 mo, 40 rights | 10 Oct 69 | — |
+| `10SPTTBPH` / `10SPTTB` | ttb | Shopee ฿220 / ฿350 off | 7–9 / 10 Oct 69 | — |
+| `PWB4` | Central The 1 | Power Buy cashback from 8 Oct | from 8 Oct 69 | `pwd-store-202607` / `pwd-iphone18-202609` cashback (to 7 Oct) → `PWB4` (**not published 3 Oct**) |
+
+New or changed rows, October 2026:
+- **TrueMoney PayNext Extra iPhone** (Ascend Nano): 12 Sep – 30 Nov 69. 0% up to 36 months (Advice), 24 (iStudio ×3), 15 (True/dtac, IT City, Jaymart, TG), 10 (JIB). Cashback tiers 400 / 800 / 1,200 / 1,600 / 5,000 (Advice 400 / 800 / 1,300 / 1,800 / 6,000) at ฿20k / 30k / 40k / 50k / 100k a transaction; 4,670 rights. 99-coin coupon ฿1,000 (True ฿1,500) at ≥ ฿50,000. **Predecessor**: the iPhone 17 page "0% สูงสุด 24 เดือน … 1 ก.ค. 69 – 30 ก.ย. 69" at the same URL `redirect-iphone`, and Advice `it-paynext-extra-promotion-01` (1 Jul – 30 Sep, ended).
+- **SPayLater at AIS**: 0% 12 months, 15 Sep – 31 Dec 69. **Umay+ at AIS**: 0% 10 months, 13 Jul – 31 Dec 69.
+- **UnionPay**: Lazada ฿360 ≥ ฿2,000 (`260827112802`, 1 Sep 69 – 28 Feb 70, 1,670 a month); QR 6% October `260723112620` (≤ ฿60 a slip, ≤ ฿300 a month; Nov `…621`, Dec `…622`, Jan `…623`); NFC 3% `260226111820` (to 31 Dec); Global Online 5% `260727112642` (16 Aug – 31 Dec); overseas 10% `260925112958` (1 Oct 69 – 1 Jun 70, ICBC/BOC/KKP cards only).
+- **JCB**: Lazada first-link 20% ≤ ฿200 (`LAZADANew/95754`), King Power Online ฿300 (`KingpowerQ4/95748`, Q4).
+- Welcome offers: KBank `NCCS260871` (to 31 Jan 70), ttb so smart / so fast / absolute / Disney / Global House (approved by 31 Oct 69), Krungsri Card website (1 Oct 69 – 31 Jan 70, new this quarter), Lotus's (applied by 30 Nov), GSB Welcome No.5 (applied by 31 Dec), CardX `C6902030` (1 Oct – 31 Dec), UOB Q4 (1 Oct – 31 Dec), KTC JCB GrabFood (1 Sep – 31 Dec).
+
+#### From the Com7 in-store posters (Studio7 / BaNANA / BKK / Kingkong, 1–31 Oct 69; the user's screenshots, 3 Oct)
+
+| Campaign | Issuer | Pays at Com7 shops | Period | Note |
+|---|---|---|---|---|
+| **ISQ4** | UOB | Apple and IT on 0% 6 / 10 months: ฿150–1,000 per slip, plus GrabFood ฿500 at ≥ ฿50,000; points 12% instant. iPhone 18 and Duo excluded | 1 Oct – 31 Dec | new |
+| **MTC4** (Krungsri Card, Central The 1, HomePro, First Choice) | Krungsri group | ฿100–700 on 3-month-plus plans (First Choice 24 months ฿150–800); points +15% | 1 Sep 69 – 28 Feb 70 | Krungsri Card's code was read as `MTC3` on its site |
+| **BN4** · **IT** | KBank · KTC | IT-shop installment cashback: **Apple excluded** at Com7 shops; points burns only (K Point 12% `COM`, KTC 13 / 15%) | Oct – Dec | confirms [[2026-10/apple-kbank-cardx-ttb]] |
+| **NA4** · **FXP** | CardX | 1.0 / 1.5 / 1.8% on 0% 10 months (iPhone 18 Pro / Duo excluded), POINTX ×1–×6 → 10–60% · FLEX / SPEEDY CASH Starbucks ฿300–2,000 | 1 Oct – 31 Dec | |
+| POINTX QR points-back | SCB / CardX | pay with POINTX by PromptPay QR in SCB Easy → 20 / 30 / 50% of the week's points back each Friday | 15 Oct – 31 Dec | new |
+

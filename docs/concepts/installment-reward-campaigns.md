@@ -14,7 +14,7 @@ than a line in each card's file.
 | Rewards paid upfront | Krungsri family, card-level | ×0 | none | `KrungsriFamilyCard` (lib/earning) |
 | Personal-loan credit line | First Choice, card-level | ×0 | none | `FirstChoice` (same rule, its own note) |
 | **ดีจังผ่อน 0%** (Dee-Jang) | CardX, **plan-level** | ×0 | unaffected | `installment-campaigns/dee-jang.yaml` |
-| **U Plan 0%** | Krungsri / First Choice, **plan-level** | ×0 | varies by promo | `installment-campaigns/u-plan.yaml` |
+| **U Plan** (0% or with interest) | Krungsri / First Choice, **plan-level** | ×0 | varies by promo | `installment-campaigns/u-plan.yaml` |
 
 ## Why some of this is plan-level
 
@@ -55,7 +55,9 @@ First Choice is the same rule for a different reason, so its class
 
 1. **credit card** — a pay-in-full purchase lands here and earns normally;
 2. **personal loan** — a merchant-offered installment (0% interest, up to 10
-   months) lands here instead.
+   months) lands here instead. Only an installment set up at checkout lands
+   here; a charge paid in full stays on the card line even when U Plan
+   re-splits it later.
 
 A merchant installment therefore earns no points and no cashback because it
 never touches the card line at all. That's a different product doing the
@@ -79,11 +81,63 @@ Confirmed scope (user, 2026-08-10): **only** plans in this campaign lose points.
 Other CardX JCB installments earn normally, which is why this can't be a card
 flag.
 
-### U Plan 0% — Krungsri / First Choice
+### U Plan — Krungsri / First Choice
 
-Pay in full at the merchant — so the charge starts on the **card** line — then
-ask Krungsri to re-split it into 0% over **3 months**. Those rows earn **no
+Pay in full at the merchant, then ask Krungsri to re-split it. The charge
+**stays on the card line**: a full-amount charge can never move to the
+personal-loan line (user, 2026-10-03). The statement shows it there, as the
+original charge, a `REV-FC PLAN ON DEMAND: <merchant>` reversal under
+`รายละเอียดการเปลี่ยนรายการปกติเป็นผ่อนชำระ` (conversions to installments), and
+each term as `FIRST CHOICE PLAN ON DEMAND <principal> 001/003 <term>` inside
+"Total Payment Due For Credit Card"; the personal-loan total stays ฿0. Two kinds: **0% over 3 months** (only where a
+promotion offers it, e.g. 11 listed public hospitals) and **with interest**,
+0.39% a month on the principal for 4–10 months. Those rows earn **no
 points**, but **may earn cashback** depending on the active promotion.
+
+A term with interest is the principal ÷ terms plus 0.39% of the principal:
+Nuta's `OMISE*ROOJAI Chon Buri TH 01/10` is ฿5,548.55 ÷ 10 + ฿21.64 = ฿576.49
+(user, 2026-10-03).
+
+**The original charge still counts toward Krungsri's cashback campaigns**
+(user, 2026-10-03). U PLAN gives up the points; its page says nothing of
+cashback campaigns, so a full-amount charge converted later counts toward
+NW4 (and the like) once, as the original charge, on its own date. Sure for
+0% plans, not yet confirmed for plans with interest. The terms themselves are
+never new spend, which is why the Bureau's installment rules still hit every
+`NN/NN` row. This is what separates U Plan from a **merchant installment**:
+that one books to First Choice's personal-loan line and never counts at all.
+
+#### Recording a conversion: as the statement prints it (user, 2026-10-03)
+
+Every conversion is recorded as three kinds of rows, so the Bureau counts the
+original charge and the bill still adds up:
+
+| Row | Amount | Cycle | Points | Note |
+|---|---|---|---|---|
+| the original charge, as entered at purchase | + full | its own | `×0` | the U PLAN campaign note |
+| `REV-FC PLAN ON DEMAND: <merchant>`, dated like the charge | − full | the charge's | `×0` | — |
+| each term, `<merchant> 01/NN` (`/add-installment` with `campaign: "u-plan"`) | + term | the statement that bills it | `×0` | the U PLAN campaign note |
+
+- **The charge earns no points.** A row's points can't be cancelled by a
+  negative row (`คะแนนที่ได้จริง` earns only on positive amounts), so the
+  original row itself goes to `×0` when it's converted.
+- **The reversal isn't a refund.** `lib.ledger.is_refund_row` leaves
+  `REV-… PLAN ON DEMAND` out, so the Bureau doesn't net it off the charge, and
+  NW4 and the like count the charge once. The charge and its reversal cancel in
+  the bill; the terms are what's owed.
+- **`/record-statement` reads it all.** The Krungsri parser puts each
+  `FIRST CHOICE PLAN ON DEMAND` term in its card's section, dated the day it's
+  billed and named `<merchant> 01/03`, and tags the charge, the reversal and the
+  term. A friend's missing piece is reported. A charge or term recorded with
+  points, or without the campaign note, is flagged with the fix. Takumi's own
+  pieces are written with `×0` and the campaign note.
+
+Older plans are left as they were. Baiboon's ICARE and FUTURE ELECTRONICS plans
+kept only the terms. Nuta's `CTRIP (THAILAND) CO., BANGKOK TH` ฿11,766.58
+(Apr 2026) kept the original charge, offset by a `[เว็บรับหนี้ไปบริหารต่อเอง]`
+row when Takumi took the debt over. All three predate the Bureau. The BTS draw (`bts.py`) already flags a term as "the bank
+counts the purchase slip, which the ledger may not show"; see
+[[promotion-bureau]].
 
 That cashback caveat is why U Plan is a campaign and not covered by the card
 flag: the flag zeroes cashback, while a promo with an explicit `installment_rule`
