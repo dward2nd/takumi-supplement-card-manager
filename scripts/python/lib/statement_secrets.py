@@ -54,6 +54,26 @@ def _load() -> dict[str, Any]:
     return yaml.safe_load(text) or {}
 
 
+def malformed_issuers() -> list[str]:
+    """Issuers whose entry holds no usable password — names only, never values.
+
+    YAML accepts a mistyped entry without complaint: `{holders:"nuta":"…"}`
+    reads as one key with no value, and the password is silently lost. The
+    cloud startup hook (`scripts/install_pkgs.sh`) reports these.
+    """
+    bad = []
+    for issuer, entry in ((_load().get("issuers") or {})).items():
+        if isinstance(entry, (str, int)):
+            continue
+        if isinstance(entry, dict) and set(entry) <= {"default", "holders"}:
+            holders = entry.get("holders") or {}
+            values = [entry.get("default"), *holders.values()] if isinstance(holders, dict) else [None]
+            if any(v is not None for v in values) and all(isinstance(v, (str, int)) for v in values if v is not None):
+                continue
+        bad.append(issuer)
+    return bad
+
+
 def password_for_issuer(issuer: str, *, holder: str | None = None) -> str | None:
     """Return the statement password for an issuer, or None if unregistered.
 

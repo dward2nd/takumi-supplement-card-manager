@@ -31,7 +31,7 @@ Claude Code on the web (claude.ai/code) works on a fresh clone in a Linux contai
 | Variable | Value | Replaces |
 |---|---|---|
 | `NOTION_TOKEN` | the "Claude Code's Automated Scripts" integration token | `.env` |
-| `STATEMENT_PASSWORDS_YAML` | `statement-passwords.yaml` as one line of YAML, e.g. `{issuers: {Krungsri: "DDMonYYYY", ttb: "DDMonYYYY", CardX: {default: "DDMonYYYY", holders: {nuta: "DDMonYYYY"}}}}`. Put a space after every colon, or YAML reads `key:"value"` as one key and the password is lost | `scripts/repositories/statement-passwords.yaml` |
+| `STATEMENT_PASSWORDS_YAML` | `statement-passwords.yaml` as one line of YAML, e.g. `{issuers: {Krungsri: "DDMonYYYY", ttb: "DDMonYYYY", CardX: {default: "DDMonYYYY", holders: {nuta: "DDMonYYYY"}}}}`. JSON works too (`{"issuers":{"Krungsri":"DDMonYYYY","CardX":{"holders":{"nuta":"DDMonYYYY"}}}}`). In the YAML form put a space after every colon; in either form quote every key. Otherwise YAML reads `holders:"nuta":"…"` as one key and the password is lost; the startup hook names any issuer that ends up with no usable password | `scripts/repositories/statement-passwords.yaml` |
 
 A new session picks them up. The repo's SessionStart hook (`scripts/install_pkgs.sh`) installs the Python dependencies and reports any missing variable.
 

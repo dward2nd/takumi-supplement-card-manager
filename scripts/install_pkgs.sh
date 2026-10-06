@@ -18,5 +18,10 @@ fi
 
 # Stdout lands in Claude's context: name the secrets this session is missing.
 [ -n "$NOTION_TOKEN" ] || echo "Cloud session: NOTION_TOKEN is not set, so every scripts/python CLI will fail. The user adds it in the cloud environment's settings (see CLAUDE.md, Cloud sessions)."
+if [ -n "$STATEMENT_PASSWORDS_YAML" ]; then
+  bad=$(cd "$CLAUDE_PROJECT_DIR/scripts/python" && uv run --quiet python -c \
+    'from lib.statement_secrets import malformed_issuers; print(", ".join(malformed_issuers()))' 2>/dev/null)
+  [ -z "$bad" ] || echo "Cloud session: STATEMENT_PASSWORDS_YAML has unusable entries for: $bad (likely a missing quote or brace; see README). Tell the user; never print the value."
+fi
 [ -n "$STATEMENT_PASSWORDS_YAML" ] || echo "Cloud session: STATEMENT_PASSWORDS_YAML is not set, so encrypted statement PDFs (Krungsri family, ttb, CardX) won't open. The user adds it in the cloud environment's settings (see CLAUDE.md, Cloud sessions)."
 exit 0
