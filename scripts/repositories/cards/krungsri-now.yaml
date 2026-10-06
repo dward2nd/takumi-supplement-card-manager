@@ -29,3 +29,6 @@ notes: |
 # Promotion Bureau (lib/bureau/krungsri_now.py, one row a month); the credit is still booked
 # as the bank's own `CB <merchant>` row, never as `% cb`. SUP1, PTT2 and EAT apply to this
 # card too (docs/promotions/krungsri-card-2026.md).
+# 2026-10-06: an AIS bill paid in the AIS app (`AMP*AIS SERVICESPaymen BANGKOK TH`) counts as
+# online. Takumi's ฿2,000 on 8 Sep was credited `CB AMP*AIS SERVICESPaymen BANGKOK` −฿100, so the
+# Bureau class matches `AMP*AIS SERVICES` too.

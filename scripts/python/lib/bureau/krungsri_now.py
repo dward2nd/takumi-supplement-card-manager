@@ -9,7 +9,8 @@ at most ฿300 a month. Insurance, funds and travel (hotels, tickets, car rental
 travel agencies), online advertising, QR-code payments and Krungsri Smart Plan
 installments don't count. Credited within 5 days of posting — a `CB <merchant>`
 line (Baiboon's Makro PRO ฿4,159 → `CB HTTPS://WWW.MAKRO.PRO/ BANGKOK` −฿200,
-Sep 2026). The household books that line as a separate row and never sets
+Sep 2026; Takumi's AIS bill paid in the app, `AMP*AIS SERVICESPaymen BANGKOK TH`
+฿2,000 → `CB AMP*AIS SERVICESPaymen BANGKOK` −฿100, 8 Sep 2026). The household books that line as a separate row and never sets
 `% cb` (scripts/repositories/cards/krungsri-now.yaml); rows that earn it earn
 no points (×0).
 """
@@ -29,7 +30,8 @@ from .slips import SlipCreditPromotion
 BLOCK, PER_BLOCK = Decimal(500), Decimal(25)
 
 _ONLINE = re.compile(r"WWW\.|HTTPS?:|\.COM\b|\.CO\.TH|\.PRO\b|SHOPEE|LAZADA|TIKTOK|2C2P|OMISE|GBPRIME|"
-                     r"ANTHROPIC|OPENAI|GOOGLE|APPLE\.COM|NETFLIX|SPOTIFY|YOUTUBE|STEAM|AMAZON|AIS ONLINE")
+                     r"ANTHROPIC|OPENAI|GOOGLE|APPLE\.COM|NETFLIX|SPOTIFY|YOUTUBE|STEAM|AMAZON|AIS ONLINE|"
+                     r"AMP\*AIS SERVICES")
 _TRAVEL_ETC = re.compile(r"AGODA|BOOKING|EXPEDIA|TRAVELOKA|TRIP\.COM|CTRIP|KLOOK|AIR ?ASIA|AIRWAYS|AIRLINES|"
                          r"NOK ?AIR|VIETJET|HOTEL|RESORT|AIRBNB|HERTZ|\bAVIS\b|INSURANCE|ASSURANCE|\bAIA\b|"
                          r"\bFUND\b|FACEBK|FACEBOOK ADS|GOOGLE ADS")
