@@ -120,7 +120,7 @@ An unknown id is rejected with the list of known ids rather than written silentl
 
 1. the original charge (normally already in the ledger from the day it was spent): `/update-transaction` to `×0` with the U PLAN note: converted charges earn no points;
 2. `/add-transaction` a `REV-FC PLAN ON DEMAND: <merchant>` row at minus the full amount, dated like the charge and in the charge's cycle, `×0`, no `% cb`. The Bureau doesn't read it as a refund, so NW4 and the like still count the charge;
-3. this skill with `campaign: "u-plan"` for `01/NN`, in the cycle that bills it.
+3. this skill with `campaign: "u-plan"` for `01/NN`, in the cycle that bills it. When the charge posted on the bill-cycle date itself, that's the **next** cycle (pass `bill_cycle` and `due_date`), because the bank had no time to put the term on the statement it cut that day. This is rare, and was confirmed with Krungsri's call centre (user, 2026-10-06; [[../../../docs/concepts/installment-reward-campaigns#Recording a conversion: as the statement prints it (user, 2026-10-03)|recording a conversion]]).
 
 `/record-statement` checks all three when the statement lands. A plan with interest runs 4–10 terms, so no `campaign_hint` flags it; on First Choice, ask whether any installment was set up at checkout (personal-loan line) or converted afterwards (U PLAN).
 

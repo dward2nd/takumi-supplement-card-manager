@@ -29,6 +29,8 @@ Installment transactions earn **1% per installment row**, regardless of which ti
 
 This is the convention that makes UOB One's installments different from First Choice (where installment cashback typically arrives in a one-shot at purchase time).
 
+A full charge converted later through **UOB PayLater** ends up the same way. UOB takes back the original charge's cashback on approval and pays it on each term instead ("…จะได้รับคะแนนสะสมหรือเครดิตเงินคืนตามยอดการชำระในแต่ละงวดแทน", [UOB PayLater page](https://www.uob.co.th/personal/cards/credit/uob-paylater.page), read 2026-10-05). The household hasn't had a PayLater conversion on UOB One yet. Whether the 1% counts a term's interest too is unconfirmed. See [[../concepts/installment-conversion-rates]].
+
 ## Exclusions
 
 The promo does **not** override the project-wide exclusions:

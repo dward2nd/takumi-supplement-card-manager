@@ -94,6 +94,8 @@ promotion offers it, e.g. 11 listed public hospitals) and **with interest**,
 0.39% a month on the principal for 4–10 months. Those rows earn **no
 points**, but **may earn cashback** depending on the active promotion.
 
+The 0.39% is a **promotional** rate and may not be offered next month or next year (user, 2026-10-05). For how it compares with UOB and ttb, see [[installment-conversion-rates]].
+
 A term with interest is the principal ÷ terms plus 0.39% of the principal:
 Nuta's `OMISE*ROOJAI Chon Buri TH 01/10` is ฿5,548.55 ÷ 10 + ฿21.64 = ฿576.49
 (user, 2026-10-03).
@@ -132,7 +134,9 @@ original charge and the bill still adds up:
   points, or without the campaign note, is flagged with the fix. Takumi's own
   pieces are written with `×0` and the campaign note.
 
-The first plan recorded this way: Nuta's First Choice `7-11 NAPHRU SOI 3 CHONBURI TH` ฿7,175.88 (3 Oct 2026), 0% over 3 terms of ฿2,391.96 (user, 2026-10-05). Its `01/03` went on the 5 Oct cycle. The request came on the BC date itself, and on that day `/add-installment`'s default still names the previous cycle, so the cycle was passed explicitly. `/record-statement` confirms which statement billed it.
+The first plan recorded this way: Nuta's First Choice `7-11 NAPHRU SOI 3 CHONBURI TH` ฿7,175.88 (3 Oct 2026), 0% over 3 terms of ฿2,391.96 (user, 2026-10-05). Its `01/03` first went on the 5 Oct cycle, and was moved to the 5 Nov cycle the next day (rule below). The charge and its reversal stay on the 5 Oct cycle, where they cancel.
+
+**A charge that posts on the cut-off day bills its first term a cycle later** (user, 2026-10-06, confirmed with Krungsri's call centre). The `7-11 NAPHRU` charge posted on 5 Oct, the bill-cycle date itself, which left the bank no time to put the conversion's first term on that statement. So `01/03` belongs to the **next** cycle: dated that cycle's BC date (`Transaction Datetime` 2026-11-05, `Bill Cycle Date` 2026-11-05, `Due Date` 2026-11-25), so `/record-statement` matches it to the November line. The app's bill and the printed statement differ meanwhile. This applies only when the charge posts on the BC date, which is rare. A charge that posts earlier in the cycle has its first term on that cycle as usual.
 
 Older plans are left as they were. Baiboon's ICARE and FUTURE ELECTRONICS plans
 kept only the terms. Nuta's `CTRIP (THAILAND) CO., BANGKOK TH` ฿11,766.58

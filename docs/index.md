@@ -54,6 +54,7 @@ Each note opens with a live Notion URL, collection ID, and the full property sch
 - [[concepts/promotions]] — cashback is promotion-driven; effective dates, tier rules, and how general rules (foreign-in-THB, etc.) interact with promos
 - [[concepts/promotion-bureau]] — campaigns paid on pooled spend: one Bureau row per quota period, one class per payout shape and per campaign, first-come-first-served split
 - [[concepts/installment-reward-campaigns]] — ดีจังผ่อน / U Plan and why an installment plan's rewards can't be read off the merchant string
+- [[concepts/installment-conversion-rates]] — what re-splitting a paid charge costs on First Choice U PLAN, UOB PayLater and ttb so goood, flat vs reducing-balance rates, break-even points
 - [[concepts/premium-tier]] — Signature / Platinum / none
 - [[concepts/card-network]] — JCB / Mastercard / VISA / UnionPay
 - [[concepts/ledger-reset]] — `Reset ยอดใช้จ่ายและคะแนน`: zeroing a card's balance and points without deleting history

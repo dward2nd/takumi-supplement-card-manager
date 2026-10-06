@@ -41,6 +41,16 @@ NW3, ON3 and IS3 ended 30 Sep, and their successors run 1 Oct – 31 Dec 2026. D
 - **IS4** is credited within 5 business days and can't also count toward NW4.
 - **A U PLAN conversion keeps the original charge counting** toward NW4 and IS4, once, as the full-amount slip; merchant installments (personal-loan line) never count, and no billed term is new spend (user, 2026-10-03). See [[../concepts/installment-reward-campaigns#U Plan — Krungsri / First Choice]].
 
+## TR3 — travel (read 2026-10-05, not tracked)
+
+The travel spend NW4 leaves out (`หมวดท่องเที่ยว หมายรวมถึงการซื้อตั๋วเครื่องบิน การจองโรงแรม และยอดจองผ่าน Travel Agency ต่างๆ …`) goes to **TR3**: 1 Sep – 31 Oct 2026, register `TR3` in UCHOOSE or by SMS on or before the purchase date. Not in the household's registration list (2026-10-05). Source: <https://www.firstchoice.co.th/promotion/travel>.
+
+- **Pays** ฿150 per whole ฿10,000 of travel spend a month, up to ฿1,200, plus ฿1,750 per whole ฿100,000. Caps: ฿3,500 a month and ฿7,000 for the campaign, per primary account. Pooled over principal and supplements. Bank examples: ฿11,000 → ฿150, ฿55,000 → ฿750, ฿88,000 → ฿1,200, ฿110,000 → ฿1,750, ฿220,000 → ฿3,500.
+- **Categories, by Visa MCC**: airlines booked direct (12 excluded: Thai → `TG3`, Singapore → `AP3`, ANA, Cathay, China Airlines, Emirates, Etihad, EVA, JAL, Korean, Lufthansa, Qatar), hotels booked direct, "Online Travel Agent" (`การจองผ่านตัวแทนจำหน่าย เช่น Agoda, Traveloka, Trip.com, Booking.com, Klook, Gother เป็นต้น และการจองผ่าน BOOKOLA`), King Power, car rental. Spend outside the listed MCCs and merchants earns nothing.
+- **A tour agency probably counts, unconfirmed.** The headline names "Travel agent" (`สายการบิน, โรงแรม, Travel agent, รถเช่า, Duty free`) and the OTA list is open-ended ("เช่น … เป็นต้น"). Online agents and tour operators usually share MCC 4722. But the detailed heading reads *Online* Travel Agent, and the agency's actual MCC decides it.
+- **Full amount, THB only** (`ยอดการใช้จ่ายแบบชำระเต็มจำนวน เป็นสกุลเงินบาท`). The page's own part 3 offers U PLAN 0% × 3 on trip spend, but doesn't say whether a converted slip still counts toward part 1. The household's NW4 reading would say it counts, once, as the original slip; that's unconfirmed for plans with interest ([[../concepts/installment-reward-campaigns#U Plan — Krungsri / First Choice]]).
+- Also on the page: U CHALLENGE ×3 points for spend in all three of airline/hotel/travel agent, travel insurance (Chubb, MSIG, Sompo, AIG) and foreign-currency spend abroad, 1 Sep – 31 Dec. U PLAN rows earn no points, so a converted slip gains nothing from it.
+
 ## Months
 
 | Month | Row | Result |
