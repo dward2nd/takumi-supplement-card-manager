@@ -60,9 +60,16 @@ def malformed_issuers() -> list[str]:
     YAML accepts a mistyped entry without complaint: `{holders:"nuta":"…"}`
     reads as one key with no value, and the password is silently lost. The
     cloud startup hook (`scripts/install_pkgs.sh`) reports these.
+
+    A key that names no card issuer is counted, never echoed: mangled at the
+    issuer level (`{issuers: {Krungsri:"…"}}`), the key *is* the password.
     """
-    bad = []
+    known = {card.issuer for card in card_repo.load_all()}
+    bad, unrecognised = [], 0
     for issuer, entry in ((_load().get("issuers") or {})).items():
+        if issuer not in known:
+            unrecognised += 1
+            continue
         if isinstance(entry, (str, int)):
             continue
         if isinstance(entry, dict) and set(entry) <= {"default", "holders"}:
@@ -71,6 +78,8 @@ def malformed_issuers() -> list[str]:
             if any(v is not None for v in values) and all(isinstance(v, (str, int)) for v in values if v is not None):
                 continue
         bad.append(issuer)
+    if unrecognised:
+        bad.append(f"{unrecognised} key(s) naming no card issuer")
     return bad
 
 
