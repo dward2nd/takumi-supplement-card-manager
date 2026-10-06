@@ -13,7 +13,9 @@ import { SectionLabel } from "../components/SectionLabel";
 import { TransactionRow } from "../components/TransactionRow";
 import { DateGroupedTransactions } from "../components/DateGroupedTransactions";
 import { fmtLong, fmtRate } from "../data/format";
-import { sumCashback, sumPoints } from "../data/earnings";
+import { fmtPoints, pointsLabel, sumCashback, sumPoints } from "../data/earnings";
+import { accountById, campaignById, periodsForCard } from "../data/campaigns";
+import { CampaignCard } from "../components/CampaignCard";
 import { inProgressPlans, type InstallmentPlan } from "../data/installments";
 import type { CardId, HolderKey, Transaction } from "../data/types";
 
@@ -49,6 +51,10 @@ export const CardDetailScreen = () => {
   );
 
   const promos = activePromotionsFor(card.id, TODAY);
+  // Shared campaigns (Promotion Bureau periods) this card counts toward —
+  // household-wide progress; the share shown follows the viewer's visibility.
+  const periods = periodsForCard(card.id, viewerKey);
+  const hasSideColumn = promos.length > 0 || periods.length > 0;
 
   const cycleTxs = txs.filter((t) => t.billCycleDate === currentBC(card));
   const cycleSpend = cycleTxs.reduce((s, t) => s + (t.amount > 0 ? t.amount : 0), 0);
@@ -87,6 +93,7 @@ export const CardDetailScreen = () => {
   let n = 0;
   const nextNum = () => String(++n).padStart(2, "0");
   const promoNum = promos.length > 0 ? nextNum() : null;
+  const campaignsNum = periods.length > 0 ? nextNum() : null;
   const installmentsNum = installmentPlans.length > 0 ? nextNum() : null;
   const txNum = nextNum();
   const upcomingNum = upcoming.length > 0 ? nextNum() : null;
@@ -130,7 +137,12 @@ export const CardDetailScreen = () => {
           <div className="mt-5 grid grid-cols-3 gap-x-3 gap-y-4 text-[13px]">
             <Tile label="spend" value={cycleSpend} />
             {earnsPoints && (
-              <Tile label="points earned" value={cyclePoints} format="int" />
+              <Tile
+                label={`${pointsLabel(card, false)} earned`}
+                value={cyclePoints}
+                format="int"
+                display={fmtPoints(cyclePoints, card)}
+              />
             )}
             {cycleCashback > 0 || !earnsPoints ? (
               <Tile
@@ -151,9 +163,11 @@ export const CardDetailScreen = () => {
         left; transactions + upcoming (long lists) on the right. When no
         promotions are active, the transactions section uses full width.
       */}
-      <div className={promos.length > 0 ? "lg:grid lg:grid-cols-12 lg:gap-8 lg:px-5" : ""}>
+      <div className={hasSideColumn ? "lg:grid lg:grid-cols-12 lg:gap-8 lg:px-5" : ""}>
+      {hasSideColumn && (
+      <div className="lg:col-span-5">
       {promos.length > 0 && promoNum && (
-        <section className="mt-8 px-5 lg:col-span-5 lg:mt-8 lg:px-0">
+        <section className="mt-8 px-5 lg:mt-8 lg:px-0">
           <SectionLabel number={promoNum}>Active promotions</SectionLabel>
           <div className="mt-3 space-y-3">
             {promos.map((p) => {
@@ -243,7 +257,36 @@ export const CardDetailScreen = () => {
         </section>
       )}
 
-      <div className={promos.length > 0 ? "lg:col-span-7" : ""}>
+      {periods.length > 0 && campaignsNum && (
+        <section className="mt-8 px-5 lg:px-0">
+          <SectionLabel
+            number={campaignsNum}
+            trailing={
+              <button
+                onClick={() => nav("/campaigns")}
+                className="tap -my-3 text-amber-glow/90 transition-colors hover:text-amber-glow"
+              >
+                all campaigns →
+              </button>
+            }
+          >
+            Campaigns this cycle
+          </SectionLabel>
+          <p className="mt-1 text-[12px] leading-snug text-ink-faint">
+            Paid on the {accountById(campaignById(periods[0].campaignId).accountId).label}&rsquo;s pooled spend
+            {viewerKey === "takumi" ? " — every holder's share below." : " — the bar is household-wide, the share is yours."}
+          </p>
+          <div className="mt-3 space-y-3">
+            {periods.map((p, i) => (
+              <CampaignCard key={p.id} period={p} viewer={viewerKey} focus={instanceHolder} index={i} dense />
+            ))}
+          </div>
+        </section>
+      )}
+      </div>
+      )}
+
+      <div className={hasSideColumn ? "lg:col-span-7" : ""}>
         {installmentPlans.length > 0 && installmentsNum && (
           <InProgressInstallments
             sectionNum={installmentsNum}
@@ -296,8 +339,11 @@ export const CardDetailScreen = () => {
 };
 
 const currentBC = (c: { issuer: string }): string => {
-  if (c.issuer === "UOB") return "2026-05-25";
-  if (c.issuer === "Krungsri" || c.issuer === "CardX") return "2026-06-05";
+  if (c.issuer === "UOB" || c.issuer === "KBank") return "2026-05-25";
+  // Krungsri family (incl. Lotus's Beyond, issued through Lotus Money) + CardX: BC day 5.
+  if (c.issuer === "Krungsri" || c.issuer === "CardX" || c.issuer === "Lotus") return "2026-06-05";
+  if (c.issuer === "KTC" || c.issuer === "ttb") return "2026-05-27";
+  if (c.issuer === "AEON") return "2026-06-10";
   return "2026-05-25";
 };
 
@@ -344,6 +390,15 @@ const InProgressInstallments = ({
                 <span className="text-[10.5px] uppercase tracking-[0.22em] text-ink-ghost">
                   posted
                 </span>
+                {/* Plan-level conversion campaign, inherited from the terms' note */}
+                {p.rows.some((r) => r.installment?.campaign === "u-plan") && (
+                  <span className="text-[10.5px] uppercase tracking-[0.22em] text-amber-glow/80">
+                    U PLAN · no points
+                  </span>
+                )}
+                {p.rows.some((r) => r.installment?.campaign === "dee-jang") && (
+                  <span className="text-[10.5px] tracking-[0.06em] text-amber-glow/80">ดีจังผ่อน · no points</span>
+                )}
               </div>
               <div className="mt-1 truncate font-display text-[15px] leading-tight tracking-tight text-ink">
                 {p.base}
@@ -388,11 +443,14 @@ const Tile = ({
   value,
   tone = "default",
   format = "money",
+  display,
 }: {
   label: string;
   value: number;
   tone?: "default" | "credit" | "muted";
   format?: "money" | "int";
+  /** Pre-formatted figure (e.g. fractional coins). */
+  display?: string;
 }) => (
   <div>
     <div className="text-[11px] uppercase tracking-[0.22em] text-ink-faint">
@@ -409,7 +467,7 @@ const Tile = ({
               : "text-ink")
         }
       >
-        {value.toLocaleString("en-US")}
+        {display ?? value.toLocaleString("en-US")}
       </div>
     ) : (
       <Amount value={value} signed={false} tone={tone} size="sm" className="mt-1" />

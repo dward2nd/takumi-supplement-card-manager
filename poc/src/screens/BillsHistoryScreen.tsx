@@ -13,16 +13,11 @@ export const BillsHistoryScreen = () => {
   const { holderKey: viewerKey } = useApp();
   if (!viewerKey) return null;
 
-  // Scope: paid bills only — this is the archive.
+  // Scope: paid bills only — this is the archive. Takumi sees every Bills DB,
+  // his own statement-driven one included; supplements see only their own.
   const visiblePaid = useMemo(() => {
-    const inScope: ("baiboon" | "nuta")[] =
-      viewerKey === "takumi"
-        ? ["baiboon", "nuta"]
-        : viewerKey === "baiboon"
-          ? ["baiboon"]
-          : ["nuta"];
     return BILLS.filter(
-      (b) => b.status === "paid" && inScope.includes(b.holder),
+      (b) => b.status === "paid" && (viewerKey === "takumi" || b.holder === viewerKey),
     ).sort((a, b) => b.billCycleDate.localeCompare(a.billCycleDate));
   }, [viewerKey]);
 
@@ -69,9 +64,8 @@ export const BillsHistoryScreen = () => {
     });
   }, [visiblePaid, cycle, holderFilter, cardId]);
 
-  // Bills DB only exists for supplement holders, so the admin chip row
-  // excludes Takumi.
-  const include = HOLDER_LIST.filter((h) => h.key !== "takumi");
+  // Every holder has a Bills DB since 2026-09-27 (Takumi's is statement-driven).
+  const include = HOLDER_LIST;
 
   return (
     <div className="mx-auto max-w-md md:max-w-3xl lg:max-w-6xl">

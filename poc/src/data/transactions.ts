@@ -62,6 +62,7 @@ const NUTA_UOB_CYCLE = (() => {
     tx("n-uob-11", "nuta", "uob-one", "SHOPEETH BANGKOK TH", 184, "2026-05-22", bc, dd, { cashbackPercent: 0.01, multiplier: "×0" }),
     tx("n-uob-12", "nuta", "uob-one", "TMN 7-11 BANGKOK TH", 106, "2026-05-24", bc, dd, { cashbackPercent: 0.01, multiplier: "×0" }),
     tx("n-uob-13", "nuta", "uob-one", "WWW.GRAB.COM BANGKOK TH", 165, "2026-05-24", bc, dd, { cashbackPercent: 0.05, multiplier: "×0" }),
+    tx("n-uob-14", "nuta", "uob-one", "WWW.GRAB.COM BANGKOK TH", 960, "2026-05-19", bc, dd, { cashbackPercent: 0.05, multiplier: "×0" }),
 
     // Installments — current cycle 2026-05-25.
     // One brand-new plan (01/10) and two ongoing 10-term plans on the same
@@ -152,21 +153,21 @@ const BAIBOON_UOB_WORLD = (() => {
   const bc = "2026-05-25";
   const dd = "2026-06-15";
   return [
-    tx("b-uw-1", "baiboon", "uob-world", "TMN ISERVICECCP BANGKOK TH", 100, "2026-04-26", bc, dd),
-    tx("b-uw-2", "baiboon", "uob-world", "TMN ISERVICECCP BANGKOK TH", 50, "2026-04-27", bc, dd),
-    tx("b-uw-3", "baiboon", "uob-world", "TMN 7-11 BANGKOK TH", 501, "2026-04-29", bc, dd),
-    tx("b-uw-4", "baiboon", "uob-world", "TMN 7-11 BANGKOK TH", 111, "2026-04-29", bc, dd),
+    tx("b-uw-1", "baiboon", "uob-world", "TMN ISERVICECCP BANGKOK TH", 100, "2026-04-26", bc, dd, { multiplier: "×5" }),
+    tx("b-uw-2", "baiboon", "uob-world", "TMN ISERVICECCP BANGKOK TH", 50, "2026-04-27", bc, dd, { multiplier: "×5" }),
+    tx("b-uw-3", "baiboon", "uob-world", "TMN 7-11 BANGKOK TH", 501, "2026-04-29", bc, dd, { multiplier: "×5" }),
+    tx("b-uw-4", "baiboon", "uob-world", "TMN 7-11 BANGKOK TH", 111, "2026-04-29", bc, dd, { multiplier: "×5" }),
     tx("b-uw-5", "baiboon", "uob-world", "Google YouTubePremium Mountain View USA", 359, "2026-04-30", bc, dd, {
       multiplier: "×0",
       note: "Foreign merchant (USA) charged in THB — no cashback/points.",
     }),
-    tx("b-uw-6", "baiboon", "uob-world", "KFC3293-SPTT OR NA YAI CHANTHABURI TH", 19, "2026-05-01", bc, dd),
-    tx("b-uw-7", "baiboon", "uob-world", "KFC3293-SPTT OR NA YAI CHANTHABURI TH", 69, "2026-05-01", bc, dd),
-    tx("b-uw-8", "baiboon", "uob-world", "DONKI THANIYA PLAZA BANGKOK TH", 348, "2026-05-02", bc, dd),
-    tx("b-uw-9", "baiboon", "uob-world", "RIMPING -MAYA CHIANGMAI TH", 66, "2026-05-03", bc, dd),
-    tx("b-uw-10", "baiboon", "uob-world", "TMN 7-11 BANGKOK TH", 118, "2026-05-03", bc, dd),
-    tx("b-uw-11", "baiboon", "uob-world", "TMN FAST FOOD BANGKOK TH", 39, "2026-05-02", bc, dd),
-    tx("b-uw-12", "baiboon", "uob-world", "TMN 7-11 BANGKOK TH", 22, "2026-05-02", bc, dd),
+    tx("b-uw-6", "baiboon", "uob-world", "KFC3293-SPTT OR NA YAI CHANTHABURI TH", 19, "2026-05-01", bc, dd, { multiplier: "×5" }),
+    tx("b-uw-7", "baiboon", "uob-world", "KFC3293-SPTT OR NA YAI CHANTHABURI TH", 69, "2026-05-01", bc, dd, { multiplier: "×5" }),
+    tx("b-uw-8", "baiboon", "uob-world", "DONKI THANIYA PLAZA BANGKOK TH", 348, "2026-05-02", bc, dd, { multiplier: "×2" }),
+    tx("b-uw-9", "baiboon", "uob-world", "RIMPING -MAYA CHIANGMAI TH", 66, "2026-05-03", bc, dd, { multiplier: "×2" }),
+    tx("b-uw-10", "baiboon", "uob-world", "TMN 7-11 BANGKOK TH", 118, "2026-05-03", bc, dd, { multiplier: "×5" }),
+    tx("b-uw-11", "baiboon", "uob-world", "TMN FAST FOOD BANGKOK TH", 39, "2026-05-02", bc, dd, { multiplier: "×5" }),
+    tx("b-uw-12", "baiboon", "uob-world", "TMN 7-11 BANGKOK TH", 22, "2026-05-02", bc, dd, { multiplier: "×5" }),
   ];
 })();
 
@@ -207,13 +208,105 @@ const TAKUMI_SAMPLE = (() => {
   const bc = "2026-05-25";
   const dd = "2026-06-15";
   return [
+    // UOB World — the cycle's ×5 quota (฿20,000, every row on the account
+    // counts) runs out inside the THAI AIRWAYS charge. That row keeps ×5 and
+    // hands the over-quota part's extra points back through `ใช้คะแนน`.
+    tx("t-uw-2", "takumi", "uob-world", "TRAVELOKA*8812345 BANGKOK TH", 8450, "2026-04-27", bc, dd, { multiplier: "×5" }),
+    tx("t-uw-3", "takumi", "uob-world", "LINEPAY*LINE MAN BANGKOK TH", 1280, "2026-05-05", bc, dd, { multiplier: "×5" }),
     tx("t-uw-1", "takumi", "uob-world", "MEDIUM SUBSCRIPTION SAN FRANCISCO US", 195, "2026-05-10", bc, dd, {
       multiplier: "×0",
       note: "Foreign merchant in THB.",
     }),
+    tx("t-uw-4", "takumi", "uob-world", "THAI AIRWAYS INTL BANGKOK TH", 9620, "2026-05-16", bc, dd, {
+      multiplier: "×5",
+      note: "The account's ฿20,000 ×5 quota ends inside this row — it keeps ×5; the over-quota part's extra points come back through ใช้คะแนน.",
+    }),
     tx("t-up-1", "takumi", "uob-premier", "JIB COMPUTER BANGKOK TH", 24500, "2026-05-12", bc, dd),
     tx("t-up-2", "takumi", "uob-premier", "EATIGO BANGKOK TH", 1850, "2026-05-15", bc, dd),
     tx("t-um-1", "takumi", "uob-makro", "MAKRO-RAMA9 BANGKOK TH", 7240, "2026-05-18", bc, dd),
+
+    // UOB One — Takumi's principal. Most of the account's 10%/5% spend this
+    // month is his, so it's his rows that bring the shared ฿500 near its cap.
+    tx("t-uo-1", "takumi", "uob-one", "LINEPAY*BTS BANGKOK TH", 600, "2026-05-02", bc, dd, { cashbackPercent: 0.1, multiplier: "×0" }),
+    tx("t-uo-2", "takumi", "uob-one", "WWW.GRAB.COM BANGKOK TH", 1200, "2026-05-06", bc, dd, { cashbackPercent: 0.05, multiplier: "×0" }),
+    tx("t-uo-3", "takumi", "uob-one", "TOPS MARKET CENTRAL WORLD BANGKOK TH", 2350, "2026-05-09", bc, dd, { cashbackPercent: 0.01, multiplier: "×0" }),
+    tx("t-uo-4", "takumi", "uob-one", "AMZ_SD2210 SAMYAN BANGKOK TH", 85, "2026-05-12", bc, dd, { cashbackPercent: 0.1, multiplier: "×0" }),
+    tx("t-uo-5", "takumi", "uob-one", "7-11 SAMYAN MITRTOWN BANGKOK TH", 900, "2026-05-15", bc, dd, { cashbackPercent: 0.05, multiplier: "×0" }),
+    tx("t-uo-6", "takumi", "uob-one", "MRT-BEM SUKHUMVIT BANGKOK TH", 400, "2026-05-20", bc, dd, { cashbackPercent: 0.1, multiplier: "×0" }),
+    tx("t-uo-7", "takumi", "uob-one", "WATSONS-CENTRAL FESTIVAL BANGKOK TH", 1800, "2026-05-22", bc, dd, { cashbackPercent: 0.05, multiplier: "×0" }),
+    tx("t-uo-8", "takumi", "uob-one", "WWW.GRAB.COM BANGKOK TH", 1450, "2026-05-23", bc, dd, { cashbackPercent: 0.05, multiplier: "×0" }),
+  ];
+})();
+
+/**
+ * First Choice, cycle 2026-06-05 — Takumi's principal and Nuta's supplement.
+ *
+ * Nuta's U PLAN conversion is recorded the way the statement prints it
+ * (docs/concepts/installment-reward-campaigns.md, "Recording a conversion"):
+ *   1. the original charge — stays, now ×0, and still counts once toward the
+ *      pooled NW4 ladder (so it keeps the ladder's 2%);
+ *   2. `REV-FC PLAN ON DEMAND: <merchant>` at minus the full amount, dated
+ *      like the charge — an adjustment, never a refund (the Bureau doesn't
+ *      net it off the charge);
+ *   3. the terms, `<merchant> 01/03` …, dated the day each is billed.
+ * 0% over 3 terms: ฿7,175.88 → 3 × ฿2,391.96.
+ */
+const U_PLAN_NOTE = "เป็นรายการผ่อนชำระเอง ไม่ได้รับคะแนนสะสม";
+const FIRST_CHOICE_JUN = (() => {
+  const bc = "2026-06-05";
+  const dd = "2026-06-25";
+  const merchant = "POWERBUY CENTRAL FESTIVAL CHIANGMAI TH";
+  return [
+    tx("t-fc-1", "takumi", "first-choice", "HOMEPRO CHIANGMAI TH", 4280, "2026-05-10", bc, dd, { cashbackPercent: 0.02 }),
+
+    tx("n-fc-uplan-charge", "nuta", "first-choice", merchant, 7175.88, "2026-05-20", bc, dd, {
+      cashbackPercent: 0.02,
+      multiplier: "×0",
+      note: U_PLAN_NOTE,
+      conversion: { campaign: "u-plan", role: "charge", terms: 3 },
+    }),
+    tx("n-fc-uplan-rev", "nuta", "first-choice", `REV-FC PLAN ON DEMAND: ${merchant}`, -7175.88, "2026-05-20", bc, dd, {
+      multiplier: "×0",
+      conversion: { campaign: "u-plan", role: "reversal", terms: 3 },
+    }),
+    tx("n-fc-uplan-01", "nuta", "first-choice", `${merchant} 01/03`, 2391.96, "2026-06-05", bc, dd, {
+      multiplier: "×0",
+      note: U_PLAN_NOTE,
+      installment: { base: merchant, term: 1, total: 3, perTermAmount: 2391.96, campaign: "u-plan" },
+    }),
+  ];
+})();
+
+/**
+ * Lotus's Beyond, cycle 2026-06-05 — fractional coins.
+ * `บาทต่อ 1 คะแนน` 50 × `คะแนนต่อ 1 หน่วย` 0.25: each whole ฿50 of a line is
+ * a quarter-coin; `×6` on rows at Lotus's makes it 1.5 coins a block.
+ *   ฿151 at Lotus's   → floor(151/50) × 6 × 0.25 = 4.5 coins
+ *   ฿52 anywhere else → floor(52/50) × 1 × 0.25 = 0.25 coins
+ * The ฿100+ restaurant slips feed QRT4 (฿10 a slip); the bank's credit lines
+ * `CB TMN QR QRT4<MON><YY>` land on the primary account — Takumi's ledger.
+ */
+const LOTUSS_BEYOND = (() => {
+  const bc = "2026-06-05";
+  const dd = "2026-06-25";
+  return [
+    tx("t-lb-2", "takumi", "lotuss-beyond", "KHAO SOI KHUN YAI CHIANGMAI TH", 100, "2026-05-03", bc, dd),
+    tx("t-lb-3", "takumi", "lotuss-beyond", "KHAO SOI KHUN YAI CHIANGMAI TH", 100, "2026-05-03", bc, dd),
+    tx("t-lb-1", "takumi", "lotuss-beyond", "LOTUS'S HANG DONG CHIANGMAI TH", 3920, "2026-05-04", bc, dd, { multiplier: "×6" }),
+    tx("t-lb-4", "takumi", "lotuss-beyond", "CB TMN QR QRT4MAY26", -20, "2026-05-06", bc, dd, {
+      multiplier: "×0",
+      note: "QRT4 credit for the two 3 May slips — settles Takumi's May tracker (Slip Transaction).",
+    }),
+    tx("t-lb-6", "takumi", "lotuss-beyond", "CB TMN QR QRT4MAY26", -10, "2026-05-13", bc, dd, {
+      multiplier: "×0",
+      note: "QRT4 credit for Baiboon's 11 May slip — lands on the primary account; Takumi pays her by transfer.",
+    }),
+    tx("t-lb-5", "takumi", "lotuss-beyond", "LOTUS'S HANG DONG CHIANGMAI TH", 2646, "2026-05-23", bc, dd, { multiplier: "×6" }),
+
+    tx("b-lb-1", "baiboon", "lotuss-beyond", "LOTUS'S KAMTHIENG CHIANGMAI TH", 151, "2026-05-09", bc, dd, { multiplier: "×6" }),
+    tx("b-lb-2", "baiboon", "lotuss-beyond", "SALAD FACTORY MAYA CHIANGMAI TH", 128, "2026-05-11", bc, dd),
+    tx("b-lb-3", "baiboon", "lotuss-beyond", "LOTUS'S KAMTHIENG CHIANGMAI TH", 1284.5, "2026-05-16", bc, dd, { multiplier: "×6" }),
+    tx("b-lb-4", "baiboon", "lotuss-beyond", "NAM PRIK NUM SHOP CHIANGMAI TH", 52, "2026-05-19", bc, dd),
   ];
 })();
 
@@ -223,6 +316,8 @@ export const TRANSACTIONS: Transaction[] = [
   ...BAIBOON_UOB_WORLD,
   ...BAIBOON_FIRST_CHOICE,
   ...TAKUMI_SAMPLE,
+  ...FIRST_CHOICE_JUN,
+  ...LOTUSS_BEYOND,
 ];
 
 export const transactionsFor = (holder: HolderKey, cardId?: CardId) =>

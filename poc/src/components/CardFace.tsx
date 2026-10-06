@@ -2,6 +2,7 @@ import clsx from "clsx";
 import type { Card, HolderKey } from "../data/types";
 import { last4For } from "../data/cards";
 import { formatBahtInt } from "../data/format";
+import { fmtPoints, pointsLabel } from "../data/earnings";
 
 interface Props {
   card: Card;
@@ -112,9 +113,15 @@ export const CardFace = ({
             )}
           </div>
           {card.network && (
-            <span className="shrink-0 rounded-full border border-white/20 px-2 py-0.5 text-[11px] uppercase tracking-[0.18em] text-white/70">
-              {card.network}
-            </span>
+            <div className="flex shrink-0 flex-col items-end gap-1">
+              <span className="rounded-full border border-white/20 px-2 py-0.5 text-[11px] uppercase tracking-[0.18em] text-white/70">
+                {card.network}
+              </span>
+              {/* Network tier — names stay short; the tier lives here. */}
+              {card.premiumTier && size !== "sm" && (
+                <span className="font-display text-[12px] italic text-white/55">{card.premiumTier}</span>
+              )}
+            </div>
           )}
         </div>
 
@@ -173,10 +180,10 @@ export const CardFace = ({
             {showOverall && lifetimePoints !== undefined && lifetimePoints > 0 ? (
               <div className="text-right">
                 <div className="text-[10.5px] uppercase tracking-[0.2em] text-white/55">
-                  lifetime pts
+                  lifetime {pointsLabel(card)}
                 </div>
                 <div className="num text-base font-medium text-white/95">
-                  {lifetimePoints.toLocaleString("en-US")}
+                  {fmtPoints(lifetimePoints, card)}
                 </div>
               </div>
             ) : card.pointsDefault ? (

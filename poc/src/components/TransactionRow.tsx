@@ -4,8 +4,8 @@ import { CARDS } from "../data/cards";
 import { Amount } from "./Amount";
 import { Pill } from "./Pill";
 import { fmtShort, splitMerchant } from "../data/format";
-import { earnedCashback, earnedPoints } from "../data/earnings";
-import type { Transaction } from "../data/types";
+import { earnedCashback, earnedPoints, fmtPoints, pointsLabel } from "../data/earnings";
+import type { InstallmentCampaignId, Transaction } from "../data/types";
 
 interface Props {
   tx: Transaction;
@@ -20,6 +20,11 @@ export const TransactionRow = ({ tx, hideCardChip, onTap, index = 0 }: Props) =>
   const { headline, tail } = splitMerchant(tx.name);
   const isCredit = tx.amount < 0;
   const isCashbackRow = /cashback/i.test(tx.name);
+  // A U PLAN reversal is an adjustment that cancels the converted charge in
+  // the bill — not a refund and not a credit, so it doesn't wear credit-teal.
+  const isReversal = tx.conversion?.role === "reversal";
+  const isConvertedCharge = tx.conversion?.role === "charge";
+  const planCampaign = tx.installment?.campaign;
 
   // Per-row earnings — same axes whether the row earned points, cashback, or both.
   // null means "this axis doesn't apply" (e.g. UOB One has no points line).
@@ -41,7 +46,7 @@ export const TransactionRow = ({ tx, hideCardChip, onTap, index = 0 }: Props) =>
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="num text-[12px] tracking-[0.14em] text-ink-faint">
               {fmtShort(tx.transactionDate)}
             </span>
@@ -61,9 +66,25 @@ export const TransactionRow = ({ tx, hideCardChip, onTap, index = 0 }: Props) =>
                 {card.name}
               </span>
             )}
-            {tx.installment && <Pill tone="ghost">installment</Pill>}
+            {tx.installment && !planCampaign && <Pill tone="ghost">installment</Pill>}
+            {planCampaign && (
+              <Pill tone="neutral" uppercase={false}>
+                {CAMPAIGN_NAME[planCampaign]} · no points
+              </Pill>
+            )}
+            {isConvertedCharge && tx.conversion && (
+              <Pill tone="neutral" uppercase={false}>
+                converted · {tx.conversion.terms} terms
+              </Pill>
+            )}
+            {isReversal && <Pill tone="ghost">adjustment</Pill>}
           </div>
-          <div className="mt-1.5 truncate font-display text-[15px] leading-tight tracking-tight text-ink">
+          <div
+            className={clsx(
+              "mt-1.5 truncate font-display text-[15px] leading-tight tracking-tight",
+              isReversal ? "text-ink-dim" : "text-ink",
+            )}
+          >
             {headline}
           </div>
           {tail && (
@@ -81,7 +102,7 @@ export const TransactionRow = ({ tx, hideCardChip, onTap, index = 0 }: Props) =>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
           <Amount
             value={tx.amount}
-            tone={isCredit ? "credit" : "default"}
+            tone={isReversal ? "muted" : isCredit ? "credit" : "default"}
             className={clsx(isCashbackRow && "font-medium", "text-base")}
           />
 
@@ -90,8 +111,11 @@ export const TransactionRow = ({ tx, hideCardChip, onTap, index = 0 }: Props) =>
             <div className="flex items-center gap-3">
               {pts !== null && (
                 <Earned
-                  label="pts"
-                  value={pts > 0 ? pts.toLocaleString("en-US") : "—"}
+                  label={
+                    pointsLabel(card) +
+                    (pts > 0 && tx.multiplier && tx.multiplier !== "×0" ? ` ${tx.multiplier}` : "")
+                  }
+                  value={pts > 0 ? fmtPoints(pts, card) : "—"}
                   tone={pts > 0 ? "default" : "muted"}
                 />
               )}
@@ -108,6 +132,11 @@ export const TransactionRow = ({ tx, hideCardChip, onTap, index = 0 }: Props) =>
       </div>
     </motion.button>
   );
+};
+
+const CAMPAIGN_NAME: Record<InstallmentCampaignId, string> = {
+  "u-plan": "U PLAN",
+  "dee-jang": "ดีจังผ่อน",
 };
 
 const Earned = ({

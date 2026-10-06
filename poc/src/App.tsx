@@ -11,6 +11,7 @@ import { BillsHistoryScreen } from "./screens/BillsHistoryScreen";
 import { BillDetailScreen } from "./screens/BillDetailScreen";
 import { AddTransactionScreen } from "./screens/AddTransactionScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
+import { CampaignsScreen } from "./screens/CampaignsScreen";
 
 function App() {
   const store = useAppStore();
@@ -49,6 +50,14 @@ function App() {
             element={
               <Guard>
                 <TransactionsHistoryScreen />
+              </Guard>
+            }
+          />
+          <Route
+            path="/campaigns"
+            element={
+              <Guard>
+                <CampaignsScreen />
               </Guard>
             }
           />

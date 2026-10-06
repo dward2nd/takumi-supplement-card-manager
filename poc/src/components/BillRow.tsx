@@ -5,9 +5,10 @@ import { CARDS } from "../data/cards";
 import { HOLDERS } from "../data/holders";
 import { daysUntil } from "../data/format";
 import { TRANSACTIONS } from "../data/transactions";
+import { billDueDate } from "../data/bills";
 import { Amount } from "./Amount";
 import { Pill } from "./Pill";
-import type { Bill, Transaction } from "../data/types";
+import type { Bill, HolderKey, StatementBreakdown, Transaction } from "../data/types";
 
 /**
  * Categorise a cycle row into one of four buckets. Same rules as
@@ -50,10 +51,9 @@ export const BillRow = ({ bill, index = 0 }: { bill: Bill; index?: number }) => 
   const nav = useNavigate();
   const card = CARDS[bill.cardId];
   const today = new Date("2026-05-26");
-  const dueDate =
-    bill.billCycleDate === "2026-05-25" ? "2026-06-15" : bill.billCycleDate;
-  const days = daysUntil(dueDate, today);
+  const days = daysUntil(billDueDate(bill), today);
   const paid = bill.status === "paid";
+  const isStatement = bill.source === "statement";
 
   // Per-bucket counts for the faint subline beneath the amount. Visible
   // only when at least one non-regular bucket has rows — the regular case
@@ -61,6 +61,7 @@ export const BillRow = ({ bill, index = 0 }: { bill: Bill; index?: number }) => 
   // in `lib.bills.explain_cycle`.
   const buckets = useMemo(() => {
     const counts = { installment: 0, "cashback-credit": 0, payment: 0, "manual-adjustment": 0 };
+    if (bill.source === "statement") return counts; // the breakdown strip replaces this
     for (const tx of TRANSACTIONS) {
       if (tx.holder !== bill.holder) continue;
       if (tx.cardId !== bill.cardId) continue;
@@ -69,7 +70,7 @@ export const BillRow = ({ bill, index = 0 }: { bill: Bill; index?: number }) => 
       if (b !== "regular") counts[b] += 1;
     }
     return counts;
-  }, [bill.holder, bill.cardId, bill.billCycleDate]);
+  }, [bill.holder, bill.cardId, bill.billCycleDate, bill.source]);
   const subParts = [
     buckets.installment > 0 ? `${buckets.installment} installment${buckets.installment === 1 ? "" : "s"}` : null,
     buckets["cashback-credit"] > 0
@@ -116,7 +117,7 @@ export const BillRow = ({ bill, index = 0 }: { bill: Bill; index?: number }) => 
             </div>
             <div className="text-[12px] uppercase tracking-[0.16em] text-ink-faint">
               cycle {bill.billCycleDate}{" "}
-              {bill.isDraft ? (
+              {!paid && (bill.isDraft || isStatement) ? (
                 <>
                   · due in <span className="num text-ink-dim">{days}</span> days
                 </>
@@ -125,7 +126,17 @@ export const BillRow = ({ bill, index = 0 }: { bill: Bill; index?: number }) => 
               ) : null}
             </div>
             <div className="text-[12px] uppercase tracking-[0.16em] text-ink-ghost">
-              {HOLDERS[bill.holder].englishName} · {HOLDERS[bill.holder].thaiName}
+              {isStatement ? (
+                // Takumi's own Bills DB — the bank's print, paid by him.
+                <>
+                  <span className="text-ink-faint">statement</span> ·{" "}
+                  {bill.paidVia === "auto-debit" ? "auto-debit" : "you pay the bank"}
+                </>
+              ) : (
+                <>
+                  {HOLDERS[bill.holder].englishName} · {HOLDERS[bill.holder].thaiName}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -136,6 +147,68 @@ export const BillRow = ({ bill, index = 0 }: { bill: Bill; index?: number }) => 
           {subParts.join(" · ")}
         </div>
       )}
+      {isStatement && bill.breakdown && (
+        <div className="w-full border-t border-paper-line/40 pt-2.5">
+          <BreakdownStrip breakdown={bill.breakdown} total={bill.amount} />
+        </div>
+      )}
     </motion.button>
+  );
+};
+
+/** Who owns which part of a printed card total — in holder accents, untracked as a dashed ghost. */
+export const breakdownParts = (b: StatementBreakdown) => {
+  const parts: { key: HolderKey | "untracked"; label: string; thai?: string; amount: number; color: string | null }[] = [];
+  const add = (key: HolderKey) => {
+    const v = b[key];
+    if (v) parts.push({ key, label: HOLDERS[key].englishName, thai: HOLDERS[key].thaiName, amount: v, color: HOLDERS[key].accent });
+  };
+  add("takumi");
+  add("baiboon");
+  add("nuta");
+  if (b.untracked) parts.push({ key: "untracked", label: "untracked supplement", amount: b.untracked, color: null });
+  return parts;
+};
+
+export const BreakdownStrip = ({
+  breakdown,
+  total,
+  legend = true,
+}: {
+  breakdown: StatementBreakdown;
+  total: number;
+  legend?: boolean;
+}) => {
+  const parts = breakdownParts(breakdown);
+  return (
+    <div className="w-full">
+      <div className="flex h-[5px] w-full gap-[2px] overflow-hidden rounded-full" aria-hidden>
+        {parts.map((p) => (
+          <span
+            key={p.key}
+            className={p.color ? "h-full rounded-full" : "h-full rounded-full border border-dashed border-ink-ghost/70"}
+            style={{
+              width: `${Math.max(1.5, (Math.abs(p.amount) / Math.max(total, 1)) * 100)}%`,
+              background: p.color ? `${p.color}cc` : undefined,
+            }}
+          />
+        ))}
+      </div>
+      {legend && (
+        <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-ink-faint">
+          {parts.map((p) => (
+            <span key={p.key} className="inline-flex items-baseline gap-1">
+              <span
+                aria-hidden
+                className="inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full"
+                style={{ background: p.color ?? "transparent", outline: p.color ? undefined : "1px dashed currentColor" }}
+              />
+              {p.thai ?? p.label}
+              <span className="num text-ink-dim">{p.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };

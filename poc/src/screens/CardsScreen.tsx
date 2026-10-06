@@ -10,6 +10,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Pill } from "../components/Pill";
 import { HolderChipRow, type HolderFilter } from "../components/HolderChips";
 import { activePromotionsFor } from "../data/promotions";
+import { campaignById, periodsForCard, progressOf } from "../data/campaigns";
 import type { HolderKey } from "../data/types";
 
 export const CardsScreen = () => {
@@ -63,6 +64,14 @@ export const CardsScreen = () => {
       <PageHeader
         title="The wallet"
         eyebrow={`${instances.length} card supplements · current cycle`}
+        trailing={
+          <button
+            onClick={() => nav("/campaigns")}
+            className="tap -mr-2 flex items-center rounded-full px-3 text-[12px] uppercase tracking-[0.22em] text-amber-glow/90 transition-colors hover:text-amber-glow"
+          >
+            campaigns →
+          </button>
+        }
       />
 
       {isAdmin && (
@@ -105,6 +114,7 @@ export const CardsScreen = () => {
                 {instances.map((i, idx) => {
                   const card = CARDS[i.cardId];
                   const promos = activePromotionsFor(card.id, "2026-05-26");
+                  const periods = periodsForCard(card.id, viewerKey);
                   return (
                     <motion.div
                       key={`${i.cardId}#${i.holder}`}
@@ -121,13 +131,28 @@ export const CardsScreen = () => {
                           holder={i.holder}
                           showOverall
                         />
-                        {promos.length > 0 && (
+                        {(promos.length > 0 || periods.length > 0) && (
                           <div className="mt-2 flex flex-wrap items-center gap-1.5">
                             {promos.map((p) => (
                               <Pill key={p.id} tone="amber" uppercase={false}>
                                 active promo · {p.name}
                               </Pill>
                             ))}
+                            {/* Shared campaigns — tone follows household-wide progress */}
+                            {periods.map((p) => {
+                              const c = campaignById(p.campaignId);
+                              const st = progressOf(p).state;
+                              return (
+                                <Pill
+                                  key={p.id}
+                                  tone={st === "full" ? "teal" : st === "near" ? "amber" : "neutral"}
+                                  uppercase={false}
+                                >
+                                  <span className="num">{c.code} {c.headline}</span>
+                                  {st === "near" ? " · near cap" : st === "full" ? " · full" : ""}
+                                </Pill>
+                              );
+                            })}
                           </div>
                         )}
                       </button>
