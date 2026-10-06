@@ -25,10 +25,12 @@ Notes:
 
 Decoded from the 5 Sep 2026 statement (Takumi's …3471 plus the untracked supplement …6524). Each line earns per whole ฿50 of its own amount, floored line by line: `floor(ยอดชำระ / 50)` blocks. A ฿46.75 line earns nothing. The coin summary prints two figures:
 
-| Printed | Rule | 5 Sep 2026 |
-|---|---|---|
-| normal | 0.25 a block, every charge line | 56 blocks → 14.00 |
-| special | 1.25 a block, Lotus's lines only (`LOTUS'S …`, `LOTUSS …`) | 49 blocks → 61.25 |
+| Printed | Rule | 5 Sep 2026 | 5 Oct 2026 |
+|---|---|---|---|
+| normal | 0.25 a block, every charge line | 56 blocks → 14.00 | 64 blocks → 16.00 |
+| special | 1.25 a block, Lotus's lines only (`LOTUS'S …`, `LOTUSS …`) | 49 blocks → 61.25 | 58 blocks → 72.50 |
+
+The 5 Oct 2026 statement reconciles exactly (`/audit-rewards`, 2026-10-07). Takumi's lines give 17 normal blocks and 11 Lotus's blocks (4.25 + 13.75 = his ledger's 18.00). …6524 gives 47 blocks, all at Lotus's (11.75 + 58.75 = the audit's whole −70.5 gap). It also confirms the phone-bill exclusion: `AMP*AIS SERVICESPaymen` ฿2,000 (40 blocks) earned nothing; with it, normal would print 26.00.
 
 So a Lotus's line earns 1.5 a block in all, and every line's coins are a whole number of **quarter-coins**. The flooring has the same shape as [[../formulas/points-realized|`คะแนนที่ได้จริง`]]: floor first, then multiply. With `บาทต่อ 1 คะแนน` = 50, a row's formula points are its quarter-coins at the general rate. Takumi's 16 ledger points on that cycle are his 16 blocks. In quarter-coins, the Lotus's rate is ×6. The `TMN*LOTUS HYPER` case isn't on this statement and is still unverified.
 
