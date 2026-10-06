@@ -15,8 +15,8 @@ issuer's parser), total what the ledgers say for the same card and period:
     or inferred (UOB credits points as each charge posts) — or "cycle", the
     rows billed on the statement's cycle (KBank, AEON; the default);
   - how many points: the `คะแนนที่ได้จริง` formula per row (`lib.points`) — and,
-    for a bank that rounds once per cycle (`points_rounding` "cycle": KBank, KTC,
-    Krungsri), what that gives on the same rows: floor(Σ / baht per point) per
+    for a bank that rounds once per cycle (`points_rounding` "cycle": KBank,
+    KTC), what that gives on the same rows: floor(Σ / baht per point) per
     multiplier. The difference is `rounding`, what per-row flooring loses;
     `[ปรับคะแนน]` rows are the household's adjustments on the principal's
     ledger — split lines, and (`[ปรับคะแนน] ปัดเศษ…`) the cycle's rounding —

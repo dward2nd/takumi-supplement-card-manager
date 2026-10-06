@@ -24,7 +24,8 @@ Each issuer's parser class states two facts. The engine is `lib/rewards_audit.py
 |---|---|---|---|
 | UOB | `posting`: rows *posted* from the previous statement date to the day before this one (`Process Date`, else inferred). Points are credited as each charge posts. | `line`, like the ledger formula | Aug/Sep 2026 exact |
 | KBank, AEON | `cycle`: rows billed on the cycle. Points are credited per cycle, in the app the day after BC (user). | `cycle`: floor(Σ spend / ฿ per point) per multiplier | KBank Aug exact after rounding |
-| KTC, Krungsri | `cycle` (default) | `cycle` | KTC Aug, Krungsri Visa Sep exact |
+| KTC | `cycle` (default) | `cycle` | KTC Aug exact |
+| Krungsri | `cycle` (default) | `line`: per statement line, credits not netted (user, 2026-10-07) | Visa 5 Oct 2026: 485 per line vs 486 per cycle; Lady 177 with credits left in |
 | Lotus's | `cycle` (default) | `line`: coins per whole ฿50 of each line, 0.25 (+1.25 at Lotus's) | 5 Sep 2026: normal 14.00 + special 61.25 exact, per line |
 | CardX | `cycle` (default) | `line`: Sep 2026 printed 15; the rows give 15 one by one, 16 rounded once | Jun/Aug/Sep 2026 exact |
 

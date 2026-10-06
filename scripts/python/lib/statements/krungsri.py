@@ -233,6 +233,9 @@ def _primary(statement: Statement) -> str | None:
 
 class KrungsriParser(StatementParser):
     key = issuer = "Krungsri"
+    # Points per statement line, credits not netted (user, 2026-10-07). The 5 Oct
+    # 2026 Visa printed 485 = Σ floor(line / 25); once on the cycle's spend gives 486.
+    points_rounding = "line"
     signature = "TOTAL PAYMENT DUE FOR CREDIT CARD"
 
     def rewards(self, text: str, statement: Statement) -> tuple[RewardSummary, ...]:
