@@ -35,7 +35,7 @@ Claude Code on the web (claude.ai/code) works on a fresh clone in a Linux contai
 
 A new session picks them up. The repo's SessionStart hook (`scripts/install_pkgs.sh`) installs the Python dependencies and reports any missing variable.
 
-The default network policy blocks the bank and merchant sites and Wikimedia Commons, which `/write-catalogue` needs. To research catalogues in the cloud, widen *Network access* in the same settings. Work done in the cloud lands on a `claude/…` branch; merge it into `main` by pull request. The full list of differences is in [`CLAUDE.md`](CLAUDE.md#cloud-sessions-claude-code-on-the-web).
+The default network policy blocks the bank and merchant sites and Wikimedia Commons, which `/write-catalogue` needs. To research catalogues in the cloud, widen *Network access* in the same settings. A cloud session starts on a `claude/…` branch; Claude merges it into `main` itself (this is a solo project, so no pull request is needed). The full list of differences is in [`CLAUDE.md`](CLAUDE.md#cloud-sessions-claude-code-on-the-web).
 
 ## Documentation language
 

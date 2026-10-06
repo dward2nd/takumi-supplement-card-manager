@@ -91,7 +91,7 @@ Since 2026-10-06 Claude also runs in Anthropic's cloud, not only on Takumi's Mac
 
 - **Secrets come from the environment.** `.env` and `scripts/repositories/statement-passwords.yaml` are gitignored, so the clone lacks them. The cloud environment's settings supply `NOTION_TOKEN` and `STATEMENT_PASSWORDS_YAML` (the passwords file as one line of YAML: `{issuers: {Krungsri: "…", ttb: "…"}}`). `lib/notion_client.py` and `lib/statement_secrets.py` read them when the file is absent. Never ask the user to paste a token or password into the chat.
 - **Startup hook.** `.claude/settings.json` runs `scripts/install_pkgs.sh` at session start: `uv sync`, then swap uv's deprecated `UV_NATIVE_TLS` for `UV_SYSTEM_CERTS` (its warning otherwise lands in `2>&1` captures of a CLI's JSON) and make `UV_PROJECT` absolute, then print a line for each missing secret. It does nothing on the Mac.
-- **Nothing outlives the session unless pushed.** The container is discarded. Commit and push vault, skill and script changes before finishing; they go to the session's `claude/…` branch and reach `main` by pull request. Gitignored output is lost — `/update-docs`'s `docs/_stale-review.md` included — so put what matters from it in the reply.
+- **Nothing outlives the session unless pushed.** The container is discarded. Commit and push vault, skill and script changes before finishing. The session starts on a `claude/…` branch; merge it into `main` and push both (see *Git* under Working conventions). Gitignored output is lost — `/update-docs`'s `docs/_stale-review.md` included — so put what matters from it in the reply.
 - **Files.** Statement PDFs and slips the user attaches should land in `/mnt/user-data/uploads/`, the cloud's `~/Downloads` (unconfirmed: it was empty on 2026-10-06; look there before asking). A Bills row's `ใบแจ้งยอด (PDF)` (statement PDF) still downloads from Notion's signed URL.
 - **The network is an allowlist.** Reachable on 2026-10-06: the Notion API and its file storage, PyPI, npm, GitHub. Denied: bank and merchant sites, Wikimedia Commons, archive.org, r.jina.ai, wsrv.nl. So `/write-catalogue` research and `commons:` cover logos fail. Name the denied host to the user; they widen *Network access* in the environment's settings.
 - **No Notion MCP.** `mcp.notion.com` is denied too, so the deprecated server fails to connect at startup. Expected; `scripts/python` is the path anyway.
@@ -143,6 +143,7 @@ Rules:
 - **Wikilinks everywhere**. The Obsidian graph is the navigation layer.
 - **Don't mutate Notion** without explicit instruction. Reads are free; writes require asking.
 - **Don't translate Thai labels**, don't rename `ยอดค้างชำระ` → `outstanding_balance`. The future app's data model can rename; the vault cannot.
+- **Git: commit straight to `main`.** A solo project: commit directly to `main`, or merge a branch into `main`, without asking first (user, 2026-10-06). It applies on the Mac and in cloud sessions alike. Pushing still needs Claude's GitHub access to the repo.
 
 ## What NOT to do
 
