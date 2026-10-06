@@ -1,6 +1,6 @@
 ---
 name: update-docs
-description: Sweep `docs/`, `CLAUDE.md`, and `README.md` for staleness (broken wikilinks, broken path references, doc older than something it references, drift from CLAUDE.md / .mcp.json), then **apply the writes** for fixes that are unambiguous — and queue the rest at `docs/_stale-review.md` for human judgment. Use when the user runs `/update-docs`, asks to "fix stale docs", "sweep the vault for rot", or "bring the docs up to date with the code". Self-revising — extend this skill in place when new signal patterns appear.
+description: Sweep `docs/`, `CLAUDE.md`, and `README.md` for staleness (broken wikilinks, broken path references, doc older than something it references, drift from CLAUDE.md), then **apply the writes** for fixes that are unambiguous — and queue the rest at `docs/_stale-review.md` for human judgment. Use when the user runs `/update-docs`, asks to "fix stale docs", "sweep the vault for rot", or "bring the docs up to date with the code". Self-revising — extend this skill in place when new signal patterns appear.
 ---
 
 # update-docs
@@ -52,7 +52,6 @@ Extend this table AND the `cli.py` source when new patterns surface — see *Sel
 | `wikilink_target_newer`   | The wikilink target file is newer than this doc                      | Re-read the target; if it changed substantively, update this doc.             |
 | `path_ref_newer`          | A path code-span target is newer than this doc                       | Same as above. Often the doc describes a script that has since been refactored. |
 | `claudemd_newer`          | `CLAUDE.md` was touched after this doc                               | **Low priority alone.** Almost every old doc trips this. Only act on it if paired with another signal or if you can identify a specific convention that changed. |
-| `mcp_config_newer`        | `.mcp.json` was touched after this doc                               | Rarely matters — only flags docs that pin an MCP endpoint or transport.       |
 
 ## Procedure
 
@@ -63,7 +62,7 @@ Extend this table AND the `cli.py` source when new patterns surface — see *Sel
    - Only `claudemd_newer` → **low** priority. Group these together in the checklist; they're a long tail.
    - `path_ref_newer` / `wikilink_target_newer` where the target is itself a stale-flagged doc → don't double-count; fix the upstream first.
 3. **Read suspicious docs.** When in doubt, `Read` the doc and the referenced file to judge whether the signal reflects real drift or is benign (e.g. the doc still describes the right behaviour even though the code was reformatted). Skip whole-vault reading — only sample what you need.
-4. **Cross-check Notion when the docs are about schema.** For a flagged `docs/databases/*.md`, optionally use `mcp__notion__notion-fetch` (read-only) to confirm the live schema still matches what the doc says. Only when signals don't already explain the staleness.
+4. **Cross-check Notion when the docs are about schema.** For a flagged `docs/databases/*.md`, optionally read the data source's schema through `scripts/python` (`GET /v1/data_sources/{id}`, read-only) to confirm the live schema still matches what the doc says. Only when signals don't already explain the staleness.
 5. **Decide auto-fix vs queue.** Walk each signal through the *Auto-fix decision table* below. Auto-fixable items get an `Edit`/`Write` immediately. Everything else goes onto the review queue.
 6. **Apply auto-fixes.** Use `Edit` with `replace_all=false` and full-surrounding-context strings — never blanket-replace. After each edit, re-read the surrounding paragraph to confirm the fix reads naturally. If it doesn't, revert and push the item to the review queue instead.
 7. **Write `docs/_stale-review.md`.** Replace it in full; this file is regenerated each run. Use the *Output shape* below. Auto-fixed items go in a separate **Applied** section so the user can audit what changed.
@@ -83,7 +82,6 @@ A signal is **auto-fixable** only when all of these hold:
 | `broken_path_ref`       | Auto-fix if **exactly one** path on disk matches the broken ref's basename **and** lives under a sibling directory (typical rename: `scripts/python/foo.py` → `scripts/python/lib/foo.py`). Update the ref in place. Otherwise queue. |
 | `wikilink_target_newer` / `path_ref_newer` | Never auto-fix — these signal **content** drift, which the skill cannot rewrite without judgment. Always queue. |
 | `claudemd_newer`        | Never auto-fix — too vague a signal. Queue as Low.                                                                                                                              |
-| `mcp_config_newer`      | Never auto-fix — `.mcp.json` rarely affects doc prose. Queue with a one-line "check if MCP endpoint pinning in this doc still matches `.mcp.json`".                              |
 
 When in doubt, **queue rather than auto-fix.** A bad auto-fix that the human has to undo is worse than a queued item the human resolves in 10 seconds.
 
@@ -92,7 +90,6 @@ When in doubt, **queue rather than auto-fix.** A bad auto-fix that the human has
 - Never delete a doc. Even if every reference to it is broken.
 - Never edit `Name`-equivalent identifiers in docs (Thai field names, card titles, holder names). Verbatim is sacred ([[../../CLAUDE.md]]).
 - Never edit `poc/*` — that's [[../update-poc/SKILL.md|/update-poc]]'s job.
-- Never edit `.mcp.json` from this skill. If it's wrong, the user fixes it.
 - Cap auto-fixes at 10 per run. Beyond that the run is probably wrong about the signal definition; queue the rest and stop.
 
 ## Output shape — `docs/_stale-review.md`

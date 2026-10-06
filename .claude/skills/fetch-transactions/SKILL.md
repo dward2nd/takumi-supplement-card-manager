@@ -58,10 +58,6 @@ Translate the user's request into the spec, run the script, then format the JSON
 - "Total Makro spend on Baiboon's First Choice this cycle?" → `name_contains: "MAKRO"` + `summary: true`.
 - "Cumulative cashback on Nuta's UOB One this cycle?" → `bill_cycle` + `summary: true` (no limit).
 
-## MCP fallback (no script available)
-
-If you're in an environment without the Python sandbox (e.g. a different repo), the MCP-only patterns below still work — they're slower and need client-side filtering, but they're correct. The Notion MCP exposes `mcp__notion__notion-fetch` (one page/data source by ID) and `mcp__notion__notion-search` (semantic, optionally scoped to a data source — **not** a structured filter). There is **no `query_data_sources` tool** wired in.
-
 ## Hard rules
 
 ### 1. Correct holder → correct database
@@ -78,7 +74,7 @@ Same routing table as [[add-transaction]]:
 
 ### 2. Card name matching is exact
 
-If the user names a card, resolve it the same way as the write skill: `notion-search` against that holder's Cards DS, **exact title match**, no substrings.
+If the user names a card, the CLI's `card` key resolves it the same way as the write skill (`lib.cards.find_card` against that holder's Cards DS): **exact title match**, no substrings.
 
 ### 3. Return verbatim merchant names
 
@@ -87,30 +83,6 @@ When you display the results, the merchant name (`Name`) is reproduced **exactly
 ### 4. Never mutate
 
 Even if the user's question implies "and please also mark them as paid", **stop and confirm** before touching anything. This skill returns data; updates are a separate, explicit step.
-
-## Procedure (MCP fallback only)
-
-### Path A — card-scoped query (PREFERRED when a card is named)
-
-This is the highest-fidelity path because the card row carries an inverse relation listing every transaction on that card.
-
-1. **Resolve the card** in the holder's Cards DS via `notion-search` + exact-title filter. Capture the card's page ID.
-2. **Fetch the card page** with `notion-fetch`. The response includes an inverse-relation property listing transaction URLs. Note: the column is named after the *holder's transactions DB title*, e.g. `รายการใช้จ่ายผ่านบัตรของใบบุญ` — and Nuta's Cards DS reuses Baiboon's label string for the same column (see [[../docs/concepts/known-divergences]] if/when documented). Read by *position*, not by name.
-3. **Pick which transactions to fetch** based on the user's filter:
-   - **"Last N by date"** → Notion page IDs are roughly creation-time-sortable, and the relation list tends to come back in creation order. Fetch the trailing `N + ~10` entries (a safety buffer for any out-of-order writes), then sort by `Transaction Datetime` DESC and slice the top N.
-   - **"All in bill cycle X"** → fetch *all* entries, then filter on `date:Bill Cycle Date:start`.
-   - **"Largest / smallest / matching note"** → fetch all entries, then filter/sort on the relevant property.
-4. **Parallelize fetches** in one tool-use block (5–25 fetches per turn is fine; for >50, batch across turns to keep the conversation log readable).
-5. **Sort / filter client-side** on the fetched property values.
-6. **Display** a compact table: date, merchant (verbatim), amount in baht, optionally any flag the user cares about. Don't dump full URLs unless asked.
-
-### Path B — holder-wide query (no card specified)
-
-When the user doesn't pin a card, the inverse-relation traversal doesn't apply. Fallbacks:
-
-- **Date-range / keyword queries** → try `mcp__notion__notion-search` with `data_source_url: "collection://<txn DS>"` and a substring query, then filter client-side. Acknowledge that semantic search may miss exact matches.
-- **Bill-cycle scoped queries** → if the user is asking about a specific bill cycle, the corresponding row in that holder's Bills DB (`บิลเรียกเก็บค่าบัตรเครดิต`) may already aggregate. Check Bills before falling back to per-transaction reads.
-- **Anything broader** → tell the user the structured-query gap exists and propose either (a) narrowing by card, or (b) creating a temporary filtered Notion view via `notion-create-view` and reading from that.
 
 ## Filterable properties on Transactions
 

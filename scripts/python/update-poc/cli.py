@@ -46,7 +46,6 @@ Watched paths — changes here may justify a POC update:
 
   Top-level config:
   - CLAUDE.md
-  - .mcp.json
 
 A change here is *evidence* of evolution, not a verdict. The agent
 triages each change by `status` (A=added → likely new capability;
@@ -91,7 +90,6 @@ DEFAULT_WATCHED: list[str] = [
     "scripts/python/lib",
     # Top-level config.
     "CLAUDE.md",
-    ".mcp.json",
 ]
 
 POC_PATH = "poc"

@@ -42,7 +42,7 @@ echo '{"holder":"takumi","limit":5,"sort":"date_desc"}' \
 
 Start from an existing skill (`/fetch-transactions`, `/summarize-overview`, `/add-transaction`, …). For a one-off read with no skill behind it, write a throwaway script in the scratchpad that imports `lib.notion_client` — still the HTTP API, still `lib/`. If a read is worth repeating, propose promoting it to a skill rather than leaving it ad-hoc.
 
-`mcp__notion__*` is deprecated in this repo. `.mcp.json` still configures the server, but don't call it.
+The Notion MCP server is gone from the repo: `.mcp.json` was deleted on 2026-10-06 (user: "we prefer Notion API in this project"). If a user-level config still offers `mcp__notion__*`, don't call it.
 
 ### Integration access
 
@@ -94,7 +94,6 @@ Since 2026-10-06 Claude also runs in Anthropic's cloud, not only on Takumi's Mac
 - **Nothing outlives the session unless pushed.** The container is discarded. Commit and push vault, skill and script changes before finishing. The session starts on a `claude/…` branch; merge it into `main` and push both (see *Git* under Working conventions). Gitignored output is lost — `/update-docs`'s `docs/_stale-review.md` included — so put what matters from it in the reply.
 - **Files.** Statement PDFs and slips the user attaches should land in `/mnt/user-data/uploads/`, the cloud's `~/Downloads` (unconfirmed: it was empty on 2026-10-06; look there before asking). A Bills row's `ใบแจ้งยอด (PDF)` (statement PDF) still downloads from Notion's signed URL.
 - **The network is an allowlist.** Reachable on 2026-10-06: the Notion API and its file storage, PyPI, npm, GitHub. Denied: bank and merchant sites, Wikimedia Commons, archive.org, r.jina.ai, wsrv.nl. So `/write-catalogue` research and `commons:` cover logos fail. Name the denied host to the user; they widen *Network access* in the environment's settings.
-- **No Notion MCP.** `mcp.notion.com` is denied too, so the deprecated server fails to connect at startup. Expected; `scripts/python` is the path anyway.
 - **Mac-only skills.** `/show-poc` opens Chrome on macOS: here, screenshot the POC with Playwright's Chromium (`/opt/pw-browsers`) and send the image instead. Don't run `/release` here: it tags and pushes the current branch, which is the session's `claude/…` branch, not `main`.
 - **Linux tools.** `timeout` exists, `sips` doesn't (use ImageMagick's `convert`), and catalogue covers fall back from Sukhumvit Set to the Loma Thai font (`lib/catalogue/cover.py`), so they look a little different from Mac-rendered ones.
 
@@ -103,7 +102,6 @@ Since 2026-10-06 Claude also runs in Anthropic's cloud, not only on Takumi's Mac
 ```
 .
 ├── .claude/                 # skills + settings.json (env, cloud SessionStart hook)
-├── .mcp.json                # Notion MCP server config (deprecated — use scripts/python)
 ├── CLAUDE.md                # this file
 ├── README.md
 ├── docs/                    # Obsidian-native knowledge vault (open this folder as a vault)

@@ -95,7 +95,7 @@ Pick the data source by holder. **Never** cross-write — a Baiboon transaction 
 
 Before creating any pages:
 
-1. Call `mcp__notion__notion-search` with `data_source_url: "collection://<holder-cards-collection>"` and `query: "<card name>"`.
+1. The CLI resolves the card with `lib.cards.find_card(<holder cards DS>, "<card name>")`, which queries the holder's Cards DS through the Notion API.
 2. Filter the results to an **exact** match on the card's title. Reject substring matches (`Krungsri JCB` is not `Krungsri NOW`; `UOB One` is not `UOB World`).
 3. Capture the card page URL (`https://www.notion.so/<id>`). Pass it in the `Card` property as a **JSON array string** containing one element:
 
@@ -300,7 +300,6 @@ Notion's `number` property type with a "percent" format displays as `1%` while t
 2. **Build the JSON spec** described in *Primary execution path*. Every amount the user listed becomes its own entry in `transactions`, even when the merchant string repeats across amounts.
 3. **Run the script.** Pipe the JSON in, read the JSON envelope back.
 4. **Report back** with the count, the merchant/amount/date list, and the card. Don't dump every Notion URL unless asked. From `promotions`, report: the fields it `fixed`, any row of yours `not_linked` or `flagged`, each Bureau row's new share when it changed, `missing` periods (offer to create them), and `warnings`.
-5. **MCP fallback** — only if the script isn't available (e.g. wrong repo): use one `mcp__notion__notion-create-pages` call with `parent: { type: "data_source_id", data_source_id: "<holder transactions DS>" }` and the same property mapping below.
 
 ## After writing
 

@@ -62,7 +62,6 @@ The CLI watches both **documentation surfaces** (narrative that reshapes the UI)
 | `.claude/skills/`                 | A new `SKILL.md` is a new user capability — the POC may need to mirror it.               |
 | `scripts/python/lib/`             | A new lib file is a new domain concept (`installments.py`, `bill_explain.py`, etc.).     |
 | `CLAUDE.md`                       | Top-level conventions.                                                                   |
-| `.mcp.json`                       | Notion endpoint config (offline POC ⇒ rarely relevant; included for completeness).       |
 
 ### Triage heuristics
 
@@ -80,7 +79,7 @@ The CLI emits a `status` per change (`A`=added, `M`=modified, `D`=deleted, `R…
 | `M` on existing SKILL.md                                                | **Capability evolved.** Skim the diff (`git show <last_commit> -- <path>`). If new spec keys / new flags affect user-visible behaviour, mirror in the POC; if it's docstring polish, skip. |
 | `A` on `scripts/python/lib/<file>.py` (new lib file)                    | **New domain concept.** Read the module's docstring + public functions. If it introduces a data abstraction (clusters, summaries, classifications), reflect the abstraction in `src/data/types.ts` and any screen that should surface it. Pair with the corresponding `SKILL.md`. |
 | `M` on existing `scripts/python/lib/<file>.py`                          | Usually skip — internal refactor. Re-check only if the change is paired with a SKILL.md edit on the same topic.               |
-| `CLAUDE.md` / `.mcp.json` change                                        | Almost always skip for the POC. Re-check the charter section below instead.                                                  |
+| `CLAUDE.md` change                                                      | Almost always skip for the POC. Re-check the charter section below instead.                                                  |
 
 ### Direct-feedback trigger (args present)
 
@@ -149,7 +148,7 @@ Call the `frontend-design` skill via the Skill tool with the brief above as the 
 5. **Cross-check structured data** when narrative docs are ambiguous. The structured source of truth lives in:
    - `scripts/repositories/cards/<slug>.yaml`
    - `scripts/repositories/promotions/<id>.yaml`
-   - Live Notion via `mcp__notion__notion-fetch` (read-only) — only when neither narrative nor YAML answers the question.
+   - Live Notion through `scripts/python` (read-only; `lib.notion_client`) — only when neither narrative nor YAML answers the question.
 6. **Compose the brief** with the six sections above.
 7. **Invoke `/frontend-design`** with the brief. Wait for it to apply edits.
 8. **Smoke-test via chrome-devtools-mcp**: launch `bun run dev` in `poc/`, navigate to the affected screen on a phone viewport (390×844), take a screenshot, check `list_console_messages` for errors. Stop the dev server when done.

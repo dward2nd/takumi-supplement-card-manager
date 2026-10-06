@@ -5,7 +5,7 @@ to the current state of the codebase.
 deterministic + idempotent: no writes, no network. Compares each doc's
 "freshness time" against the freshness time of the files it references
 (wikilinks + path code-spans) and a small set of global drift sources
-(CLAUDE.md, .mcp.json). Emits a JSON envelope on stdout.
+(CLAUDE.md). Emits a JSON envelope on stdout.
 
 "Freshness time" of a file F:
   - If F appears in `git status --porcelain` (modified or untracked),
@@ -22,7 +22,6 @@ new patterns are found in the field):
   - wikilink_target_newer : a [[X]] target is newer than the doc
   - path_ref_newer      : a `path/to/x` code-span target is newer than the doc
   - claudemd_newer      : CLAUDE.md is newer than the doc
-  - mcp_config_newer    : .mcp.json is newer than the doc
 
 Folder wikilinks (`[[../promotions/]]`, trailing slash) resolve to a
 directory and never emit a `*_newer` signal — directory mtimes have
@@ -55,7 +54,6 @@ DEFAULT_DOC_GLOBS: list[str] = [
 # Files whose freshness, if newer than a doc, suggests convention/config drift.
 GLOBAL_DRIFT_SOURCES: list[tuple[str, str]] = [
     ("CLAUDE.md", "claudemd_newer"),
-    (".mcp.json", "mcp_config_newer"),
 ]
 
 # Wikilink: [[target]] or [[target|alias]]. Capture `target`. We later
