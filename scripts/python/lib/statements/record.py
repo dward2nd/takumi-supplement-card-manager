@@ -271,8 +271,13 @@ def bill_note(statement: Statement, plan: AccountPlan, printed: Statement | None
     for holder in (*HOLDERS, "unmonitored"):
         if holder in plan.split:
             parts.append(f"{THAI_NAMES[holder]} ฿{plan.split[holder]:,.2f}")
-    if abs(plan.carried) > 0.005:
-        parts.append(f"balance carried from the previous statement ฿{plan.carried:,.2f}")
+    carried = plan.carried
+    if (over := plan.overpaid()) > 0.005:
+        parts.append(f"overpaid on the previous statement ฿{-over:,.2f} "
+                     f"(payments ฿{plan.paid:,.2f} against ฿{plan.previous:,.2f})")
+        carried = round(carried + over, 2)
+    if abs(carried) > 0.005:
+        parts.append(f"balance carried from the previous statement ฿{carried:,.2f}")
     shown = printed or statement
     note = f"{statement.issuer} statement dated {shown.statement_date}, due {shown.due_date}. "
     if printed and printed.statement_date != statement.statement_date:
@@ -449,6 +454,8 @@ def _report(plan: AccountPlan) -> dict:
             e[key] = getattr(plan, key)
     if abs(plan.carried) > 0.005:
         e["carried"] = plan.carried
+    if plan.overpaid() > 0.005:
+        e["overpaid"] = plan.overpaid()
     return e
 
 

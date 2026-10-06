@@ -43,7 +43,7 @@ Checked against every credit so far:
 | 2 Sep: `MOOYIM JIMJUM` ฿100 × 3 (and ฿52) | 3 Sep `CB TMN QR QRT4SEP26` −฿30 (the ฿52 earned nothing) |
 | 8 Sep: `CHAILAISALADROLLHEALHT` ฿100 | 10 Sep `CB TMN QR QRT4SEP26` −฿10 (September's ฿40 now full) |
 | 1 Oct: `CHAILAISALADROLLHEALTHT` ฿100 | 4 Oct `CB TMN QR QRT4OCT26` −฿10 |
-| 3 Oct: `PHUNGNOI MAYA-CM` ฿108 | pending |
+| 3 Oct: `PHUNGNOI MAYA-CM` ฿108 | 5 Oct `CB TMN QR QRT4OCT26` −฿10 |
 
 ## Crediting
 
@@ -58,7 +58,7 @@ Once, **before** the transaction: UCHOOSE → `QRT4`, or SMS `QRT4 <16-digit car
 | Row | Created | State |
 |---|---|---|
 | `2026M9 — QRT4 cb 10%` | 2026-10-05 | ฿40 to Takumi, settled by the two `QRT4SEP26` credits (tracker ticked) |
-| `2026M10 — QRT4 cb 10%` | 2026-10-05 | ฿20 to Takumi; ฿10 credited 4 Oct, PHUNGNOI's ฿10 pending |
+| `2026M10 — QRT4 cb 10%` | 2026-10-05 | ฿20 to Takumi, both credited (4 and 5 Oct) and linked to the tracker; left unticked until the month closes, since a ticked tracker no longer follows the Bureau and ฿20 of the ฿40 is still open |
 
 July and August have no rows: the ledger has no qualifying slip on the card in either month.
 

@@ -86,6 +86,25 @@ The bill's `จ่ายแล้ว` is then set by hand, with nothing attached
 
 **KTC: transfer rows at statement time** (user, 2026-09-27). KTC bills the principal and each supplement card separately, one PDF per card number, and Takumi may pay a KTC bill in one transfer or split it. So when his principal statement carries a friend's `[บัตรหลัก]` line, add the `โอนยอดจาก<friend>` row **when the statement is recorded**. Date it on the statement date, tag it to that cycle, and set `×0`. His card balance then equals the bill before payment, and the payment row(s) can mirror the slip(s) exactly. First case: KTC UnionPay 2026-08, `โอนยอดจากใบบุญ` +376.00 for `[บัตรหลัก] CMU FITNESS`, making ฿1,447.60 = the bill.
 
+**Bank credits that post after the cut-off pay the closed bill** (user, 2026-10-06). A credit that lands between the statement and its due date, such as a pay-with-points credit or a waived fee, lowers what the bank wants for the closed statement. So it goes on that bill as a payment:
+
+- **Old cycle**: one `ชำระบางส่วน` / `ชำระเพิ่มบางส่วนจนครบ` row per credit, for the credit's amount and dated on its posting date. The Note names the bank line. Write it with `lib.payments.record_primary_payment`, since `/update-bill` only writes payment rows when a slip is attached. A friend's PWP credit also brings in the friend's `โอนยอดจาก<name>` row for her statement-line total.
+- **Next cycle**, only for a credit on Takumi's own charges: the bank's line, plus `[ยกยอดมาจาก <YYYY-MM>]` for the opposite amount, both `×0`. The pair stops the credit counting twice when `/record-statement` reads the next PDF. A friend's PWP credit already has that pair in her ledger: `[หักลบหนี้เก่า] PWP: <merchant>` (debt offset) in the purchase's cycle, then `PWP: <merchant>` and `[ยกยอดมาจาก <YYYY-MM>]` in the cycle that prints it.
+
+First case: UOB Makro 2026-09 (฿3,161.71). The ฿440.35 slip was followed by Baiboon's `PWP: MAKRO_CHIANGMAI 2` ฿171.43 (26 Sep, with `โอนยอดจากใบบุญ` +688.35) and the waived `CARD MEMBERSHIP FEE - WITH VAT 7%`, `CR CARD MEMBERSHIP FEE - INC OF VAT` ฿2,033.00 (30 Sep, with the cancelling pair on 2026-10-22). That leaves Baiboon's ฿516.92 and ฿0.01.
+
+### Overpayments
+
+When the payments after a statement add up to more than it asked for, the bank credits the excess on the next statement and prints it as part of the previous balance. `/record-statement` reports this as `overpaid` and says so in the bill's Note (2026-10-06). Before that change it was labelled "balance carried from the previous statement". The ledger needs three rows on that card, all `×0` and dated on the extra payment:
+
+| Row | Amount | Cycle |
+|---|---:|---|
+| `ชำระบางส่วน`, Note naming the bank line and slip | −excess | the overpaid cycle |
+| `[ยอดยกมาจากรอบ <YYYY-MM>]` | +excess | the overpaid cycle |
+| `[ยอดยกมาจากรอบ <YYYY-MM>]` | −excess | the next cycle |
+
+Attach the extra slip to the overpaid bill with `record_payment: false`, since the script would call it a payment completing the bill. First case: UOB One 2026-08. Takumi's ฿585.47 slip on 31 Aug already covered Baiboon's ฿169.00. Her ฿160.55 then went to UOB a second time (`PAYMENT THANK YOU - BAY 0025/7603`, 31 Aug), and the 25 Sep statement credited it.
+
 ### Friends' balances are debts to Takumi, not to the bank
 
 Baiboon's and Nuta's open balances are what they owe **Takumi**. His payment to the bank never touches their ledgers. Their balances clear only through their own `ชำระ…` rows when they transfer to him.
@@ -137,10 +156,10 @@ Closing 2026-09-27, due 2026-10-12. Takumi paid all three from slips on 28 Sep, 
 
 | Bill | `ยอดชำระ` | Split | Paid |
 |---|---:|---|---|
-| KTC UnionPay 2026-09 (1346) | 3,797.96 | Takumi 1,907.26 + Baiboon `[บัตรหลัก]` 1,890.70 | ฿1,907.26 (two `ชำระบางส่วน`); Baiboon's share open |
+| KTC UnionPay 2026-09 (1346) | 3,797.96 | Takumi 1,907.26 + Baiboon `[บัตรหลัก]` 1,890.70 | ✓ ฿1,907.26 (two `ชำระบางส่วน`, 28 Sep) + Baiboon's ฿1,890.70 (`ชำระเพิ่มบางส่วนจนครบ`, 6 Oct) |
 | KTC Mastercard 2026-09 (5549) | 1,545.30 | Takumi | ✓ |
 | KTC Digital VISA 2026-09 (0581) | 20.00 | Takumi | ✓ |
 
-- `โอนยอดจากใบบุญ` +1,890.70 was added at statement time, as the KTC rule above says. Baiboon pays her 1346 share to KTC herself (August: `Payment-BAY Internet` −376.00 on 6 Sep), so the bill stays open until she does.
+- `โอนยอดจากใบบุญ` +1,890.70 was added at statement time, as the KTC rule above says. In August Baiboon paid her 1346 share to KTC herself (`Payment-BAY Internet` −376.00 on 6 Sep). In September she transferred it to Takumi with her own …2310 bill (฿9,797.38, 6 Oct) and he paid KTC the same day (Krungsri bill payment, memo `1346 - KTC UnionPay (ส่วนของใบบุญ)`). Because the transfer row already existed, that slip took only `payment_amount`, no `payment_covers`.
 - Baiboon's own statement (…2310, ฿7,906.68) went on **her** KTC UnionPay bill with the 1346 PDF, as in August: ฿9,797.38 = 7,906.68 + her 1,890.70 of `[บัตรหลัก]` shares. Three of its lines (฿514.00) were missing from her ledger and were added.
 - Points: `CNX BC DOM L2 LS(6110)` (Bonchon at Chiang Mai airport, ฿478.46, split Takumi 281.06 / Baiboon 197.40) earned nothing: fast food, MCC 5814, KTC UnionPay rule (16). Both halves are `×0`. The petrol lines (`BANGCHAK …` ฿940, `BSRC-…` ฿686.20) earned, so KTC UnionPay has no petrol exclusion (see [[../promotions/ktc-forever|ktc-forever]]).

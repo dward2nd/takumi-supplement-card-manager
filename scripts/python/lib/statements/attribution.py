@@ -81,7 +81,15 @@ class AccountPlan:
     # on an issuer that bills each card number separately (KTC, CardX).
     bill_holder: str = PRIMARY
     carried: float = 0.0  # previous balance left after this statement's payments
+    previous: float = 0.0  # the previous statement's balance, as printed
+    paid: float = 0.0  # payments this statement received (positive)
     warnings: list[str] = field(default_factory=list)
+
+    def overpaid(self) -> float:
+        """How far payments went past a previous balance that was owed (2026-10-06:
+        the 31 Aug BAY ฿160.55 paid Baiboon's UOB One share twice). A credit
+        balance carried in from earlier isn't counted."""
+        return round(max(0.0, self.paid - max(self.previous, 0.0)), 2)
 
     def drift(self) -> float:
         """Notion minus statement, over the lines this plan accounts for."""
@@ -245,10 +253,12 @@ def plan_account(
     for section in account.sections:
         holder = owners[section.number][1]
         plan.carried += section.previous_balance
+        plan.previous += section.previous_balance
         for line in section.lines:
             if line.kind == "payment":
                 plan.payments.append(line)
                 plan.carried += line.amount
+                plan.paid -= line.amount
                 continue
             if holder == PRIMARY:
                 primary_lines.append(line)
@@ -274,6 +284,14 @@ def plan_account(
                     f"on their own supplement card {section.number} but carries the [บัตรหลัก] prefix"
                 )
     plan.carried = round(plan.carried, 2)
+    plan.previous, plan.paid = round(plan.previous, 2), round(plan.paid, 2)
+    if plan.overpaid() > 0.005:
+        plan.warnings.append(
+            f"{plan.card}: payments after the previous statement (฿{plan.paid:,.2f}) exceed its "
+            f"฿{plan.previous:,.2f} by ฿{plan.overpaid():,.2f}. Look for a payment made twice, and book the "
+            f"excess in Takumi's ledger as a ชำระบางส่วน row (the extra payment, previous cycle) plus a "
+            f"[ยอดยกมาจากรอบ <YYYY-MM>] +/− pair across the two cycles, ×0."
+        )
 
     # Primary lines: exact matches first across everyone, then near-date, then shares.
     remaining: list[StatementLine] = []
