@@ -3,9 +3,10 @@
 deterministic + idempotent — safe to re-run.
 
 One client per process. Loads NOTION_TOKEN from the nearest .env
-(repo root in this project). Uses the 2025-09-03 multi-source API:
-queries hit `data_sources/{id}/query` and page parents are typed
-`data_source_id`.
+(repo root in this project); a variable already in the environment wins,
+which is how a cloud session (no .env in its fresh clone) supplies it.
+Uses the 2025-09-03 multi-source API: queries hit
+`data_sources/{id}/query` and page parents are typed `data_source_id`.
 """
 
 from __future__ import annotations
@@ -31,7 +32,8 @@ def get_client() -> Client:
     token = os.environ.get("NOTION_TOKEN")
     if not token:
         raise NotionAuthError(
-            "NOTION_TOKEN is not set. Add it to .env at the repo root."
+            "NOTION_TOKEN is not set. Add it to .env at the repo root, or, in a "
+            "cloud session, as an environment variable in the cloud environment's settings."
         )
     return Client(auth=token)
 

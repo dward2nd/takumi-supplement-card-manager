@@ -46,7 +46,7 @@ Start from an existing skill (`/fetch-transactions`, `/summarize-overview`, `/ad
 
 ### Integration access
 
-The scripts authenticate as the Notion integration **"Claude Code's Automated Scripts"** with `NOTION_TOKEN` from the repo-root `.env`. A database invisible to that integration returns `ObjectNotFound` on query, and — more quietly — **relations pointing into it read back as an empty array**, which looks like unset data rather than an access error.
+The scripts authenticate as the Notion integration **"Claude Code's Automated Scripts"** with `NOTION_TOKEN` from the repo-root `.env` (in a cloud session, from the environment; see *Cloud sessions*). A database invisible to that integration returns `ObjectNotFound` on query, and — more quietly — **relations pointing into it read back as an empty array**, which looks like unset data rather than an access error.
 
 All fourteen databases are shared as of 2026-09-30 (Takumi's Bills DB joined 2026-09-27; the Promotion Bureau and the three cashback trackers 2026-09-28; Promotion Catalogues 2026-09-30). If a relation ever comes back empty across a whole table, suspect this before suspecting the data — that was the symptom while Takumi's Cards DS was still unshared. Confirm what the token can see with `client.search(filter={"property": "object", "value": "data_source"})`.
 
@@ -85,10 +85,24 @@ Notable schema quirks worth knowing before you touch the data:
 
 Full schema is documented in `docs/databases/`.
 
+## Cloud sessions (Claude Code on the web)
+
+Since 2026-10-06 Claude also runs in Anthropic's cloud, not only on Takumi's MacBook. A cloud session is a fresh Linux container on a fresh clone; `CLAUDE_CODE_REMOTE=true` marks it. What changes:
+
+- **Secrets come from the environment.** `.env` and `scripts/repositories/statement-passwords.yaml` are gitignored, so the clone lacks them. The cloud environment's settings supply `NOTION_TOKEN` and `STATEMENT_PASSWORDS_YAML` (the passwords file as one line of YAML: `{issuers: {Krungsri: "…", ttb: "…"}}`). `lib/notion_client.py` and `lib/statement_secrets.py` read them when the file is absent. Never ask the user to paste a token or password into the chat.
+- **Startup hook.** `.claude/settings.json` runs `scripts/install_pkgs.sh` at session start: `uv sync`, then swap uv's deprecated `UV_NATIVE_TLS` for `UV_SYSTEM_CERTS` (its warning otherwise lands in `2>&1` captures of a CLI's JSON) and make `UV_PROJECT` absolute, then print a line for each missing secret. It does nothing on the Mac.
+- **Nothing outlives the session unless pushed.** The container is discarded. Commit and push vault, skill and script changes before finishing; they go to the session's `claude/…` branch and reach `main` by pull request. Gitignored output is lost — `/update-docs`'s `docs/_stale-review.md` included — so put what matters from it in the reply.
+- **Files.** Statement PDFs and slips the user attaches should land in `/mnt/user-data/uploads/`, the cloud's `~/Downloads` (unconfirmed: it was empty on 2026-10-06; look there before asking). A Bills row's `ใบแจ้งยอด (PDF)` (statement PDF) still downloads from Notion's signed URL.
+- **The network is an allowlist.** Reachable on 2026-10-06: the Notion API and its file storage, PyPI, npm, GitHub. Denied: bank and merchant sites, Wikimedia Commons, archive.org, r.jina.ai, wsrv.nl. So `/write-catalogue` research and `commons:` cover logos fail. Name the denied host to the user; they widen *Network access* in the environment's settings.
+- **No Notion MCP.** `mcp.notion.com` is denied too, so the deprecated server fails to connect at startup. Expected; `scripts/python` is the path anyway.
+- **Mac-only skills.** `/show-poc` opens Chrome on macOS: here, screenshot the POC with Playwright's Chromium (`/opt/pw-browsers`) and send the image instead. Don't run `/release` here: it tags and pushes the current branch, which is the session's `claude/…` branch, not `main`.
+- **Linux tools.** `timeout` exists, `sips` doesn't (use ImageMagick's `convert`), and catalogue covers fall back from Sukhumvit Set to the Loma Thai font (`lib/catalogue/cover.py`), so they look a little different from Mac-rendered ones.
+
 ## Repo layout
 
 ```
 .
+├── .claude/                 # skills + settings.json (env, cloud SessionStart hook)
 ├── .mcp.json                # Notion MCP server config (deprecated — use scripts/python)
 ├── CLAUDE.md                # this file
 ├── README.md
@@ -101,6 +115,7 @@ Full schema is documented in `docs/databases/`.
 │   ├── formulas/            # Notion formula decodings
 │   └── future-app/          # phase-2 target: product-shape.md (canonical) + data-model + migration
 └── scripts/                 # sandboxed deterministic automation
+    ├── install_pkgs.sh      # cloud SessionStart hook (no-op on the Mac)
     ├── typescript/          # Bun runtime
     └── python/              # uv runtime
 ```

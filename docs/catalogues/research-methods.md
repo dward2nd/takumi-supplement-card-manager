@@ -22,6 +22,16 @@ How the [[index|catalogue research]] got at each issuer's and merchant's terms (
 - **Does a merchant have an app?** `itunes.apple.com/search?term=<q>&country=th&entity=software` lists the Thai App Store's matches.
 - **Logos without the merchant's site**: `graph.facebook.com/<page>/picture?type=large&width=720` returns the Facebook profile picture to curl, and `page.line.me/<LINE OA id>` is readable (its "Basic info" also lists accepted payments).
 
+## In a cloud session
+
+Claude Code on the web runs on Linux behind an allowlist (see `CLAUDE.md`, *Cloud sessions*). On 2026-10-06 the default policy denied every site in the table below, plus r.jina.ai, archive.org, wsrv.nl and Wikimedia Commons, so research needs *Network access* widened in the environment's settings first. Once the hosts are allowed, the tools differ from the Mac:
+
+- **Headless Chrome** is Playwright's Chromium: `/opt/pw-browsers/chromium-<n>/chrome-linux/chrome --headless=new --no-sandbox`.
+- **`timeout`** exists, so the `perl -e 'alarm …'` wrapper isn't needed.
+- **No `sips`**: convert webp posters with `convert in.webp out.png` (ImageMagick).
+- **`pdftotext`** is installed.
+- **Egress** is not the Mac's Hong Kong exit; which sites block it is untested.
+
 ## By site
 
 | Site | What works | Notes |

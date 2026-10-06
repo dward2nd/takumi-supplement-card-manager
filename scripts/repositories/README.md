@@ -198,6 +198,12 @@ Resolution is `card name → card_repo issuer → password`. `/audit-bill`'s
 `extract.py` auto-resolves it from `--card "<title>"` (or `--issuer`), so a
 known issuer's password is never re-typed.
 
+A cloud session has no copy of the file (fresh clone). It reads the same YAML
+from the `STATEMENT_PASSWORDS_YAML` environment variable, set in the cloud
+environment's settings, written as one line of flow YAML:
+`{issuers: {Krungsri: "DDMonYYYY", CardX: {default: "DDMonYYYY", holders: {nuta: "DDMonYYYY"}}}}`.
+The file wins when both exist.
+
 ## How skills read this
 
 - `scripts/python/lib/card_repo.py` — load + lookup cards by name.

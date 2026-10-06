@@ -75,6 +75,7 @@ If it has already been pushed, undo is invasive (force-push to rewrite history, 
 
 ## Notes
 
+- **Not in a cloud session** (`CLAUDE_CODE_REMOTE=true`). There the current branch is the session's `claude/…` branch, so the release commit and tag would land off `main`, and the cloud's git proxy may refuse the tag push. Stop and tell the user to merge the session's pull request and cut the release from `main` on the Mac.
 - The version in `scripts/python/pyproject.toml` is the Python sandbox's own version and is **independent** of the repo's release version. This skill does not touch it.
 - If a CHANGELOG.md is added to the repo later, extend this skill to stamp it. Right now the only artifact is VERSION + the tag.
 - All hard rules from the project ([[../add-transaction/SKILL.md]] style — verbatim, no normalization, no skipping hooks) apply by extension.

@@ -60,6 +60,15 @@ Exits non-zero if:
 ## Constraints
 
 - **macOS only.** The `open` command is Apple-specific. Cross-platform support is out of scope.
+- **Not in a cloud session** (`CLAUDE_CODE_REMOTE=true`): there is no screen to open a window on, and the user can't reach the container's `localhost`. Send a screenshot instead (worked 2026-10-06):
+
+  ```sh
+  cd poc && bun install && (bun run dev > /tmp/vite.log 2>&1 &)
+  /opt/pw-browsers/chromium-1194/chrome-linux/chrome --headless=new --no-sandbox --disable-gpu \
+    --window-size=420,900 --virtual-time-budget=8000 --screenshot=<scratchpad>/poc.png http://localhost:5173/
+  ```
+
+  Then send the PNG to the user and stop the dev server. The Chromium folder's version number can change with the image: `ls /opt/pw-browsers`.
 - **Requires a running dev or preview server.** The POC is no longer a static `file://` page — it's a Vite-built PWA. `--auto` is the convenience escape hatch.
 - **Does not rebuild the POC.** Use [[../update-poc/SKILL.md|/update-poc]] for syncing the POC to recent project changes.
 - **Does not use the chrome-devtools MCP.** That MCP is for the agent's own browser interactions during a turn — `/show-poc` exists to give the human a real, persistent window.

@@ -34,8 +34,9 @@ W, H = 1800, 900
 _PLATE = (110, 270, 930, 630)
 _UA = {"User-Agent": "Mozilla/5.0 (takumi-supplement-card-manager catalogue covers)"}
 # By file name: Pillow searches the system font folders (macOS keeps these in
-# /System/Library/Fonts and its Supplemental/ subfolder).
-_FONTS = ("SukhumvitSet.ttc", "Thonburi.ttc")
+# /System/Library/Fonts and its Supplemental/ subfolder; Linux, /usr/share/fonts).
+# Loma (TLWG) is the Thai font on the Linux cloud image, where macOS's are absent.
+_FONTS = ("SukhumvitSet.ttc", "Thonburi.ttc", "Loma.otf")
 
 
 @dataclass(frozen=True)
@@ -82,9 +83,11 @@ def _rgb(h: str) -> tuple[int, int, int]:
 
 
 def font(size: int, face: int = 5) -> ImageFont.FreeTypeFont:
-    """Sukhumvit Set (face 5 = Bold, 4 = Semi Bold, 3 = Medium) — Thai and Latin — or Thonburi."""
+    """Sukhumvit Set (face 5 = Bold, 4 = Semi Bold, 3 = Medium) — Thai and Latin — or Thonburi, or Loma."""
     for name in _FONTS:
         try:
+            if name.startswith("Loma"):  # one file per weight, not a collection
+                return ImageFont.truetype("Loma-Bold.otf" if face >= 4 else name, size)
             return ImageFont.truetype(name, size, index=face if name.startswith("Sukhumvit") else min(face, 1))
         except OSError:
             continue

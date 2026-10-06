@@ -1,6 +1,6 @@
 """Statement-PDF decryption passwords — gitignored, keyed by issuer.
 
-deterministic + idempotent — pure function of the on-disk YAML.
+deterministic + idempotent — pure function of the on-disk YAML (or its env twin).
 
 Several Thai banks ship their statement PDFs AES-encrypted. The Krungsri
 family bundles the primary cardholder plus every supplement holder into a
@@ -11,6 +11,13 @@ The real passwords live in `scripts/repositories/statement-passwords.yaml`,
 which is gitignored (see `statement-passwords.example.yaml` for the committed
 template, and the repositories README for the schema). Resolution is
 `card name -> card_repo issuer -> password`.
+
+A cloud session (Claude Code on the web) starts from a fresh clone, so the
+gitignored file isn't there. It reads the same YAML from the
+`STATEMENT_PASSWORDS_YAML` environment variable instead, set in the cloud
+environment's settings. A one-line flow mapping fits an env var:
+`{issuers: {Krungsri: "<password>", ttb: "<password>"}}`. The file wins when
+both exist.
 
 File shape:
 
@@ -26,6 +33,7 @@ File shape:
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from typing import Any
 
@@ -33,13 +41,17 @@ import yaml
 
 from . import card_repo, paths
 
+ENV_VAR = "STATEMENT_PASSWORDS_YAML"
+
 
 @lru_cache(maxsize=1)
 def _load() -> dict[str, Any]:
     path = paths.STATEMENT_PASSWORDS_FILE
-    if not path.exists():
-        return {}
-    return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if path.exists():
+        text = path.read_text(encoding="utf-8")
+    else:
+        text = os.environ.get(ENV_VAR, "")
+    return yaml.safe_load(text) or {}
 
 
 def password_for_issuer(issuer: str, *, holder: str | None = None) -> str | None:

@@ -54,7 +54,7 @@ These shape every script under this directory:
 
 - Every script header starts with: a one-line description and the marker `deterministic + idempotent — safe to re-run.` (Or, when re-running is *not* safe, an explicit note saying so — see `add-transaction/cli.py`.)
 - Notion access goes through `lib/notion_client.py`. Don't instantiate `notion_client.Client` inline anywhere else.
-- The integration token is read from `NOTION_TOKEN` (loaded from the repo-root `.env` automatically). Never hardcode it. Never commit it.
+- The integration token is read from `NOTION_TOKEN` (loaded from the repo-root `.env` automatically; a cloud session sets it as an environment variable instead). Never hardcode it. Never commit it.
 - CLIs take a JSON spec on **stdin** (or via `--input <file>`) and write a JSON envelope to **stdout**. This makes them composable from Claude, from shell, or from a future application. (A tiny script with a single argument may use a positional CLI arg instead — see `release/cli.py`. Pick whichever is more ergonomic for the *caller*.)
 - Thai property names stay verbatim in code (`"ยอดชำระ"`, `"ชำระแล้ว"`, etc.). Project rule.
 - Hyphenated folder names match skill names. CLIs use `sys.path.insert` to import `lib`, so the parent dir doesn't need to be a Python package.
