@@ -38,7 +38,7 @@ For each card, read its current `ยอดค้างชำระ` (call it `B`
 | `ยอดชำระ` | `-B` |
 | `ใช้คะแนน` | `P + (floor(-B / R) if -B > 0 else 0)` — leave empty when that is 0 |
 | `Transaction Datetime` | the reset date |
-| `Bill Cycle Date` / `Due Date` | the card's current open cycle — see [[bill-cycle-patterns]] |
+| `Bill Cycle Date` / `Due Date` | **empty** (since 2026-10-06, see below) |
 | `Processed` | ✅ true |
 | `ชำระแล้ว` / `Credit Return` | ☐ false |
 | multiplier checkboxes | all unticked (multiplier `1`) |
@@ -81,7 +81,7 @@ Points to read off this table:
 - **A positive amount means the card was overpaid.** Three of Takumi's four hand-written rows were positive, which reads backwards until you internalise the sign flip. His ledger had no activity after 2025-06-11 and had drifted net-overpaid on the UOB cards.
 - **`KTC Mastercard` carries amount `0`.** Its balance was already zero but it held 536 points, so the row exists purely to run `ใช้คะแนน`. Amount `0` fails the `> 0` gate, so it earns nothing — exactly what's wanted.
 - **`-727.999999999996` is float noise** from negating an accumulated sum. Harmless, and evidence the figure was computed rather than typed. `AEON Next Gen` leaves a comparable ~2×10⁻¹² residue for the same reason.
-- **Bill-cycle dates follow each issuer's current pattern**, resolved with `lib.bill_cycle.active_cycle` (next BC ≥ today) — not the card's stale `วันตัดรอบบิล` rollup, which for most of these still pointed at June 2025. Grab PayLater's row was re-dated from 2026-09-30 to 2026-10-01 on 2026-09-23 when that card's pattern was re-anchored — see [[bill-cycle-patterns]].
+- **No bill-cycle dates** (user, 2026-10-06: "to avoid confusion … I want to use the sum aggregation to see if every bill cycle ends up with 0 Baht of balance"). The rows were first written with the card's open cycle (`lib.bill_cycle.active_cycle`), which put the reset amount into that cycle's sum. Grab PayLater, for example, had a cycle holding nothing but its reset row. On 2026-10-06 all 14 rows had `Bill Cycle Date` and `Due Date` cleared, and every closed cycle in Takumi's ledger then summed to ฿0.00. Card balances and points are unaffected, being unfiltered sums. The points scripts treat a `Reset …` row as before every statement whatever its dates (`lib.points_balance`). One side effect: the Cards DB's `วันตัดรอบบิล` / `วันครบกำหนดชำระ` rollups (latest date, read by `/summarize-overview`) fall back to the newest real row: AEON Next Gen and AEON Primo show 2025-06-10, Grab PayLater 2025-03-31, Central The 1 Redz 2026-09-05. A new reset row is written without dates.
 
 ### Two rows needed correcting
 
@@ -99,7 +99,7 @@ The Grab PayLater fix corrected the point balance as a side effect: flipping the
 A reset row is indistinguishable from a real charge to everything downstream. Before running one on a card, check:
 
 - **Live debt.** Zeroing `ยอดค้างชำระ` on a card that genuinely owes the bank destroys the household's record of what's owed. The supplement holders' cards are the live ones — see the caution in [[supplement-card-model]]. Takumi's own ledger was dormant, which is what made it safe.
-- **Bills.** A reset row carries a `Bill Cycle Date`, so `/prepare-bill` will sum it into that cycle's draft exactly like a purchase. On [[../databases/baiboon-bills|Baiboon]]'s and [[../databases/nuta-bills|Nuta]]'s cards that silently corrupts the next bill. Takumi's Bills DB (added 2026-09-27) takes the statement's printed total rather than summing his rows — see [[../databases/takumi-bills]] — so the exposure still doesn't exist on his side.
+- **Bills.** A reset row with a `Bill Cycle Date` would be summed by `/prepare-bill` into that cycle's draft exactly like a purchase; written without dates (above), it falls in no cycle. On [[../databases/baiboon-bills|Baiboon]]'s and [[../databases/nuta-bills|Nuta]]'s cards that silently corrupts the next bill. Takumi's Bills DB (added 2026-09-27) takes the statement's printed total rather than summing his rows — see [[../databases/takumi-bills]] — so the exposure still doesn't exist on his side.
 - **Statement reconciliation.** `/audit-bill` will report the reset row as a Notion row with no matching statement line, forever.
 
 This is a deliberate exception to the house rule in `CLAUDE.md` and `/audit-bill` that Notion's calculated balance is reconciled against the bank, never edited to match it. A reset is the holder declaring a new epoch for their own record — not a correction.
