@@ -16,7 +16,7 @@ Every [[../databases/promotion-catalogues|Promotion Catalogues]] page (a Thai re
 
 ### October 2026 — researched 2026-10-01
 
-Pages: `Makro — Oct 2026`, `GO Wholesale — Oct 2026`, `Shopee — Oct 2026`, `The 1 — Oct 2026`; on 2 Oct, `Sriphat Medical Center — Oct 2026` and `Yunomori Onsen & Spa — Oct 2026`; on 3 Oct, `Thaiticketmajor — Oct 2026` and `Apple Products — Oct 2026`; on 5 Oct, `UNIQLO — Oct 2026`.
+Pages: `Makro — Oct 2026`, `GO Wholesale — Oct 2026`, `Shopee — Oct 2026`, `The 1 — Oct 2026`; on 2 Oct, `Sriphat Medical Center — Oct 2026` and `Yunomori Onsen & Spa — Oct 2026`; on 3 Oct, `Thaiticketmajor — Oct 2026` and `Apple Products — Oct 2026`; on 5 Oct, `UNIQLO — Oct 2026`; on 6 Oct, `Jampha — Oct 2026`.
 
 - [[2026-10/krungsri-group]] — Krungsri Card, First Choice, XU, Lotus's
 - [[2026-10/the1]] — The 1 membership and the Central The 1 card, and how they differ
@@ -54,6 +54,12 @@ Researched 2026-10-05 for the UNIQLO page:
 - [[2026-10/uniqlo-uob-kbank-ttb-others]] — UOB `UNO` / `PPF`, KBank `UQN` / `BCB`, ttb `UQCB` / `UQBP`, the new CardX `UQC` / `UQB` round (UNIQLO's own CardX page is stale), Bangkok Bank / GSB / Amex / networks (nothing at UNIQLO)
 - [[2026-10/uniqlo-krungsri-ktc-aeon]] — Krungsri `UNQ`, J SHOPPING 3× / JCB Ultimate 5×, `all-plaza` (points → 13–15% at Central mall shops), `JCLD`; First Choice NW4 counts fashion; Lotus's SMP1 / SMT2 and the invited ช้อปฮีลใจ name UNIQLO; KTC JCB ×2–×5 and KTC's points → 13 / 16 / 18%; AEON nothing
 - [[2026-10/all-spend-uniqlo]] — each household card's own rate at UNIQLO in store and online, the "not combinable" question (only UNO's cashback says it), offers that name no merchant, welcome offers
+
+Researched 2026-10-06 for the Jampha page (`Jampha — Oct 2026`, แจ่มฟ้าเซฟมาร์ท, a Chiang Mai/Lamphun supermarket chain):
+
+- [[2026-10/jampha]] — Jampha Savemart itself: the company (บริษัท แจ่มฟ้า เซฟมาร์ท จำกัด), its 25 branches (18 in Chiang Mai), how it takes money (UnionPay QR the only credit-card QR, PromptPay, physical cards +2% — per the household, borne out by the ledger), KTC `JFM`, its own `โปรแจ่ม!!`, the welfare card, logo
+- [[2026-10/supermarket-jampha-banks]] — every issuer's and network's campaign checked against a Jampha slip, net of the 2% fee: UnionPay QR 6%, AEON's Lamphun gift, Krungsri HALO, KBank HYP / BCB / PLUSTINUM, NW4's supermarket allowance; the named-chain lists Jampha isn't on
+- [[2026-10/all-spend-jampha]] — offers that name no merchant, each of Baiboon's cards at MCC 5411 by channel, and the TrueMoney route (a linked Visa paying Jampha's PromptPay QR with no fee)
 
 ### September 2026 — written 2026-09-30
 

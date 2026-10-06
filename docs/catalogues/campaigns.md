@@ -9,15 +9,15 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 - **ended**: look for the successor;
 - **not published yet**: look again.
 
-- **Pages**: **M** Makro · **G** GO Wholesale · **S** Shopee · **T** The 1 (Central The 1 in Sep) · **L** Lazada · **K** TikTok Shop. Lazada and TikTok Shop were Sep only. · **H** Sriphat Medical Center · **Y** Yunomori Onsen & Spa (both from Oct 2026) · **E** Thaiticketmajor (event tickets, from 3 Oct 2026) · **A** Apple Products (Apple and its resellers, from 3 Oct 2026) · **U** UNIQLO (from 5 Oct 2026).
-- **Detail**: each month's research reports: [[2026-10/krungsri-group|Krungsri group]] · [[2026-10/the1|The 1]] · [[2026-10/kbank-cardx-uob-ttb|KBank / CardX / UOB / ttb]] · [[2026-10/ktc-aeon-other-banks-networks|KTC / AEON / other banks / networks]] · [[2026-10/merchants-wallets|merchants and wallets]] · [[2026-10/all-spend|offers that name no merchant]] · hospital and spa (2 Oct): [[2026-10/sriphat|Sriphat]] · [[2026-10/yunomori|Yunomori]] · [[2026-10/health-beauty-spa|health, beauty and spa campaigns]] · [[2026-10/all-spend-hospital-spa|offers that name no merchant, at a hospital and a spa]] · Thaiticketmajor (3 Oct): [[2026-10/thaiticketmajor|the merchant]] · [[2026-10/ticketing-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/ticketing-other-banks-networks|other banks and networks]] · [[2026-10/all-spend-ticketing|offers that name no merchant, at a ticket agency]] · UNIQLO (5 Oct): [[2026-10/uniqlo|the merchant]] · [[2026-10/uniqlo-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/uniqlo-uob-kbank-ttb-others|UOB, KBank, ttb, CardX, other banks]] · [[2026-10/all-spend-uniqlo|offers that name no merchant, at UNIQLO]].
+- **Pages**: **M** Makro · **G** GO Wholesale · **S** Shopee · **T** The 1 (Central The 1 in Sep) · **L** Lazada · **K** TikTok Shop. Lazada and TikTok Shop were Sep only. · **H** Sriphat Medical Center · **Y** Yunomori Onsen & Spa (both from Oct 2026) · **E** Thaiticketmajor (event tickets, from 3 Oct 2026) · **A** Apple Products (Apple and its resellers, from 3 Oct 2026) · **U** UNIQLO (from 5 Oct 2026) · **J** Jampha Savemart (แจ่มฟ้า, from 6 Oct 2026).
+- **Detail**: each month's research reports: [[2026-10/krungsri-group|Krungsri group]] · [[2026-10/the1|The 1]] · [[2026-10/kbank-cardx-uob-ttb|KBank / CardX / UOB / ttb]] · [[2026-10/ktc-aeon-other-banks-networks|KTC / AEON / other banks / networks]] · [[2026-10/merchants-wallets|merchants and wallets]] · [[2026-10/all-spend|offers that name no merchant]] · hospital and spa (2 Oct): [[2026-10/sriphat|Sriphat]] · [[2026-10/yunomori|Yunomori]] · [[2026-10/health-beauty-spa|health, beauty and spa campaigns]] · [[2026-10/all-spend-hospital-spa|offers that name no merchant, at a hospital and a spa]] · Thaiticketmajor (3 Oct): [[2026-10/thaiticketmajor|the merchant]] · [[2026-10/ticketing-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/ticketing-other-banks-networks|other banks and networks]] · [[2026-10/all-spend-ticketing|offers that name no merchant, at a ticket agency]] · UNIQLO (5 Oct): [[2026-10/uniqlo|the merchant]] · [[2026-10/uniqlo-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/uniqlo-uob-kbank-ttb-others|UOB, KBank, ttb, CardX, other banks]] · [[2026-10/all-spend-uniqlo|offers that name no merchant, at UNIQLO]] · Jampha (6 Oct): [[2026-10/jampha|the merchant]] · [[2026-10/supermarket-jampha-banks|bank and network campaigns]] · [[2026-10/all-spend-jampha|offers that name no merchant, wallets, card earning]].
 - **Figures** are the October terms unless marked; the reports have every tier and source.
 
 ## First Choice and XU
 
 | Campaign | Pays | Sep 2026 | Oct 2026 | Pages | Tracked |
 |---|---|---|---|---|---|
-| NW3 → **NW4** | pooled all-spend ladder: ฿200 per whole ฿10,000 a month | NW3 (+฿500 at ฿200k; supermarket slips > ฿10,000 excluded), ended 30 Sep | NW4, 1 Oct – 31 Dec: cap ฿2,000/month; supermarkets and fuel count up to ฿30,000/month each; MCC 5199 out; ticketing isn't excluded | M G H Y E | [[../promotions/first-choice-nw3]] · `nw4.py` |
+| NW3 → **NW4** | pooled all-spend ladder: ฿200 per whole ฿10,000 a month | NW3 (+฿500 at ฿200k; supermarket slips > ฿10,000 excluded), ended 30 Sep | NW4, 1 Oct – 31 Dec: cap ฿2,000/month; supermarkets and fuel count up to ฿30,000/month each; MCC 5199 out; ticketing isn't excluded | M G H Y E J | [[../promotions/first-choice-nw3]] · `nw4.py` |
 | ON3 → **ON4** | Shopee / Lazada / TikTok ladder | ON3, ended 30 Sep | ON4, 1 Oct – 31 Dec: new ฿25 step at ฿2,000; +฿610 at ฿150k | S L K | [[../promotions/first-choice-2026h2]] · `on4.py` |
 | IS3 → **IS4** | insurance, per slip | IS3, ended 30 Sep | IS4, 1 Oct – 31 Dec | — | `is4.py` |
 | DLV3 | delivery ladder (ShopeeFood counts) | 1 Sep – 31 Dec | continues | S | `dlv3.py` |
@@ -39,13 +39,13 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 |---|---|---|---|---|---|
 | SUP1 | per slip ฿35 / ฿120 at Makro (UCHOOSE scan) + Makro PRO, GO, Big C, Tops | 1 Aug – 31 Oct | **last month** | M G T | [[../promotions/krungsri-card-2026]] · `sup1.py` |
 | SUP2 | ฿700 at ฿60,000 a month (not registered) | 1 Aug – 31 Oct | last month | M G | — |
-| ONQ3 | online ladder ฿40 / ฿170 / ฿350 (VISA, JCB, Lady) | 7 Aug – 30 Nov | continues | S L K | `onq3.py` |
+| ONQ3 | online ladder ฿40 / ฿170 / ฿350 (VISA, JCB, Lady) | 7 Aug – 30 Nov | continues; at Jampha only by paying its PromptPay QR in TrueMoney with Krungsri VISA (unconfirmed) | S L K J | `onq3.py` |
 | NOW 5% online | ฿25 per ฿500 online slip, ฿300/month; QR excluded | standing | continues; a card payment on thaiticketmajor.com counts (reading: the travel exclusion names only travel tickets) | M S E | `krungsri_now.py` |
 | PTT2 · EAT | fuel per slip · dining ฿100 + ฿100 | 1 Jul – 31 Oct | last month | T | `ptt2.py` · `eat.py` |
 | Bangchak 1% + BC3P → **Bangchak700 1% + BXP** | Bangchak per whole ฿800 → per whole ฿700 | ended 30 Sep | 1 Oct 2026 – 31 May 2027; BXP rounds 1 Oct–31 Jan, 1 Feb–31 May | — | `bangchak.py` · `bxp.py` |
 | J Dining → **JOY DINING 3×** | JCB dining ฿30 per ฿1,000 → 3× points, no cashback | ended 30 Sep | 1 Oct 2026 – 31 Dec 2027 | — | `jdining.py` (Sep) |
 | KCCPAYDAY / KCCPAYDAYH | Shopee Payday codes | 25–30 Sep | **not published yet** | S | — |
-| HALO | Krungsri VISA: ≥ ฿6,000 across dining + supermarket + fuel → Bar B Q Plaza ฿255 | Aug–Oct | last round (Makro excluded) | G | — |
+| HALO | Krungsri VISA: ≥ ฿6,000 across dining + supermarket + fuel → Bar B Q Plaza ฿255 | Aug–Oct | last round (Makro excluded); Jampha counts as the supermarket leg (MCC 5411) | G J | — |
 | JSU | Krungsri JCB at Tops: ฿100 per slip ≥ ฿1,000 | 1 Aug – 31 Oct | last month | T | — |
 | CRD | Central Midnight Sale / Robinson Pay Day: store coupon + card cashback | 23 Sep – 4/5 Oct | ends 4–5 Oct | T | — |
 | **HHQ4** | Thai Watsadu / BnB per slip ฿130–4,100 | — | new, 1 Oct – 31 Dec | T | — |
@@ -54,7 +54,7 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | **J SHOPPING 3×** · JCB Ultimate 5× | Krungsri JCB Platinum 3× at UNIQLO and Japanese brands, ≤ 400 bonus points a month; JCB Ultimate 5× (1,600) from 21 Oct | — | 1 Oct 2026 – 31 Dec 2027; **UNIQLO only to 28 Feb 2027** | U | — |
 | **all-plaza** | points → 13% Mon–Thu / 15% Fri–Sun on a slip ≥ ฿1,000 at every plaza-zone shop of Central malls (both Chiang Mai Centrals), USSD `*465*12581*…#` the same day; not online | — | new, 1 Oct – 31 Dec | U | — |
 | **JCLD** | Krungsri JCB: 1 Japan-tour draw right per full-pay slip ≥ ฿1,000; register once | — | new, 1 Oct 2026 – 31 Jan 2027 | U | — |
-| Points: Online Lover, pay with points, PT26, Makro e-voucher | Shopee codes 899 → ฿100…; points → cashback ฿0.10; 1,100 → ฿100 Makro | all year | continues | M S | — |
+| Points: Online Lover, pay with points, PT26, Makro e-voucher | Shopee codes 899 → ฿100…; points → cashback ฿0.10; 1,100 → ฿100 Makro | all year | continues | M S J | — |
 | **MED1 / MED2** | hospital per slip ฿170 (฿15k) … ฿5,500; +฿1,500 at ฿700k | — | new, 1 Oct – 31 Dec; Bangkok hospitals only | H | — |
 | **PT26** | points → cashback ฿0.10/pt at medical and personal-care MCCs (8062, 8011, 8099, 7230, 7297, 7298 …), primary cards | all 2026 | continues | H Y | — |
 | HOS · Lady light pay | hospital 0% up to 10 months (Chiang Mai Ram, Lanna) · Lady 0% × 4 at 7230/7298 | all 2026 | continue | H Y | — |
@@ -120,12 +120,13 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | ช้อป MAKRO **MKR** (round 1 → round 2) | Makro monthly: ฿100 per ฿10k, cap ฿200 → ฿100 at ฿10k / ฿240 at ฿20k | 1 Aug – 30 Sep, K Scan to Pay in store | 1 Oct – 31 Dec, card swipe counts; **re-register** | M | [[../promotions/kbank-makro]] |
 | **Thaiticketmajor** | ฿120 (฿200 on The Wisdom / The Premier) on a slip ≥ ฿200 at thaiticketmajor.com, ticketmaster.co.th or a stand-alone outlet; 1 right a person a month, 1,000 people a month (+250); register in K PLUS from the 1st; silent on supplements | 1 Mar – 31 Dec | continues | E | — |
 | Visa × Maroon 5 draw | KBank Visa only: a right per ฿1,000 of any spend; 40 pairs of seats (show 9 Feb 2027); register in K PLUS first | 1 Sep – 31 Oct | **last month** | E | — |
-| HYP | supermarkets ฿75 / 300 / 700 / 1,250 a month (not Makro) | 15 Jul – 31 Oct | last month | G T | — |
+| HYP | supermarkets ฿75 / 300 / 700 / 1,250 a month (not Makro) | 15 Jul – 31 Oct | last month; every MCC 5411/5333 shop, so Jampha counts (physical card only there, 2% fee) | G T J | — |
 | Double Day **DBD** | Shopee + Lazada + TikTok on 3 days: ฿70–1,600 (not the KBank Shopee card) | 8–10 Sep | **final round 9–11 Oct** | S L K | — |
-| PLUSTINUM Season 3 · monthly e-coupon | ≥ ฿30,000 → Starbucks ฿400 · ≥ ฿10,000 → a ฿200 coupon on the 15th | Aug–Oct | last month (re-register for Oct) | M G H Y | — |
+| PLUSTINUM Season 3 · monthly e-coupon | ≥ ฿30,000 → Starbucks ฿400 · ≥ ฿10,000 → a ฿200 coupon on the 15th | Aug–Oct | last month (re-register for Oct) | M G H Y J | — |
 | KBank Shopee card | ×5 / ×10 K Point, Coins 1%, 1,000 K Point → ฿150 code | standing | continues | S | — |
 | UQN | UNIQLO per slip ฿100 / 200 / 300 at ฿3,000 / 6,000 / 9,000, ฿600 from ฿12,000; +200 / 400 / 600 K Point; no "not combinable" line | — | new, 1 Oct 2026 – 28 Feb 2027; registered on every KBank card 1 Oct | U | [[../promotions/uniqlo-2026]] · `uniqlo.py` |
 | **BCB** | K Point → 10% at any shop in participating malls (Central Pattana included; names no shop); SMS every time | 1 Aug – 31 Dec | continues | U | — |
+| **BCB** (Supermarket, ACCS260210) | K Point = slip → 10% at any Supermarket-category shop, SMS `BCB <12> <amount>` → 4545888 every time | 1 Mar 2026 – 28 Feb 2027 | continues | J | — |
 | **LINE Points on-top** | KBank LINE Points card: +50 points at ฿5k–14,999 a month, +200 at ≥ ฿15k; +800 at ฿80k cumulative (on the card's 1% anywhere) | 1 Sep – 31 Dec | continues | H Y | — |
 | HP4 / MHP4 / HL · BD4 | hospital cashback (Bangkok lists) · Bangkok Hospital group installments 0% × 6 + ฿250–3,000 (Bangkok Hospital Chiang Mai) | — | new, 1 Oct – 31 Dec | H | — |
 | K PLUS hospital 0% | any MCC 8062 slip ≥ ฿50,000 → 0% for 3 months | — | 1 Oct – 31 Dec | H | — |
@@ -202,7 +203,7 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | Shopee points codes | 899 → ฿100; ฿300 tier at 1,599 points (Sep special); 3,499 → ฿500 | Sep special | **special ended** | S | — |
 | Central Midnight / Robinson Payday points | 13% any day, 16–18% Fri–Sun | to 4–5 Oct | ending | T | — |
 | KTC JCB ×2 / ×3 / ×5 | Central / Robinson monthly spend | 1 Aug – 31 Oct | last month | T | — |
-| UnionPay QR 6% | ≤ ฿60 per slip, ฿300/month per card; monthly offers | Sep pool gone 12 Sep | Oct offer 260723112620 live (80% left on 2 Oct; works at CMU's CMEx, unconfirmed at Sriphat and Yunomori); not at Thaiticketmajor (no UnionPay QR) | M G H Y | [[../promotions/unionpay-qr]] |
+| UnionPay QR 6% | ≤ ฿60 per slip, ฿300/month per card; monthly offers | Sep pool gone 12 Sep | Oct offer 260723112620 live (80% left on 2 Oct; works at CMU's CMEx, unconfirmed at Sriphat and Yunomori); not at Thaiticketmajor (no UnionPay QR); the only credit-card QR Jampha takes (user, 6 Oct); pool 34% left on 6 Oct 18:47 | M G H Y J | [[../promotions/unionpay-qr]] |
 | **Concert-platform installments** (`concert-event-installment`) | slip ≥ ฿3,000 at All Ticket, Eventpop, THAITICKETMAJOR, The Concert, Ticketmaster, Ticketmelon: points = 25% of the slip → 0% × 4, or points = the slip → 0% × 4 + 10% back (฿0.10 a point); register the same day | all 2026 | continues | E | — |
 | Ticketmelon discounts · Ticketmelon points codes · Ticketmelon new-card ฿200 | T.O.P PRE-STUDIO 15% (1–24 Oct), MAMA In the Mood 10%, Black Crystal 10%; 900 pts → ฿100 … 10,000 → ฿1,400 | — | Oct; Ticketmelon only, not TTM | E | — |
 | Public-hospital installments (MKTHO-1399) | 0.69%/month × 10 at 12 government hospitals incl. **ศูนย์ศรีพัฒน์** (first 3 months' interest back; no points) | all 2026 | continues | H | — |
@@ -210,6 +211,7 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | **Wellness Max** BWC / BWP · Health Level Up `ACC` · `beautywellness` BWF | 0.5% instead of points or points → 13% at MCC 5698/7230/7297/7298/8011/8099 · e-coupons from ฿50k of health spend · 0% + ฿220–7,100 per installment slip | 1 Jul – 31 Dec; BWF from 1 Oct | continue | H Y | — |
 | **Yunomori e-coupons** | 1 point + ฿1,950 = Onsen + Aromatherapy 90 (−21%); five points + cash options | 13 May – 31 Dec | continues | Y | — |
 | Let's Relax 10% · Onsen @ Moncham | 1-point e-coupon · 10% off rooms at the Mae Rim onsen | 16 Mar – 31 Dec · 1 Sep – 31 Mar | continue | Y | — |
+| **JFM** (Jampha Savemart) · Jampha Shopping Mall Lamphun | KTC points = slip → 10% (฿0.10, par) at every Jampha Savemart branch, SMS `JFM <16>#<amount>` → 0613845000 every slip, no cap · 10% off with points at the Lamphun mall only, no registration | 1 Mar – 31 Dec | continue; whether a UnionPay QR slip counts for JFM is unverified | J | — |
 
 ## AEON
 
@@ -226,6 +228,7 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | Oasis Spa 30% | all AEON cards, four 2-hour treatments, Chiang Mai Nimman and Lanna branches | — | 1 Sep 2026 – 31 Jul 2027 | Y | — |
 | No points at hospitals | every AEON card withholds points at MCC 8062, 9399, 9405, 5912 (from 11 Nov 2025) | standing | continues | H | — |
 | NEW4 → (none) | new-card offer | ended 30 Sep | **no successor** on 2 Oct | — | — |
+| **ช้อปปุ๊บ รับปั๊บ** (Jampha, Lamphun) | any AEON card, a day's spend at 3 Lamphun Jampha locations ≥ ฿1,200 → tumbler (฿299), ≥ ฿4,500 → Anello backpack (฿2,490); claim at AEON Big C Lamphun the same day; 900 / 120 for the whole campaign | 15 Aug – 31 Oct | last month | J | — |
 
 ## Other banks
 
@@ -262,6 +265,7 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | Campaign | Pays | Sep 2026 | Oct 2026 | Pages | Tracked |
 |---|---|---|---|---|---|
 | TrueMoney Pay Next / Pay Next Extra 3% | 3% per bill, ฿100 per round | round 3 Jul–Sep (full) | **round 4**, 1 Oct – 31 Dec | M | — |
+| **TrueMoney × Visa PromptPay** | a linked **Visa** credit card pays any PromptPay shop QR, no minimum, no fee; ฿30 back on the first such scan ≥ ฿100 (third-party); limits unpublished. Lets First Choice (NW4), Krungsri VISA (ONQ3) and KBank PLUSTINUM pay Jampha without its 2% card fee; the slip posts as `TMN*PROMPTPAY30` | published 9 Sep | continues; ฿30 offer to 31 Dec | J | — |
 | **ShopeePay × Thaiticketmajor** | ฿300 coupon on ≥ ฿5,000 paid by ShopeePay QR; 5,000 coupons a month; collect at `shopee.co.th/m/Thaiticketmajor` | — | new, 1 Oct – 31 Dec | E | — |
 | SCB LET'S Mastercard debit × Thaiticketmajor | ฿100 on ≥ ฿500, SMS `DBTM` monthly, 350 a month (not the household's) | — | new, 1 Oct 2026 – 30 Sep 2027 | E | — |
 | Makro_THT (TrueMoney ×2 PRO Points) | extra points | 1 Jul – 30 Sep | **ended**, no successor | M | — |
