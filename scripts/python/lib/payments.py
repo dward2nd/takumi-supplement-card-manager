@@ -278,7 +278,8 @@ def record_primary_payment(
         if any(r["name"] == name and abs((r["amount"] or 0) - share) < 0.005
                and (r.get("transaction_date") or "")[:10] == payment_date for r in rows):
             continue
-        writes.append({"name": name, "amount": share,
+        # ×0: a positive amount earns points, and those points are already on the friend's rows.
+        writes.append({"name": name, "amount": share, "multiplier": "×0",
                        "note": f"{HOLDERS[h].thai_name}'s share of the card bill, paid to the bank by this slip."})
 
     out = {"holder": holder.key, "card": card_name, "bill_cycle": bill_cycle, "kind": kind,
@@ -289,7 +290,8 @@ def record_primary_payment(
     for w in writes:
         props = build_transaction_properties(
             name=w["name"], amount=w["amount"], transaction_date=payment_date, bill_cycle_date=bill_cycle,
-            due_date=due_date, card_page_id=card_page_id, processed=True, note=w["note"])
+            due_date=due_date, card_page_id=card_page_id, processed=True, note=w["note"],
+            multiplier=w.get("multiplier"))
         w["id"] = notion_client.create_page(holder.transactions_ds, props)["id"]
     out["rows"] = [{k: v for k, v in w.items() if v is not None} for w in writes]
     return out

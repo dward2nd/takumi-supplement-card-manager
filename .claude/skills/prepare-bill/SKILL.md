@@ -1,11 +1,11 @@
 ---
 name: prepare-bill
-description: Draft a new row on Baiboon's or Nuta's Bills DB for the current unbilled cycle of a single card. Sums `ยอดชำระ` across every transaction whose `Bill Cycle Date` matches the cycle's BC date and writes it as a `[DRAFT] <Card> <YYYY-MM>` Bills row that stays draft until the user uploads the official statement (via /update-bill) or manually strips the prefix. Use when the user says "prepare the bill for Nuta's UOB One", "draft the May bill for Baiboon's UOB World", or otherwise wants a pre-statement balance written into Notion. Also has a date-range mode that drafts every cycle whose bill cycle date falls in a window, across cards and holders — use it for "prepare the bills for whatever cards closed 25–27 September".
+description: Draft a new row on Baiboon's or Nuta's Bills DB for the current unbilled cycle of a single card. Sums `ยอดชำระ` across every transaction whose `Bill Cycle Date` matches the cycle's BC date and writes it as a `[DRAFT] <Card> <YYYY-MM>` Bills row that stays draft until the user uploads the official statement (via /update-bill) or manually strips the prefix. Use when the user says "prepare the bill for Nuta's UOB One", "draft the May bill for Baiboon's UOB World", or otherwise wants a pre-statement balance written into Notion. Also has a date-range mode that drafts every cycle whose bill cycle date falls in a window, across cards and holders — use it for "prepare the bills for whatever cards closed 25–27 September". With `holder: takumi` it drafts Takumi's statement bills at an estimate from all three ledgers (his rows + each friend's subtotal + an unmonitored supplement's total) — use it for "draft my own bills too".
 ---
 
 # prepare-bill
 
-Creates **one** new row on Baiboon's or Nuta's Bills DB representing the cycle that's currently accumulating. Takumi's Bills DB is statement-driven — his bill is the bank's per-card total, not a sum of his own rows — so this skill rejects `takumi` (see [[../../docs/databases/takumi-bills|takumi-bills]]).
+Creates **one** new row on Baiboon's or Nuta's Bills DB representing the cycle that's currently accumulating. Takumi's Bills DB is statement-driven — his bill is the bank's per-card total, not a sum of his own rows — so for `takumi` the skill drafts a different way: an estimate from all three ledgers (see [[#Takumi's bills — an estimate from all three ledgers]] and [[../../docs/databases/takumi-bills|takumi-bills]]).
 
 This is a write skill — it overrides the project's "don't mutate Notion without explicit instruction" rule because the user invoked it explicitly. For patching an existing bill see [[../update-bill/SKILL.md|/update-bill]].
 
@@ -138,6 +138,25 @@ For cards without an active cashback promotion at the cycle's date (e.g. UOB Wor
 
 For First Choice **during** an active promotion: the user currently manages those cashback adjustments manually (no per-promo credit-row workflow is documented yet). Until First Choice promos get their own promo notes + credit-row convention, `/prepare-bill` won't trigger the safety check for First Choice — confirm with the user that promo cashback has been applied per-row before drafting.
 
+## Takumi's bills — an estimate from all three ledgers
+
+Added 2026-10-06 ("draft my own bills too"; "bring the others' subtotals here too"). Takumi's bill is the printed card total, his section plus every supplement section. Before the PDF arrives, `holder: takumi` drafts it from the ledgers (`lib/bill_estimate.py`, `lib.bill_draft.draft_primary_bill`):
+
+```json
+{"holder": "takumi", "bill_cycle_from": "2026-10-05", "bill_cycle_to": "2026-10-05",
+ "unmonitored": {"Lotus's Beyond": 2603.25}}
+```
+
+or for one card: `{"holder": "takumi", "card": "Lotus's Beyond", "bill_cycle": "2026-10-05", "unmonitored": 2603.25}`. `bill_cycle` defaults to the card's **most recently closed** cycle, not the active one, because his bill only exists once the bank has cut the statement.
+
+- **What's summed**: Takumi's statement-line rows (bank credits included), plus each friend's statement-line rows and cashback rows on the card. A friend's cashback row is the bank's credit booked in their ledger, except on a `lib.crediting` card (UOB One), where it's the household's computed credit and isn't printed. On KTC and CardX, which print one statement per card number, only a friend's `[บัตรหลัก]` rows count. Payments, `โอนยอด…`, resets, carry-forwards and debt takeovers never count.
+- **`unmonitored`**: required for a card whose YAML has an `unmonitored` statement number (Lotus's 6524). Pass `0` if that card spent nothing. No ledger holds it, so ask the user for the figure from the bank's app.
+- **Note**: the split, `฿12,046.73 = เว็บ ฿-5.27 + ใบบุญ ฿12,052.00`, plus a warning when the previous bill isn't marked paid.
+- **Window mode** finds cycles in all three ledgers. It reports `skipped` for a cycle with nothing on the principal's statement (a friend's own CardX/KTC card, a ledger reset) and `exists` for a bill already there. Nothing is populated or credited: no installments and no cashback check. Takumi's rows come from the statement.
+- **Completion**: `/record-statement` fills the same row with the printed total, title and Note, and reports `estimate_off_by`. When rows are added after the draft, re-estimate it with [[../update-bill/SKILL.md|/update-bill]]'s `refresh_from_transactions` (2026-10-06; pass `unmonitored` again for Lotus's). It refuses only his final bills.
+
+Report each draft's total and split to the user, and name any gap you can already see, such as Takumi's share of a pooled credit that isn't in his ledger.
+
 ## Hard rules
 
 ### 1. Holder routing
@@ -146,7 +165,7 @@ For First Choice **during** an active promotion: the user currently manages thos
 |----------|--------------------------------------------|
 | baiboon  | `192cb755-f0f1-8064-9075-000be05ba72d`     |
 | nuta     | `2a1cb755-f0f1-8193-982d-000bd4e3156c`     |
-| takumi   | *(statement-driven — rejected)*            |
+| takumi   | `63dcb755-f0f1-83df-aaa8-871bb9069dae` — statement-driven, estimate from all three ledgers (below) |
 
 ### 2. `Card` is a relation, on Bills and on Transactions
 
@@ -190,5 +209,5 @@ Until then, anything that consumes Bills data should treat `[DRAFT] ` rows as **
 - Does **not** finalize a bill. The `[DRAFT] ` prefix stays until the user strips it (manually or via the statement-upload flow).
 - Does **not** write transactions. For cashback credit rows, use [[../add-transaction/SKILL.md|/add-transaction]] first.
 - Does **not** edit an existing bill row. Use [[../update-bill/SKILL.md|/update-bill]] for patches (paid flag, slips, statement PDFs, notes).
-- Does **not** mutate Takumi's data (Takumi has no Bills DB).
+- Does **not** write Takumi's transactions. His bills are drafted only as estimates; his rows come from `/record-statement`.
 - Does **not** translate Thai labels — `ยอดชำระ`, `วันตัดรอบบิล`, `จ่ายแล้ว` stay verbatim per project convention.

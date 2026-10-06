@@ -25,11 +25,13 @@ import datetime as _dt
 
 from . import card_repo, installments, notion_client
 from . import notion_blocks as nb
-from .bill_cycle import PatternNotFoundError, active_cycle, cycle_for_month, due_date_for, pattern_for_card
+from .bill_cycle import (PatternNotFoundError, active_cycle, cycle_for_month, due_date_for,
+                         most_recent_closed_cycle, pattern_for_card)
+from .bill_estimate import BillEstimateError, estimate, previous_bill_warning
 from .bills import DRAFT_PREFIX, bills_for, card_relation, explain_cycle, require_bills_ds
 from .cards import CardAmbiguousError, CardNotFoundError, card_title_text, card_titles_by_id, find_card
-from .holders import resolve_holder
-from .ledger import amount_due, cycle_pages, title_text
+from .holders import HOLDERS, resolve_holder
+from .ledger import PRIMARY_PREFIX, amount_due, cycle_pages, cycle_rows, title_text
 from .transaction_read import project_transaction
 
 
@@ -60,18 +62,103 @@ class BillExistsError(BillDraftError):
 
 
 def reject_statement_bills(holder) -> None:
-    """Refuse to draft a bill for a holder whose bills come from the statement.
+    """Refuse to sum one holder's own rows into a bill whose total comes from the statement.
 
-    A draft sums one holder's own Transactions rows. Takumi's bill is the
-    bank's per-card total — his primary charges plus Baiboon's and Nuta's
-    supplement and `[บัตรหลัก]` rows — so that sum would understate it.
+    Takumi's bill is the bank's per-card total — his primary charges plus
+    Baiboon's and Nuta's supplement and `[บัตรหลัก]` rows — so his rows alone
+    would understate it. His drafts go through `draft_primary_bill`, which
+    adds up all three ledgers.
     """
     if holder.statement_bills:
         raise BillDraftError(
             f"{holder.key!r} bills are the bank statement's per-card totals "
             f"(principal + supplement sections), not a sum of {holder.key}'s own "
-            f"rows — create them from the statement, not /prepare-bill"
+            f"rows — draft them with draft_primary_bill"
         )
+
+
+def _on_pattern(card: str, bill_cycle: str) -> None:
+    bc = _dt.date.fromisoformat(bill_cycle)
+    try:
+        on_pattern = cycle_for_month(pattern_for_card(card), bc.year, bc.month)[0] == bc
+    except PatternNotFoundError as e:
+        raise BillDraftError(str(e)) from e
+    if not on_pattern:
+        raise BillDraftError(f"{bill_cycle} isn't a cycle date of {card!r}'s bank pattern")
+
+
+def _primary_estimate(bills_ds: str, card_page: dict, bill_cycle: str, unmonitored: float | None):
+    try:
+        est = estimate(bill_title_card(card_page), bill_cycle, unmonitored=unmonitored)
+    except BillEstimateError as e:
+        raise BillDraftError(str(e)) from e
+    if (warning := previous_bill_warning(bills_ds, card_page["id"], bill_cycle)):
+        est.warnings.append(warning)
+    return est
+
+
+def reestimate_primary_bill(holder, card: str, bill_cycle: str, *, unmonitored: float | None = None):
+    """A fresh ledger estimate for an existing `[DRAFT]` statement bill (/update-bill's
+    `refresh_from_transactions` on Takumi's drafts): rows added after the draft
+    (a late-entered charge, a moved installment term) are picked up."""
+    try:
+        card_page = find_card(holder.cards_ds, card)
+    except (CardNotFoundError, CardAmbiguousError) as e:
+        raise BillDraftError(str(e)) from e
+    return _primary_estimate(require_bills_ds(holder), card_page, bill_cycle, unmonitored)
+
+
+def draft_primary_bill(spec: dict, *, dry_run: bool = False) -> dict:
+    """`[DRAFT] <Card> <YYYY-MM>` on a statement-driven Bills DB, at the ledgers' estimate.
+
+    Before the statement arrives, Takumi's bill is estimated from all three
+    ledgers (`lib.bill_estimate`): his rows, each friend's statement-line rows
+    (their subtotals go in the Note), and an `unmonitored` supplement's total
+    the user supplies. /record-statement later completes the row with the
+    printed total, title and Note, and reports how far the estimate was off.
+
+    Spec keys: `holder` (the primary), `card` (required); `bill_cycle`
+    (optional, default the card's most recently closed cycle); `unmonitored`
+    (the untracked supplement's total, required for a card that has one).
+    """
+    for key in ("holder", "card"):
+        if not spec.get(key):
+            raise BillDraftError(f"missing required field: {key!r}")
+    holder = resolve_holder(spec["holder"])
+    if not holder.statement_bills:
+        raise BillDraftError(f"{holder.key!r} bills are drafted from their own rows — use draft_bill")
+    bills_ds = require_bills_ds(holder)
+    try:
+        card_page = find_card(holder.cards_ds, spec["card"])
+    except (CardNotFoundError, CardAmbiguousError) as e:
+        raise BillDraftError(str(e)) from e
+    name = bill_title_card(card_page)
+    if (bill_cycle := spec.get("bill_cycle")):
+        _on_pattern(name, bill_cycle)
+    else:
+        bill_cycle = most_recent_closed_cycle(name, _dt.date.today())[0].isoformat()
+    if (page := existing_bill(bills_ds, card_page["id"], bill_cycle)) is not None:
+        raise BillExistsError(page, holder.key, name, bill_cycle)
+    est = _primary_estimate(bills_ds, card_page, bill_cycle, spec.get("unmonitored"))
+    if not est.lines and not est.split.get("unmonitored"):
+        raise BillDraftError(f"no statement lines for {name} cycle {bill_cycle} in any ledger — nothing to bill")
+
+    title = f"{DRAFT_PREFIX}{name} {bill_cycle[:7]}"
+    out = {"holder": holder.key, "card": name, "bill_cycle": bill_cycle, "title": title,
+           "ยอดชำระ": est.total, "split": est.split, "tx_count": est.lines, "note": est.note()}
+    if est.warnings:
+        out["warnings"] = est.warnings
+    if dry_run:
+        return {**out, "dry_run": True}
+    page = notion_client.create_page(bills_ds, {
+        "title": {"title": [{"text": {"content": title}}]},
+        "Card": card_relation(card_page["id"]),
+        "วันตัดรอบบิล": {"date": {"start": bill_cycle}},
+        "ยอดชำระ": {"number": est.total},
+        "จ่ายแล้ว": {"checkbox": False},
+        "Note": {"rich_text": nb.text(est.note())},
+    })
+    return {"id": page["id"], "url": page.get("url"), **out}
 
 
 def draft_statement_bill(holder, card: str, bill_cycle: str, *, dry_run: bool = False) -> dict:
@@ -92,13 +179,7 @@ def draft_statement_bill(holder, card: str, bill_cycle: str, *, dry_run: bool = 
         card_page = find_card(holder.cards_ds, card)
     except (CardNotFoundError, CardAmbiguousError) as e:
         raise BillDraftError(str(e)) from e
-    bc = _dt.date.fromisoformat(bill_cycle)
-    try:
-        on_pattern = cycle_for_month(pattern_for_card(card), bc.year, bc.month)[0] == bc
-    except PatternNotFoundError as e:
-        raise BillDraftError(str(e)) from e
-    if not on_pattern:
-        raise BillDraftError(f"{bill_cycle} isn't a cycle date of {card!r}'s bank pattern")
+    _on_pattern(card, bill_cycle)
     ds = require_bills_ds(holder)
     name = bill_title_card(card_page)
     if (page := existing_bill(ds, card_page["id"], bill_cycle)) is not None:
@@ -169,8 +250,9 @@ def draft_bill(spec: dict, *, dry_run: bool = False) -> dict:
             raise BillDraftError(f"missing required field: {key!r}")
 
     holder = resolve_holder(spec["holder"])
+    if holder.statement_bills:
+        return draft_primary_bill(spec, dry_run=dry_run)
     bills_ds = require_bills_ds(holder)
-    reject_statement_bills(holder)
 
     # The Cards DB is the authority on whether the card exists — a typo
     # raises here with substring candidates. The bill links to that page.
@@ -317,6 +399,79 @@ def pattern_bill_cycle(card_name: str, bill_cycle: str) -> str | None:
     return cycle_for_month(pattern, bc.year, bc.month)[0].isoformat()
 
 
+def _cycle_rows_by_name(holder, card: str, bill_cycle: str) -> list[dict]:
+    try:
+        page = find_card(holder.cards_ds, card)
+    except CardNotFoundError:
+        return []
+    return cycle_rows(holder.transactions_ds, page["id"], bill_cycle)
+
+
+def _primary_window(holder, lo: str, hi: str, card_filter: set[str], unmonitored: dict,
+                    *, dry_run: bool) -> list[dict]:
+    """Window mode for the primary: one estimate draft per (card, BC) any ledger has.
+
+    Cycles come from all three Transactions DBs, since a card Takumi didn't use
+    can still carry a friend's lines. `unmonitored` maps card → the untracked
+    supplement's total. Status `skipped` is a cycle with no line on the
+    principal's statement (a friend's own KTC/CardX card, a ledger reset).
+    """
+    found: dict[tuple[str, str], int] = {}
+    for h in HOLDERS.values():
+        titles = card_titles_by_id(h.cards_ds)
+        for (card_id, bc), n in discover_cycles(h.transactions_ds, lo, hi)[0].items():
+            if (title := titles.get(card_id)) is None:
+                continue
+            repo = card_repo.get(title)
+            key = (repo.name if repo else title, bc)
+            found[key] = found.get(key, 0) + n
+    amounts = {k.strip().casefold(): v for k, v in unmonitored.items()}
+
+    results = []
+    for (card, bc), n in sorted(found.items(), key=lambda kv: (kv[0][1], kv[0][0])):
+        if card_filter and card.casefold() not in card_filter:
+            continue
+        entry: dict = {"holder": holder.key, "card": card, "bill_cycle": bc, "rows": n}
+        results.append(entry)
+        expected = pattern_bill_cycle(card, bc)
+        if expected is not None and expected != bc:
+            entry.update(status="off-pattern", reason=f"card pattern puts this month's BC on {expected}; "
+                                                      f"check the rows with /audit-transaction-dates")
+            continue
+        try:
+            find_card(holder.cards_ds, card)
+        except CardNotFoundError:
+            # A friend's own card (Nuta's CardX JCB) with no principal in Takumi's
+            # Cards DB. Only a [บัตรหลัก] row would put it on his statement.
+            shares = [h.key for h in HOLDERS.values() if h is not holder
+                      and any(r["name"].startswith(PRIMARY_PREFIX) for r in _cycle_rows_by_name(h, card, bc))]
+            entry.update(status="blocked" if shares else "skipped",
+                         reason=(f"{card} isn't in {holder.key}'s Cards DB"
+                                 + (f", but {', '.join(shares)} have [บัตรหลัก] rows on it — add the card"
+                                    if shares else " — not his bill")))
+            continue
+        spec = {"holder": holder.key, "card": card, "bill_cycle": bc}
+        if card.casefold() in amounts:
+            spec["unmonitored"] = amounts[card.casefold()]
+        try:
+            out = draft_primary_bill(spec, dry_run=dry_run)
+        except BillExistsError as e:
+            entry.update(status="exists", bill_id=e.page["id"],
+                         **{"ยอดชำระ": e.page["properties"].get("ยอดชำระ", {}).get("number")})
+            continue
+        except BillDraftError as e:
+            nothing = str(e).startswith("no statement lines")
+            entry.update(status="skipped" if nothing else "blocked", reason=str(e))
+            continue
+        entry.update({"status": "would-create" if dry_run else "created",
+                      **{k: out[k] for k in ("title", "ยอดชำระ", "split", "tx_count", "note")}})
+        if out.get("warnings"):
+            entry["warnings"] = out["warnings"]
+        if not dry_run:
+            entry["bill_id"] = out["id"]
+    return results
+
+
 def draft_bills_in_window(spec: dict, *, dry_run: bool = False) -> dict:
     """Draft a bill for every cycle whose BC falls in [from, to], across cards.
 
@@ -324,7 +479,10 @@ def draft_bills_in_window(spec: dict, *, dry_run: bool = False) -> dict:
     at most MAX_WINDOW_DAYS apart); `holders` (list) or `holder` (default:
     both supplement holders); `cards` (optional list filter, matched
     case-insensitively); `skip_populate_installments`, `skip_cashback_check`,
-    `skip_auto_note` (passed through to every draft).
+    `skip_auto_note` (passed through to every draft). Naming the primary
+    (`takumi`) drafts his statement bills at the ledgers' estimate instead
+    (`_primary_window`); `unmonitored` maps a card to its untracked
+    supplement's total for those.
 
     Cycles are discovered from the Transactions DBs, not predicted from the
     card patterns — a card with no rows in the window has nothing to bill.
@@ -337,7 +495,8 @@ def draft_bills_in_window(spec: dict, *, dry_run: bool = False) -> dict:
     BC isn't the card's bank-pattern BC for that month — misdated rows, or a
     bank-side shift the holiday library missed; draft it in single mode with
     an explicit `bill_cycle` if it's genuine), `blocked` (a guard refused;
-    `reason` says which).
+    `reason` says which), and for the primary `skipped` (nothing on the
+    principal's statement).
     """
     if not isinstance(spec, dict):
         raise BillDraftError("spec must be a JSON object")
@@ -370,7 +529,6 @@ def draft_bills_in_window(spec: dict, *, dry_run: bool = False) -> dict:
     holders = [resolve_holder(h) for h in holder_keys]
     for h in holders:
         require_bills_ds(h)
-        reject_statement_bills(h)
 
     card_filter = {c.strip().casefold() for c in spec.get("cards") or []}
     passthrough = {
@@ -382,6 +540,10 @@ def draft_bills_in_window(spec: dict, *, dry_run: bool = False) -> dict:
     results: list[dict] = []
     unassigned_rows: dict[str, int] = {}
     for holder in holders:
+        if holder.statement_bills:
+            results += _primary_window(holder, lo.isoformat(), hi.isoformat(), card_filter,
+                                       spec.get("unmonitored") or {}, dry_run=dry_run)
+            continue
         titles = card_titles_by_id(holder.cards_ds)
         cycles, unassigned = discover_cycles(holder.transactions_ds, lo.isoformat(), hi.isoformat())
         if unassigned:

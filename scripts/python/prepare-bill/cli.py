@@ -21,7 +21,10 @@ the prefix.
 Reads a JSON spec from stdin (or --input <file>):
 
   {
-    "holder":     "baiboon" | "nuta",          // required (takumi's bills are statement-driven)
+    "holder":     "baiboon" | "nuta" | "takumi", // required; takumi → an estimate from all
+                                               //   three ledgers (lib.bill_draft.draft_primary_bill),
+                                               //   plus "unmonitored": <amount> for a card with an
+                                               //   untracked supplement
     "card":       "UOB One",                   // required, must match a SELECT option
     "bill_cycle": "2026-05-25",                // optional ISO date; inferred if omitted
     "skip_populate_installments": false,       // optional; default false. When false,
@@ -57,7 +60,9 @@ cards and holders. Selected by the presence of `bill_cycle_from`:
   {
     "bill_cycle_from": "2026-09-25",           // required, ISO, inclusive
     "bill_cycle_to":   "2026-09-27",           // required, ISO, inclusive; ≤ 31 days
-    "holders": ["baiboon", "nuta"],            // optional; default both (or "holder")
+    "holders": ["baiboon", "nuta"],            // optional; default both (or "holder"); "takumi"
+                                               //   drafts his statement bills at the estimate,
+                                               //   with "unmonitored": {"<card>": <amount>}
     "cards":   ["UOB One"],                    // optional filter, case-insensitive
     "skip_populate_installments": false,       // optional; passed to every draft
     "skip_cashback_check": false,              //   "

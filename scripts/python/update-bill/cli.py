@@ -96,7 +96,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib import installments, notion_client, notion_files, payments
 from lib import notion_blocks as nb
-from lib.bill_draft import DRAFT_PREFIX, draft_bill, draft_statement_bill
+from lib.bill_draft import DRAFT_PREFIX, draft_bill, draft_statement_bill, reestimate_primary_bill
 from lib.icons.bills import bill_icon
 from lib.bills import STATEMENT_PDF, BillNotFoundError, explain_cycle, find_bill
 from lib.ledger import amount_due, cycle_rows, is_bill_payment_row, title_text
@@ -351,11 +351,26 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
     refresh = bool(spec.get("refresh_from_transactions"))
     refreshed: dict | None = None
     if refresh and statement_bills:
-        raise ValueError(
-            f"refresh_from_transactions doesn't apply to {holder_key!r}: the bill is "
-            f"the statement's card total, not a sum of {holder_key}'s own rows"
-        )
-    if refresh:
+        # Takumi's bill is the statement's card total. Before the statement, a
+        # `[DRAFT]` row holds the ledgers' estimate (lib.bill_draft.draft_primary_bill),
+        # and refreshing re-estimates it from all three ledgers. A final bill is
+        # the printed figure: nothing to recompute.
+        if not _current_title(page_id).startswith(DRAFT_PREFIX):
+            raise ValueError(
+                f"refresh_from_transactions doesn't apply to {holder_key!r}'s final bills: "
+                f"the bill is the statement's printed card total"
+            )
+        if not resolvable:
+            raise ValueError("refresh_from_transactions requires (holder, card, bill_cycle)")
+        est = reestimate_primary_bill(holder_rec, card, bill_cycle, unmonitored=spec.get("unmonitored"))
+        simple_props["ยอดชำระ"] = {"number": est.total}
+        actions.append("ยอดชำระ (re-estimated)")
+        if "Note" not in simple_props:
+            simple_props["Note"] = {"rich_text": nb.text(est.note())}
+            actions.append("Note (auto)")
+        refreshed = {"ยอดชำระ": est.total, "split": est.split, "tx_count": est.lines,
+                     "auto_note": est.note()}
+    elif refresh:
         if not (holder_key and card and bill_cycle):
             raise ValueError(
                 "refresh_from_transactions requires the bill to be resolvable "

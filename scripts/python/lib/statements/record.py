@@ -391,8 +391,10 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
             counts["bills_created"] += 1
             entry["bill"] = {"status": "created", "id": bill["id"], "ยอดชำระ": plan.total}
         elif _pending_draft(bill):
-            # Drafted from a payment slip before the statement arrived
-            # (lib.bill_draft.draft_statement_bill): the statement completes it.
+            # Drafted before the statement arrived — from a payment slip
+            # (lib.bill_draft.draft_statement_bill) or as the ledgers' estimate
+            # (draft_primary_bill): the statement completes it.
+            estimate = _estimate_report(bill, plan)
             final_title = f"{bill_name} {statement.statement_date[:7]}"
             notion_client.update_page_properties(bill["id"], {
                 "title": {"title": [{"text": {"content": final_title}}]},
@@ -400,7 +402,7 @@ def record(statement: Statement, *, pdf: str | Path | None = None, dry_run: bool
                 "Note": {"rich_text": nb.text(bill_note(statement, plan, printed))},
             }, icon=bill_icon(final_title))
             counts["bills_completed"] += 1
-            entry["bill"] = {"status": "draft completed", "id": bill["id"], "ยอดชำระ": plan.total}
+            entry["bill"] = {"status": "draft completed", "id": bill["id"], "ยอดชำระ": plan.total, **estimate}
         if pdf is not None:
             names = {f.get("name") for f in bill["properties"].get(STATEMENT_PDF, {}).get("files", [])} if "properties" in bill else set()
             if Path(pdf).name not in names:
@@ -460,16 +462,26 @@ def _report(plan: AccountPlan) -> dict:
 
 
 def _pending_draft(bill: dict) -> bool:
-    """A slip-first placeholder: `[DRAFT] …` title and no `ยอดชำระ` yet."""
+    """A `[DRAFT] …` bill the statement completes: a slip-first placeholder
+    (no `ยอดชำระ` yet) or a ledger estimate (`lib.bill_draft.draft_primary_bill`)."""
     title = "".join(t.get("plain_text", "") for p in bill["properties"].values()
                     if p.get("type") == "title" for t in p.get("title", []))
-    return title.startswith(DRAFT_PREFIX) and bill["properties"].get("ยอดชำระ", {}).get("number") is None
+    return title.startswith(DRAFT_PREFIX)
+
+
+def _estimate_report(bill: dict, plan: AccountPlan) -> dict:
+    """How far a ledger-estimate draft was from the printed total."""
+    estimate = bill["properties"].get("ยอดชำระ", {}).get("number")
+    if estimate is None:
+        return {}
+    return {"draft_estimate": estimate, "estimate_off_by": round(plan.total - estimate, 2)}
 
 
 def _bill_report(bill: dict, plan: AccountPlan) -> dict:
     amount = bill["properties"].get("ยอดชำระ", {}).get("number")
     if _pending_draft(bill):
-        return {"status": "draft to complete", "id": bill["id"], "ยอดชำระ": plan.total}
+        return {"status": "draft to complete", "id": bill["id"], "ยอดชำระ": plan.total,
+                **_estimate_report(bill, plan)}
     r = {"status": "exists", "id": bill["id"], "ยอดชำระ": amount}
     if amount is None or abs(amount - plan.total) > 0.005:
         r["warning"] = f"existing bill says {amount}, statement prints {plan.total:,.2f} — left unchanged"

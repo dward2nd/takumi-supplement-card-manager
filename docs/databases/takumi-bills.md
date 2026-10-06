@@ -18,10 +18,38 @@ One row per card per **bank statement** — the amount [[../people/takumi|Takumi
 A supplement holder's bill is **computed**: the sum of *their own* Transactions rows for the cycle, drafted by `/prepare-bill` and reconciled against the statement afterwards. Takumi's bill is **the statement**:
 
 - `ยอดชำระ` is the issuer's printed total for that card — principal **plus every supplement section**. Takumi pays the whole card to the bank, usually after Baiboon and Nuta have paid their shares to him.
-- The title has no `[DRAFT] ` prefix, except on a placeholder drafted from a payment slip before the statement arrived (see *Slip before statement* below). There is no pre-statement estimate.
+- The title has no `[DRAFT] ` prefix once the statement is recorded. Before that, a `[DRAFT] ` row is either an estimate from the ledgers (see *Drafting before the statement* below) or a placeholder drafted from a payment slip (see *Slip before statement* below).
 - `จ่ายแล้ว` means *Takumi paid the bank*, not *a friend paid Takumi*.
 
-In code Takumi is a `PrimaryHolder` (`scripts/python/lib/holders.py`), whose `statement_bills` is `True`; Baiboon and Nuta are `SupplementHolder`s. That makes three automations refuse him: `/prepare-bill` (a sum of his own rows would understate the bill; a slip that arrives first gets a placeholder instead), `/update-bill`'s `refresh_from_transactions` (same reason), and the automatic full-bill payment row that `/update-bill` and `/record-payment` write on a slip (see *Payments* below). Slips, statement PDFs, `Note` and an explicit `paid: true` all work through `/update-bill` as usual.
+In code Takumi is a `PrimaryHolder` (`scripts/python/lib/holders.py`), whose `statement_bills` is `True`; Baiboon and Nuta are `SupplementHolder`s. That makes the automatic full-bill payment row refuse him: the one that `/update-bill` and `/record-payment` write on a slip (see *Payments* below). `/prepare-bill` drafts his bills from all three ledgers instead of his own rows, and `/update-bill`'s `refresh_from_transactions` re-estimates such a draft the same way. A final bill can't be refreshed (see *Drafting before the statement* below). Slips, statement PDFs, `Note` and an explicit `paid: true` all work through `/update-bill` as usual.
+
+## Drafting before the statement (2026-10-06)
+
+The friends' bills are drafted when a cycle closes. Takumi asked for his own to be drafted alongside them ("draft my own bills too"), with each friend's subtotal shown. Because every statement line lives in exactly one ledger (next section), the printed card total can be estimated before the PDF arrives:
+
+- **Takumi's statement-line rows**, his bank credits (`CB…`) included.
+- **Each friend's statement-line rows on that card**, plus their cashback rows. On these cards a friend's cashback row is the bank's credit booked in their ledger: Krungsri `CB…`, their share of First Choice's NW3, AEON's `CASH BACK …`. The exception is a card whose cashback comes back as household credit rows, which the bank never prints (`lib.crediting`: UOB One). On KTC and CardX, which print one statement per card number, only a friend's `[บัตรหลัก]` rows are on his statement.
+- **An unmonitored supplement's total**, which no ledger holds. The user reads it off the bank's app and passes it as `unmonitored`. Lotus's 6524 was ฿2,603.25 for 2026-10.
+
+`/prepare-bill` with `holder: takumi` writes `[DRAFT] <Card> <YYYY-MM>` at that sum. Its `Note` gives the split, e.g. `฿12,046.73 = เว็บ ฿-5.27 + ใบบุญ ฿12,052.00`, plus a warning when the previous bill isn't marked paid, since the statement would carry that balance. Window mode finds the cycles in all three ledgers, so a card Takumi didn't use still gets a draft when a friend did. It skips cycles with nothing on the principal's statement, such as Nuta's own CardX JCB or a ledger reset. The code is `lib/bill_estimate.py` and `lib.bill_draft.draft_primary_bill`.
+
+`/record-statement` completes the draft in place: title, printed `ยอดชำระ` and `Note`. It reports `estimate_off_by` (printed − estimate). A gap is a lead, not an error: a line nobody recorded, a credit that posted for a different amount, or Takumi's share of a pooled credit that isn't in his ledger yet. When rows are added after the draft, `/update-bill` with `refresh_from_transactions` re-estimates it from the three ledgers (`lib.bill_draft.reestimate_primary_bill`). Pass `unmonitored` again for Lotus's. First uses, 2026-10-06: Krungsri NOW ฿3,839.00 → ฿5,739.00 after his `AMP*AIS SERVICESPaymen` ฿2,000 and its `CB` −฿100, and Krungsri Lady ฿4,305.00 → ฿5,073.00 after his Bangchak ฿800, its −฿8 discount and `CB12_BC3P` −฿24.
+
+First batch, 2026-10-06, BC 2026-10-05:
+
+| Draft | `ยอดชำระ` | Split |
+|---|---:|---|
+| First Choice 2026-10 | 32,657.03 | เว็บ 11,204.44 + ใบบุญ 17,877.51 + นุตา 3,575.08 |
+| Krungsri JCB 2026-10 | 12,227.14 | เว็บ 980.00 + ใบบุญ 11,247.14 |
+| Krungsri Visa 2026-10 | 12,046.73 | เว็บ −5.27 + ใบบุญ 12,052.00 |
+| Lotus's Beyond 2026-10 | 5,372.25 | เว็บ 2,769.00 + unmonitored …6524 2,603.25 |
+| Krungsri Lady 2026-10 | 4,305.00 | ใบบุญ 4,305.00 |
+| Krungsri NOW 2026-10 | 3,839.00 | ใบบุญ 3,839.00 |
+| Central The 1 Redz 2026-10 | 2,763.00 | ใบบุญ 2,763.00 |
+
+First Choice includes the August NW3 credit, ฿800 split three ways and all under `NW3 Cashback 2% (1–31 Aug 2026)`: ใบบุญ −674.54, นุตา −17.84 and Takumi's remainder −107.62. Takumi's share was added the same day, and the draft was re-estimated from ฿32,657.03 to ฿32,549.41.
+
+**Watch the dry run when the 2026-10 statement is recorded.** July's three shares carried the bank's text (`เครดิตเงินคืน NW3_1JUL26-31JUL26`), so `/record-statement` claimed the friends' rows as shares of the bank's line and matched Takumi's remainder. The August rows don't carry that text. A friend's row that says `Cashback` is left out of the share pool, and the first two words (`NW3 Cashback`) won't match the bank's line either. The dry run will then plan a new −฿800 row for Takumi on top of the three shares. Rename the three rows to the printed text before the real run.
 
 ## Every statement line lives in exactly one ledger
 
