@@ -24,7 +24,7 @@ How the [[index|catalogue research]] got at each issuer's and merchant's terms (
 
 ## In a cloud session
 
-Claude Code on the web runs on Linux behind an allowlist (see `CLAUDE.md`, *Cloud sessions*). On 2026-10-06 the default policy denied every site in the table below, plus r.jina.ai, archive.org, wsrv.nl and Wikimedia Commons, so research needs *Network access* widened in the environment's settings first. Once the hosts are allowed, the tools differ from the Mac:
+Claude Code on the web runs on Linux behind an allowlist (see `CLAUDE.md`, *Cloud sessions*). The default policy denies every site in the table below, plus r.jina.ai, wsrv.nl and Wikimedia Commons. Takumi widened *Network access* on 2026-10-06: since then the bank sites, Wikimedia and r.jina.ai answer, but archive.org resets the connection, so the Wayback fallback doesn't work from the cloud. The tools differ from the Mac:
 
 - **Headless Chrome** is Playwright's Chromium: `/opt/pw-browsers/chromium-<n>/chrome-linux/chrome --headless=new --no-sandbox`.
 - **`timeout`** exists, so the `perl -e 'alarm …'` wrapper isn't needed.
