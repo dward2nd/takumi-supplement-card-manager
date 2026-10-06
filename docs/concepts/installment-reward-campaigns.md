@@ -138,6 +138,12 @@ The first plan recorded this way: Nuta's First Choice `7-11 NAPHRU SOI 3 CHONBUR
 
 **A charge that posts on the cut-off day bills its first term a cycle later** (user, 2026-10-06, confirmed with Krungsri's call centre). The `7-11 NAPHRU` charge posted on 5 Oct, the bill-cycle date itself, which left the bank no time to put the conversion's first term on that statement. So `01/03` belongs to the **next** cycle: dated that cycle's BC date (`Transaction Datetime` 2026-11-05, `Bill Cycle Date` 2026-11-05, `Due Date` 2026-11-25), so `/record-statement` matches it to the November line. The app's bill and the printed statement differ meanwhile. This applies only when the charge posts on the BC date, which is rare. A charge that posts earlier in the cycle has its first term on that cycle as usual.
 
+**The app's figure is what the bank collects** (user, 2026-10-07, checked in UCHOOSE). The 5 Oct First Choice PDF prints the `7-11 NAPHRU` charge with no reversal and no term, so its card total is ฿39,725.29. UCHOOSE shows ฿32,549.41, which is the printed total minus the converted charge, and the bank collects that amount. The three-ledger estimate on Takumi's `[DRAFT]` bill (`/prepare-bill`, `holder: takumi`) was ฿32,549.41 too, because Nuta's ledger already holds the reversal on that cycle. So on such a cycle, expect:
+
+- `/record-statement` to report `estimate_off_by` = the charge (฿7,175.88), Nuta's `REV-FC PLAN ON DEMAND` row under `not_on_statement`, and a matching First Choice `drift`. These are expected, not leads.
+- completing Takumi's draft at the printed total to overstate the debit by the charge. The amount he actually pays is the app's.
+- `/audit-bill` on the friend's bill to show the reversal as `extra_in_notion`. The friend's bill (Nuta's ฿3,575.08) is right as it stands.
+
 Older plans are left as they were. Baiboon's ICARE and FUTURE ELECTRONICS plans
 kept only the terms. Nuta's `CTRIP (THAILAND) CO., BANGKOK TH` ฿11,766.58
 (Apr 2026) kept the original charge, offset by a `[เว็บรับหนี้ไปบริหารต่อเอง]`

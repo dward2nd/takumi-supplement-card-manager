@@ -136,7 +136,8 @@ def _stem(name: str) -> tuple[str, ...]:
 
 
 def _days(a: str, b: str) -> int:
-    return abs((_dt.date.fromisoformat(a) - _dt.date.fromisoformat(b)).days)
+    # Rows entered with a time of day read back as a datetime (`…T18:47:00.000+07:00`).
+    return abs((_dt.date.fromisoformat(a[:10]) - _dt.date.fromisoformat(b[:10])).days)
 
 
 def _is_bank_credit_candidate(row: dict, holder: str) -> bool:
