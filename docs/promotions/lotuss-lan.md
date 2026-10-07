@@ -41,7 +41,7 @@ Within 60 days after each month-end, on the primary account's statement: October
 
 ## Predecessor?
 
-Takumi's ledger has `CB MLO_Promotion 1 - 31 JUL'26` and `… AUG'26`, ฿40 each, a month after the month they name. That is the size of one ฿2,000 step. His own Lotus's spend in August was well under ฿2,000, so if MLO was LAN's Q3 predecessor, the …6524 supplement's spend made up the rest. Unconfirmed.
+Takumi's ledger has `CB MLO_Promotion 1 - 31 JUL'26`, `… AUG'26` and `CB MLO_Promotion 1 - 30 Sep'26` (6 Oct), ฿40 each, a month after the month they name. That is the size of one ฿2,000 step. His own Lotus's spend in August was well under ฿2,000, so if MLO was LAN's Q3 predecessor, the …6524 supplement's spend made up the rest. Unconfirmed.
 
 ## Bureau rows
 
