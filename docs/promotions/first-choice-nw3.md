@@ -29,8 +29,8 @@ Krungsri First Choice's monthly cashback ladder on pooled full-amount spend. Tak
 | Month | Bureau row | Pooled | Credit | Split |
 |---|---|---|---|---|
 | Jul 2026 | — (pre-Bureau) | — | ฿1,000 (statement) | friends flat 2%, Takumi remainder: Baiboon 941.52 · Nuta 37.16 · Takumi 21.32 |
-| Aug 2026 | — (pre-Bureau) | — | pending statement | friends flat 2%: Baiboon 674.54 · Nuta 17.84 |
-| Sep 2026 | `2026M9 — NW3 cb 2%` | ฿36,803.92 (= app) | ฿600 (ladder) | FCFS: Takumi 302.94 · Baiboon 246.73 · Nuta 50.33 |
+| Aug 2026 | — (pre-Bureau) | — | ฿800, credited 6 Sep | friends flat 2%, Takumi remainder: Baiboon 674.54 · Nuta 17.84 · Takumi 107.62 |
+| Sep 2026 | `2026M9 — NW3 cb 2%` | ฿44,036.92 | ฿800 (ladder), credited 6 Oct | FCFS: Takumi 334.25 · Baiboon 415.42 · Nuta 50.33 |
 
 **September reconciled (2026-09-28).** The Bureau matches the app's eligible list to the satang: ฿36,803.92. Getting there took two fixes:
 
@@ -40,3 +40,5 @@ Krungsri First Choice's monthly cashback ladder on pooled full-amount spend. Tak
 False leads, for next time: KALM VILLAGE (an even split), the two ฿95 `TMN*PROMPTPAY30` rows on 09-13 (both real), and the five split charges (all match the app). A single row equal to the gap is no lead when even splits exist. Checking against the app's list row by row, from the day after the last verified statement, is what found both errors.
 
 The boundary day (09-24) was then ordered by times the user found: PROMPTPAY30 10:56, DUMPLINGS 18:47, Hai Di Lao 21:21. Final split: Takumi ฿302.94 · Baiboon ฿246.73 · Nuta ฿50.33 = ฿600.
+
+**September credited (2026-10-07).** Spend recorded after 28 Sep, to the month's end, took the pool to ฿44,036.92 and the ladder to ฿800. The bank credited ฿800 on 6 Oct, matching the Bureau. Each holder's ledger has a `NW3 Cashback 2% (1–30 Sep 2026)` row for their share on First Choice, billed 5 Nov, as August's were: Takumi −334.25 (`×0`, the Note naming the friends' shares), Baiboon −415.42, Nuta −50.33.
