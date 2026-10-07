@@ -17,7 +17,7 @@ The UOB One Account spend-and-save tiered-cashback promotion as it applies to UO
 
 Two **bonus** tiers stacked on a **base** rate:
 
-- **10%** on transit + Café Amazon merchants (BTS / MRT / AMZ-named rows).
+- **10%** on transit + Café Amazon merchants (BTS / MRT / AMZ-named rows). Transit means BTS and MRT only: the SRT Red Line (`SRT RED LINE …`) earns the base 1% (user, 2026-10-07). Two 2025 Red Line rows carry Notes that disagree (10% and 1%); the 1% one stands.
 - **5%** on convenience + grooming + Thailand-side ride-hail (`7-11`, `WATSON`, `WWW.GRAB.COM`, `GRABTAXI`) — but *not* `TMN 7-11`, which is a TrueMoney top-up at 7-Eleven that falls through to the base rate.
 - **1%** on everything else not excluded.
 

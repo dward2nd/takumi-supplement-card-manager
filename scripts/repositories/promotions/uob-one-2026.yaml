@@ -18,7 +18,7 @@ tiers:
     label: bonus
     patterns:
       - BTS
-      - MRT
+      - MRT            # not the SRT Red Line: SRT RED LINE … earns 1% (user, 2026-10-07)
       - AMZ            # Café Amazon (also matches RMAMZ in observed data)
   - rate: 0.05
     label: bonus
