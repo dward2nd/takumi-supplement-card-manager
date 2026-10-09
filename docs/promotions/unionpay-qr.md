@@ -67,5 +67,6 @@ Earlier months look discounted too: Baiboon's `BANGCHAK …` ฿470 (฿500 less
 ## See also
 
 - [[../cards/ktc-unionpay]] — the card; points (KTC FOREVER) are earned on the net amount.
+- [[unionpay-mrt]] — UnionPay's other offer the household meets: 15% off MRT fares by contactless tap, also inside the charge.
 - [[../concepts/promotion-bureau]] — the Bureau, shapes, per-card-number quotas.
 - [[../databases/promotion-bureau]] — `Quotas Exceeded Date`.

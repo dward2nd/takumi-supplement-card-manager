@@ -226,6 +226,10 @@ A **points** card, not a cashback one — leave `% cb` unset on every row, alway
 
 Takumi (…1346) and Baiboon (her own …2310) pay with KTC UnionPay by UnionPay QR only, and UnionPay's monthly offer takes 6% off at payment (up to ฿60 a slip, one slip a card a day, ฿300 a card a month, until UnionPay's pool runs out). `ยอดชำระ` is **what KTC charged**, i.e. the net amount (฿67.68 for a ฿72 price). A receipt, or the app at payment time, may show the price before the discount: use the charged figure. Leave `% cb` unset, since nothing is credited later. The Bureau follow-up keeps `UnionPay QR …1346` / `…2310` in step and reports the month's pool under `quota`. See [[../../../docs/promotions/unionpay-qr|unionpay-qr]].
 
+### UnionPay at the MRT — 15% off, already inside the charge
+
+A participating UnionPay card (AEON UnionPay, KTC UnionPay, …) tapped at an MRT Blue or Purple Line gate gets 15% off the fare, 16 Mar – 31 Dec 2026, up to ฿550 a card a month, while UnionPay's monthly pool lasts. The statement shows the net fare, so `MRT-BEM …` ฿50.15 is a ฿59 fare less ฿8.85. Book what was charged and leave `% cb` unset: nothing is credited later. Not in the Bureau. See [[../../../docs/promotions/unionpay-mrt|unionpay-mrt]].
+
 ### CardX JCB — ongoing card-level policy (not yet framed as a dated promotion)
 
 - **Cashback**:

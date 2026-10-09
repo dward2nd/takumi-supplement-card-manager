@@ -94,6 +94,7 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 - [[promotions/uob-makro-gold-mission]] — UOB Makro 26th "Gold Mission" `UMK26` (Makro stores monthly, Makro PRO app per slip, other spend ฿300 a month), Oct–Dec 2026.
 - [[promotions/cardx-hypermarket]] — CardX HY1 per hypermarket slip (฿40/200/720, ฿1,440 a month) and HYP ฿3,000 at ฿300,000, Oct–Dec 2026.
 - [[promotions/unionpay-qr]] — UnionPay QR 6% off on KTC UnionPay (monthly from Sep 2026), taken off the charge itself; one Bureau row per card number, `Quotas Exceeded Date` when UnionPay's pool runs out.
+- [[promotions/unionpay-mrt]] — UnionPay 15% off MRT Blue and Purple Line fares by contactless tap (16 Mar – 31 Dec 2026, ฿550 a card a month), taken off the charge itself; not in the Bureau.
 
 ## Future application
 

@@ -38,4 +38,5 @@ KTC pattern: **bill cuts on the 27th, due ~15 days later** (e.g. cycle `2026-07-
 - [[../concepts/promotions]] — the promotion-driven cashback / exclusion model.
 - [[../concepts/bill-cycle-patterns]] — the KTC 27th-cut pattern.
 - [[../promotions/unionpay-qr]] — the UnionPay QR 6% discount, per card number.
+- [[../promotions/unionpay-mrt]] — UnionPay's 15% off MRT fares by contactless tap; this card qualifies, though it's used by QR only.
 - Memory: `project_card_ktc_unionpay`.
