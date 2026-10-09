@@ -18,3 +18,12 @@ notes: |
 
   Tell for a ดีจังผ่อน plan: 4 terms, where Thai plans conventionally run 3, 6
   or 10. Advisory only — never auto-applied.
+
+  Bank notices printed on the 5 Oct 2026 statement (…1265). Not yet encoded in
+  lib.earning, so set them by hand on /add-transaction:
+  - From 1 Aug 2026: no POINTX and no cashback on MCC 6540, e-wallet top-ups and
+    account funding of every kind (CardX-wide notice).
+  - From 1 Sep 2026: the 3% cashback on JPY/KRW/HKD/SGD/TWD spend in Japan,
+    South Korea, Hong Kong, Singapore and Taiwan is counted per whole ฿1,000 of
+    each sales slip, capped at ฿1,800 per card per cycle; spend in those five
+    countries earns no POINTX (tick ×0).
