@@ -37,7 +37,7 @@ Either way, the unnamed checkbox is ticked once the credit has reached the holde
 - **Paid out by transfer.** Takumi transfers the money and attaches the slip to `Slip`.
 - **Paid by the bank onto the card.** The credit is already a row in the holder's own ledger. It might be the bank's line (`BANGCHAK SPECIAL DISCOUNT OF 1 %`, `CB15_ SUP1 …`) or the household's credit row (`UOB ONE CASHBACK 1%`). That row goes in `Slip Transaction` (user, 2026-09-30). Before this column existed, the row was written into `Note` as `บันทึกในบัญชีแล้ว: <name> ฿<amt> · <card> ของ<ชื่อ> <date>`, with a link. The four trackers settled that way on 2026-09-29 keep their Note, and were linked through `Slip Transaction` on 2026-09-30.
 
-The relation only reaches the holder's own ledger. A friend's credit that landed on Takumi's primary card is in his ledger, not theirs, so their tracker is settled by his transfer slip.
+The relation only reaches the holder's own ledger. A friend's credit that landed on Takumi's primary card is in his ledger, not theirs, so their tracker is settled by his transfer slip. Example: Baiboon's `Everyday with AEON 10 Aug` (฿120), settled 2026-10-09 by his PromptPay slip after her `[บัตรหลัก] CASH BACK - CREDIT CARD PROMOTION` row was archived ([[../promotions/aeon-2026#NTW1 for the cycle billed 10 Aug, paid by transfer|aeon-2026]]).
 
 **A pooled bank credit settles Takumi's share.** When the bank credits a whole pooled campaign onto his card, as with `UOB One Cashback 10% 5%` −฿420.95 on 30 Sep 2026, his tracker links that one row and is ticked, even though the row is the whole pool and not his share. The Note gives both figures (user, 2026-10-06).
 
