@@ -22,7 +22,10 @@ notes: |
   Bank notices printed on the 5 Oct 2026 statement (…1265). Not yet encoded in
   lib.earning, so set them by hand on /add-transaction:
   - From 1 Aug 2026: no POINTX and no cashback on MCC 6540, e-wallet top-ups and
-    account funding of every kind (CardX-wide notice).
+    account funding of every kind (CardX-wide notice). Top-ups only: a merchant
+    payment routed through a wallet still earns (user, 2026-10-10). The 5 Oct
+    statement confirms it: `LPTH*PF_LM_SHREDDED68BT` ฿69 (LINE Pay → LINE MAN,
+    10 Sep) earned 2 of the 10 points printed.
   - From 1 Sep 2026: the 3% cashback on JPY/KRW/HKD/SGD/TWD spend in Japan,
     South Korea, Hong Kong, Singapore and Taiwan is counted per whole ฿1,000 of
     each sales slip, capped at ฿1,800 per card per cycle; spend in those five
