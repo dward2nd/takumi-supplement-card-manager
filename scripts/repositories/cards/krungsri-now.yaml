@@ -32,5 +32,3 @@ notes: |
 # 2026-10-06: an AIS bill paid in the AIS app (`AMP*AIS SERVICESPaymen BANGKOK TH`) counts as
 # online. Takumi's ฿2,000 on 8 Sep was credited `CB AMP*AIS SERVICESPaymen BANGKOK` −฿100, so the
 # Bureau class matches `AMP*AIS SERVICES` too.
-# 2026-10-12: the bank also spells it `AMP* AIS SERVICESPaymen BANGKOK TH` (a space after the
-# star): ฿500 on 8 Oct, credited `CB AMP* AIS SERVICESPaymen BANGKOK` −฿25. The class matches both.
