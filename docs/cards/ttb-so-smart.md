@@ -1,7 +1,7 @@
 ---
 tags: [card, ttb, cashback]
 issuer: ttb
-holders: [baiboon]
+holders: [takumi, baiboon]
 points: none
 ---
 
@@ -18,9 +18,10 @@ ttb's flat-rate cashback card. It is a **cashback card, not a points card** — 
 | 7-11 (`…7-11…`) | **excluded** — no cashback | `×0` |
 | Petrol stations (`PTT`/`BCP`/`BANGCHAK`/`BSRC`/`ESSO`/`SHELL`/`CALTEX`) | **excluded** — no cashback | `×0` |
 | Installment rows (`NN/NN`) | **excluded** — no cashback | `×0` |
+| Utilities, MCC 4900 (`ttb touch* PWA Provincial Waterworks Aut`, MEA/PEA/MWA, `…WATERWORKS…`, `…ELECTRICITY…`) | **excluded** since 15 Jan 2026 — no cashback | `×0` |
 | Foreign merchant billed in THB | **excluded** (general rule) | `×0` |
 
-- **Cap**: the 1% is capped per cycle, but the household spends little on this card, so **the cap is intentionally not tracked** (per user, 2026-07-21). If usage grows, revisit — the cap would need block/cap math the current tier model can't express (cf. [[krungsri-now|Krungsri NOW]]).
+- **Cap**: ฿2,000 per statement cycle per card account, enforced by the [[../concepts/promotion-bureau|Promotion Bureau]] row `<year>M<month> — ttb so smart cb 1%` (`TTBSoSmartCashback`), whose re-sync after each write unsets `% cb` past the cap. The bank's full exclusion list is in [[../promotions/ttb-2026]].
 - Zero-cashback rows leave `% cb` **unset** (never an explicit `0`), per project convention.
 
 ## Notion / classification encoding
@@ -28,9 +29,11 @@ ttb's flat-rate cashback card. It is a **cashback card, not a points card** — 
 The policy is machine-applied by `lib.promotions.classify`, split across two repository files:
 
 - **`scripts/repositories/cards/ttb-so-smart.yaml`** — `points_default: "×0"` (no points, canonical); the gas-station carve-out is `TTBCard` in `lib/earning`. `bill_cycle_pattern: ttb`.
-- **`scripts/repositories/promotions/ttb-so-smart-cashback.yaml`** — the 1% base tier (`patterns: ["*"]`, `exclude_patterns: ["TMN", "7-11"]`) and `installment_rule: { rate: 0.0 }` to zero installment rows. Modeled as an open-ended, ongoing card-level policy (`effective_start: 2026-01-01`, no `effective_end`).
+- **`scripts/repositories/promotions/ttb-so-smart-cashback.yaml`** — the 1% base tier (`patterns: ["*"]`, `exclude_patterns`: `TMN`, `7-11`, and the utility strings `WATERWORKS`, `ELECTRICIT`, `TOUCH* MEA`/`PEA`/`MWA`/`PWA`, `การประปา`, `การไฟฟ้า`) and `installment_rule: { rate: 0.0 }` to zero installment rows. Modeled as an open-ended, ongoing card-level policy (`effective_start: 2026-01-01`, no `effective_end`).
 
 So `/add-transaction` with `auto_classify: true` fills `% cb`, the `×0` multiplier, and the exclusion Note automatically. Verified across mall / TMN / 7-11 / petrol / installment / foreign cases on 2026-07-21.
+
+**Utilities joined the YAML on 2026-10-17** (user), after Takumi's `ttb touch* PWA Provincial Waterworks Aut` ฿386.27 (16 Oct) auto-classified at 1%. The Bureau already left it out of the 1% pool. Exclude patterns match as plain substrings, so the authorities' bare acronyms aren't listed (`MEA` would catch `MEAL`): only the ttb touch bill-payment form (`TOUCH* PWA`) and the spelled-out names. Excluded rows get no Note, as with `TMN`.
 
 ## Crediting mechanism — external savings account
 

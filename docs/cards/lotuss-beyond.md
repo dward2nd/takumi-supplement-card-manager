@@ -7,7 +7,7 @@ points: fractional
 
 # Lotus's Beyond
 
-Lotus-group co-brand card, issued through Lotus Money Service — a Krungsri Consumer partner, so the card repo files it under `issuer: Krungsri` (user, 2026-09-27). It stays exempt from the Krungsri 7-11 / TrueMoney points exclusion (CP ALL), and Takumi pays it by auto-debit like the rest of the family — see [[../databases/takumi-bills#payments|takumi-bills → Payments]]. The issuer awards **fractional coins**, which the ledger holds since 2026-10-05 through the card's `คะแนนต่อ 1 หน่วย` and a `×6` box (below).
+Lotus-group co-brand card, issued through Lotus Money Service — a Krungsri Consumer partner, so the card repo files it under `issuer: Krungsri` (user, 2026-09-27). It stays exempt from the Krungsri 7-11 / TrueMoney points exclusion (CP ALL), and Takumi pays it by slip like the rest of the family since the 2026-10 bill (auto-debit until 2026-09) — see [[../databases/takumi-bills#payments|takumi-bills → Payments]]. The issuer awards **fractional coins**, which the ledger holds since 2026-10-05 through the card's `คะแนนต่อ 1 หน่วย` and a `×6` box (below).
 
 ## Earning rules
 

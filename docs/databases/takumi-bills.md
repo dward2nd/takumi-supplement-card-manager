@@ -104,13 +104,15 @@ Then attach the slip(s) with `/update-bill` and set `จ่ายแล้ว` o
 
 **Slip before statement** (user, 2026-09-28: "put the payment slips to new drafted bills; I'll bring the statements later"). When he pays before the PDF arrives, `/update-bill` creates a placeholder for the slip: `[DRAFT] <Card> <YYYY-MM>`, with no `ยอดชำระ` and a Note naming the slips (`lib.bill_draft.draft_statement_bill`). `/record-statement` later fills in that same row (title, `ยอดชำระ`, Note) instead of creating a second one. The payment rows wait for it, because full vs partial depends on the bill total. First case: KTC Digital VISA (฿20.00), KTC Mastercard …5549 (฿1,545.30) and KTC UnionPay …1346 (฿967.26 + ฿940.00), all cycle 2026-09-27 and paid 28 Sep.
 
-**Krungsri-family cards pay by auto-debit** (user, 2026-09-27), so there is no slip. The group is the `issuer: Krungsri` cards: First Choice, Central The 1 Redz, Krungsri NOW, Krungsri JCB, Krungsri Visa, Krungsri Lady, and Lotus's Beyond (issued through Lotus Money Service, a Krungsri Consumer partner; `issuer: Krungsri` since 2026-09-27). Each paid bill gets one row named `AUTO DEBIT`:
+**Krungsri-family cards: slips from the 2026-10 bills on.** Takumi cancelled the auto-debit (user, 2026-10-17), so these bills are paid by slip like every other card: `ชำระ…` rows plus `โอนยอดจาก<friend>` rows through `/update-bill`'s `payment_amount` / `payment_covers`. The group is the `issuer: Krungsri` cards: First Choice, Central The 1 Redz, Krungsri NOW, Krungsri JCB, Krungsri Visa, Krungsri Lady, and Lotus's Beyond (issued through Lotus Money Service, a Krungsri Consumer partner; `issuer: Krungsri` since 2026-09-27). First case: all seven 2026-10-05 bills, paid 17 Oct by bill payment from his Krungthai account (Krungsri Lady's last ฿195.53 from KBank). First Choice also had a ฿3,575 slip on 14 Oct for Nuta's share. Lotus's unmonitored supplement …6524 gets `โอนยอดจากบัตรเสริม`, which `payment_covers` can't write: add it with `/add-transaction` (`×0`, slip date, paid cycle).
+
+**Up to the 2026-09 bills they were auto-debited** (user, 2026-09-27), with no slip. Each paid bill got one row named `AUTO DEBIT`:
 
 - **Amount**: the negative full `ยอดชำระ`.
 - **Cycle and date**: dated on the due date and tagged to the paid bill's cycle.
 - **Multiplier**: none.
 
-The bill's `จ่ายแล้ว` is then set by hand, with nothing attached to `หลักฐานการชำระ`. His 2025 ledger named these rows `AUTO DEBIT - <card>`. From 2026 the name is just `AUTO DEBIT`, because the `Card` relation already says which card.
+The bill's `จ่ายแล้ว` was then set by hand, with nothing attached to `หลักฐานการชำระ`. His 2025 ledger named these rows `AUTO DEBIT - <card>`. From 2026 the name is just `AUTO DEBIT`, because the `Card` relation already says which card.
 
 **KTC: transfer rows at statement time** (user, 2026-09-27). KTC bills the principal and each supplement card separately, one PDF per card number, and Takumi may pay a KTC bill in one transfer or split it. So when his principal statement carries a friend's `[บัตรหลัก]` line, add the `โอนยอดจาก<friend>` row **when the statement is recorded**. Date it on the statement date, tag it to that cycle, and set `×0`. His card balance then equals the bill before payment, and the payment row(s) can mirror the slip(s) exactly. First case: KTC UnionPay 2026-08, `โอนยอดจากใบบุญ` +376.00 for `[บัตรหลัก] CMU FITNESS`, making ฿1,447.60 = the bill.
 

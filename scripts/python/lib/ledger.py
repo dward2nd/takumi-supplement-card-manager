@@ -23,9 +23,9 @@ PRIMARY_PREFIX = "[บัตรหลัก]"
 # ชำระล่วงหน้าบางส่วน, ชำระเพิ่มบางส่วนจนครบ, ชำระเต็มจำนวนอย่างล่าช้า,
 # จ่ายเต็มจำนวน, จ่ายบิลเต็มจำนวน, จ่ายก่อนบิลมา, จ่ายบิลล่วงหน้าบางส่วน,
 # จ่ายส่วนขาดเพิ่มเติม. No non-payment row in the data starts with either.
-# `AUTO DEBIT` is Takumi's bank-side auto-debit row (the Krungsri family pays
-# that way; his 2025 UOB rows read `AUTO DEBIT - <card>`). Only his ledger
-# carries it.
+# `AUTO DEBIT` is Takumi's bank-side auto-debit row (the Krungsri family paid
+# that way up to the 2026-09 bills; his 2025 UOB rows read
+# `AUTO DEBIT - <card>`). Only his ledger carries it.
 _PAYMENT_NAME_PREFIXES: tuple[str, ...] = ("ชำระ", "จ่าย", "AUTO DEBIT")
 
 # The separator after `CB` varies — a space, a hyphen before a batch number, or

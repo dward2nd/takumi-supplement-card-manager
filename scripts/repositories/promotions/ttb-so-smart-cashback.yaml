@@ -14,6 +14,14 @@ tiers:
   exclude_patterns:
   - TMN
   - 7-11
+  - WATERWORKS
+  - ELECTRICIT
+  - TOUCH* MEA
+  - TOUCH* PEA
+  - TOUCH* MWA
+  - TOUCH* PWA
+  - การประปา
+  - การไฟฟ้า
 installment_rule:
   rate: 0.0
   credited: at_purchase
