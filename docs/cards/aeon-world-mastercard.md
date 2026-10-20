@@ -28,6 +28,15 @@ A merchant string doesn't show its MCC, so only strings known to bill under an e
 
 The two strings are both Makro PRO, but the bank files them under different codes. Encoded as `points_excluded_merchants` in `scripts/repositories/cards/aeon-world.yaml`, so `auto_classify` and `/record-statement` apply it. On 2026-09-28 five past rows (Baiboon, 27 Jul–12 Aug 2026) were set to `×0`. The foreign-merchant and installment exclusions are not encoded yet.
 
+## Cancelled orders and late posting
+
+A cancelled order's refund doesn't name the merchant: it reads `REFUND TRANSACTION`, for the order's amount. Baiboon's 10 Oct 2026 Makro PRO orders show both quirks (AEON call centre, 2026-10-21):
+
+- **The charge posts days later.** A `HTTPS://WWW.MAKRO.PRO/` order of 10 Oct, the cut-off day, posted 12 Oct, so it bills on the next cycle (10 Nov), not the one closing on its date. The refund follows it onto the same bill.
+- **The pair is booked on the ledger, both at `×0`.** The charge is ฿15,807.50 with `Process Date` 12 Oct, and the refund −฿15,807.50 shares its cycle. Each row's Note names the other. They cancel in baht and points.
+
+The [[../concepts/promotion-bureau|Bureau]] can't pair them. `REFUND TRANSACTION` doesn't match the supermarket patterns of AEON WM 5% or NTW1, so it isn't netted, and the cancelled charge still counts as spend there. In Nov 2026 that cost nothing: the cycle's two real orders (฿32,051) already reach both caps.
+
 ## See also
 
 - [[_stubs|Card stub index]]
