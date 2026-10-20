@@ -11,8 +11,10 @@ is still excluded), now in steps of ฿700 a slip:
           ฿700 of each slip, at most ฿21 per primary card account per statement
           cycle (the bank counts at most ฿2,100 of fuel a cycle), credited within
           the cycle. The old terms' ฿8 per whole ฿800 was confirmed by the bank's
-          `BANGCHAK SPECIAL DISCOUNT OF 1 %` lines; this reading follows it, and
-          October's lines will confirm it. `Bangchak700CardBenefit`, code
+          `BANGCHAK SPECIAL DISCOUNT OF 1 %` lines; this reading follows it. The
+          first October line fits (Takumi's Lady: ฿700 on 18 Oct → −฿7 on 19 Oct),
+          but a plain 1% gives ฿7 too: a slip that isn't a whole multiple of ฿700
+          will settle the rounding. `Bangchak700CardBenefit`, code
           "Bangchak700" so its cycle rows never share a name with the old
           `Bangchak` rows (the cycle billed 5 Oct 2026 straddles both).
   ต่อ 2 — BXP, registered in UCHOOSE per round (round 1: 1 Oct 2026 – 31 Jan
@@ -72,7 +74,8 @@ class Bangchak700CardBenefit(SlipCreditPromotion):
         "Counted per statement cycle (Bill Cycle Date), supplements included; credited within the "
         "cycle as `BANGCHAK SPECIAL DISCOUNT OF 1 %`.",
         "Read as ฿7 per whole ฿700 of each slip, as the Jun–Sep terms' ฿8 per ฿800 were paid; "
-        "October's statement lines will confirm it.",
+        "a ฿700 slip got −฿7 the next day (19 Oct 2026), and a slip that isn't a whole multiple "
+        "of ฿700 will settle the rounding.",
         "The card's normal points are withheld on the same spend.",
     )
     rules: ClassVar = _RULES
