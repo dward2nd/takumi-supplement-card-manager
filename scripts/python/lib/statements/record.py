@@ -284,6 +284,8 @@ def bill_note(statement: Statement, plan: AccountPlan, printed: Statement | None
         note += (f"The cycle closed {statement.statement_date} (filed there, due {statement.due_date}); "
                  f"the printed dates are shifted on paper. ")
     note += f"฿{plan.total:,.2f} = " + " + ".join(parts) + "."
+    if plan.total < -0.005:
+        note += " A credit balance: nothing is due, and it carries to the next statement."
     if plan.not_on_statement or plan.missing:
         note += f" Notion differs from the statement by ฿{plan.drift():+,.2f} — see /record-statement's report."
     return note

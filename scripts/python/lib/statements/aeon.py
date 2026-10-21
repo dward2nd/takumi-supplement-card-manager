@@ -10,6 +10,11 @@ lists single-dated payments and cashback (printed unsigned, but credits) until
 `BALANCE BROUGHT FORWARD`; purchases follow as `TRANS POSTING DESCRIPTION
 AMOUNT [FOREIGN CCY]`. Fees print undated (`ANNUAL FEE 1,605.00 VAT 7% 105.00
 THB`) and are dated at the statement date.
+
+A credit balance prints as `0.00 Baht` (nothing due). The 10 Oct 2026
+statement's AEON World closed at −15,701.78 after a ฿15,807.50 refund. The
+signed figures are `BALANCE BROUGHT FORWARD` and the card's `SUBTOTAL`, so the
+account's total is their sum in that case, still checked against the lines.
 """
 
 from __future__ import annotations
@@ -24,7 +29,8 @@ _DUE = re.compile(r"^(\d\d) / (\d\d) / (\d{4})$")
 _CARD = re.compile(r"^\d{4} - \d\d\*\* - \*\*\*\* - (\d{4})$")
 _BAHT = re.compile(r"^(-?[\d,]+\.\d\d) Baht$")
 _OPENING = re.compile(r"^OPENING BALANCE (-?[\d,]+\.\d\d)$")
-_BROUGHT_FORWARD = re.compile(r"^BALANCE BROUGHT FORWARD\b")
+_BROUGHT_FORWARD = re.compile(r"^BALANCE BROUGHT FORWARD\b(?: (-?[\d,]+\.\d\d))?")
+_SUBTOTAL = re.compile(r"^SUBTOTAL \d{4} - \d\d\*\* - \*\*\*\* - (\d{4}) (-?[\d,]+\.\d\d)$")
 _SINGLE = re.compile(r"^(\d\d)/(\d\d)/(\d{4}) (.+?) ([\d,]+\.\d\d)$")
 _LINE = re.compile(
     r"^(\d\d)/(\d\d)/(\d{4}) \d\d/\d\d/\d{4} (.+?) (-?[\d,]+\.\d\d)(?: ([\d,]+\.\d\d) ([A-Z]{3}))?$"
@@ -40,7 +46,7 @@ def parse(text: str) -> Statement:
         raise StatementParseError("AEON: statement date / due date not found")
     statement_date = f"{st.group(3)}-{st.group(2)}-{st.group(1)}"
 
-    cards: dict[str, dict] = {}  # number → {product, total, prev, lines, open}
+    cards: dict[str, dict] = {}  # number → {product, total, prev, lines, open, forward, subtotal}
     order: list[str] = []
     cur: dict | None = None
     product: str | None = None
@@ -52,7 +58,8 @@ def parse(text: str) -> Statement:
         if (m := _CARD.match(ln)):
             num = m.group(1)
             if num not in cards:
-                cards[num] = {"product": product, "total": None, "prev": 0.0, "lines": [], "open": True}
+                cards[num] = {"product": product, "total": None, "prev": 0.0, "lines": [], "open": True,
+                              "forward": None, "subtotal": None}
                 order.append(num)
             cur, baht_seen = cards[num], 0
             continue
@@ -66,8 +73,13 @@ def parse(text: str) -> Statement:
         if (m := _OPENING.match(ln)):
             cur["prev"] = parse_amount(m.group(1))
             continue
-        if _BROUGHT_FORWARD.match(ln):
+        if (m := _BROUGHT_FORWARD.match(ln)):
             cur["open"] = False
+            if m.group(1):
+                cur["forward"] = parse_amount(m.group(1))
+            continue
+        if (m := _SUBTOTAL.match(ln)) and m.group(1) in cards:
+            cards[m.group(1)]["subtotal"] = parse_amount(m.group(2))
             continue
         if (m := _LINE.match(ln)):
             note = f"Original amount {m.group(6)} {m.group(7)}." if m.group(6) else None
@@ -111,10 +123,15 @@ def parse(text: str) -> Statement:
         c = cards[num]
         if c["total"] is None:
             raise StatementParseError(f"AEON: no total balance found for card {num}")
+        total = c["total"]
+        if not total and c["forward"] is not None and c["subtotal"] is not None:
+            closing = round(c["forward"] + c["subtotal"], 2)
+            if closing < 0:
+                total = closing  # a credit balance, printed as 0.00 due
         accounts.append(
             CardAccount(
                 product=c["product"],
-                total=c["total"],
+                total=total,
                 sections=(CardSection(num, c["prev"], tuple(c["lines"])),),
             )
         )

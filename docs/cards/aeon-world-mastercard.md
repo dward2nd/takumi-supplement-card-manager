@@ -28,14 +28,15 @@ A merchant string doesn't show its MCC, so only strings known to bill under an e
 
 The two strings are both Makro PRO, but the bank files them under different codes. Encoded as `points_excluded_merchants` in `scripts/repositories/cards/aeon-world.yaml`, so `auto_classify` and `/record-statement` apply it. On 2026-09-28 five past rows (Baiboon, 27 Jul–12 Aug 2026) were set to `×0`. The foreign-merchant and installment exclusions are not encoded yet.
 
-## Cancelled orders and late posting
+## Cancelled orders, late posting and credit balances
 
-A cancelled order's refund doesn't name the merchant: it reads `REFUND TRANSACTION`, for the order's amount. Baiboon's 10 Oct 2026 Makro PRO orders show both quirks (AEON call centre, 2026-10-21):
+A cancelled order's refund doesn't name the merchant: it reads `REFUND TRANSACTION`, for the order's amount. The 10 Oct 2026 statement shows three quirks at once:
 
-- **The charge posts days later.** A `HTTPS://WWW.MAKRO.PRO/` order of 10 Oct, the cut-off day, posted 12 Oct, so it bills on the next cycle (10 Nov), not the one closing on its date. The refund follows it onto the same bill.
-- **The pair is booked on the ledger, both at `×0`.** The charge is ฿15,807.50 with `Process Date` 12 Oct, and the refund −฿15,807.50 shares its cycle. Each row's Note names the other. They cancel in baht and points.
+- **Purchases post one to four days late.** AEON prints both dates (`06/10/2026 08/10/2026 …`), and the bill follows the posting date. Rows dated in the last days before the 10th often bill on the next cycle. Baiboon's two `HTTPS://WWW.MAKRO.PRO/` orders of 10 Oct, Nuta's Alipay ฿755.48 of 10 Oct, and Takumi's MRT, `BANGKOK SMARTCARD SYSTEM` and LINEPAY rows of 9–10 Oct weren't on it. They were moved to the 10 Nov cycle (user, 2026-10-21).
+- **A refund can post before its charge.** `REFUND TRANSACTION 15,807.50` is printed on 01/10, on the 10 Oct statement. AEON's call centre ties it to a cancelled `HTTPS://WWW.MAKRO.PRO/` order of 10 Oct, posted 12 Oct, which falls in the 10 Nov cycle (2026-10-21). Both rows are `×0`, each Note names the other, and the charge carries `Process Date` 12 Oct. The 10 Nov statement will show whether the charge really posts.
+- **A credit balance prints as `0.00 Baht` due.** That refund left AEON World at −฿15,701.78. The parser rebuilds the signed figure from `BALANCE BROUGHT FORWARD` + the card's `SUBTOTAL`. Takumi's bill carries the signed balance (see [[../databases/takumi-bills#Credit balances|takumi-bills → Credit balances]]). Baiboon's ledger moves it to the next cycle with a `[ยอดยกมาจากรอบ 2026-10]` pair: +฿15,701.78 on 10 Oct, −฿15,701.78 on 10 Nov, both `×0`, so her 10 Oct bill is ฿0.
 
-The [[../concepts/promotion-bureau|Bureau]] can't pair them. `REFUND TRANSACTION` doesn't match the supermarket patterns of AEON WM 5% or NTW1, so it isn't netted, and the cancelled charge still counts as spend there. In Nov 2026 that cost nothing: the cycle's two real orders (฿32,051) already reach both caps.
+The [[../concepts/promotion-bureau|Bureau]] can't pair a `REFUND TRANSACTION` with its charge. The line doesn't match the supermarket patterns of AEON WM 5% or NTW1, so it isn't netted, and a cancelled charge still counts as spend there. The bank does net it. The same statement's NTW1 credit for the cycle closing 10 Sep was ฿120, not ฿340, which fits ฿34,260 of Makro spend less this refund (฿18,452.50, under the ฿30,000 tier). Baiboon's tracker `Everyday with AEON 10 Sep` still expects ฿340.
 
 ## See also
 

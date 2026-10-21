@@ -135,6 +135,10 @@ When the payments after a statement add up to more than it asked for, the bank c
 
 Attach the extra slip to the overpaid bill with `record_payment: false`, since the script would call it a payment completing the bill. First case: UOB One 2026-08. Takumi's ฿585.47 slip on 31 Aug already covered Baiboon's ฿169.00. Her ฿160.55 then went to UOB a second time (`PAYMENT THANK YOU - BAY 0025/7603`, 31 Aug), and the 25 Sep statement credited it.
 
+### Credit balances
+
+A statement can close below zero, after a refund larger than the cycle's spend. AEON then prints `0.00 Baht` due. The bill's `ยอดชำระ` is the **signed** balance (user, 2026-10-21), so the next statement's opening balance carries on from it. First case: AEON World Mastercard 2026-10 at −฿15,701.78, from Baiboon's `REFUND TRANSACTION` −฿15,807.50. The friend whose lines make the credit moves it to their next cycle with a `[ยอดยกมาจากรอบ <YYYY-MM>]` pair (+ in the old cycle, − in the next, `×0`), so their own bill for the cycle is ฿0. See [[../cards/aeon-world-mastercard#Cancelled orders, late posting and credit balances|aeon-world-mastercard]].
+
 ### Friends' balances are debts to Takumi, not to the bank
 
 Baiboon's and Nuta's open balances are what they owe **Takumi**. His payment to the bank never touches their ledgers. Their balances clear only through their own `ชำระ…` rows when they transfer to him.
