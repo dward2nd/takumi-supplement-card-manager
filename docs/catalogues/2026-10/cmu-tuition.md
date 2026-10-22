@@ -69,3 +69,79 @@ The manual's `ช่องทางที่ 3 : Credit Cards` box (same PDF, pa
 - **The conflict**: the screenshot of the online card screen in the same box shows `ค่าธรรมเนียมในการใช้บัตรเครดิต ภาษีมูลค่าเพิ่มและค่าใช้จ่ายอื่น ๆ 2.30 %` ("Credit Card service fee and Tax of 2.30 %"): ฿345 on a ฿15,000 example, total ฿15,345, with the note that the receipt excludes the fee. A 2020 poster on reg.cmu.ac.th (https://www.reg.cmu.ac.th/webreg/wp-content/uploads/2020/12/reg-feecredit-th.png, semester 2/2563, 17–23 Dec 2020) also says `ค่าธรรมเนียมบัตรเครดิต 2.3%`. So the screenshot is probably the older screen and **2.1% is the 2025 rate**, but whether 2.1% includes VAT isn't stated (2.1% × 1.07 = 2.247%, not 2.3%). Only the payment screen on the day shows the exact figure. **unverified** (which one applies in Nov 2026)
 - **Worked out for a ฿60,000 semester**: counter 0.9% = **฿540**; online 2.1% = **฿1,260** (2.3% = ฿1,380); Alipay/WeChat 1.7% = ฿1,020; QR ฿0.
 - The surcharge is charged by CMU's payment screen on top of the fee and **is not on CMU's receipt**, so whether the card statement shows one line (fee + surcharge) or two isn't known. **unverified**
+
+## 2. Payment window
+
+### 2.1 Semester 2/2569 · **verified**
+
+From the semester 2/2569 announcement (§1.0) and the one-page `กำหนดการสำคัญ` (key dates) sheet, dated 2 Sep 2026, https://www.reg.cmu.ac.th/webreg/reg-files/69/CMU-Important-Enrollment-2-2569.pdf:
+
+| Date (2026) | What |
+|---|---|
+| 5–11 Oct | `วันลงทะเบียนกระบวนวิชาล่วงหน้า` (advance course registration) |
+| 20 Oct | advance registration results |
+| 9–22 Nov | registration / add / drop for those who didn't register in advance (system opens 9 Nov, processing from 14 Nov) |
+| 14–27 Nov | `วันลงทะเบียนเพื่อใช้บริการของมหาวิทยาลัย` (registration for "use of university services", for students not taking courses: thesis-only, `I`/`P` grades, graduation) |
+| **16 Nov** | `วันเปิดภาคการศึกษา` (semester starts) |
+| 29 Nov | registration summary published; the `มชท.50` printable from 30 Nov |
+| **30 Nov – 4 Dec** | **`วันชำระค่าธรรมเนียมการศึกษา`** — the fee-payment window. Online channels until **23:00** on 4 Dec; the Finance Division card counter until **16:30**; bank counters within banking hours |
+| 30 Nov – 11 Dec | late registration with a fine (`หลังกำหนดแบบมีค่าปรับ`) |
+| **7–11 Dec** | **`วันชำระค่าธรรมเนียมการศึกษาหลังกำหนดพร้อมค่าปรับ`** — late payment with a fine |
+| 9 Dec | `การยกเลิกข้อมูลการลงทะเบียน` — unpaid registrations are cancelled (announcement item 6) |
+| 16 Dec | `วันพ้นสถานภาพนักศึกษาของนักศึกษาที่ไม่มาลงทะเบียนและมิได้ลาพักการศึกษา` — students who neither registered nor took leave lose student status |
+
+- **Cross-check**: the academic calendar `ประกาศมหาวิทยาลัยเชียงใหม่ เรื่อง ปฏิทินการศึกษา ระบบทวิภาค ประจำปีการศึกษา 2569` (updated 19 May 2026), https://www.reg.cmu.ac.th/webreg/reg-files/69/CMU-Academic-Calendar-2569.pdf, page 3, gives the same window: `วันชำระเงินค่าธรรมเนียมการศึกษา จันทร์ที่ 30 พฤศจิกายน - ศุกร์ที่ 4 ธันวาคม 2569` (Mon 30 Nov – Fri 4 Dec). Its text layer is garbled; rendering the page to an image reads it. **verified**
+- **Nothing falls in October.** The household's charge will be dated between 30 Nov and 4 Dec 2026 (or 7–11 Dec if late), so it lands in the cycles that close in early-to-mid December for most cards, and in late-November-closing cycles only for a card whose cycle closes on 30 Nov – 4 Dec itself. **verified** (dates), the cycle mapping depends on each card.
+- The 9 Dec cancellation sits inside the 7–11 Dec late-payment band; the two documents don't say how they fit together (presumably late payers have to ask for reinstatement, per the payment manual's last line: `นักศึกษาที่ ไม่ได้ชำระค่าธรรมเนียมการศึกษาภายในระยะเวลาที่กำหนด… จะถูกยกเลิกผลการลงทะเบียนกระบวนวิชา ซึ่งนักศึกษาต้องขออนุมัติการลงทะเบียนกระบวนวิชาหลังกำหนดเป็นกรณีพิเศษ และชำระค่าธรรมเนียมการศึกษาพร้อมค่าปรับ`). Don't plan on the late band. **unverified** (how they interact)
+- The guardian page (§1.1) still showed semester 1 on 2026-10-22; it is updated per semester. **verified**
+
+### 2.2 Late fine · **verified**
+
+- **Undergraduate**: `ค่าปรับลงทะเบียนหลังกำหนดวันละ 50 บาท แต่ไม่เกิน 500 บาท` (late registration fine ฿50 a day, at most ฿500), counting calendar days. `ประกาศ … ฉบับที่ ร 9/2566`, https://www.reg.cmu.ac.th/webreg/reg-files/u/cmu-reg-u-2-8.pdf
+- **Graduate**: `ค่าปรับลงทะเบียนหลังกำหนด วันละ 100 บาท` (฿100 a day, no cap stated). `ประกาศ … ฉบับที่ ร 10/2566`, https://www.reg.cmu.ac.th/webreg/reg-files/g/cmu-reg-g-2-18.pdf
+
+### 2.3 Earlier and later semesters (for reference) · **verified**
+
+- Semester 1/2569: paid **6–10 Jul 2026**, cancellation 14 Jul 2026 (https://www.reg.cmu.ac.th/webreg/reg-files/69/CMU-Announcement-Enrollment-1-2569.pdf). Same channels.
+- **Semester 1/2570: paid 5–9 Jul 2027** (`วันชำระเงินค่าธรรมเนียมการศึกษา จันทร์ที่ 5 - ศุกร์ที่ 9 กรกฎาคม 2570`; term starts 21 Jun 2027), from `ประกาศมหาวิทยาลัยเชียงใหม่ เรื่อง ปฏิทินการศึกษา ระบบทวิภาค ประจำปีการศึกษา 2570`, updated 15 Oct 2026, https://www.reg.cmu.ac.th/webreg/reg-files/70/CMU-Academic-Calendar-2570.pdf (page 2).
+- Annual-system programmes (Medicine years 2–6, Dentistry, Pharmacy, Veterinary Medicine — `ระบบชั้นปี`) pay **once a year** on their own calendars (`CMU-Academic-Calendar-2569-yearly*.pdf`), not in this window.
+
+## 3. Fee structure
+
+### 3.1 A flat semester fee (`เหมาจ่าย`) · **verified**
+
+- **Undergraduate**: `ระเบียบมหาวิทยาลัยเชียงใหม่ ว่าด้วยค่าธรรมเนียมการศึกษาระดับปริญญาตรี พ.ศ. 2566` (undergraduate fee regulation 2023), https://www.reg.cmu.ac.th/webreg/reg-files/u/cmu-reg-u-3-1.pdf (a scan), for students entering from 2567; earlier cohorts stay on the 2556 regulation. Item 3: `ให้กำหนดค่าธรรมเนียมการศึกษาระดับปริญญาตรีแบบเหมาจ่าย` — a flat amount per semester, by programme, in three schedules: `บัญชีที่ 1` Thai-language regular programmes, `บัญชีที่ 2` international programmes, `บัญชีที่ 3` special (`ภาคพิเศษ`, evening/weekend) programmes. Foreign students pay **฿20,000 more a regular semester** (฿8,000 summer; ฿48,000 a year in annual-system programmes). Registering ≤ 11 credits halves the fee.
+- **Graduate**: `ระเบียบมหาวิทยาลัยเชียงใหม่ ว่าด้วยค่าธรรมเนียมการศึกษาระดับบัณฑิตศึกษาแบบเหมาจ่าย พ.ศ. 2568` (graduate flat-fee regulation 2025), signed 15 Nov 2025, https://www.reg.cmu.ac.th/webreg/reg-files/g/cmu-reg-g-5-1.pdf (scan; also on the Finance Division site), **for students entering from semester 1/2569**; earlier cohorts stay on the 2556 regulation and its 57 amendments. Each programme has a whole-course fee and a per-regular-semester fee. After the normal study period: ฿10,000 a regular semester, ฿8,000 summer. Foreign students: **+฿20,000 a regular semester** (+฿40,000 a year in annual-system programmes).
+- Both regulations: the flat fee **excludes the per-item fees** (`ค่าธรรมเนียมการศึกษาที่เรียกเก็บตามรายการทุกครั้ง`: graduation registration ฿1,500, leave of absence, transcripts, fines …), and **paid fees are not refunded** (`เมื่อชำระแล้วจะไม่คืนให้`).
+- The Finance Division keeps every regulation and programme schedule at https://finance.oou.cmu.ac.th/statute_education_fee/ (`ค่าธรรมเนียมการศึกษา`).
+
+### 3.2 Which programmes run over ฿60,000 a semester · **verified** (read from the scanned schedules)
+
+**Thai undergraduate programmes don't**: `บัญชีที่ 1 (1)` runs ฿15,000–40,000 a semester (e.g. ฿15,000 for most Humanities and Education majors, ฿40,000 for `การจัดการธุรกิจบริการ`). The undergraduate exceptions:
+
+| Programme (undergraduate) | Per semester |
+|---|---|
+| `การออกแบบเชิงบูรณาการสถาปัตยกรรมแนวใหม่` (Integrated Architectural Design, international), Faculty of Architecture | **฿65,000** |
+| International programmes (`บัญชีที่ 2`): Accounting, Digital Innovation (ICDI) ฿55,000; Engineering, Nursing ฿50,000; others ฿35,000–40,000 | ≤ ฿55,000 (+฿20,000 = ฿55,000–75,000 for a foreign student) |
+| Dentistry, years 4–6 (annual system) | ฿100,000 a **year**, one payment |
+| Veterinary Medicine, years 5–6 (annual system) | ฿70,000 a year |
+
+**Graduate programmes for 2569 entrants** (`บัญชีที่ 1` Thai regular, `บัญชีที่ 2` special, `บัญชีที่ 3` international), per regular semester:
+
+| Programme (graduate) | Schedule | Per semester |
+|---|---|---|
+| Fine Arts PhD `ศิลปะและการออกแบบ`; Music PhD (weekend) | 1 | ฿70,000 |
+| MBA `นวัตกรรมธุรกิจสำหรับผู้บริหาร` (Business Innovation for Executives); MBA Marketing | 2 | ฿70,000; ฿60,000 |
+| Social Sciences international PhDs (`ภูมิศาสตร์` ฿65,000; Women, Gender and Sexuality ฿60,000) and MA | 3 | ฿57,500–65,000 |
+| Dentistry `โอษฐวิทยา` PhD; Nursing PhD | 3 | ฿82,500 |
+| Nursing master's | 3 | ฿75,000 |
+| Architecture PhD; Architecture master's (joint degree) | 3 | ฿80,000; ฿75,000 |
+| Economics PhD | 3 | ฿125,000 |
+| Mental Health PhD / MSc (College of Multidisciplinary and Interdisciplinary Studies) | 3 | ฿100,000 / ฿87,500 |
+| Knowledge Management and Innovation PhD (CAMT) | 3 | ฿90,000 |
+| Digital Innovation and Financial Technology PhD / MSc (ICDI) | 3 | ฿125,000 / ฿100,000 |
+| Public Policy PhD (plan 2.1) / MA | 3 | ฿120,000 / ฿82,500 |
+| Public Health MPH / PhD (international) | 3 | ฿125,000 / ฿130,000 **a year** |
+
+- So a ฿60,000+ semester is almost certainly a **graduate (international or executive) programme, the undergraduate international architecture programme, or a foreign student's surcharge on top**. Which programme the household's payment is for isn't known; this page doesn't need it, since the channels and the fee are the same for every level.
+- **Students who entered before 2569 pay the old (2556) schedules**, which weren't read here.
