@@ -21,7 +21,7 @@ researched: 2026-10-22
 
 - **Semester 2/2569 fees are paid 30 Nov – 4 Dec 2026** (late with a fine 7–11 Dec 2026). No part of the window is in October; all of it is in the household's **November–December** statement cycles. §2
 - **Six channels**, all through the registration system (`ระบบงานทะเบียนการศึกษา`) except the counters: Thai QR (free), **credit card online (2.1% fee)**, Alipay / WeChat Pay (1.7%), **credit card at the Finance Division counter (0.9% fee)**, and cash at five banks' counters with the `มชท.50` slip (bank fee). §1
-- **A card always costs a surcharge**: 0.9% at the counter, 2.1% online (the online screen's own example still says 2.30% "service fee and tax"). A card's reward has to beat the fee to be worth it. §1.3
+- **A card always costs a surcharge**: **2.1% online** (confirmed: the household's figure matches CMU's April 2025 manual; it was 2.3% incl. VAT until 2023) or **0.9% at the Finance Division counter**. One rate for every card; no network or debit-card rule is published. The only fee-free channel is the Thai QR. A card's reward has to beat the fee to be worth it. §1.3
 
 ## 1. Payment channels
 
@@ -59,16 +59,30 @@ The Registration Office's announcement `ประกาศสำนักทะ�
 - **`QR CODE เป็นช่องทางหลักในการชำระค่าธรรมเนียมฯ สะดวก รวดเร็ว ไม่มีค่าใช้จ่ายเพิ่มเติม`** — QR is the main channel, with **no extra charge**. **verified**
 - Receipts: QR, card, Alipay and WeChat payments download an electronic receipt from the system; a bill-payment `มชท.50` stamped and signed by the bank is the full receipt (lost ones: กองคลัง, 053-943130). **verified**
 
-### 1.3 Card surcharge · **verified**, with one conflict
+### 1.3 Card surcharge · **verified** (2.1% online, 0.9% at the counter)
 
-The manual's `ช่องทางที่ 3 : Credit Cards` box (same PDF, page 3):
+**The household's figure is confirmed.** The user said on 2026-10-22 that CMU's registration office charges a **2.1% processing fee on credit-card tuition payments**; CMU's own payment manual says the same.
 
-- **`ชำระผ่านบัตรเครดิตที่กองคลัง ค่าธรรมเนียม 0.9%`** — card at the Finance Division counter: **0.9% fee**, last day until 16:30.
-- **`ชำระผ่านระบบออนไลน์ ค่าธรรมเนียม 2.1%`** — card online: **2.1% fee**, last day until 23:00. The English manual says the same ("Paying the tuition fee at the finance division with 0.9% Processing fee … through online system with 2.1%").
-- **Alipay and WeChat Pay: 1.7%** each.
-- **The conflict**: the screenshot of the online card screen in the same box shows `ค่าธรรมเนียมในการใช้บัตรเครดิต ภาษีมูลค่าเพิ่มและค่าใช้จ่ายอื่น ๆ 2.30 %` ("Credit Card service fee and Tax of 2.30 %"): ฿345 on a ฿15,000 example, total ฿15,345, with the note that the receipt excludes the fee. A 2020 poster on reg.cmu.ac.th (https://www.reg.cmu.ac.th/webreg/wp-content/uploads/2020/12/reg-feecredit-th.png, semester 2/2563, 17–23 Dec 2020) also says `ค่าธรรมเนียมบัตรเครดิต 2.3%`. So the screenshot is probably the older screen and **2.1% is the 2025 rate**, but whether 2.1% includes VAT isn't stated (2.1% × 1.07 = 2.247%, not 2.3%). Only the payment screen on the day shows the exact figure. **unverified** (which one applies in Nov 2026)
-- **Worked out for a ฿60,000 semester**: counter 0.9% = **฿540**; online 2.1% = **฿1,260** (2.3% = ฿1,380); Alipay/WeChat 1.7% = ฿1,020; QR ฿0.
-- The surcharge is charged by CMU's payment screen on top of the fee and **is not on CMU's receipt**, so whether the card statement shows one line (fee + surcharge) or two isn't known. **unverified**
+The manual's `ช่องทางที่ 3 : Credit Cards` box (https://www.reg.cmu.ac.th/webreg/reg-files/CMU-Tuition-Fees-Payment-ForStudent-th.pdf, page 3, dated 4 Apr 2025):
+
+- **`ชำระผ่านระบบออนไลน์ ค่าธรรมเนียม 2.1%`** — card online in the registration system: **2.1% fee**, last day until 23:00. The English manual says the same: "Paying the tuition fee through online system with 2.1%" (https://www.reg.cmu.ac.th/webreg/reg-files/CMU-Tuition-Fees-Payment-ForStudent-en.pdf). **verified**
+- **`ชำระผ่านบัตรเครดิตที่กองคลัง ค่าธรรมเนียม 0.9%`** — card at the Finance Division counter (`กองคลัง`, University Office): **0.9% fee**, last day until 16:30 ("Paying the tuition fee at the finance division with 0.9% Processing fee"). **verified**
+- **Alipay and WeChat Pay: 1.7%** each. **verified**
+- **QR code: no fee.** `QR CODE เป็นช่องทางหลักในการชำระค่าธรรมเนียมฯ สะดวก รวดเร็ว ไม่มีค่าใช้จ่ายเพิ่มเติม` ("QR CODE is the main payment method (convenient, fast, and no additional charges)"). **verified**
+- **Bank counters with the `มชท.50`: a bank fee** (`โดยมีค่าธรรมเนียมในการชำระเงิน`, amount not stated, so it's the bank's own counter fee). **Mobile-banking bill payment of the slip's barcode is not allowed** (`ห้ามนักศึกษาสแกนจ่ายจากบาร์โค้ดด้านล่างใบ มชท. 50`). So **the only fee-free channel is the QR** in the registration system. **verified** (2026 announcement, §1.0)
+
+**History of the online rate** — it was 2.3% until at least mid-2023:
+
+- 2020 poster (https://www.reg.cmu.ac.th/webreg/wp-content/uploads/2020/12/reg-feecredit-th.png, semester 2/2563): `ช่องทางการชำระเงินค่าธรรมเนียมการศึกษาด้วยบัตรเครดิตผ่านระบบออนไลน์ (ค่าธรรมเนียมบัตรเครดิต 2.3%)`, "for undergraduate and graduate students". **verified** (old)
+- 2023 poster for semester 1/2566 (https://www.reg.cmu.ac.th/webreg/wp-content/uploads/2023/07/tuition-fee-paymeny-166-th.jpg): three channels — QR (`ไม่มีค่าใช้จ่ายเพิ่ม`), banks (SCB, GSB, KBank, Bangkok Bank and Krungthai logos), and `ผ่านบัตรเครดิต … ค่าธรรมเนียม 0.9 - 2.3%`. **verified** (old)
+- The manual's own screenshot of the online card screen (page 3) still shows the old screen: `ค่าธรรมเนียมในการใช้บัตรเครดิต ภาษีมูลค่าเพิ่มและค่าใช้จ่ายอื่น ๆ 2.30 %` ("Credit Card service fee and Tax of 2.30 %"), ฿345 on a ฿15,000 example. So the 2.1% (from the Apr 2025 manual) is the newer figure, and the old 2.3% was **inclusive of VAT and "other expenses"**. Whether 2.1% likewise includes VAT isn't stated. The screen shows the exact figure before you confirm. **unverified** (VAT treatment of the 2.1%)
+
+**Networks, debit cards, one line or two**:
+
+- **Networks**: no CMU page names them. The manual, the announcements and both posters say only "credit card" (`บัตรเครดิต`, "Credit Cards") with generic card art, and give **one rate for all cards**: no page charges a different rate by network (Visa, Mastercard, JCB, UnionPay, Amex) or by issuer. Whether JCB, UnionPay or Amex are accepted at all isn't stated. **not found**
+- **Debit cards**: no channel names them. The online channel and the counter are both worded `บัตรเครดิต` / "Credit Cards" only. Whether a Visa/Mastercard debit card goes through the online card page (and at what rate) isn't stated. **not found**
+- **One charge or two**: the online screen adds the fee to the tuition and shows a single total — `รวมจำนวนเงินที่ต้องชำระทั้งหมด (Total)` ฿15,345 for ฿15,000 + ฿345 — and confirms it with one button (`ยืนยันการชำระเงินด้วย Credit Cards (Confirm Payment)`), which suggests **one card charge for fee + surcharge**. CMU's receipt shows only the tuition (`มหาวิทยาลัยจะออกใบเสร็จรับเงินตามจำนวนค่าธรรมเนียมรวมเท่านั้น และจะไม่รวมค่าธรรมเนียมการใช้บริการบัตรเครดิต`). How the bank statement prints it (one line, or the surcharge as a second line under a gateway name) isn't shown anywhere. **unverified** — the statement Takumi's earlier CMU card payment sits on would settle it.
+- **Worked out for a ฿60,000 semester**: online 2.1% = **฿1,260** (฿61,260 charged); counter 0.9% = **฿540** (฿60,540); Alipay/WeChat 1.7% = ฿1,020; QR ฿0. A card's earn rate has to beat 2.1% online, or 0.9% at the counter, before paying by card is worth it.
 
 ## 2. Payment window
 
