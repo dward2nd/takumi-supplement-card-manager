@@ -159,3 +159,53 @@ From the semester 2/2569 announcement (§1.0) and the one-page `กำหนด�
 
 - So a ฿60,000+ semester is almost certainly a **graduate (international or executive) programme, the undergraduate international architecture programme, or a foreign student's surcharge on top**. Which programme the household's payment is for isn't known; this page doesn't need it, since the channels and the fee are the same for every level.
 - **Students who entered before 2569 pay the old (2556) schedules**, which weren't read here.
+
+## 4. Bank deals that name CMU
+
+**None found.** No bank page read here names มหาวิทยาลัยเชียงใหม่ for tuition, and CMU's own pages advertise no bank partner, installment plan or card promotion for fees. What turned up on the way (the bank researchers cover the banks in depth):
+
+- **CMU runs no installment plan of its own.** No channel in §1 offers one; any 0% plan would be the card issuer's own conversion after the charge. **verified** (absence on CMU's pages)
+- **Krungsri `เลือกแบ่งจ่ายได้ 0%* 4 เดือน ค่าเทอม ที่สถาบันการศึกษาทั่วไทยที่ร่วมรายการ`** (0% for 4 months on tuition at participating institutions nationwide), **Krungsri Platinum cards only** (`CardType: บัตรเครดิต กรุงศรี แพลทินัม`), 1 Apr – 31 Dec 2026, https://www.krungsricard.com/th/promotion/family-with-kids-4-months. It's in krungsricard.com's listing JSON, but the page itself returned the WAF's "Access Denied" to curl and headless Chrome on 22 Oct, so **whether CMU is a participating institution wasn't read**. **verified** (listing entry only)
+- **KTC `E12`**: 12% cashback for points at `สถาบันการศึกษาที่ร่วมรายการ` (participating educational institutions), 15 Jan – 31 Dec 2026, https://www.ktc.co.th/promotion/education/recommended/education-cashback. Its participating places are each a KTC page of their own (Crest School, Wall Street English, Let's Mandarin …); **KTC's sitemaps have no CMU page** under `/promotion/education/`, so CMU isn't in it. Same page: KTC 0.69% a month instalments for 3/6/10 months at participating institutions (register with KTC PHONE on the day). **verified** (CMU absent)
+- KTC's only CMU-named page is a **points donation** to the CMU alumni association (`/promotion/donation-social-support/education/chiang-mai-university-alumni-associate`), not tuition. **verified** (URL in KTC's sitemap; page not read)
+- **SCB and CMU**: the guardian payment system's path is `scbqr`, and a 2021 Registration Office poster (https://www.reg.cmu.ac.th/webreg/wp-content/uploads/2021/08/SCBannouncement.jpg) says the SCB branches at CMU and at the Faculty of Medicine **issue CMU student ID cards** (`ขอรับออกบัตรนักศึกษาใหม่`). So SCB is CMU's student-card and probably its QR bank. No SCB credit-card offer for CMU fees was seen. **verified** (poster), **unverified** (SCB runs the QR / card gateway)
+- **No CMU co-branded credit card** (student or alumni) turned up in CMU's pages or the searches. **not found**
+
+## 5. Merchant category (MCC)
+
+- **No source gives CMU's MCC** — not CMU's pages, not a bank's list, not a forum. **not found**
+- **Reading: MCC 8220 (colleges and universities)** for the online card channel and the Finance Division's card terminal. CMU is a public autonomous university (`มหาวิทยาลัยในกำกับของรัฐ`) and the fee is tuition. **unverified** (reading only)
+  - The **household's analogue**: Takumi's `CHULALONGKORN UNIVERSITY BANGKOK` ฿33,500 (31 Jul 2026, KBank Visa), also a public autonomous university's fee, posted under the university's own name and earned ordinary KBank points, which a government-services MCC (9399) excluded from points would not. That points to an education MCC for Chula, not proof for CMU. **unverified**
+  - **The descriptor may not say "CHIANG MAI UNIVERSITY"**: the online card page is a bank or gateway's page (unnamed, §1.3), and the surcharge goes to that gateway, so the statement may print the gateway's or CMU's name, as one line or two. **unverified**
+  - **Takumi's earlier CMU card payment**, which the user recalls from one of his statements (not in the ledger), would settle the descriptor, MCC-dependent earning and the one-line/two-line question. The main session is looking for it in his statement PDFs. **pending**
+- A 9399 posting would cost the most rewards (many issuers exclude government payments). Nothing seen suggests CMU uses it, but nothing rules it out.
+
+## 6. Logo and cover assets
+
+- **The seal (`ตราสัญลักษณ์ "ช้างชูคบเพลิง"`, the elephant holding a torch)**: a clean vector is CMU's own favicon, **https://www.cmu.ac.th/Content/images/favicon.svg** (96 × 96 viewBox, 59 KB; colours `#9375b1` purple, `#33a457` green, `#272525`). It renders as the full ceremonial seal: green double ring, purple inner disc, white elephant and torch, Pali motto `อตฺตานํ ทมยนฺติ ปณฺฑิตา` and `มหาวิทยาลัยเชียงใหม่ พ.ศ.๒๕๐๗`. Render it in headless Chrome (ImageMagick has no SVG delegate here); give the window ≈ 140 px more height than the image, or the bottom is cut off. **verified**
+- **The sub-logo (the `CMU` wordmark: black C and U, purple M with an orange stroke, "CHIANG MAI UNIVERSITY")**: a clean 1920 × 960 PNG on transparency at **https://www1.reg.cmu.ac.th/scbqr/reg-portal/images/cmu-logo-sub.png** (the guardian payment page's header, fittingly). Also on Wikimedia Commons as **https://upload.wikimedia.org/wikipedia/commons/e/e7/CMU_sub-logo.svg** (`File:CMU_sub-logo.svg`, PD-textlogo, uploaded 18 Jan 2025) and `File:CMU_SUB-LOGO-08.png` (6,234 × 991, public domain). **verified** (Commons pages read through WebFetch; upload.wikimedia.org returned HTTP 429 to this machine, so the files themselves weren't downloaded)
+- **The seal is not on Commons**: English Wikipedia's infobox uses a local non-free file, `Chiang_mai_university_logo.png` (https://upload.wikimedia.org/wikipedia/en/2/25/Chiang_mai_university_logo.png). Commons' `Category:Chiang_Mai_University` holds only the sub-logo. **verified** (WebFetch)
+- **Brand colour** (CMU's corporate-identity page, https://www.cmu.ac.th/th/cmu/symbol): `สีม่วงดอกรัก` (crown-flower purple), the university colour, **CMYK C40 M60, RGB 158 118 180 = `#9E76B4`**. The favicon SVG uses a close `#9375b1`. The sub-logo's own palette (from `sublogo-02.jpg` on the same page) is **"Very Peri" `#6868AC`** (RGB 104 104 172) and **"Candlelight" `#FAAC1E`** (RGB 250 172 30) on black/white. **verified**
+- **Official downloads need a login**: https://www.cmu.ac.th/ci/ (`ข้อกำหนดการใช้งานตราสัญลักษณ์`) keeps the master files behind `เข้าสู่ระบบ`, and quotes the rule (Royal Gazette, 2 Dec 2011) that **the seal is for CMU's own business; any commercial use needs the president's written permission**. A private household reading page isn't commercial, but prefer the sub-logo wordmark for a cover. **verified**
+
+## Not found / unconfirmed
+
+- **Which bank or gateway runs the online card page**, and so which networks it takes (Visa / Mastercard surely; JCB, UnionPay, Amex unknown) and whether debit cards work. Nothing public names it; the system needs a CMU or guardian login. `epayment.cmu.ac.th` exists but returns 403.
+- **Which bank's terminal the Finance Division counter uses**, and its networks.
+- **Whether 2.1% includes VAT** (the old 2.3% did).
+- **How the charge prints on a statement**: one line or two (fee + surcharge), and under whose name. Takumi's earlier CMU statement line (being looked for by the main session) should answer it.
+- **CMU's MCC.** Reading: 8220.
+- **Whether CMU is on Krungsri's tuition 0% list** (page WAF-blocked).
+- **The household's programme and its exact fee**: which programme the >฿60,000 semester is, so whether the 2568 (2569 entrants) or the 2556 graduate schedule applies.
+- **Facebook / LINE posts** about the 2/2569 payment round: the Registration Office's Facebook page (`RegCMU`) read through r.jina.ai showed only recent photo posts, none about fees; r.jina.ai later refused this machine ("bad IP reputation").
+
+## Site tricks
+
+New ones, not yet in [[../research-methods]]:
+
+- **reg.cmu.ac.th is WordPress under `/webreg/`**: the REST root is `https://www.reg.cmu.ac.th/webreg/wp-json/` (not `/webreg/th/wp-json/`, which 404s). Posts stopped in 2023; current content is in **pages** (`/wp/v2/pages?slug=undergraduate`, `graduate`, `reg-handbook`, with `content.rendered` holding every PDF link) and the **media library** (`/wp/v2/media?search=fee` or `?after=2024-01-01T00:00:00` lists the posters).
+- **Registration Office PDFs** live under `/webreg/reg-files/<yy>/` (`CMU-Announcement-Enrollment-<sem>-<year>.pdf`, `CMU-Important-Enrollment-…`, `CMU-Academic-Calendar-<year>.pdf`). The announcements extract cleanly with `pdftotext -layout`; the calendars and the one-page key-dates sheet have broken Thai text layers, so render them (`pdftoppm -r 100 -png`) and read the images.
+- **The fee regulations are scans** (`/webreg/reg-files/u/cmu-reg-u-3-1.pdf`, `/g/cmu-reg-g-5-1.pdf`; the Finance Division keeps the same files at `finance.oou.cmu.ac.th/statute_education_fee/`). No OCR here: render at ≈ 170 dpi, crop the table area and stack two pages per image to read the per-semester column.
+- **The guardian payment system** `www1.reg.cmu.ac.th/scbqr/login.php` is public up to the login and shows the current semester's payment window.
+- **Wikimedia rate-limits this machine** (HTTP 429 on the API, `upload.wikimedia.org` and the REST summary): WebFetch reads Commons and Wikipedia pages instead.
+- **Headless Chrome screenshots** lose ≈ 140 px of the window to browser chrome in `--headless=new`; make the window taller than the image.
