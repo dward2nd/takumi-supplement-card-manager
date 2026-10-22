@@ -16,7 +16,7 @@ Every [[../databases/promotion-catalogues|Promotion Catalogues]] page (a Thai re
 
 ### October 2026 — researched 2026-10-01
 
-Pages: `Makro — Oct 2026`, `GO Wholesale — Oct 2026`, `Shopee — Oct 2026`, `The 1 — Oct 2026`; on 2 Oct, `Sriphat Medical Center — Oct 2026` and `Yunomori Onsen & Spa — Oct 2026`; on 3 Oct, `Thaiticketmajor — Oct 2026` and `Apple Products — Oct 2026`; on 5 Oct, `UNIQLO — Oct 2026`; on 6 Oct, `Jampha — Oct 2026`.
+Pages: `Makro — Oct 2026`, `GO Wholesale — Oct 2026`, `Shopee — Oct 2026`, `The 1 — Oct 2026`; on 2 Oct, `Sriphat Medical Center — Oct 2026` and `Yunomori Onsen & Spa — Oct 2026`; on 3 Oct, `Thaiticketmajor — Oct 2026` and `Apple Products — Oct 2026`; on 5 Oct, `UNIQLO — Oct 2026`; on 6 Oct, `Jampha — Oct 2026`; on 22 Oct, `CMU Tuition — Nov 2026` (dated November because CMU's payment window opens on 30 Nov).
 
 - [[2026-10/krungsri-group]] — Krungsri Card, First Choice, XU, Lotus's
 - [[2026-10/the1]] — The 1 membership and the Central The 1 card, and how they differ
@@ -60,6 +60,13 @@ Researched 2026-10-06 for the Jampha page (`Jampha — Oct 2026`, แจ่ม�
 - [[2026-10/jampha]] — Jampha Savemart itself: the company (บริษัท แจ่มฟ้า เซฟมาร์ท จำกัด), its 25 branches (18 in Chiang Mai), how it takes money (UnionPay QR the only credit-card QR, PromptPay, physical cards +2% — per the household, borne out by the ledger), KTC `JFM`, its own `โปรแจ่ม!!`, the welfare card, logo
 - [[2026-10/supermarket-jampha-banks]] — every issuer's and network's campaign checked against a Jampha slip, net of the 2% fee: UnionPay QR 6%, AEON's Lamphun gift, Krungsri HALO, KBank HYP / BCB / PLUSTINUM, NW4's supermarket allowance; the named-chain lists Jampha isn't on
 - [[2026-10/all-spend-jampha]] — offers that name no merchant, each of Baiboon's cards at MCC 5411 by channel, and the TrueMoney route (a linked Visa paying Jampha's PromptPay QR with no fee)
+
+Researched 2026-10-22 for the CMU tuition page (`CMU Tuition — Nov 2026`: Baiboon pays a semester of over ฿60,000 at Chiang Mai University, semester 2/2569, paid 30 Nov – 4 Dec 2026):
+
+- [[2026-10/cmu-tuition]] — how CMU takes tuition: Thai QR in the registration system (free), card online (2.1%), card at the Finance Division counter (0.9%), Alipay / WeChat Pay (1.7%), cash at bank counters; the payment window and late fines; no bank's fee waiver (Chula's KBank waiver has no CMU equivalent); no CMU tuition charge in the 90 statement PDFs attached in Notion; logo
+- [[2026-10/education-krungsri-ktc-aeon]] — Krungsri group, KTC and AEON on a tuition slip net of the fee: NW4 counts education; Central The 1 `ED1` (฿700 per ฿60,000–149,999 education slip); Lotus's invited Q4 ladders; Krungsri's 0% × 4 by MCC; First Choice U PLAN 0% × 3 keeps NW4; AEON and KTC UnionPay earn no points at education MCCs; the TrueMoney route
+- [[2026-10/education-uob-kbank-ttb-others]] — UOB, KBank, ttb and the issuers the household doesn't hold: only UOB One and ttb so smart clear the 0.9% counter fee; ttb so goood and KBank's 0% × 3 (slips ≥ ฿100,000) on education MCCs; CardX's fee-free tuition programme (Bangkok institutions on its banners); UOB `IPW887`
+- [[2026-10/all-spend-tuition]] — offers that name no merchant, ranked against CMU's three channels: First Choice through TrueMoney's linked-Visa PromptPay route (NW4 on the free QR, untested), the counter versus online, welcome offers, wallets, points cash-outs
 
 ### September 2026 — written 2026-09-30
 

@@ -52,6 +52,8 @@ Thai narrative, card and code names verbatim. Say where a figure is third-party 
 | `Thaiticketmajor — Oct 2026` | 🎫 | 2026-10-03 |
 | `Apple Products — Oct 2026` | 🍎 | 2026-10-03 |
 | `UNIQLO — Oct 2026` | 👕 | 2026-10-05 |
+| `Jampha — Oct 2026` | 🛒 | 2026-10-06 |
+| `CMU Tuition — Nov 2026` | 🎓 | 2026-10-22 |
 
 From October the Central The 1 page is **`The 1 — <Mon YYYY>`**. It covers the The 1 membership (points, member-only deals, network coupons in the The 1 app) as well as the Central The 1 credit card, and says where the two differ (user, 2026-10-01: "they overlap mostly but can be different in some aspects").
 
@@ -84,3 +86,7 @@ From October the Central The 1 page is **`The 1 — <Mon YYYY>`**. It covers the
 - **Thaiticketmajor charges 3% on every online method** (card, QR, TrueMoney, ShopeePay) plus ฿30 a ticket, none refundable (Oct 2026). A card only beats paying with no fee when its reward tops 3%; the merchant's own per-slip deals (CardX ฿200, KBank ฿120, Central The 1 ฿100, once a month each) do, so the plan splits a multi-ticket purchase into one order per card. Visa and Mastercard are certain there; JCB and UnionPay acceptance is unconfirmed. No TTM event is in Chiang Mai, so its page is for trips and TTM LIVE streams.
 - **Apple Products is a product page, not a merchant page** (user, 2026-10-03: "not specific to any merchants … mostly I'm looking for resellers who offer the best deal"). Its plan ranks card × reseller routes for a reference purchase (iPhone 18 Pro ฿48,900), and adds a short list for small items. apple.com/th takes only Visa, Mastercard and Amex, and its 0% plan leaves out KTC and AEON. The money is in the issuers' iPhone launch deals at resellers, mostly on installments, and in Shopee and Lazada codes.
 - Bank discount codes are one per order and "not combinable"; the net charge still counts toward the card's own accumulating campaigns.
+- **`CMU Tuition — Nov 2026` is a payment page, not a shop** (2026-10-22): Baiboon pays one semester of over ฿60,000 at Chiang Mai University, in CMU's window of 30 Nov – 4 Dec 2026. It is dated November, the month the window opens, and compares paying on 30 Nov (November's campaigns) with 1–4 Dec (December's).
+- **CMU charges every card a surcharge**: 2.1% online, 0.9% by card at the Finance Division counter (`กองคลัง`), 1.7% on Alipay / WeChat Pay; its Thai QR is free. No bank is exempt, unlike Chulalongkorn, which waives its fee for KBank cards (user, 2026-10-22). So the plan rates every card net of the fee against the free QR, and almost everything loses money online.
+- **What clears the fee at CMU**: First Choice paying CMU's free QR through TrueMoney with the linked Visa (NW4's 2%, no fee; untested at this size), Lotus's Beyond if Takumi's account is invited to the Q4 `small-ticket` ladders, First Choice at the counter (+1.5%), Central The 1 `ED1` (+0.3–0.8%), UOB One / ttb so smart (+0.1%). Every AEON card and KTC UnionPay earn no points at education MCCs.
+- **Education MCCs decide the tuition plans**: Krungsri's 0% × 4, ttb so goood and KBank's 0% × 3 count MCC 8211–8299 rather than a list of institutions. CMU's MCC isn't published, and 9399 (government) would drop them along with NW4, `ED1` and Krungsri, REDZ and Lotus's points.
