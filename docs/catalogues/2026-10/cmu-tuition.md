@@ -13,15 +13,15 @@ researched: 2026-10-22
 - **third-party only**: the only source is not CMU.
 - **unverified**: an inference, or the household's own ledger evidence.
 
-*(Report in progress — sections are filled as the research goes.)*
-
 ---
 
 ## 0. The short version
 
 - **Semester 2/2569 fees are paid 30 Nov – 4 Dec 2026** (late with a fine 7–11 Dec 2026). No part of the window is in October; all of it is in the household's **November–December** statement cycles. §2
 - **Six channels**, all through the registration system (`ระบบงานทะเบียนการศึกษา`) except the counters: Thai QR (free), **credit card online (2.1% fee)**, Alipay / WeChat Pay (1.7%), **credit card at the Finance Division counter (0.9% fee)**, and cash at five banks' counters with the `มชท.50` slip (bank fee). §1
-- **A card always costs a surcharge**: **2.1% online** (confirmed: the household's figure matches CMU's April 2025 manual; it was 2.3% incl. VAT until 2023) or **0.9% at the Finance Division counter**. One rate for every card; no network or debit-card rule is published. The only fee-free channel is the Thai QR. A card's reward has to beat the fee to be worth it. §1.3
+- **A card always costs a surcharge**: **2.1% online** (confirmed: the household's figure matches CMU's April 2025 manual; it was 2.3% incl. VAT until 2023) or **0.9% at the Finance Division counter**. One rate for every card: **no bank's cards are exempt** (unlike Chula's KBank waiver, §1.4), and no network or debit-card rule is published. The only fee-free channel is the Thai QR. A card's reward has to beat the fee to be worth it. §1.3
+- **No CMU-named bank deal and no CMU installment plan.** §4
+- **MCC unknown; 8220 is a reading.** §5
 
 ## 1. Payment channels
 
@@ -84,6 +84,24 @@ The manual's `ช่องทางที่ 3 : Credit Cards` box (https://www.
 - **One charge or two**: the online screen adds the fee to the tuition and shows a single total — `รวมจำนวนเงินที่ต้องชำระทั้งหมด (Total)` ฿15,345 for ฿15,000 + ฿345 — and confirms it with one button (`ยืนยันการชำระเงินด้วย Credit Cards (Confirm Payment)`), which suggests **one card charge for fee + surcharge**. CMU's receipt shows only the tuition (`มหาวิทยาลัยจะออกใบเสร็จรับเงินตามจำนวนค่าธรรมเนียมรวมเท่านั้น และจะไม่รวมค่าธรรมเนียมการใช้บริการบัตรเครดิต`). How the bank statement prints it (one line, or the surcharge as a second line under a gateway name) isn't shown anywhere. **unverified** — the statement Takumi's earlier CMU card payment sits on would settle it.
 - **Worked out for a ฿60,000 semester**: online 2.1% = **฿1,260** (฿61,260 charged); counter 0.9% = **฿540** (฿60,540); Alipay/WeChat 1.7% = ฿1,020; QR ฿0. A card's earn rate has to beat 2.1% online, or 0.9% at the counter, before paying by card is worth it.
 
+### 1.4 Any bank-specific exception to the fee? · **none found**
+
+The household knows a precedent: **Chulalongkorn University waives its card processing fee for KBank cards** (user, 2026-10-22), which is why Takumi's `CHULALONGKORN UNIVERSITY BANGKOK` ฿33,500 (31 Jul 2026, KBank Visa) posted clean. So a university surcharge can depend on the bank. For CMU:
+
+- **No CMU source makes an exception.** The semester 2/2569 announcement (§1.0) attaches `โดยมีค่าธรรมเนียมในการชำระเงิน` to every card channel without naming a bank; the 2025 payment manual (§1.3) gives one rate per channel ("2.1%" online, "0.9%" at the counter) with no bank, card, co-brand or app carve-out; the guardian manual (§1.1) and the 2020–2023 posters say the same. **verified** (absence on every CMU page read)
+- **No bank's own channel is offered for cards.** The bank channel (§1.0, 5.6) is **cash at the counter** with the `มชท.50`, and paying its barcode from a bank app is forbidden. There is no "pay with an SCB/KBank/KTB card in that bank's app" route. **verified**
+- **SCB is the likeliest partner** (the payment system's path is `scbqr`, and SCB issues the student ID card, §4), but nothing says SCB cards are charged less. **not found**
+- **No fee-free card channel exists.** The only fee-free channel is the Thai QR, which is paid from a bank account (or from whatever a payer's app lets fund a Thai QR). Whether a credit card linked to a wallet can pay CMU's Thai QR as a "QR" payment is a bank/wallet question, not covered here. **verified** (QR fee-free), **not researched** (card-funded QR)
+- **Searches** (`มหาวิทยาลัยเชียงใหม่ ชำระค่าเทอม บัตรเครดิต ยกเว้นค่าธรรมเนียม ธนาคาร` and similar) turned up nothing for CMU. **not found**
+- So for CMU, **every card pays 2.1% online or 0.9% at the Finance Division counter**, as far as anything published says. Only the payment screen (online) or the counter staff can confirm on the day. **unverified** (no exception exists)
+
+### 1.5 Household facts (user, 2026-10-22)
+
+- The user's figure: **CMU charges a 2.1% processing fee on credit-card tuition payments** — matches CMU's manual (§1.3).
+- **Chulalongkorn waives its card fee for KBank cards**; Takumi's ฿33,500 Chula payment on KBank Visa posted at exactly the fee. Chula's fee for other banks' cards isn't known, so the Chula row is **not** evidence that Thai universities charge no surcharge.
+- **No CMU tuition charge appears in any of the 90 statement PDFs attached in Notion.** The user recalls Takumi once paid a CMU fee by card, on a statement that isn't in Notion. Until that statement turns up, the statement descriptor, the one-line/two-line question and the MCC stay open.
+- The ledgers show only Baiboon's small CMU merchant charges (`CMU FITNESS CHIANGMAI TH`, `PTTST.C CHIANG MAI UNIV`), which aren't tuition and say nothing about the Registration Office's channels.
+
 ## 2. Payment window
 
 ### 2.1 Semester 2/2569 · **verified**
@@ -140,7 +158,7 @@ From the semester 2/2569 announcement (§1.0) and the one-page `กำหนด�
 | Dentistry, years 4–6 (annual system) | ฿100,000 a **year**, one payment |
 | Veterinary Medicine, years 5–6 (annual system) | ฿70,000 a year |
 
-**Graduate programmes for 2569 entrants** (`บัญชีที่ 1` Thai regular, `บัญชีที่ 2` special, `บัญชีที่ 3` international), per regular semester:
+**Graduate programmes for 2569 entrants** (`บัญชีที่ 1` Thai regular, `บัญชีที่ 2 … ภาคพิเศษ` special, `บัญชีที่ 3 … หลักสูตรนานาชาติ` international, `บัญชีที่ 4` graduate diplomas), per regular semester:
 
 | Programme (graduate) | Schedule | Per semester |
 |---|---|---|
@@ -175,9 +193,9 @@ From the semester 2/2569 announcement (§1.0) and the one-page `กำหนด�
 
 - **No source gives CMU's MCC** — not CMU's pages, not a bank's list, not a forum. **not found**
 - **Reading: MCC 8220 (colleges and universities)** for the online card channel and the Finance Division's card terminal. CMU is a public autonomous university (`มหาวิทยาลัยในกำกับของรัฐ`) and the fee is tuition. **unverified** (reading only)
-  - The **household's analogue**: Takumi's `CHULALONGKORN UNIVERSITY BANGKOK` ฿33,500 (31 Jul 2026, KBank Visa), also a public autonomous university's fee, posted under the university's own name and earned ordinary KBank points, which a government-services MCC (9399) excluded from points would not. That points to an education MCC for Chula, not proof for CMU. **unverified**
+  - The **household's analogue**: Takumi's `CHULALONGKORN UNIVERSITY BANGKOK` ฿33,500 (31 Jul 2026, KBank Visa), also a public autonomous university's fee, posted under the university's own name and earned ordinary KBank points, which a government-services MCC (9399) excluded from points would not. That points to an education MCC for Chula, not proof for CMU. It was paid on a KBank card, which Chula exempts from its card fee (§1.5); CMU's card channels may post differently. **unverified**
   - **The descriptor may not say "CHIANG MAI UNIVERSITY"**: the online card page is a bank or gateway's page (unnamed, §1.3), and the surcharge goes to that gateway, so the statement may print the gateway's or CMU's name, as one line or two. **unverified**
-  - **Takumi's earlier CMU card payment**, which the user recalls from one of his statements (not in the ledger), would settle the descriptor, MCC-dependent earning and the one-line/two-line question. The main session is looking for it in his statement PDFs. **pending**
+  - **Takumi's earlier CMU card payment**, which the user recalls from one of his statements, would settle the descriptor, MCC-dependent earning and the one-line/two-line question. It is **not in any of the 90 statement PDFs in Notion** (§1.5). **pending**
 - A 9399 posting would cost the most rewards (many issuers exclude government payments). Nothing seen suggests CMU uses it, but nothing rules it out.
 
 ## 6. Logo and cover assets
@@ -190,10 +208,11 @@ From the semester 2/2569 announcement (§1.0) and the one-page `กำหนด�
 
 ## Not found / unconfirmed
 
-- **Which bank or gateway runs the online card page**, and so which networks it takes (Visa / Mastercard surely; JCB, UnionPay, Amex unknown) and whether debit cards work. Nothing public names it; the system needs a CMU or guardian login. `epayment.cmu.ac.th` exists but returns 403.
+- **Which bank or gateway runs the online card page**, and so which networks it takes (presumably Visa and Mastercard; JCB, UnionPay and Amex unknown) and whether debit cards work. Nothing public names it; the system needs a CMU or guardian login. `epayment.cmu.ac.th` exists but returns 403.
 - **Which bank's terminal the Finance Division counter uses**, and its networks.
 - **Whether 2.1% includes VAT** (the old 2.3% did).
-- **How the charge prints on a statement**: one line or two (fee + surcharge), and under whose name. Takumi's earlier CMU statement line (being looked for by the main session) should answer it.
+- **How the charge prints on a statement**: one line or two (fee + surcharge), and under whose name. Takumi's earlier CMU statement line would answer it; it isn't among the 90 statement PDFs in Notion.
+- **Any bank-specific waiver** like Chula's for KBank: nothing published says CMU has one (§1.4); only the payment screen or the Finance Division can confirm.
 - **CMU's MCC.** Reading: 8220.
 - **Whether CMU is on Krungsri's tuition 0% list** (page WAF-blocked).
 - **The household's programme and its exact fee**: which programme the >฿60,000 semester is, so whether the 2568 (2569 entrants) or the 2556 graduate schedule applies.
@@ -204,7 +223,7 @@ From the semester 2/2569 announcement (§1.0) and the one-page `กำหนด�
 New ones, not yet in [[../research-methods]]:
 
 - **reg.cmu.ac.th is WordPress under `/webreg/`**: the REST root is `https://www.reg.cmu.ac.th/webreg/wp-json/` (not `/webreg/th/wp-json/`, which 404s). Posts stopped in 2023; current content is in **pages** (`/wp/v2/pages?slug=undergraduate`, `graduate`, `reg-handbook`, with `content.rendered` holding every PDF link) and the **media library** (`/wp/v2/media?search=fee` or `?after=2024-01-01T00:00:00` lists the posters).
-- **Registration Office PDFs** live under `/webreg/reg-files/<yy>/` (`CMU-Announcement-Enrollment-<sem>-<year>.pdf`, `CMU-Important-Enrollment-…`, `CMU-Academic-Calendar-<year>.pdf`). The announcements extract cleanly with `pdftotext -layout`; the calendars and the one-page key-dates sheet have broken Thai text layers, so render them (`pdftoppm -r 100 -png`) and read the images.
+- **Registration Office PDFs** live under `/webreg/reg-files/<yy>/` (`CMU-Announcement-Enrollment-<sem>-<year>.pdf`, `CMU-Important-Enrollment-…`, `CMU-Academic-Calendar-<year>.pdf`). The announcements extract cleanly with `pdftotext -layout`; the key-dates sheet extracts with `ำ` mangled into `ำ` (fix with `sed`); the academic calendars' Thai text layer is garbled, so render them (`pdftoppm -r 100 -png`) and read the images.
 - **The fee regulations are scans** (`/webreg/reg-files/u/cmu-reg-u-3-1.pdf`, `/g/cmu-reg-g-5-1.pdf`; the Finance Division keeps the same files at `finance.oou.cmu.ac.th/statute_education_fee/`). No OCR here: render at ≈ 170 dpi, crop the table area and stack two pages per image to read the per-semester column.
 - **The guardian payment system** `www1.reg.cmu.ac.th/scbqr/login.php` is public up to the login and shows the current semester's payment window.
 - **Wikimedia rate-limits this machine** (HTTP 429 on the API, `upload.wikimedia.org` and the REST summary): WebFetch reads Commons and Wikipedia pages instead.
