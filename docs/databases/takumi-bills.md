@@ -35,6 +35,15 @@ The friends' bills are drafted when a cycle closes. Takumi asked for his own to 
 
 `/record-statement` completes the draft in place: title, printed `ยอดชำระ` and `Note`. It reports `estimate_off_by` (printed − estimate). A gap is a lead, not an error: a line nobody recorded, a credit that posted for a different amount, or Takumi's share of a pooled credit that isn't in his ledger yet. When rows are added after the draft, `/update-bill` with `refresh_from_transactions` re-estimates it from the three ledgers (`lib.bill_draft.reestimate_primary_bill`). Pass `unmonitored` again for Lotus's. First uses, 2026-10-06: Krungsri NOW ฿3,839.00 → ฿5,739.00 after his `AMP*AIS SERVICESPaymen` ฿2,000 and its `CB` −฿100, and Krungsri Lady ฿4,305.00 → ฿5,073.00 after his Bangchak ฿800, its −฿8 discount and `CB12_BC3P` −฿24.
 
+**From the bank's app** (2026-10-24). UOB's app shows the account's bill total and each supplement's "transferred" balance before the PDF exists. When the user reads them out, the draft takes the app's total and its Note gives the split, with Takumi's share as the remainder, next to the ledger estimate and the gap. On UOB One the supplement figure includes the cycle's installment terms and leaves out the bank's `UOB One Cashback 1%`, which posts on the primary on the statement date. Purchases dated on a UOB statement date post the next working day, so they go in the next cycle (22 Oct 2026 → 26 Oct, bill 25 Nov). First case, BC 2026-10-22:
+
+| Draft | App total | Split from the app | Ledger estimate |
+|---|---:|---|---:|
+| UOB One 2026-10 | 36,582.81 | เว็บ 3,295.63 + ใบบุญ 463.00 + นุตา 32,824.18 | 35,121.47 (นุตา ฿1,311.34 and เว็บ ฿150.00 short) |
+| UOB World 2026-10 | 18,811.25 | เว็บ 1,892.25 + ใบบุญ 16,919.00 | 19,006.25 (เว็บ ฿195.00 over) |
+
+UOB Makro wasn't drafted. The estimate gave −฿2,204.43, counting the waived fee and Baiboon's PWP credit, which had already paid the 2026-09 bill (see *Payments*).
+
 First batch, 2026-10-06, BC 2026-10-05:
 
 | Draft | `ยอดชำระ` | Split |

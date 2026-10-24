@@ -135,5 +135,5 @@ class UOBOneCrediting(Crediting):
         write.done += [f"append installment term {e['next_name']} ฿{e['amount']}" for e in appended]
         if not write.dry_run:
             return []   # written: the cycle query sees them
-        return [{"name": e["next_name"], "amount": e["amount"],
+        return [{"name": e["next_name"], "amount": e["amount"], "transaction_date": bc.isoformat(),
                  "cashback_percent": (e.get("classification") or {}).get("cashback_percent")} for e in appended]
