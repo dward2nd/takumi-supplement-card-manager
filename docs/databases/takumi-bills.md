@@ -42,7 +42,7 @@ The friends' bills are drafted when a cycle closes. Takumi asked for his own to 
 | UOB One 2026-10 | 36,582.81 | เว็บ 3,295.63 + ใบบุญ 463.00 + นุตา 32,824.18 | 35,121.47 (นุตา ฿1,311.34 and เว็บ ฿150.00 short) |
 | UOB World 2026-10 | 18,811.25 | เว็บ 1,892.25 + ใบบุญ 16,919.00 | 19,006.25 (เว็บ ฿195.00 over) |
 
-UOB Makro wasn't drafted. The estimate gave −฿2,204.43, counting the waived fee and Baiboon's PWP credit, which had already paid the 2026-09 bill (see *Payments*).
+UOB Makro 2026-10 was ฿0.00 in the app (user: the waived fee and the points). The waived `CR CARD MEMBERSHIP FEE - INC OF VAT` −฿2,033.00 and Baiboon's `PWP: MAKRO_CHIANGMAI 2` −฿171.43 print on this statement, but both had already paid the 2026-09 bill (see *Payments*). The ledger estimate gave −฿2,204.43 because it counts those credits again. It skips their `[ยกยอดมาจาก 2026-09]` cancelling rows as household brackets. The draft was set to the app's ฿0.00.
 
 First batch, 2026-10-06, BC 2026-10-05:
 
