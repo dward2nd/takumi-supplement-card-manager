@@ -21,6 +21,10 @@ Researched 2026-10-05 for a ฿17,988 China tour package over 10 months, where t
 
 Flat and reducing-balance rates don't compare directly. Over 10 months, a flat monthly rate *f* costs *f* × 10 of the principal. UOB's 10.98% a year works out to the same money as about 0.51%/month flat, and 16% to about 0.75%.
 
+**How a UOB PayLater rate becomes the terms** (user, 2026-10-26). The 10.98% is the *effective* rate (`อัตราดอกเบี้ยที่แท้จริง`). That's the reducing-balance rate the Bank of Thailand has issuers charge and quote. Each month's interest is 10.98% ÷ 12 = 0.915% of the principal still owed. The term is fixed so that every term is the same amount, which makes it an annuity: term = P × r ÷ (1 − (1 + r)^−n), with r = rate ÷ 12. Each term is rounded to the satang, and the last term absorbs the rounding. This reproduces the 2026-10-05 table below (฿17,988 × 10 → ฿1,890.56). Reading 10.98% as a compounded annual rate (r = 1.1098^(1/12) − 1) gives a slightly smaller term, but that isn't how it's charged. On the same effective basis (monthly IRR × 12), U PLAN's flat 0.39% a month comes to about 8.4% a year over 10 months.
+
+Worked example: Nuta's `UNITHAI TRIP CO.,LTD. BANGKOK TH` ฿20,000 on UOB One (5 Oct 2026), over 9 months at 10.98%. That's eight terms of ฿2,325.12 and a last term of ฿2,325.15. Interest falls from ฿183.00 in the first term to ฿21.08 in the last, ฿926.11 in all. The charge was already on the 22 Oct statement, so it can only be converted by phone. The 1% (฿200) the charge earned is taken back on approval, and each term earns 1% instead. As of 2026-10-26 this conversion was planned but not confirmed.
+
 ## The 2026-10-05 comparison (฿17,988, 10 months)
 
 | Option | Card fee | Interest | Total paid | Per month |
