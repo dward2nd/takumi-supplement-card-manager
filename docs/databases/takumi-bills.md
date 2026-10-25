@@ -113,6 +113,21 @@ Then attach the slip(s) with `/update-bill` and set `จ่ายแล้ว` o
 
 **Slip before statement** (user, 2026-09-28: "put the payment slips to new drafted bills; I'll bring the statements later"). When he pays before the PDF arrives, `/update-bill` creates a placeholder for the slip: `[DRAFT] <Card> <YYYY-MM>`, with no `ยอดชำระ` and a Note naming the slips (`lib.bill_draft.draft_statement_bill`). `/record-statement` later fills in that same row (title, `ยอดชำระ`, Note) instead of creating a second one. The payment rows wait for it, because full vs partial depends on the bill total. First case: KTC Digital VISA (฿20.00), KTC Mastercard …5549 (฿1,545.30) and KTC UnionPay …1346 (฿967.26 + ฿940.00), all cycle 2026-09-27 and paid 28 Sep.
 
+**Paid before the cycle closes** (user, 2026-10-25: "Why aren't my advance payment recorded?"). Waiting only applies to a slip that comes after the cycle has closed but before the PDF arrives. A slip paid **on or before the closing date** is an advance payment, so its row is written straight away. That's one `ชำระบิลล่วงหน้า` row per slip (`lib.payments.PAYMENT_LABELS["advance"]`, the label the friends' ledgers have used since February):
+- the negative slip amount, dated on the slip
+- billed on the cycle it pays, with no multiplier and no `% cb`
+- a Note with `Slip memo: …` and how much of the ledger's cycle it covers
+
+The bank prints a payment made inside the period on that same statement, so the printed total is already net of it. The cycle's rows net to the same figure: charges minus the advance. The placeholder bill is still drafted, and `/record-statement` still completes it. The later payment of what's left is then labelled `ชำระเพิ่มบางส่วนจนครบ`. `record_primary_payment` can't write the advance row yet, because it needs a bill total, so write it with `build_transaction_properties`. First case: five slips on 25 Oct, each with a placeholder bill:
+
+| Card | Slip | Cycle |
+|---|---:|---|
+| KBank PLUSTINUM | ฿25.00 | 2026-10-25, paid on the closing day |
+| KBank JCB | ฿14.00 | 2026-10-25, paid on the closing day |
+| KTC Digital VISA | ฿34.00 | 2026-10-27 |
+| KTC UnionPay …1346 | ฿1,688.00 | 2026-10-27 |
+| ttb so smart | ฿548.27 | 2026-10-27 |
+
 **Krungsri-family cards: slips from the 2026-10 bills on.** Takumi cancelled the auto-debit (user, 2026-10-17), so these bills are paid by slip like every other card: `ชำระ…` rows plus `โอนยอดจาก<friend>` rows through `/update-bill`'s `payment_amount` / `payment_covers`. The group is the `issuer: Krungsri` cards: First Choice, Central The 1 Redz, Krungsri NOW, Krungsri JCB, Krungsri Visa, Krungsri Lady, and Lotus's Beyond (issued through Lotus Money Service, a Krungsri Consumer partner; `issuer: Krungsri` since 2026-09-27). First case: all seven 2026-10-05 bills, paid 17 Oct by bill payment from his Krungthai account (Krungsri Lady's last ฿195.53 from KBank). First Choice also had a ฿3,575 slip on 14 Oct for Nuta's share. Lotus's unmonitored supplement …6524 gets `โอนยอดจากบัตรเสริม`, which `payment_covers` can't write: add it with `/add-transaction` (`×0`, slip date, paid cycle).
 
 **Up to the 2026-09 bills they were auto-debited** (user, 2026-09-27), with no slip. Each paid bill got one row named `AUTO DEBIT`:
@@ -141,6 +156,8 @@ When the payments after a statement add up to more than it asked for, the bank c
 | `ชำระบางส่วน`, Note naming the bank line and slip | −excess | the overpaid cycle |
 | `[ยอดยกมาจากรอบ <YYYY-MM>]` | +excess | the overpaid cycle |
 | `[ยอดยกมาจากรอบ <YYYY-MM>]` | −excess | the next cycle |
+
+An advance payment (*Paid before the cycle closes* above) also goes past the previous balance, so `/record-statement` reports it as `overpaid` too. When the cycle already has its `ชำระบิลล่วงหน้า` row for that amount, the warning is expected and none of the three rows are needed.
 
 Attach the extra slip to the overpaid bill with `record_payment: false`, since the script would call it a payment completing the bill. First case: UOB One 2026-08. Takumi's ฿585.47 slip on 31 Aug already covered Baiboon's ฿169.00. Her ฿160.55 then went to UOB a second time (`PAYMENT THANK YOU - BAY 0025/7603`, 31 Aug), and the 25 Sep statement credited it.
 
