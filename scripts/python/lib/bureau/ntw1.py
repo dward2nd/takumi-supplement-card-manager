@@ -16,6 +16,11 @@ writes the Bureau and the trackers only.
 Restaurants (MCC 5812, dine-in or take-away, not fast food or food courts)
 can't be told from the merchant string, so they're never linked
 automatically: link a restaurant row by hand and it counts.
+
+Spend counts by transaction date, strictly 11th – 10th, whatever statement
+the row bills on (AEON's call centre, 2026-10-24). AEON posts purchases one
+to four days late, so a row dated the 9th or 10th often bills a cycle later
+but still counts in the period it was made in.
 """
 
 from __future__ import annotations
@@ -26,8 +31,11 @@ from decimal import Decimal
 from typing import ClassVar
 
 from .. import promotions
-from .base import Rule, Tx
+from ..bill_cycle import pattern_for_card
+from .base import Rule, Tx, cycle_billed_on
 from .ladder import LadderPromotion, Tranche
+
+_DAY = dt.timedelta(days=1)
 
 BANDS = ((Decimal(30_000), Decimal(340)), (Decimal(10_000), Decimal(120)))
 
@@ -61,6 +69,30 @@ class NTW1Promotion(LadderPromotion):
     def qualifies(self, tx: Tx) -> bool:
         return bool(_CATEGORIES.search(tx.merchant))
 
+    # A row belongs to the period closing on the first AEON closing date (the 10th)
+    # on or after its transaction date, not the one its Bill Cycle Date names. The
+    # Bureau row keeps a cycle row's dates (Start = the previous closing date,
+    # End = the day before this one), so names and links stay as they were.
+    def _closing(self, tx: Tx) -> dt.date:
+        return pattern_for_card(tx.card or self.cards[0]).active(tx.day)[0]
+
+    def covers(self, start: dt.date, end: dt.date, tx: Tx) -> bool:
+        first, last = self.campaign
+        return self._closing(tx) == cycle_billed_on(end) and first <= tx.day and (last is None or tx.day <= last)
+
+    def candidate_filter(self, start: dt.date, end: dt.date) -> list[dict]:
+        # A superset, a day wide each side (timed rows read back as datetimes); `covers` decides.
+        return [{"property": "Transaction Datetime", "date": {"on_or_after": start.isoformat()}},
+                {"property": "Transaction Datetime", "date": {"on_or_before": (cycle_billed_on(end) + _DAY).isoformat()}}]
+
+    def period_for(self, tx: Tx) -> tuple[dt.date, dt.date] | None:
+        first, last = self.campaign
+        if tx.day < first or (last is not None and tx.day > last):
+            return None
+        closing = self._closing(tx)
+        previous, _ = pattern_for_card(tx.card or self.cards[0]).closed(closing)
+        return self._clip_cycle(previous, closing - _DAY)
+
     ladder_title = "Cashback per statement cycle"
     ladder_header = ("Pooled spend in the cycle", "Cashback")
     ladder_rows: ClassVar = (
@@ -76,6 +108,8 @@ class NTW1Promotion(LadderPromotion):
         "Foodland, Go Wholesale and Makro PRO; Agoda, Booking.com, Gother, Klook, Traveloka and "
         "Trip.com; Beautrium, Boots, EVEANDBOY, Sephora and Watsons; and the listed fashion and "
         "sports brands in department-store plazas.",
+        "Counted by transaction date, 11th – 10th, whatever statement the row bills on (AEON's "
+        "call centre, 2026-10-24).",
         "Only on the registered card — AEON World Mastercard — and the supplements under it.",
         "Only spend from the day registration completes counts (AEON THAI MOBILE or aeon.co.th, "
         "once for the campaign).",
