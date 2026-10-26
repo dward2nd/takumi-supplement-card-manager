@@ -94,6 +94,12 @@ Takumi's hand-written rows hit the self-earn trap and a sign slip. Both were fix
 
 The Grab PayLater fix corrected the point balance as a side effect: flipping the sign dropped the row below the `> 0` gate, removing the 56 points it had been self-earning.
 
+### Archiving a row from before the reset
+
+The reset row cancels everything before it. So when a pre-reset row is archived, the reset row has to change by the same amount, or the card's balance and points move. **Change it in the same direction as the archived amount: raise the reset row by the amount archived.** The reset row is −(sum before), so taking a +฿1,339 charge out of the sum means the reset row needs ฿1,339 more. Then recompute `ใช้คะแนน` so the card's points stay put, self-earn included: new `ใช้คะแนน` = old `ใช้คะแนน` − (points the archived rows realized) + (floor(new amount ÷ baht per point) − floor(old amount ÷ baht per point)).
+
+First case, 2026-10-27, UOB World: the user asked for an April 2025 `2C2P *SHOPEE` plan to be removed because it ended long ago. Only terms `01/10` and `02/10` (฿1,339 each, `×2`, 106 points each) had ever been recorded, so the plan still read as 8 terms in progress. Archiving both took ฿2,678 and 212 points out. The reset row went from ฿4,387.67 / 11,055 used to **฿7,065.67 / 10,950 used**: the new amount self-earns 282 points instead of 175. The card stayed at ฿25.25 and 18,654 points. The first attempt lowered the reset row instead, which took the balance to −฿5,330.75 until it was corrected. Points stayed right even then, so check the balance too.
+
 ## When not to do this
 
 A reset row is indistinguishable from a real charge to everything downstream. Before running one on a card, check:
