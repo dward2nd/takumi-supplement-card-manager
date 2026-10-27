@@ -40,6 +40,7 @@ The two sources diverge most sharply on Nuta: her Bills DB offers **13** card op
 | [[lotuss-beyond\|Lotus's Beyond]]    | Lotus             |    ✓    |      |        |
 | SPayLater                            | Shopee            |    ✓    |  ✓   |   ✓    |
 | [[ttb-so-smart\|ttb so smart]]       | ttb               |    ✓    |      |        |
+| [[uob-cash-plus\|UOB Cash Plus]] (cash card) | UOB        |         |  ✓   |   ✓    |
 | [[uob-makro\|UOB Makro]]             | UOB               |    ✓    |  ✓   |        |
 | [[uob-one\|UOB One]]                 | UOB               |    ✓    |  ✓   |   ✓    |
 | UOB Premier                          | UOB               |    ✓    |  ✓   |   ✓    |

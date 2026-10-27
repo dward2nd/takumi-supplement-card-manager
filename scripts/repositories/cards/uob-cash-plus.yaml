@@ -1,0 +1,25 @@
+name: UOB Cash Plus
+issuer: UOB
+bill_cycle_pattern: uob       # ASSUMED from the UOB credit cards: no Cash Plus statement seen yet
+statement_numbers: {}         # card number unknown until the first statement (2026-11)
+points_default: "×0"
+notes: |
+  A cash card (บัตรกดเงินสด), not a credit card: a personal-loan line in
+  Takumi's name. Thai cash cards earn no points or cashback on anything
+  (user, 2026-10-27), so `lib.earning.CashCard` forces ×0 and no `% cb` on
+  every row, promotions included.
+
+  A cash card can't have a supplement, so every row a friend owes on it goes
+  in that friend's ledger as `[บัตรหลัก] …` and in Takumi's statement total.
+
+  First use (2026-10-27): Nuta's `UNITHAI TRIP CO.,LTD. BANGKOK TH` ฿20,000
+  (5 Oct, her UOB One, cycle 2026-10-22) became a 12-month cash loan at 8.99%
+  a year. Takumi drew ฿20,000 on this card and paid it into UOB One (slip
+  27 Oct, memo `นุตาผ่อนจ่าย UNITRIP`), so Nuta's UOB One books a ฿20,000
+  payment and her ledger carries `[บัตรหลัก] CASH LOAN INSTALLMENT NN/12`
+  at ฿1,748.94 a term (amortised: 20,000 at 8.99%/12 a month over 12 months).
+  The bank's line name and the first and last terms' amounts are unconfirmed
+  until the first statement.
+
+  Open: the statement's cycle and due dates, whether it bundles into the UOB
+  statement PDF, and the card number for `statement_numbers`.

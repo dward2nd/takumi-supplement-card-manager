@@ -39,6 +39,8 @@ A row whose name starts `[บัตรหลัก]` (primary card) records a ch
 
 Such a row can sit beside a supplement-card row with the same merchant, date and amount. Baiboon's `ttb so smart` cycle 2026-09-27 has `WWW.MAKRO.PRO BANGKOK TH` ฿19,875 on 28 Aug twice, one plain and one `[บัตรหลัก]`. Those are **two purchases**, one made by each of them (confirmed by Takumi 2026-09-27), not a double entry. Don't flag the pair as a duplicate.
 
+A **cash card** (บัตรกดเงินสด) can't have supplements at all, so anything a friend owes on one is always `[บัตรหลัก]`. First case: Nuta's UNITRIP charge, moved onto Takumi's [[../cards/uob-cash-plus|UOB Cash Plus]] as a 12-month cash loan (2026-10-27).
+
 ## What this means for [[../future-app/data-model-target|the future app]]
 
 The app needs first-class **person** entities, per-person scoping/authorization, and a clear mapping from supplement-card → underlying primary-card-account. The current Notion structure lacks an explicit "primary account" entity — that's a gap to close in phase 2.

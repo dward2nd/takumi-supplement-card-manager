@@ -59,6 +59,7 @@ How a card earns beyond its promotions is code, one class per card family in `sc
 | `FirstChoice` | First Choice | the family's rules, with its personal-loan-line installment note |
 | `KrungsriJCB` | Krungsri JCB | the family's rules, plus petrol earning no **points** (Krungsri's Thai-petrol campaign) |
 | `AEONCard` | every AEON card | the `points_excluded_merchants` below |
+| `CashCard` | UOB Cash Plus | a cash card, not a credit card: every row `×0`, no cashback, whatever a promotion says ([[../../docs/cards/uob-cash-plus]]) |
 | `Card` | everything else, incl. `Lotus's Beyond` (CP ALL exemption) and `CardX JCB` (SCB X group) | promotions only |
 
 `lib.earning.card_for` picks the class: an entry in `BY_NAME`, else `BY_ISSUER`, else `Card`.

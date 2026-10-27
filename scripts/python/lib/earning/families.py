@@ -40,6 +40,21 @@ class TTBCard(FuelWithheldCard):
     """ttb so smart: petrol withheld like UOB's."""
 
 
+class CashCard(Card):
+    """A cash card (บัตรกดเงินสด): a personal-loan line, not a credit card. Thai
+    cash cards earn no points or cashback on anything (user, 2026-10-27), so
+    every row is ×0 with no `% cb`, whatever a promotion says. UOB Cash Plus."""
+
+    def after_rules(self) -> list[AfterRule]:
+        return [self._earns_nothing]
+
+    def _earns_nothing(self, result: Classification, date: dt.date, merchant: str,
+                       inst: bool) -> Classification:
+        note = f"Cash card — {self.name} earns no points or cashback."
+        return Classification(None, f"{result.note} {note}".strip() if result.note else note, "×0",
+                              result.promotion_id, f"{result.reason}+cash-card")
+
+
 class KrungsriFamilyCard(Card):
     """Krungsri's own cards: First Choice, Krungsri JCB/Lady/NOW/Visa, Central The 1 Redz.
 
