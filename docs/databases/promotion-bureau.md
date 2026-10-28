@@ -60,6 +60,7 @@ The page **body** carries the campaign summary: ladder, what counts, exclusions,
 | `2026M10 — SMP1 cb 2%` · `2026M10 — SMT2 cb ฿200` | `SMP1Promotion` · `SMT2Promotion` | created 2026-10-05 (user: "SMT1 / SMT2"); Lotus's Beyond, registered before the 1 Oct AIS bill; [[../promotions/lotuss-smp1]] |
 | `2026M10 — LAN cb 2%` | `LANPromotion` | created 2026-10-05; Lotus's Beyond, registered by 2 Oct; [[../promotions/lotuss-lan]] |
 | `2026M9`/`2026M10 — QRT4 cb 10%` | `QRT4Promotion` | created 2026-10-05; Lotus's Beyond; September settled by the bank's two `QRT4SEP26` credits; [[../promotions/lotuss-qrt4]] |
+| `2026M10`/`2026M11 — Fashionista Krungsri Lady cb 7%` | `LadyFashionistaKrungsriLady` (`CardAccount`) | created 2026-10-28; Krungsri Lady's own benefit (no registration), ฿140 per whole ฿2,000 slip, ticks `×0` on the slips that earn; [[../promotions/krungsri-card-2026]] |
 
 Every campaign still running in October 2026 got its rows for the periods that overlap October on 2026-09-29, so the writers' follow-up keeps them filled. Campaigns ending 30 Sep (NW3, EPW538, ON3, IS3, BMG, J Dining, Krungsri Bangchak) got none: a successor (NW4 …) is a new campaign class once the user brings its terms. Their successors (NW4, ON4, IS4, SPW796, BGO, BXP/Bangchak700) and the new registered campaigns (LOTA, UNQ, UNO, UQCB, MUJC) got their October rows on 2026-10-01. LOTB and SPW592 have classes but no rows: the household isn't registered for them (user, 2026-10-01). UQN was registered later that day and has its rows.
 

@@ -49,6 +49,8 @@ Modules:
   ttb_shopping  ttb MUJI (MUJC) and Big C / GO Wholesale (BGO), Oct–Dec 2026, one quota per campaign
   cardx_hypermarket  CardX HY1 per hypermarket slip (monthly) and HYP ฿3,000 at ฿300k (campaign), Oct–Dec 2026
   kbank_makro  KBank MKR at Makro (฿100/240 bands, and ฿1,500 per ฿300,000), Oct–Dec 2026 — per card
+  lady_fashionista  Krungsri Lady's LADY'S FASHIONISTA, ฿140 per whole ฿2,000 slip at seven fashion brands, Jan 2025 –
+             Dec 2026 — per card account; ×0 on the slips that earn
   uob_makro  UOB Makro Gold Mission UMK26 (MPW823), Oct–Dec 2026: Makro stores (monthly bands), Makro PRO
              (per slip, one campaign quota), other spend (฿300 a month)
   uob_one    UOB One 10%/5% (monthly) and 1% (per cycle) (credit caps)
@@ -68,8 +70,8 @@ from __future__ import annotations
 
 import datetime as dt
 
-from . import (bangchak, bts, bxp, eat, jdining, kbank_makro, krungsri_now, lotus_exclusive, lotus_qr, lotus_shopping,
-               lotus_store, onq3, ptt2, sup1, uniqlo, unionpay_qr, uob_makro)
+from . import (bangchak, bts, bxp, eat, jdining, kbank_makro, krungsri_now, lady_fashionista, lotus_exclusive,
+               lotus_qr, lotus_shopping, lotus_store, onq3, ptt2, sup1, uniqlo, unionpay_qr, uob_makro)
 from .accounts import CardAccount, CardNumber
 from .aeon_rabbit import AEONRabbitCashback
 from .aeon_unionpay import AEONUnionPayCashback
@@ -121,6 +123,8 @@ PROMOTIONS: tuple[type[BasePromotion], ...] = (
     *lotus_shopping.PROMOTIONS,
     # Read 2026-10-05: Lotus's LAN at Lotus's (registered by 2 Oct) and QRT4 per ฿100 slip (paying since Sep).
     *lotus_store.PROMOTIONS, *lotus_qr.PROMOTIONS,
+    # Read 2026-10-28: Krungsri Lady's LADY'S FASHIONISTA card benefit (1 Jan 2025 – 31 Dec 2026, no registration).
+    *lady_fashionista.ACCOUNTS,
 )
 
 

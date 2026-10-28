@@ -2,7 +2,7 @@
 tags: [promotion, krungsri]
 ---
 
-# Krungsri Card campaigns, 2026 — ONQ3, SUP1, PTT2, EAT, Bangchak/BC3P → BXP, LOTA/LOTB, UNQ, J Dining, NOW online
+# Krungsri Card campaigns, 2026 — ONQ3, SUP1, PTT2, EAT, Bangchak/BC3P → BXP, LOTA/LOTB, UNQ, J Dining, NOW online, Lady Fashionista
 
 Krungsri caps its card campaigns **per primary card account**, and each card product is its own account with its own registration and its own cap. September 2026 shows it: SUP1 paid ฿120 on each of Krungsri VISA, JCB, Lady and NOW. Every household Krungsri card is registered for every campaign and tracked per card (user, 2026-09-29). So the [[../concepts/promotion-bureau|Promotion Bureau]] keeps **one row per card per period**, e.g. `2026M9 — SUP1 Krungsri JCB cb 3%` (`CardAccount`, `lib/bureau/accounts.py`). Tracked from September 2026.
 
@@ -39,6 +39,19 @@ SUP2 (฿700 at ฿60,000 a month) isn't registered on any card (user).
 - **LOTB isn't registered** on any card (user, 2026-10-01), so it has a class but no Bureau rows; BXP, LOTA and UNQ are registered on every card.
 - **LOTA and LOTB stack** on one slip and combine with other promotions. The household's Lotus's spend has gone on Lotus's Beyond, KTC and UOB, never on a Krungsri card, so there's nothing to backfill for Aug–Sep. TrueMoney payments (`TMN*LOTUS`) are excluded as e-wallet spend.
 - **UNQ pays ฿800 only on Krungsri JCB cards** (฿700 on the rest), and the JCB's monthly cap is ฿800 to match.
+
+### Krungsri Lady's own benefit: LADY'S FASHIONISTA (read 2026-10-28)
+
+> **Structured source of truth**: `lady_fashionista.py`. Terms from the card's product page, <https://www.krungsricard.com/th/product/creditcard/krungsri-lady> (the "รายละเอียดและเงื่อนไขเพิ่มเติม" panel under LADY'S FASHIONISTA).
+
+| Campaign | Cards | Period | Pays | Cap per account |
+|---|---|---|---|---|
+| **Fashionista** (card benefit, no registration) | Lady only | 1 Jan 2025 – 31 Dec 2026 | ฿140 (7%) per whole ฿2,000 on each slip at ZARA, H&M, JASPAL, Pomelo, SEPHORA, EVEANDBOY, Adidas | ฿560/month |
+
+- **Per slip, whole steps.** "ยอดใช้จ่ายครบทุกๆ 2,000 บาท/เซลล์สลิป จะได้รับเครดิตเงินคืน 7%", and the remainder under ฿2,000 earns nothing, so ฿2,735 earns ฿140 and ฿1,999 earns nothing. Slips never add up. The brands' Thai branches and their own online channels count, full-amount payments only. ZARA Online, Adidas Online, other online spend the bank can't track, and payment by TrueMoney Wallet, Rabbit LINE Pay or ShopeePay don't.
+- **No points on what earns it.** "สงวนสิทธิ์ยกเว้นการให้คะแนนสะสมกรุงศรีโบนัส สำหรับรายการใช้จ่ายที่เข้าเงื่อนไขได้รับเครดิตเงินคืน". Only a slip that earns the cashback loses its points, so this isn't a merchant exclusion in the card YAML: a ฿1,500 slip at the same shop still earns. The class ticks `×0` with a Note on each linked slip that gets a credit, and the writers' Bureau follow-up applies it. A slip past the ฿560 cap is left as it is.
+- **Crediting.** Within 7 days after the merchant settles, to the primary account. The statement text isn't known yet. Not combinable with other promotions.
+- **First slip**: Takumi's `EVEANDBOY-MAYA CHIANGM CHIANGMAI TH` ฿2,735 on 28 Oct 2026 (user: "expects 7% cashback of every 2,000 Baht spent"). That made `2026M10 — Fashionista Krungsri Lady cb 7%` ฿140 and his tracker `Fashionista Krungsri Lady 7% 1—31 Oct`. No earlier slip at these brands is on any Krungsri Lady row, so nothing is backfilled. The November row was created the same day.
 
 GO Wholesale's statement name is `CFW-<branch> …` (Central Food Wholesale, e.g. `CFW-CHIANGMAI 1 CHIANGMAI TH`); SUP1 matches it since 2026-09-30.
 

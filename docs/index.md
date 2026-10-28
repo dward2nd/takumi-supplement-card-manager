@@ -82,7 +82,7 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 - [[promotions/uob-spw592]] — UOB supermarkets SPW592 (฿50 / ฿150 a month, Jul–Dec 2026; UOB Makro excluded); modelled, not registered.
 - [[promotions/first-choice-2026h2]] — First Choice ON3, DLV3, IS3 and the BTS lucky-draw rights (Krungsri VISA + First Choice); Q4 2026's NW4, ON4 and IS4; in the Promotion Bureau.
 - [[promotions/first-choice-privilege-2026]] — First Choice BLUE PLUS status: ฿400,000 accumulated over calendar 2026, primary + supplements; how to count it from the statements, and the 2026-10-01 reckoning.
-- [[promotions/krungsri-card-2026]] — Krungsri Card ONQ3, SUP1, PTT2, EAT, Bangchak/BC3P (BXP and Bangchak700 from Oct 2026), LOTA/LOTB, J Dining and NOW online, one Bureau row per card account.
+- [[promotions/krungsri-card-2026]] — Krungsri Card ONQ3, SUP1, PTT2, EAT, Bangchak/BC3P (BXP and Bangchak700 from Oct 2026), LOTA/LOTB, J Dining, NOW online and Krungsri Lady's Fashionista, one Bureau row per card account.
 - [[promotions/lotuss-lbs3]] — Lotus's LBS3 big-ticket cashback (Sep–Dec 2026).
 - [[promotions/lotuss-smp1]] — Lotus's SMP1 shopping ladder (Sep–Dec 2026) and SMT2 ฿200 at ฿2,000 (Oct 2026); registered.
 - [[promotions/lotuss-lan]] — Lotus's LAN ladder on spend at Lotus's itself, no e-wallet (Oct–Dec 2026); registered.

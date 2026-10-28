@@ -43,6 +43,7 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | NOW 5% online | ฿25 per ฿500 online slip, ฿300/month; QR excluded | standing | continues; a card payment on thaiticketmajor.com counts (reading: the travel exclusion names only travel tickets) | M S E C | `krungsri_now.py` |
 | PTT2 · EAT | fuel per slip · dining ฿100 + ฿100 | 1 Jul – 31 Oct | last month | T | `ptt2.py` · `eat.py` |
 | Bangchak 1% + BC3P → **Bangchak700 1% + BXP** | Bangchak per whole ฿800 → per whole ฿700 | ended 30 Sep | 1 Oct 2026 – 31 May 2027; BXP rounds 1 Oct–31 Jan, 1 Feb–31 May | — | `bangchak.py` · `bxp.py` |
+| **LADY'S FASHIONISTA** (Krungsri Lady only) | ฿140 per whole ฿2,000 slip at ZARA, H&M, JASPAL, Pomelo, SEPHORA, EVEANDBOY, Adidas; ฿560/month; no points on what earns it | 1 Jan 2025 – 31 Dec 2026 | continues to 31 Dec | — | `lady_fashionista.py` |
 | J Dining → **JOY DINING 3×** | JCB dining ฿30 per ฿1,000 → 3× points, no cashback | ended 30 Sep | 1 Oct 2026 – 31 Dec 2027 | — | `jdining.py` (Sep) |
 | KCCPAYDAY / KCCPAYDAYH | Shopee Payday codes | 25–30 Sep | **not published yet** | S | — |
 | HALO | Krungsri VISA: ≥ ฿6,000 across dining + supermarket + fuel → Bar B Q Plaza ฿255 | Aug–Oct | last round (Makro excluded); Jampha counts as the supermarket leg (MCC 5411) | G J | — |

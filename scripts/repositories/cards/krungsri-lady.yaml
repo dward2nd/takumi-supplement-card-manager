@@ -21,6 +21,11 @@ notes: |
   (issuer-level rules, so they should hold), but neither has been observed on
   this card's own data yet.
 
-  No cashback programme known. Cashback is promotion-driven, and no
-  `promotions/*.yaml` targets this card, so `auto_classify` leaves `% cb`
-  unset on every row. Add a promo entry when the user announces one.
+  Cashback is paid as Krungsri credit lines and tracked in the Promotion
+  Bureau, never as `% cb` (no `promotions/*.yaml` targets this card): the
+  Krungsri Card campaigns (SUP1, BXP, Bangchak700, ...) and the card's own
+  LADY'S FASHIONISTA, ฿140 per whole ฿2,000 slip at ZARA, H&M, JASPAL, Pomelo,
+  SEPHORA, EVEANDBOY and Adidas, 1 Jan 2025 – 31 Dec 2026 (read 2026-10-28,
+  `lib/bureau/lady_fashionista.py`). Krungsri withholds points only on the
+  slips that earn it, so the Bureau ticks `×0` on those and the card has no
+  `points_excluded_merchants` entry: a ฿1,500 slip there still earns points.
