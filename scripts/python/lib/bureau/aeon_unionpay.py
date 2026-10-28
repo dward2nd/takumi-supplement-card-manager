@@ -11,6 +11,13 @@ of the statement date (the 10th).
 The household marks these rows `% cb` 3% by hand (Nuta's Alipay rows); the
 original currency sits in the Note (`Original charge 600 CNY.`). This adds the
 cap.
+
+Counted by transaction date, 11th – 10th (`AEONTransactionDated`; user,
+2026-10-29). AEON's credits match it to the satang where it differs from the
+statement: ฿306.31 on 2 May 2026 is 3% of the ฿10,210.44 dated 11 Mar – 10 Apr,
+including a refund dated 10 Apr that posted on the May statement (the April
+statement nets to ฿14,600.64, so ฿438.02), and ฿205.33 is 3% of the ฿6,844.41
+dated 11 Apr – 10 May (the May statement: ฿73.63).
 """
 
 from __future__ import annotations
@@ -21,6 +28,7 @@ from decimal import Decimal
 from typing import ClassVar
 
 from .. import promotions
+from .aeon_cycle import AEONTransactionDated
 from .base import Rule, Tx
 from .capped import CreditCapPromotion
 
@@ -29,7 +37,7 @@ _CURRENCY = re.compile(r"\b(CNY|RMB|HKD|MOP|TWD|NTD)\b")
 _COUNTRY = re.compile(r"\b(CHN|HKG|MAC|TWN)$")
 
 
-class AEONUnionPayCashback(CreditCapPromotion):
+class AEONUnionPayCashback(AEONTransactionDated, CreditCapPromotion):
     code = "AEON UnionPay"
     icon = "🌏"
     name_pattern = r"\bAEON UnionPay cb 3%"
@@ -53,7 +61,7 @@ class AEONUnionPayCashback(CreditCapPromotion):
         ("Cap", "฿2,500 a statement cycle per primary card (฿30,000 a year), supplements included"),
     )
     inclusions: ClassVar = (
-        "Counted per statement cycle (the 10th): rows whose Bill Cycle Date is the cycle's close.",
+        "Counted by transaction date, the 11th to the 10th, whatever statement the row bills on.",
         "The base is the baht amount after conversion. No registration.",
         "A row counts when its Note gives one of the four currencies, or its merchant string ends in "
         "CHN, HKG, MAC or TWN.",

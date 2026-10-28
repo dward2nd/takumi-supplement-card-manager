@@ -23,4 +23,5 @@ notes: |
   per primary card, spend 2026-04-01 → 2027-01-31. And Takumi's Everyday with AEON
   (NTW1) registration sits on this card. Both are Promotion Bureau classes
   (lib/bureau/aeon_world.py, ntw1.py), not promotion YAML: the household keeps
-  `% cb` unset on these rows (docs/promotions/aeon-2026.md).
+  `% cb` unset on these rows (docs/promotions/aeon-2026.md). Both count by transaction
+  date, 11th–10th, whatever statement a row bills on (2026-10-29).

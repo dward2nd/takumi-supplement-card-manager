@@ -8,4 +8,5 @@ notes: |
   3% on spend in CNY, HKD, MOP or TWD, on the baht amount after conversion; at most ฿2,500
   per primary card per statement cycle (฿30,000 a year), supplements included. The household
   marks `% cb` 3% by hand (Nuta's Alipay rows, currency in the Note); the cap is the Promotion
-  Bureau's (lib/bureau/aeon_unionpay.py). No points.
+  Bureau's (lib/bureau/aeon_unionpay.py), which counts the cycle by transaction date, 11th–10th,
+  as AEON's credits do (2026-10-29). No points.

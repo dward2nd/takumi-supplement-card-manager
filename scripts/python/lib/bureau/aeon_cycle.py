@@ -7,7 +7,9 @@ statement it bills on (AEON's call centre, 2026-10-24, for NTW1). AEON posts
 purchases one to four days late, so a row dated the 9th or 10th often bills a
 cycle later but still counts in the earlier period. AEON Rabbit's 5% follows
 the same rule: its 2 Oct 2026 credit (฿100.25) matches it to the satang, and
-reading the Bill Cycle Date (฿100.75) doesn't (user, 2026-10-29).
+reading the Bill Cycle Date (฿100.75) doesn't (user, 2026-10-29). So do AEON
+UnionPay's 3% (its May and July 2026 credits) and AEON World's 5%: every
+AEON card campaign in the Bureau counts this way since 2026-10-29.
 
 Mix in before the payout shape: `class NTW1Promotion(AEONTransactionDated, LadderPromotion)`.
 The Bureau row carries the period AEON counts: Start = the day after the

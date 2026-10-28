@@ -35,7 +35,7 @@ Modules:
   lbs3       Lotus's big-ticket categories (ladder), Sep–Dec 2026
   ttb_so_smart  ttb so smart 1%, ฿2,000 a cycle (credit cap)
   aeon_rabbit / aeon_world / ntw1  AEON Rabbit 5%, AEON World 5% supermarkets, Everyday with AEON
-  aeon_cycle AEONTransactionDated: an AEON cycle quota counted by transaction date, 11th – 10th (Rabbit, NTW1)
+  aeon_cycle AEONTransactionDated: an AEON cycle quota counted by transaction date, 11th – 10th (all four AEON campaigns)
   epw538     UOB e-Commerce & e-Wallet EPW538 (ladder), Jul–Sep 2026
   spw796     its Q4 successor, Oct–Dec 2026
   spw592     UOB supermarkets SPW592 (฿50 / ฿150 bands), Jul–Dec 2026

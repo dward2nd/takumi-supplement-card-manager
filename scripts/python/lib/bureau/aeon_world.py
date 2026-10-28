@@ -11,6 +11,12 @@ within 90 days of the statement date.
 
 AEON keeps `% cb` unset on these rows (Baiboon's `[บัตรหลัก] WWW.MAKRO.PRO`
 rows), so this writes the Bureau and the trackers only.
+
+Counted by transaction date, like NTW1 and AEON Rabbit (`AEONTransactionDated`;
+user, 2026-10-29). The ฿500 cap hides which counting AEON uses in its amounts
+so far, but its 2 Oct 2026 credits (฿500 + NTW1's ฿120) are exactly the
+11 Aug – 10 Sep period by transaction date, and AEON pays all its card
+promotions on the same dates.
 """
 
 from __future__ import annotations
@@ -21,6 +27,7 @@ from decimal import Decimal
 from typing import ClassVar
 
 from .. import promotions
+from .aeon_cycle import AEONTransactionDated
 from .base import UNCERTAIN, Rule, Tx
 from .capped import CreditCapPromotion
 
@@ -29,7 +36,7 @@ _STORES = re.compile(r"BIG ?C\b|BIGC|LOTUS|FOODLAND|VILLA|\bTOPS\b|GOURMET|HOME 
                      r"MAKRO")
 
 
-class AEONWorldCashback(CreditCapPromotion):
+class AEONWorldCashback(AEONTransactionDated, CreditCapPromotion):
     code = "AEON WM"
     icon = "🛒"
     name_pattern = r"\bAEON WM cb 5%"
@@ -55,8 +62,8 @@ class AEONWorldCashback(CreditCapPromotion):
         ("Cap", "฿500 a statement cycle per primary card, supplements included (฿10,000 of spend)"),
     )
     inclusions: ClassVar = (
-        "Counted per statement cycle, the 11th to the 10th: rows whose Bill Cycle Date is the "
-        "cycle's close. The base is the baht amount after conversion.",
+        "Counted by transaction date, the 11th to the 10th, whatever statement the row bills on. "
+        "The base is the baht amount after conversion.",
         "No registration.",
     )
     rules: ClassVar = (
