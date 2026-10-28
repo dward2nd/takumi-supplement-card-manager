@@ -76,6 +76,8 @@ GO Wholesale's statement name is `CFW-<branch> …` (Central Food Wholesale, e.g
 
 The two flagged ones need a look at the October statement. ฿32 is the Bangchak 1% cap, not BC3P's. The bank had already credited ฿8 of the 1% by 15 Sep (`BANGCHAK SPECIAL DISCOUNT OF 1 %`, for 14 Sep). The sync leaves a ticked tracker as it is and only warns.
 
+**Read again 2026-10-28.** The two trackers are per slip, not per campaign: ฿32 is one slip's ฿8 (1%) + ฿24 (BC3P), and the user guessed the two campaigns had been mixed. Together they come to ฿64, the Bureau's ฿16 + ฿48. The bank has paid the 1% in full (฿8 on 15 Sep, ฿8 on 28 Sep) but only one BC3P ฿24 (`CB12_BC3P CAMPAIGN 1SEP26-30SEP26`, 30 Sep). BC3P is credited within 30 days after the month, so the second ฿24 is due by 30 Oct.
+
 Sources, read 2026-09-29: <https://www.krungsricard.com/th/promotion/online-shopping-cashback>, <https://www.krungsricard.com/th/promotion/supermarket-shopping>, <https://www.krungsricard.com/th/promotion/ptt>, <https://www.krungsricard.com/th/promotion/dining-cashback-deal>, <https://www.krungsricard.com/th/promotion/bangchak>, <https://www.krungsricard.com/th/product/creditcard/krungsri-jcb> (J Dining, from the user), <https://www.krungsricard.com/th/product/creditcard/now>.
 
 Re-read 2026-10-01: ONQ3, SUP1/SUP2 and PTT2 unchanged; <https://www.krungsricard.com/th/promotion/bangchak> now carries the Oct 2026 – May 2027 terms (Bangchak700, BXP); <https://www.krungsricard.com/th/promotion/lotus-exclusive> (LOTA, LOTB).
