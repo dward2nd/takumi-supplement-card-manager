@@ -28,6 +28,15 @@ KTC's UnionPay-network card: Takumi's principal (…1346) and supplements held b
 
 KTC pattern: **bill cuts on the 27th, due ~15 days later** (e.g. cycle `2026-07-27` → due `2026-08-11`). See [[../concepts/bill-cycle-patterns|bill-cycle-patterns]]. `/add-transaction` infers this pair automatically when the dates are omitted.
 
+## Paying the bill
+
+KTC bills each card number on its own statement ([[../databases/takumi-bills|takumi-bills]]), so Baiboon's bill covers two payments to KTC:
+
+- **His own card (…2310)**: Baiboon may pay KTC directly (user, 2026-10-28: "Baiboon can pay his own KTC cards directly"). His bill-payment slip to KTC is the evidence on his Bills row, the declared exception to "the peer transfers to Takumi" in [[../databases/baiboon-bills|baiboon-bills]]. It never touches Takumi's ledger or bills: the …2310 statement isn't on Takumi's account.
+- **His `[บัตรหลัก]` rows on Takumi's …1346**: he transfers that share to Takumi, and Takumi pays KTC. Baiboon's transfer slip goes on his own bill. Takumi's KTC slip goes on Takumi's bill, with the `โอนยอดจากใบบุญ` row added at statement time.
+
+Both slips attach to Baiboon's one `KTC UnionPay <YYYY-MM>` bill, each with its own payment row (`ชำระบางส่วน` per slip when neither clears the bill alone). First seen on the 2026-10-27 cycle: ฿52,397.52 straight to KTC for …2310, plus ฿13,618.28 via Takumi for …1346.
+
 ## Notion / classification encoding
 
 `scripts/repositories/cards/ktc-unionpay.yaml` and the `KTCUnionPay` class (`scripts/python/lib/earning/families.py`) encode what the merchant string shows: supermarket names, 7-Eleven / TrueMoney, transport and tolls. MCC-only exclusions (fast food, bakeries, public hospitals) still go `×0` **by hand** with a Note.
