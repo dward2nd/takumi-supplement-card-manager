@@ -22,5 +22,7 @@ notes: |
     at a ฿1,000 charge) and ฿1,000 per primary card per cycle. Check by hand on big cycles.
   - Digital-wallet top-ups earn nothing. AEON credits the cashback to the primary card
     within 2 billing cycles, as `CASH BACK - CREDIT CARD PROMOTION`.
+  - AEON counts the cycle by transaction date, 11th–10th, whatever statement the row bills on
+    (the Bureau's `AEONTransactionDated`; 2 Oct 2026 credit ฿100.25 matched it, 2026-10-29).
   - effective_start is a placeholder: this is a standing card benefit with no printed period.
   - Points are a separate card-level rule: none since 2025-11-11 (cards/aeon-rabbit.yaml).

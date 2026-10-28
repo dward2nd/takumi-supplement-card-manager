@@ -9,6 +9,10 @@ transaction, and ฿1,000 per primary card per statement cycle (11th – 10th),
 supplements included. Credited within two cycles as `CASH BACK - CREDIT CARD
 PROMOTION`.
 
+Counted by transaction date, like NTW1 (`AEONTransactionDated`): the 2 Oct
+2026 credit of ฿100.25 is 5% of the ฿2,005 dated 11 Aug – 10 Sep, not of the
+฿2,015 billed on the 10 Sep statement (user, 2026-10-29).
+
 Which rows earn which rate comes from the card's promotion YAML
 (`scripts/repositories/promotions/aeon-rabbit-cashback.yaml`); this adds the
 two caps, which the YAML notes but can't enforce.
@@ -21,13 +25,14 @@ from decimal import Decimal
 from typing import ClassVar
 
 from .. import promotions
+from .aeon_cycle import AEONTransactionDated
 from .base import Rule, Tx
 from .capped import CreditCapPromotion
 
 PER_TX_CAP = Decimal(50)
 
 
-class AEONRabbitCashback(CreditCapPromotion):
+class AEONRabbitCashback(AEONTransactionDated, CreditCapPromotion):
     code = "AEON Rabbit"
     icon = "🚆"
     name_pattern = r"\bAEON Rabbit cb 5%"
@@ -56,8 +61,8 @@ class AEONRabbitCashback(CreditCapPromotion):
         ("Cap", "฿1,000 a statement cycle per primary card, supplements included"),
     )
     inclusions: ClassVar = (
-        "Counted per statement cycle, the 11th to the 10th: rows whose Bill Cycle Date is the "
-        "cycle's close.",
+        "Counted by transaction date, 11th – 10th, whatever statement the row bills on: the "
+        "2 Oct 2026 credit (฿100.25) matches this to the satang.",
         "No registration; the card must be activated before the spend.",
     )
     rules: ClassVar = (
