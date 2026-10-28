@@ -26,7 +26,7 @@ from typing import ClassVar
 
 from ..holders import primary
 from ..points_account import PrincipalCardAccount, SupplementCardAccount
-from .base import CASHBACK, BasePromotion, Tx, cycle_billed_on
+from .base import CASHBACK, BasePromotion, Tx
 
 
 class CardAccount(BasePromotion):
@@ -42,7 +42,7 @@ class CardAccount(BasePromotion):
         return bool(re.search(pattern, bureau_name)) and cls.within_campaign(start, end)
 
     def row_name(self, start: dt.date, end: dt.date) -> str:
-        month = cycle_billed_on(end) if self.period_basis == "bill_cycle" else start
+        month = self.billed_on(end) if self.period_basis == "bill_cycle" else start
         kind = " cb" if self.reward == CASHBACK else ""
         return f"{month.year}M{month.month} — {self.code} {self.account()}{kind} {self.headline}"
 
@@ -88,7 +88,7 @@ class CardNumber(BasePromotion):
         return super().period_for(tx) if self.on_card(tx) else None
 
     def row_name(self, start: dt.date, end: dt.date) -> str:
-        month = cycle_billed_on(end) if self.period_basis == "bill_cycle" else start
+        month = self.billed_on(end) if self.period_basis == "bill_cycle" else start
         kind = " cb" if self.reward == CASHBACK else ""
         return f"{month.year}M{month.month} — {self.code} {self.account()}{kind} {self.headline}"
 

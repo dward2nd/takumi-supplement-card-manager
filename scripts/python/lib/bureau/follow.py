@@ -171,8 +171,10 @@ def _place(w: Written, rows: list[tuple[BureauRow, BasePromotion]]
         if not hit:
             # Same campaign and month, other dates: sync it anyway, and say why rows won't link.
             hit = [r for r in ours if (m := _MONTH.match(r.name)) and m.groups() == _MONTH.match(name).groups()]
-            warnings += [f"{r.name!r} runs {r.start}→{r.end}, but the period is {start}→{end} "
-                         f"({'a cycle row ends the day before its BC date' if promo.period_basis == 'bill_cycle' else 'a calendar month'}); "
+            why = ("a calendar month" if promo.period_basis != "bill_cycle"
+                   else "a cycle row ends on its BC date" if promo.billed_on(end) == end
+                   else "a cycle row ends the day before its BC date")
+            warnings += [f"{r.name!r} runs {r.start}→{r.end}, but the period is {start}→{end} ({why}); "
                          f"rows in it can't be linked until its Start/End Date say so" for r in hit]
         ids |= {r.id for r in hit}
         if not hit and ours and end >= min(r.start for r in ours):

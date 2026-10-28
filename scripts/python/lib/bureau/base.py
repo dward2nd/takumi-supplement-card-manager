@@ -235,6 +235,11 @@ class BasePromotion(ABC):
         may count by posting date, and a link across the boundary can be deliberate."""
         return self.period_basis == "bill_cycle"
 
+    def billed_on(self, end: dt.date) -> dt.date:
+        """The BC date of the statement a cycle row ending on `end` names
+        (`cycle_billed_on`); AEON's periods end on it (`AEONTransactionDated`)."""
+        return cycle_billed_on(end)
+
     def covers(self, start: dt.date, end: dt.date, tx: Tx) -> bool:
         """Is `tx` in the Bureau row's period `start`–`end`?"""
         if self.period_basis == "bill_cycle":
@@ -290,7 +295,7 @@ class BasePromotion(ABC):
     def row_name(self, start: dt.date, end: dt.date) -> str:
         """The Bureau Name for a period: `2026M9 — NW3 cb 2%`, `2026M9 — UOB World ×5`.
         The month is the BC date's for a cycle quota, else the period's first."""
-        month = cycle_billed_on(end) if self.period_basis == "bill_cycle" else start
+        month = self.billed_on(end) if self.period_basis == "bill_cycle" else start
         kind = " cb" if self.reward == CASHBACK else ""
         return f"{month.year}M{month.month} — {self.code}{kind} {self.headline}"
 
@@ -436,7 +441,7 @@ class BasePromotion(ABC):
         date that bills it (the BC date, as the household dates `ttb so smart 1% Sep
         bill`: 27 Sep; user, 2026-09-29) — the period's first day is the previous
         statement date, when nothing happened. Otherwise the period's first day."""
-        return cycle_billed_on(end) if self.period_basis == "bill_cycle" else start
+        return self.billed_on(end) if self.period_basis == "bill_cycle" else start
 
     def summary_blocks(self) -> list[dict]:
         """The Bureau page body: ladder, what counts, exclusions, crediting, split."""
