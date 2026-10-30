@@ -163,7 +163,12 @@ Attach the extra slip to the overpaid bill with `record_payment: false`, since t
 
 ### Credit balances
 
-A statement can close below zero, after a refund larger than the cycle's spend. AEON then prints `0.00 Baht` due. The bill's `ยอดชำระ` is the **signed** balance (user, 2026-10-21), so the next statement's opening balance carries on from it. First case: AEON World Mastercard 2026-10 at −฿15,701.78, from Baiboon's `REFUND TRANSACTION` −฿15,807.50. The friend whose lines make the credit moves it to their next cycle with a `[ยอดยกมาจากรอบ <YYYY-MM>]` pair (+ in the old cycle, − in the next, `×0`), so their own bill for the cycle is ฿0. See [[../cards/aeon-world-mastercard#Cancelled orders, late posting and credit balances|aeon-world-mastercard]].
+A statement can close below zero, after a refund larger than the cycle's spend. AEON then prints `0.00 Baht` due. **That statement gets no bill**, on Takumi's side or the friend's (user, 2026-10-30). Its lines are billed on the next cycle, where the next statement carries the credit as its opening balance. A refund that posted before its charge goes into the charge's cycle, so the two cancel there.
+
+Only case so far: AEON World Mastercard, 10 Oct 2026, at −฿15,701.78 after Baiboon's `[บัตรหลัก] REFUND TRANSACTION` −฿15,807.50. It was first filed as a signed bill at −฿15,701.78 (2026-10-21), with Baiboon carrying the credit forward through a `[ยอดยกมาจากรอบ 2026-10]` pair (+ on 10 Oct, − on 10 Nov). On 2026-10-30 both bills and the pair were archived, and her four 10 Oct lines moved to the 10 Nov cycle. See [[../cards/aeon-world-mastercard#Cancelled orders, late posting and credit balances|aeon-world-mastercard]].
+
+- **The 10 Oct PDF now sits only on the archived bills** (Takumi `400cb755-f0f1-81d1-8db5-f6e7dd3b4642`, Baiboon `3f5cb755-f0f1-81ff-805e-d17c12a9f043`; both are in Notion's trash, which empties after 30 days). Attach it to the AEON World Mastercard 2026-11 bills next to the 10 Nov statement.
+- **/record-statement doesn't know this yet.** `lib/statements/record.py` still files a signed bill on a credit balance. Re-running it on the 10 Oct statement would bring Takumi's 2026-10 bill back. It finds Baiboon's four lines in the next cycle (`fetch_later_rows`), so it wouldn't book them again. Archive such a bill by hand until the code changes.
 
 ### Friends' balances are debts to Takumi, not to the bank
 
