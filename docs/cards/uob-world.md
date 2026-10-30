@@ -38,6 +38,8 @@ Per account (Takumi + Baiboon together), counting every transaction, first come,
 
 Unlike [[uob-one]], this card has a real points balance that gets spent — e.g. `Major Combo set 1 ชุด` for 1,400 points (2026-05-19). Write redemptions with `points_redeemed`, `amount: 0`, `multiplier: "×0"` per [[../../.claude/skills/add-transaction/SKILL|/add-transaction]].
 
+Points also pay for restaurant slips through [[../promotions/uob-dining-pwp-2026|UOB Dining PWP 2026]] (20% back on Fri–Sun slips of ฿1,500 or more, on Takumi's primary card only). Uses are logged on the promotion note (Sushiro, 30 Oct 2026).
+
 ## Writing UOB World transactions
 
 `auto_classify: true` now handles this card correctly — it resolves `×5` normally, `×0` on petrol and foreign-in-THB, and `×2` for dates outside the promo window. The one thing it cannot know is the quota. Since 2026-09-28 that doesn't need a manual step: after every write, [[../../.claude/skills/add-transaction/SKILL|/add-transaction]] (and `/update-transaction`, `/record-statement`) re-syncs the cycle's `UOB World ×5` Bureau row. It sets rows past the ฿20,000 to `×2` with the quota Note, and sets the straddling row's `ใช้คะแนน` give-back ([[../concepts/promotion-bureau#Kept in step with the ledger]]). A cycle with no Bureau row yet isn't enforced; the write reports it as `missing`.
@@ -51,5 +53,6 @@ Unlike [[uob-one]], this card has a real points balance that gets spent — e.g.
 
 - `scripts/repositories/cards/uob-world.yaml` — the structured card entry.
 - [[../promotions/uob-world-points]] — the `×5` bonus narrative.
+- [[../promotions/uob-dining-pwp-2026]] — paying for restaurant slips with points.
 - [[uob-one]] — the cashback-axis sibling on the same UOB account.
 - [[uob-makro]] — the other UOB card with a non-standard multiplier (`÷4` on in-store Makro).

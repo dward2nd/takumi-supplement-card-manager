@@ -79,6 +79,7 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 - [[promotions/uob-one-2026]] — UOB One 2026 cashback promotion (effective `2026-01-01` → `2026-12-31`).
 - [[promotions/first-choice-nw3]] — First Choice NW3 pooled cashback ladder (`2026-07-01` → `2026-09-30`), tracked in the Promotion Bureau.
 - [[promotions/uob-epw538]] — UOB e-Commerce & e-Wallet EPW538 (`2026-07-01` → `2026-09-30`) and its Q4 successor SPW796, pooled across every UOB card, tracked in the Promotion Bureau.
+- [[promotions/uob-dining-pwp-2026]] — UOB Dining PWP 2026 (DPW128): register a restaurant slip, pay with points equal to it, get 20% back (`PWP20`, Fri–Sun, ≥ ฿1,500) or 10% (`DPWP`, ≥ ฿500); primary cards only; not in the Bureau.
 - [[promotions/uob-spw592]] — UOB supermarkets SPW592 (฿50 / ฿150 a month, Jul–Dec 2026; UOB Makro excluded); modelled, not registered.
 - [[promotions/first-choice-2026h2]] — First Choice ON3, DLV3, IS3 and the BTS lucky-draw rights (Krungsri VISA + First Choice); Q4 2026's NW4, ON4 and IS4; in the Promotion Bureau.
 - [[promotions/first-choice-privilege-2026]] — First Choice BLUE PLUS status: ฿400,000 accumulated over calendar 2026, primary + supplements; how to count it from the statements, and the 2026-10-01 reckoning.
