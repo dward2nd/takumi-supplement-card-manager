@@ -4,7 +4,11 @@ bill_cycle_pattern: ktc
 statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; KTC prints one PDF per card number)
   "0581": takumi
 notes: |
-  Takumi-only.
+  Takumi's card; no supplements. Baiboon pays with Takumi's own card (…0581) at
+  times: her rows carry the `[บัตรหลัก]` prefix and sit on a `KTC Digital VISA` row
+  in her Cards DB, added 2026-10-30 (first row: BBW at Central Festival Chiang Mai).
+  The row's name must stay identical to Takumi's: /record-statement finds each
+  holder's share of the …0581 statement by card name.
   Product: KTC Digital VISA Signature (upgraded from Platinum; user, 2026-10-02). The name stays
   short, without the tier. The statement numbers are the new cards' (seen on the
   Sep 2026 statements); older statements may still show the pre-upgrade numbers.

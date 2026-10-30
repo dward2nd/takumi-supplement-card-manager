@@ -33,7 +33,7 @@ The two sources diverge most sharply on Nuta: her Bills DB offers **13** card op
 | Krungsri Lady                        | Krungsri          |    ✓    |      |        |
 | Krungsri NOW                         | Krungsri          |    ✓    |      |   ✓    |
 | Krungsri Visa                        | Krungsri          |    ✓    |  ✓   |   ✓    |
-| KTC Digital VISA (Visa Signature)    | KTC               |         |      |   ✓    |
+| KTC Digital VISA (Visa Signature)    | KTC               |   ✓†    |      |   ✓    |
 | KTC JCB (JCB Ultimate)               | KTC               |         |      |   ✓    |
 | KTC Mastercard (World Reward)        | KTC               |         |      |   ✓    |
 | [[ktc-unionpay\|KTC UnionPay]] (Diamond) | KTC          |    ✓    |  ✓   |   ✓    |
@@ -47,6 +47,8 @@ The two sources diverge most sharply on Nuta: her Bills DB offers **13** card op
 | [[uob-world\|UOB World]]             | UOB               |    ✓    |  ✓   |   ✓    |
 
 `*` **KBank PLUSTINUM** is the one Takumi ✓ that does *not* come from his Cards DB — it has no row there. It's observed via statement audit (he is the primary holder; Baiboon uses it Makro-only). Either the Cards DB is missing a row, or Takumi tracks that card outside Notion. Worth asking.
+
+`†` **KTC Digital VISA** has no supplement: Baiboon's row (added to her Cards DB 2026-10-30, at the user's request) holds her `[บัตรหลัก]` purchases on Takumi's own card …0581. It keeps Takumi's exact name so /record-statement can find it.
 
 A blank Takumi cell is now a genuine negative — no row in his Cards DB — where before it was a `?` meaning unreadable. Blanks in the Baiboon / Nuta columns remain *observed-in-neither-source*, and a ✓ there still means *observed in at least one source*, not *currently held*.
 
