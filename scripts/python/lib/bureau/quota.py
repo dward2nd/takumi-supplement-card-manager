@@ -54,6 +54,22 @@ class QuotaSource(ABC):
         """The pool for the period `start`–`end`, as the bank's page shows it now."""
 
 
+@dataclass(frozen=True)
+class AnnouncedPool(QuotaSource):
+    """A pool the bank doesn't show on any page a script can read (UnionPay at the
+    MRT: its promotion code isn't in the offer API, checked 2026-11-01). The day it
+    ran out comes only from the bank's announcement, passed in as `quota_gone`."""
+
+    url: str
+
+    @property
+    def name(self) -> str:
+        return "the bank's announcements"
+
+    def status(self, start: dt.date, end: dt.date) -> QuotaStatus:
+        return QuotaStatus(UNLISTED, None, None, self.url, dt.datetime.now(dt.timezone.utc))
+
+
 def observe(row: BureauRow, promo: BasePromotion, write, *, given: str | None = None
             ) -> tuple[dict[str, Any] | None, list[str]]:
     """Read the campaign's pool, record the day it ran out, and hand it to the campaign.

@@ -24,7 +24,7 @@ One row per **quota period** (e.g. `2026M9 — NW3 cb 2%`), linking every holder
 | `เงินคืนรวม` | number (baht) | total credit (cashback returned). Follows the split while it equals Σ `เงินคืนส่วน…`; a figure typed by hand is never overwritten |
 | `เงินคืนส่วน<name>` | number (baht) | the holder's share; written by `/sync-promotion` (FCFS split) |
 | `สิทธิ์ลุ้นรางวัล` | number | lucky-draw rights the period earned, on a `RIGHTS` campaign's row (BTS); added 2026-09-29 |
-| `Quotas Exceeded Date` | date | the day the campaign's nationwide pool ran out (UnionPay QR): first seen used up on the bank's page by a sync, or set from the bank's announcement. Added by the user 2026-09-30 |
+| `Quotas Exceeded Date` | date | the day the campaign's nationwide pool ran out (UnionPay QR, UnionPay MRT): first seen used up on the bank's page by a sync, or set from the bank's announcement (the only way for MRT). Added by the user 2026-09-30 |
 
 `<name>` is the holder's Thai name (`เว็บ`, `ใบบุญ`, `นุตา`), so the scripts derive every per-holder column name from `Holder.thai_name`.
 
@@ -48,6 +48,7 @@ The page **body** carries the campaign summary: ladder, what counts, exclusions,
 | `2026M9`/`2026M10 — ttb so smart cb 1%` | `TTBSoSmartCashback` | created 2026-09-29; per ttb cycle; [[../promotions/ttb-2026]] |
 | `2026M9`/`2026M10 — AEON Rabbit cb 5%`, `— AEON WM cb 5%`, `— NTW1 cb ฿120/340` | `AEONRabbitCashback`, `AEONWorldCashback`, `NTW1Promotion` | created 2026-09-29; per AEON cycle; [[../promotions/aeon-2026]] |
 | `2026M9`/`2026M10 — UnionPay QR …1346 cb 6%`, `— UnionPay QR …2310 cb 6%` | `UnionPayQR1346`, `UnionPayQR2310` | created 2026-09-30; per card number, calendar month; September's `Quotas Exceeded Date` 12 Sep (UnionPay's Facebook post); [[../promotions/unionpay-qr]] |
+| `2026M10`/`2026M11 — UnionPay MRT …2918 cb 15%` | `UnionPayMRT2918` | created 2026-11-01 (user); Takumi's AEON UnionPay, per card number, calendar month; `Quotas Exceeded Date` by hand only (the pool isn't in UnionPay's offer API); [[../promotions/unionpay-mrt]] |
 | `2026M10 — NW4 cb 2%`, `— ON4 cb 1.25–1.8%`, `— IS4 cb 0.8–1%` | `NW4Promotion`, `ON4Promotion`, `IS4Promotion` | created 2026-10-01; First Choice Q4; [[../promotions/first-choice-2026h2]] |
 | `2026M10 — BXP/LOTA/UNQ <card> cb …`; `2026M10`/`2026M11 — Bangchak700 <card> cb 1%` (per cycle; M10 is the partial 1–4 Oct cycle) | `CardAccount` subclasses in `bxp.py`, `lotus_exclusive.py`, `uniqlo.py` | created 2026-10-01; [[../promotions/krungsri-card-2026]], [[../promotions/uniqlo-2026]] |
 | `2026M10 — SPW796 cb 2%`, `— UNO cb ฿150–800` | `SPW796Promotion`, `UOBUniqloPromotion` | created 2026-10-01; every UOB card; [[../promotions/uob-epw538]], [[../promotions/uniqlo-2026]] |

@@ -87,6 +87,10 @@ class InstantDiscountPromotion(CashbackPromotion):
     # Bureau row's `Quotas Exceeded Date`, set by `lib.bureau.quota.observe` before `allocate`.
     quota_gone: dt.date | None = None
 
+    # Why a slip the terms would discount shows none (the warning's text).
+    missed_causes: ClassVar[str] = ("card not registered for the month yet, not paid by QR, the merchant not "
+                                    "taking part, or the pool gone before Quotas Exceeded Date says")
+
     def full_discount(self, net: Decimal) -> Decimal:
         """The discount behind a net amount when no cap clipped it."""
         return net * self.rate / (1 - self.rate)
@@ -135,8 +139,9 @@ class InstantDiscountPromotion(CashbackPromotion):
                     why = f"the card's ฿{self.cap:,.0f} for the month is used"
                 if why or evidence is False:
                     if why and evidence is True:
-                        warnings.append(f"{_label(s)}: the amount looks discounted (94% of a whole price), "
-                                        f"but {why} — a coincidence, or a wrong Quotas Exceeded Date / order?")
+                        warnings.append(f"{_label(s)}: the amount looks discounted ({1 - self.rate:.0%} of a "
+                                        f"whole price), but {why} — a coincidence, or a wrong Quotas Exceeded "
+                                        f"Date / order?")
                     if not why:
                         passed.append(s)
                     rows += [TxCredit(t, _ZERO, _ZERO) for t in s]
@@ -154,7 +159,6 @@ class InstantDiscountPromotion(CashbackPromotion):
                                     f"{_label(s)} over {'; '.join(_label(r) for r in rivals)}")
             if passed and not taken:
                 warnings.append(f"{_label(passed[0])}: the amount shows no discount although the terms "
-                                f"give one — card not registered for the month yet, not paid by QR, the "
-                                f"merchant not taking part, or the pool gone before Quotas Exceeded Date says")
+                                f"give one — {self.missed_causes}")
         credit = sum((r.credit for r in rows), _ZERO).quantize(SATANG, rounding=ROUND_HALF_UP)
         return self._allocation(rows, boundary, warnings, credit=credit)

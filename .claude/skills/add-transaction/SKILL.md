@@ -228,7 +228,7 @@ Takumi (…1346) and Baiboon (her own …2310) pay with KTC UnionPay by UnionPay
 
 ### UnionPay at the MRT — 15% off, already inside the charge
 
-A participating UnionPay card (AEON UnionPay, KTC UnionPay, …) tapped at an MRT Blue or Purple Line gate gets 15% off the fare, 16 Mar – 31 Dec 2026, up to ฿550 a card a month, while UnionPay's monthly pool lasts. The statement shows the net fare, so `MRT-BEM …` ฿50.15 is a ฿59 fare less ฿8.85. Book what was charged and leave `% cb` unset: nothing is credited later. Not in the Bureau. See [[../../../docs/promotions/unionpay-mrt|unionpay-mrt]].
+A participating UnionPay card (AEON UnionPay, KTC UnionPay, …) tapped at an MRT Blue or Purple Line gate gets 15% off the fare, 16 Mar – 31 Dec 2026, up to ฿550 a card a month, while UnionPay's monthly pool lasts. The statement shows the net fare, so `MRT-BEM …` ฿50.15 is a ฿59 fare less ฿8.85. Book what was charged and leave `% cb` unset: nothing is credited later. On Takumi's AEON UnionPay …2918 the Bureau follow-up keeps `UnionPay MRT …2918` in step (from Oct 2026, user 2026-11-01). See [[../../../docs/promotions/unionpay-mrt|unionpay-mrt]].
 
 ### CardX JCB — ongoing card-level policy (not yet framed as a dated promotion)
 

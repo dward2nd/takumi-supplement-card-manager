@@ -21,6 +21,7 @@ Modules:
   quota      a campaign's nationwide pool: the bank's page, and `Quotas Exceeded Date` (the day it ran out)
   unionpay_offer  UnionPay International's offer API (the pool left per monthly offer)
   unionpay_qr  UnionPay QR 6% off on KTC UnionPay, monthly from Sep 2026 — per card number
+  unionpay_mrt  UnionPay 15% off MRT fares on AEON UnionPay …2918, monthly from Oct 2026 — per card number
   nw3        Krungsri First Choice NW3 (ladder), Jul–Sep 2026
   on3 / dlv3 / is3   First Choice online shopping, delivery, insurance (Jul/Sep 2026 –)
   bts        BTS draw rights, Aug–Nov 2026: a First Choice pool and a Krungsri Card pool
@@ -72,7 +73,8 @@ from __future__ import annotations
 import datetime as dt
 
 from . import (bangchak, bts, bxp, eat, jdining, kbank_makro, krungsri_now, lady_fashionista, lotus_exclusive,
-               lotus_qr, lotus_shopping, lotus_store, onq3, ptt2, sup1, uniqlo, unionpay_qr, uob_makro)
+               lotus_qr, lotus_shopping, lotus_store, onq3, ptt2, sup1, uniqlo, unionpay_mrt, unionpay_qr,
+               uob_makro)
 from .accounts import CardAccount, CardNumber
 from .aeon_rabbit import AEONRabbitCashback
 from .aeon_unionpay import AEONUnionPayCashback
@@ -126,6 +128,8 @@ PROMOTIONS: tuple[type[BasePromotion], ...] = (
     *lotus_store.PROMOTIONS, *lotus_qr.PROMOTIONS,
     # Read 2026-10-28: Krungsri Lady's LADY'S FASHIONISTA card benefit (1 Jan 2025 – 31 Dec 2026, no registration).
     *lady_fashionista.ACCOUNTS,
+    # 2026-11-01: UnionPay 15% off MRT fares (16 Mar – 31 Dec 2026, no registration), on Takumi's AEON UnionPay.
+    *unionpay_mrt.ACCOUNTS,
 )
 
 
