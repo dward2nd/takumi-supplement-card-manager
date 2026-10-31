@@ -13,9 +13,14 @@ tiers:
   patterns:
   - LINEPAY*
   - BANGKOK SMARTCARD SYSTEM
+  exclude_patterns:
+  - LP_AIS
 notes: |
   Source: https://www.aeon.co.th/aeon/cards/aeon-rabbit-platinum-card (user, 2026-09-28).
   - 5% on LINE Pay (`LINEPAY*…`) and Rabbit card auto top-up (`BANGKOK SMARTCARD SYSTEM`, BTS).
+  - Not on LINE Pay payments to mobile operators (user, 2026-11-01, from the card's 5% conditions):
+    `LINEPAY*LP_AIS SERVICE …` (AIS bills and top-ups) is excluded. Add True / dtac's LINE Pay
+    strings to `exclude_patterns` when they first appear.
   - 1% on MRT Purple Line card top-up — no merchant string seen yet, so no tier; add one
     when the first row appears.
   - Caps the schema can't express: ฿50 cashback per transaction (so the 5% tier tops out

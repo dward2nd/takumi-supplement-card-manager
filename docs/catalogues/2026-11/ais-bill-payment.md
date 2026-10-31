@@ -10,6 +10,11 @@ researched: 2026-11-01
 
 A new page about a bill, not a shop: Takumi's AIS postpaid bill (and any AIS Fibre bill, prepaid top-ups and add-on packages), paid every month. The question is which card and which channel return the most on a ฿2,000 (or ฿500) bill. Confidence labels: **V** verified on the official page today · **R** my reading of official terms · **T** third-party only · **U** unverified. Point values follow [[all-spend]]: Krungsri ฿0.08 · First Choice ≈ ฿0.09 · K Point ฿0.10 · KTC ฿0.10 · UOB ≈ ฿0.104 · The 1 ฿0.125.
 
+> **Correction (user, 2026-11-01), after the page was first written:**
+> - **AEON Rabbit's 5% doesn't cover an AIS bill.** Its conditions leave out LINE Pay payments to mobile operators, so §4.5 and the AEON Rabbit rows in §5–§6 are wrong. `aeon-rabbit-cashback.yaml` now excludes `LP_AIS`.
+> - **KBank LINE Points does earn on an AIS bill paid through LINE Pay**, at the card's LINE Pay rate: 3% per whole ฿1,000 of the month's LINE Pay spend up to ฿10,000, then 5%, ≤ 400 LINE POINTS a month. So ฿60 on a ฿2,000 bill. §4.8 and §5's "very likely none" read the booklet's MCC 4814 / 7399 exclusion, which applies to the 1% base rate, not to the LINE Pay rate. Paying by card directly in myAIS still earns nothing on this card.
+> - The page ranks it second, after Krungsri NOW, and ahead of First Choice.
+
 ## 1. Headline
 
 1. **Krungsri NOW in the myAIS app is still the best regular choice: 5% (฿100 on ฿2,000)**, but its ฿300 a month is shared with Baiboon's online spending on the same account (§2.3). Pay ฿2,000, not ฿1,999: it counts whole ฿500 blocks.

@@ -468,11 +468,11 @@ From [[2026-11/ais-bill-payment]]. A monthly bill, so per-slip campaigns rarely 
 | Krungsri NOW 5% online | Krungsri Card | ฿25 per whole ฿500 a slip in myAIS; ≤ ฿300 a month per account, **shared with Makro PRO and Shopee** | 2026 | card benefit |
 | KTC `BIL` (`ais-pointredemption`) | KTC | 399 points → ฿50 per bill ≥ ฿399 (myAIS or AIS Shop); `BIL` → 061-384-5000 | 1 Jul 2026 – 31 Mar 2027 | `ais-pointredemption-1` (Jan–Jun 2026) → this |
 | KBank Smart Bill Pay `ACCS260499` | KBank | ฿100 per new auto-debit provider (AIS, AIS Fibre …) after 3 debits, ≤ ฿900 | apply 1 Oct – 31 Dec 2026 | — |
-| AEON Rabbit LINE Pay 5% · AEON Next Gen 5% online | AEON | ≤ ฿50 a transaction | standing | card benefits |
+| AEON Next Gen 5% online | AEON | ≤ ฿50 a transaction (AEON Rabbit's LINE Pay 5% excludes mobile-operator bills, user 2026-11-01) | standing | card benefit |
 | Lotus's SMP1 | Lotus's | phone bills a named category; ฿70 per ฿3,500 of category spend | to 31 Dec | — |
 | CardX first card (`dacq-q42026-1stcard1500stb`) | CardX | Starbucks ฿1,000 for an AIS auto-debit (new CardX customers) | approved by 31 Dec | — |
 | CLICX × AIS Points ×10 · AIS × SCB CardX `PTE1` / `PTE5` | CLICX · CardX | — | ended 31 Aug 2026 · ran Jul–Sep 2025 | → none |
-| KBank LINE Points | KBank | **nothing**: MCC 4814 and 7399 (mPay) earn no LINE POINTS | standing | — |
+| KBank LINE Points through LINE Pay | KBank | 3% per whole ฿1,000 of the month's LINE Pay spend to ฿10,000, then 5%, ≤ 400 LINE POINTS a month; AIS bills through LINE Pay earn it (user, 2026-11-01). A direct card payment earns nothing (MCC 4814 / 7399) | standing | — |
 
 ### Bangchak (page D, from 1 Nov 2026)
 
