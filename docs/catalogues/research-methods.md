@@ -214,4 +214,11 @@ Six researchers in parallel for Makro, GO Wholesale, Shopee, The 1, Shell and PT
   - **ais.th** (Adobe AEM) gives the full page to curl, but the body is buried in navigation, so anchor on a figure from the offer. `/consumers/promotions/bank-financial` is AIS's bank-deal hub.
 - **KBank PDFs** (`/SiteCollectionDocuments/…pdf`) are 403 to curl: `fetch()` them from inside any KBank page in headless Chrome. The LINE POINTS booklet's Thai text layer is garbled; render the pages with `pdftoppm` and read the images.
 - **mitihoon.com** sits behind a Cloudflare challenge; **droidsans.com** reads with curl and often carries the same press release.
+- **Bangchak** ([[2026-11/bangchak]]):
+  - bangchak.co.th sits behind Radware (curl is redirected to `validate.perfdrive.com`), but headless Chrome over CDP opens it. `sitemap.xml` reads with curl.
+  - Fuel prices: `https://oil-price.bangchak.co.th/ApiOilPrice2/th`, JSON with plain curl.
+  - bcpgreenmiles.com (Green Miles) blocks curl, headless Chrome and r.jina.ai; the App Store lookup (`id=459028545`) carries the programme's description.
+- **A KTC page's headline can be stale** while its offer box, T&C and banner agree (the 9-point Hi Premium coupon); read the banner when they disagree.
+- **An empty CardX category** renders "ขออภัย ไม่พบผลลัพธ์": a reliable sign there's nothing in it.
+- **Look for a per-slip rounding example in the ledger before guessing.** Baiboon's ฿1,000 Krungsri JCB slip at a Bangchak station earned exactly ฿7, which settles "per whole ฿700".
 

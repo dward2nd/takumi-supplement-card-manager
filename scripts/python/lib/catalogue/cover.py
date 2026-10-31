@@ -81,6 +81,8 @@ PRESETS: dict[str, CoverTheme] = {
                         cards=(("#00A3AD", "Lotus's"), _UOB, _FC, ("#1B3F94", "KTC UnionPay"), ("#E4002B", "T1 REDZ"))),
     "ptt": CoverTheme("#1D4F9E", "#1A4890", "#0B2C63", "#BFE0FF", pad=50,
                       cards=(("#00A3AD", "Lotus's"), _KTC, ("#E4002B", "T1 REDZ"), _FC, _KS)),
+    "bangchak": CoverTheme("#0E5B3A", "#0C5334", "#06331F", "#C9F2D8",
+                           cards=(("#00A3AD", "Lotus's"), _TTB, _FC, _KS, ("#E60012", "KTC UnionPay"))),
 }
 
 

@@ -16,7 +16,7 @@ Every [[../databases/promotion-catalogues|Promotion Catalogues]] page (a Thai re
 
 ### November 2026 — researched 2026-11-01
 
-Pages: `Makro — Nov 2026`, `GO Wholesale — Nov 2026`, `Shopee — Nov 2026`, `The 1 — Nov 2026`, and two new merchants, `Shell — Nov 2026` and `PTT — Nov 2026` (petrol stations; the household's fills are ฿450–800, so per-slip minimums decide the plan); `AIS Bill Payment — Nov 2026` the same day.
+Pages: `Makro — Nov 2026`, `GO Wholesale — Nov 2026`, `Shopee — Nov 2026`, `The 1 — Nov 2026`, and two new merchants, `Shell — Nov 2026` and `PTT — Nov 2026` (petrol stations; the household's fills are ฿450–800, so per-slip minimums decide the plan); `AIS Bill Payment — Nov 2026` and `Bangchak — Nov 2026` the same day.
 
 - [[2026-11/krungsri-group]] — Krungsri Card, First Choice, XU, Lotus's: SU1 / SU2 (GO and Tops, no Makro), CRC (฿2,000 at ฿10,000 in Central Retail stores, first 2,200), PaySave II (PTT 5% at ≥ ฿1,000), NW4's new Makro wording, Lotus's ดีต่อใจ fuel code, Lotus's coins leave fuel on 1 Dec
 - [[2026-11/the1]] — The 1 membership, the Central The 1 card (184 promotions: GWS4, SE11, SO11, RBS1, CPN Year End, Super Burn Day, TYE, EVT3), GO Wholesale's own deals and point burns, network offers at Central Retail
@@ -26,6 +26,7 @@ Pages: `Makro — Nov 2026`, `GO Wholesale — Nov 2026`, `Shopee — Nov 2026`,
 - [[2026-11/fuel-stations]] — Shell and PTT themselves: operators, slip descriptors (`SHELL 0583F CO …`, `PTTST.C` / `PTTST.D` / `PTTRM_`), Shell GO+, blueplus+, own offers, prices, logos
 - [[2026-11/all-spend]] — offers that name no merchant; every household card × merchant table; the points notices that end earning at Makro; the ฿500 fill at Shell and PTT; welcome offers
 - [[2026-11/ais-bill-payment]] — AIS bills (myAIS, auto-debit, wallets) and every card that pays on them
+- [[2026-11/bangchak]] — Bangchak and BSRC (ex-Esso): Krungsri Bangchak700 + BXP, ttb BCG, Lotus's 3%, KTC's four Bangchak campaigns, KBank points, Bangkok Bank's rebate (ends 30 Nov), UnionPay QR at the pump (ledger), Green Miles, the fill size each campaign needs
 
 ### October 2026 — researched 2026-10-01
 

@@ -36,7 +36,7 @@ One page in the [[../../../docs/databases/promotion-catalogues|Promotion Catalog
 
    Each Bureau row overlapping the month comes back with `pooled_spend`, `credit`, `cap` and `left`.
 3. **Write the body as Markdown** in the page format below, to a file in the scratchpad.
-4. **Pick the cover and icon.** The logo is a Wikimedia Commons file (`commons:Makro logo.svg`), an image URL, or a local file; the brand's own site often has one when Commons doesn't (the T1 mark: `https://www.centralthe1card.com/getmedia/92566f51-45ec-4d34-9ef1-38430794d1b2/T1_Sq_1080.jpg`). An icon-only logo takes `logo_text` for a wordmark (TikTok Shop). Presets: `makro`, `go-wholesale`, `shopee`, `lazada`, `tiktok-shop`, `central-the-1` (black, like the T1 mark), `shell` (yellow; logo `https://upload.wikimedia.org/wikipedia/en/thumb/e/e8/Shell_logo.svg/960px-Shell_logo.svg.png` with `logo_text` "Shell"), `ptt` (blue; `commons:PTT-01.svg`); a new merchant gets a theme dict (brand colour, darker stripe, floor band, the issuers' card colours, and `textcolor` for the month when the banner is light). GO's logo is `commons:GO Wholesale Logo.svg`, Shopee's `commons:Shopee.svg`. **Keep the gallery's tones varied** (user, 2026-10-01): most retail brands are red or orange, so a brand whose mark is black gets a black cover, and the top card of the fan must stand out from the background.
+4. **Pick the cover and icon.** The logo is a Wikimedia Commons file (`commons:Makro logo.svg`), an image URL, or a local file; the brand's own site often has one when Commons doesn't (the T1 mark: `https://www.centralthe1card.com/getmedia/92566f51-45ec-4d34-9ef1-38430794d1b2/T1_Sq_1080.jpg`). An icon-only logo takes `logo_text` for a wordmark (TikTok Shop). Presets: `makro`, `go-wholesale`, `shopee`, `lazada`, `tiktok-shop`, `central-the-1` (black, like the T1 mark), `shell` (yellow; logo `https://upload.wikimedia.org/wikipedia/en/thumb/e/e8/Shell_logo.svg/960px-Shell_logo.svg.png` with `logo_text` "Shell"), `ptt` (blue; `commons:PTT-01.svg`), `bangchak` (deep green; `commons:Bangchak Corporation logo.svg`); a new merchant gets a theme dict (brand colour, darker stripe, floor band, the issuers' card colours, and `textcolor` for the month when the banner is light). GO's logo is `commons:GO Wholesale Logo.svg`, Shopee's `commons:Shopee.svg`. **Keep the gallery's tones varied** (user, 2026-10-01): most retail brands are red or orange, so a brand whose mark is black gets a black cover, and the top card of the fan must stand out from the background.
 5. **Dry-run, look at the cover, then write.** Read the rendered `cover_file`: the logo must be fully visible on its white plate.
 
 ```sh
@@ -48,7 +48,7 @@ uv run --project scripts/python scripts/python/write-catalogue/cli.py --input sp
 |---|---|
 | `page` | exact Name, `<Merchant> — <Mon YYYY>` (`Makro — Oct 2026`) |
 | `start`, `end` | the month; needed to create, corrected when they differ |
-| `icon` | an emoji (Makro 🛒, GO Wholesale 🧺, Shopee 🛍️, Lazada 💗, TikTok Shop 🎵, The 1 💳, Shell 🐚, PTT ⛽) |
+| `icon` | an emoji (Makro 🛒, GO Wholesale 🧺, Shopee 🛍️, Lazada 💗, TikTok Shop 🎵, The 1 💳, Shell 🐚, PTT ⛽, Bangchak ⛽, AIS Bill Payment 📱) |
 | `cover` | `{logo, logo_text?, period?, subtitle, theme}`; `period` defaults to the Thai month of `start` (`ตุลาคม 2569`) |
 | `replace_cover` | upload a new cover over an existing one (default: only when the page has none) |
 | `cover_out` | where to save the rendered JPEG (default: a temp dir) |
