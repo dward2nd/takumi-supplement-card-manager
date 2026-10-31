@@ -45,6 +45,7 @@ class CoverTheme:
     stripe: str                   # the darker diagonal stripes
     deep: str                     # the floor band
     subcolor: str = "#FFFFFF"     # the subtitle
+    textcolor: str = "#FFFFFF"    # the month; dark on a light banner (Shell yellow)
     pad: int = 60                 # the logo's padding inside the plate
     cards: tuple[tuple[str, str], ...] = field(default_factory=tuple)  # (colour, label), the issuers on the page
 
@@ -75,6 +76,11 @@ PRESETS: dict[str, CoverTheme] = {
     "central-the-1": CoverTheme("#111111", "#1B1B1B", "#E4002B", "#FFB8C4", pad=80,
                                 cards=(("#6E6E6E", "T1 Grey"), ("#1A1F71", "Visa"), _KS,
                                        ("#F79E1B", "Mastercard"), ("#2B2B2B", "T1 Black"), ("#E4002B", "T1 REDZ"))),
+    # Shell yellow with the month in Shell red; PTT blue with a yellow card on top (Nov 2026).
+    "shell": CoverTheme("#FBCE07", "#F3C300", "#DD1D21", "#7A0C10", textcolor="#C8102E",
+                        cards=(("#00A3AD", "Lotus's"), _UOB, _FC, ("#1B3F94", "KTC UnionPay"), ("#E4002B", "T1 REDZ"))),
+    "ptt": CoverTheme("#1D4F9E", "#1A4890", "#0B2C63", "#BFE0FF", pad=50,
+                      cards=(("#00A3AD", "Lotus's"), _KTC, ("#E4002B", "T1 REDZ"), _FC, _KS)),
 }
 
 
@@ -173,7 +179,7 @@ def render(logo: Image.Image, period: str, subtitle: str, theme: CoverTheme, out
     img.alpha_composite(mark, (x0 + (x1 - x0 - mark.width) // 2, y0 + (y1 - y0 - mark.height) // 2))
 
     d = ImageDraw.Draw(img)
-    d.text((1000, 300), period, font=font(86), fill=white)
+    d.text((1000, 300), period, font=font(86), fill=_rgb(theme.textcolor))
     d.text((1004, 420), subtitle, font=font(44, 3), fill=_rgb(theme.subcolor))
     d.rectangle([0, H - 110, W, H], fill=deep)
     d.text((116, H - 88), "Promotion Catalogues", font=font(48), fill=white)

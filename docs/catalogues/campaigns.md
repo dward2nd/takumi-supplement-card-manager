@@ -9,8 +9,8 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 - **ended**: look for the successor;
 - **not published yet**: look again.
 
-- **Pages**: **M** Makro · **G** GO Wholesale · **S** Shopee · **T** The 1 (Central The 1 in Sep) · **L** Lazada · **K** TikTok Shop. Lazada and TikTok Shop were Sep only. · **H** Sriphat Medical Center · **Y** Yunomori Onsen & Spa (both from Oct 2026) · **E** Thaiticketmajor (event tickets, from 3 Oct 2026) · **A** Apple Products (Apple and its resellers, from 3 Oct 2026) · **U** UNIQLO (from 5 Oct 2026) · **J** Jampha Savemart (แจ่มฟ้า, from 6 Oct 2026) · **C** CMU Tuition (Chiang Mai University's semester fees, page dated Nov 2026, researched 22 Oct 2026).
-- **Detail**: each month's research reports: [[2026-10/krungsri-group|Krungsri group]] · [[2026-10/the1|The 1]] · [[2026-10/kbank-cardx-uob-ttb|KBank / CardX / UOB / ttb]] · [[2026-10/ktc-aeon-other-banks-networks|KTC / AEON / other banks / networks]] · [[2026-10/merchants-wallets|merchants and wallets]] · [[2026-10/all-spend|offers that name no merchant]] · hospital and spa (2 Oct): [[2026-10/sriphat|Sriphat]] · [[2026-10/yunomori|Yunomori]] · [[2026-10/health-beauty-spa|health, beauty and spa campaigns]] · [[2026-10/all-spend-hospital-spa|offers that name no merchant, at a hospital and a spa]] · Thaiticketmajor (3 Oct): [[2026-10/thaiticketmajor|the merchant]] · [[2026-10/ticketing-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/ticketing-other-banks-networks|other banks and networks]] · [[2026-10/all-spend-ticketing|offers that name no merchant, at a ticket agency]] · UNIQLO (5 Oct): [[2026-10/uniqlo|the merchant]] · [[2026-10/uniqlo-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/uniqlo-uob-kbank-ttb-others|UOB, KBank, ttb, CardX, other banks]] · [[2026-10/all-spend-uniqlo|offers that name no merchant, at UNIQLO]] · Jampha (6 Oct): [[2026-10/jampha|the merchant]] · [[2026-10/supermarket-jampha-banks|bank and network campaigns]] · [[2026-10/all-spend-jampha|offers that name no merchant, wallets, card earning]] · CMU tuition (22 Oct): [[2026-10/cmu-tuition|CMU's channels and fees]] · [[2026-10/education-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/education-uob-kbank-ttb-others|UOB, KBank, ttb, CardX, other banks]] · [[2026-10/all-spend-tuition|offers that name no merchant, at a tuition payment]].
+- **Pages**: **M** Makro · **G** GO Wholesale · **S** Shopee · **T** The 1 (Central The 1 in Sep) · **L** Lazada · **K** TikTok Shop. Lazada and TikTok Shop were Sep only. · **H** Sriphat Medical Center · **Y** Yunomori Onsen & Spa (both from Oct 2026) · **E** Thaiticketmajor (event tickets, from 3 Oct 2026) · **A** Apple Products (Apple and its resellers, from 3 Oct 2026) · **U** UNIQLO (from 5 Oct 2026) · **J** Jampha Savemart (แจ่มฟ้า, from 6 Oct 2026) · **C** CMU Tuition (Chiang Mai University's semester fees, page dated Nov 2026, researched 22 Oct 2026). · **F** Shell · **P** PTT (petrol stations, from Nov 2026) · **B** AIS Bill Payment (from Nov 2026).
+- **Detail**: each month's research reports: [[2026-10/krungsri-group|Krungsri group]] · [[2026-10/the1|The 1]] · [[2026-10/kbank-cardx-uob-ttb|KBank / CardX / UOB / ttb]] · [[2026-10/ktc-aeon-other-banks-networks|KTC / AEON / other banks / networks]] · [[2026-10/merchants-wallets|merchants and wallets]] · [[2026-10/all-spend|offers that name no merchant]] · hospital and spa (2 Oct): [[2026-10/sriphat|Sriphat]] · [[2026-10/yunomori|Yunomori]] · [[2026-10/health-beauty-spa|health, beauty and spa campaigns]] · [[2026-10/all-spend-hospital-spa|offers that name no merchant, at a hospital and a spa]] · Thaiticketmajor (3 Oct): [[2026-10/thaiticketmajor|the merchant]] · [[2026-10/ticketing-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/ticketing-other-banks-networks|other banks and networks]] · [[2026-10/all-spend-ticketing|offers that name no merchant, at a ticket agency]] · UNIQLO (5 Oct): [[2026-10/uniqlo|the merchant]] · [[2026-10/uniqlo-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/uniqlo-uob-kbank-ttb-others|UOB, KBank, ttb, CardX, other banks]] · [[2026-10/all-spend-uniqlo|offers that name no merchant, at UNIQLO]] · Jampha (6 Oct): [[2026-10/jampha|the merchant]] · [[2026-10/supermarket-jampha-banks|bank and network campaigns]] · [[2026-10/all-spend-jampha|offers that name no merchant, wallets, card earning]] · CMU tuition (22 Oct): [[2026-10/cmu-tuition|CMU's channels and fees]] · [[2026-10/education-krungsri-ktc-aeon|Krungsri group, KTC, AEON]] · [[2026-10/education-uob-kbank-ttb-others|UOB, KBank, ttb, CardX, other banks]] · [[2026-10/all-spend-tuition|offers that name no merchant, at a tuition payment]]. · **November 2026** (1 Nov): [[2026-11/krungsri-group|Krungsri group]] · [[2026-11/the1|The 1, Central The 1, GO]] · [[2026-11/kbank-cardx-uob-ttb|KBank / CardX / UOB / ttb]] · [[2026-11/ktc-aeon-other-banks-networks|KTC / AEON / other banks / networks]] · [[2026-11/merchants-wallets|merchants and wallets]] · [[2026-11/fuel-stations|Shell and PTT]] · [[2026-11/all-spend|offers that name no merchant, card earning, fuel]] · [[2026-11/ais-bill-payment|AIS bill payment]].
 - **Figures** are the October terms unless marked; the reports have every tier and source.
 
 ## First Choice and XU
@@ -401,3 +401,61 @@ From [[2026-10/cmu-tuition]], [[2026-10/education-krungsri-ktc-aeon]], [[2026-10
 | `IPW887` | UOB | card fee waived at 54 international schools and SIIT | to Dec 69 (page slug) | — |
 | Lotus's invited Q4 (`small-ticket-a/b-q4-26`, `shopping-shopplearn-a/b-q426`) | Lotus's | ฿1,250 on a slip ≥ ฿50,000 · ฿600 per ฿50,000 a month; **no education or government exclusion**; invitation shows only in UCHOOSE | 1 Oct – 31 Dec | listed under Lotus's above |
 | TrueMoney × Visa PromptPay | TrueMoney | a linked Visa pays any PromptPay QR with no fee (`TMN*PROMPTPAY30`), so First Choice keeps NW4 on CMU's free QR; whether it takes CMU's bill-payment QR and ฿60,000+ is untested | standing | — |
+
+## November 2026 (researched 1 Nov)
+
+What changed on 1 Nov, from the [[2026-11/krungsri-group|November reports]]; each report's own lineage table has every row. The issuer tables above still carry the October terms. Read this section first next month, then those tables.
+
+### Points at Makro stopped on most cards
+
+Krungsri Card and First Choice (from 1 Nov), Central The 1 (1 Nov), ttb (points and so smart's 1%, 3 Nov), KBank K Point (current terms), KTC VISA (since 1 Sep). Cash campaigns aren't touched. NW4's exclusion line now reads "MCC 5199 อาทิ Makro และ Makro PRO", and Makro PRO's copy of NW4 says Makro counts only through a card linked in TrueMoney at a branch. Settle it from UCHOOSE's NW4 eligible list for October.
+
+### Successors and new campaigns
+
+| Campaign | Issuer | Pays | Nov 2026 | Pages | Chain |
+|---|---|---|---|---|---|
+| **SU1 / SU2** | Krungsri Card | GO (+ app) and Tops per slip ฿30 / 110 / 250, ฿250 a month; ฿500 at ฿50,000 (first 1,200) | 1 Nov – 31 Jan; terms on GO's site only; no Makro | G T | SUP1 / SUP2 → SU1 / SU2 (CardX also has SU1 / SU2) |
+| **CRC** | Krungsri Card | ฿2,000 at ฿10,000 in Central Retail stores incl. GO, Tops; SMS only, first 2,200 | 1–30 Nov | G T | Nov 2025 CRC (฿800) → CRC |
+| GOH | Krungsri Card | GO hampers ฿100 / ฿400 | 28 Oct – 5 Jan | G | — |
+| **PaySave II** (`SAVE`) | Krungsri Card, Lotus's, Central The 1 (separate registrations) | PTT 5% on ≥ ฿1,000 (≤ ฿100 a month); dining 10% on ≥ ฿1,000; travel 3%; +฿500 | 1 Nov – 28 Feb | P T | PTT2, EAT, Central The 1 `PTT` → PaySave II |
+| HALO · JSU | Krungsri Card | — | ended, no successor | G T | — |
+| `KCCNOV26L/–/M/H`, `KCC170FRI`, `KCCSPMALL11` | Krungsri Card | Shopee ฿150 / 1,400 … ฿3,800 / 38,000 | new monthly page | S | — |
+| `11SPKFVPH` / `11SPKFV` · `KFVNOV150/350` · `KSCINS11` · `KCC9AP11` / `KSCAP11` · `LOTUSCR11` | First Choice, Krungsri, Lotus's | Shopee 11.11 and monthly | Nov; `LOTUSCR` ends 30 Nov | S | → DEC codes |
+| ONQ3 | Krungsri Card | online ladder | last month, no ONQ4 | S | — |
+| Lotus's ดีต่อใจ (`CDP11`, `CRS11`, **`CGS11` fuel**) | Lotus's (invited) | ฿100 on one ≥ ฿500 slip per category | Nov round, register monthly | T F P | monthly |
+| Lotus's coins at fuel | Lotus's | — | **none from 1 Dec** | F P | — |
+| LOTA / LOTB → **LOA / LOB** | Krungsri Card | Lotus's stores | 1 Nov – 31 Jan | — | LOTA → LOA |
+| SMT2 | Lotus's | — | ended, no SMT3 | T | — |
+| GWS3 → **GWS4** · **GWSE** · **GWNY** | Central The 1 | GO per slip; +฿300 at ฿50,000; hampers | GWS4 to 31 Jan; GWSE to 24 Nov | G T | GWS3 → GWS4 |
+| SE10 → **SE11** · SO10 → **SO11** | Central The 1 | Shell ฿100 on ≥ ฿100 · Starbucks ฿100 coupon; first 1,500 a month | Dec: SE12 / SO12 | F T | monthly |
+| EVT2 → **EVT3** · TNL → **TYE** | Central The 1 | EV charging (EV Station PluZ counts) · online ladder (Makro excluded) | to 28 Feb | P S T | — |
+| **CDS79**, **RPAY10**, **RBS1**, Central App 11.11, **CPN Year End**, **Super Burn Day**, PWB4 | Central The 1 | department stores, malls, points burn 20% / 13% | Nov | T | CMN3 / RPAY9 → these |
+| GO Super Burn Weekend · 3rd-anniversary coupons | GO (The 1 members) | ฿0.20–0.25 a point | to 27 Dec / 10–24 Nov | G T | (missed in Oct) |
+| Caltex × The 1 | The 1 | 1 point a litre; 800 → ฿100 | **ends 30 Nov** | T | — |
+| Visa × Central Retail ฿500 | Visa | — | ended, no successor | G T | — |
+| HYP → **TSU** | KBank | supermarkets ฿75 / 300 / 700 / 1,250 a month; Makro out; `TSU` → 4545888 | 1 Nov – 28 Feb | G T | HYP → TSU |
+| PLUSTINUM Season 3 | KBank | — | ended, no Season 4 (monthly e-coupon continues) | M G | — |
+| **DBD** | KBank | Shopee / Lazada / TikTok / LINE MAN ฿70–1,250 | 10–12 Nov, 11–13 Dec | S | DBD Aug–Oct → Nov–Dec |
+| BLUE card `BCC` | KBank (not held) | K Point → 20% at PTT | to 31 Dec | P | — |
+| HY1 / **HYP full** · **OEC** · OSD · `CXSPM11` · ShopeeFood | CardX | HYP rights full; OEC monthly ladder (missed in Oct); OSD 20% on 10–12, 25–30 Nov; no ShopeeFood code | Nov | M G S | CARDXOCT → none |
+| Makro PRO double day | UOB (UOB Makro) | ฿100 / ฿220 per slip | 10.10 was MPW838; 11.11 not published on 1 Nov | M | MPW765 → MPW838 → ? |
+| MPW827 · MPW841 | UOB | Makro i-Plan (interest) · hampers | Q4 | M | MPW611 → MPW827 |
+| **SPW109** (`USC` / `SCP`) | UOB | Shell / Caltex 1 / 2 / 3% per whole ฿800; points 8% | 1 Feb 2026 – 31 Jan 2027 (not catalogued before) | F | SPW371 (2025) → SPW109 |
+| **YPW847** (`NL`) | UOB | points → 15% at Shopee / Lazada / TikTok, slip ≥ ฿1,000; World / Premier | 1 Nov – 31 Dec | S | — |
+| ttb so smart 1% at Makro | ttb | — | **excluded from 3 Nov** (Makro PRO unstated) | M | — |
+| `TTBNOV` · `TTBPREM11` · **`11TTBPREM`** | ttb | Shopee ฿200 / 2,000 · ฿650 / 2,500 · ฿1,800 / 6,000 (11 Nov) | Nov | S | → DEC |
+| **KTC × PTT** (`PTT` 3% ≥ ฿1,000 · JCB ฿45 e-coupon ≥ ฿900 · **`PTP` points → 15%**) | KTC | PTT Station | 1 Nov – 28 Feb | P | Jul–Oct round (13% points only at ≥ ฿1,000) → this |
+| `KTC11` / `11H` / `11HH`, `KTCUPI11` / `11H`, `KTCPREM11`, **`11KTCPREM`**, 1,599-point ฿300 code | KTC | Shopee | Nov | S | KTC10 → KTC11 |
+| KTC JCB ×2 / ×3 / ×5 (Central, Robinson) | KTC | points | renewed 1 Nov – 31 Jan | T | — |
+| KTC supermarket points cap | KTC | ฿20,000 per MCC per card a month at 5310 / 5333 / 5411 / 5499 | **from 1 Dec** | M G | — |
+| **AEON "แม็คโคร"** (`makro-2026`) | AEON | Makro stores 1.2% on ≥ ฿5,000 slips, ฿350 a cycle, +฿1,400 at ฿300,000; no Makro PRO | 11 Oct 2026 – 10 Apr 2027 (missed in Oct) | M | — |
+| AEONOCT → **AEONNOV** | AEON | Shopee ฿180 / 1,099 twice a month | new campaign 1 Nov – 28 Feb | S | → AEONDEC |
+| AEON YEAR END 2027 | AEON | ฿800 Magic Gift Card at CPN tenants | 30 Oct – 3 Jan | T | — |
+| BSUP → (none) · **BNYB** | Bangkok Bank | BNYB points → 12 / 15 / 18% at supermarkets (on Makro PRO's page) | 1 Nov – 28 Feb | M | BSUP → BNYB (reading) |
+| UnionPay QR `260723112620` → **`…621`** | UnionPay (KTC UnionPay) | 6%, ≤ ฿60 a slip, ≤ ฿300 a card a month | Nov; works at some Shell stations (ledger) | F (P ?) | monthly |
+| Makro PRO partnership hub · Instant Discount · ShopeePay | Makro | ฿280 off ฿17,000 (1–4 Nov); ShopeePay ฿200 / ฿3,000 (dates conflict) | Nov | M | — |
+| Shopee 11.11 | Shopee | collect from 8 Nov, use 10–13 Nov | Nov | S | — |
+| Shell V-Power Club litre discounts · biker deal · Shell Plus Package | Shell | ended 31 Oct · 5 fills → 100 points · ฿299 / ฿599 / ฿1,699 packs | Nov | F | — |
+| Self Serve ฿1/L · blueplus+ wallet ฿100 · Smooth Bag | OR (PTT) | ended 31 Oct (check the app) · first wallet payment ≥ ฿300 · stamps on ≥ ฿1,000 | Nov | P | — |
+| ไทยช่วยไทยพลัส 60/40 (เพิ่มเติม) | government | — | ends 30 Nov; no Makro, GO, Shell, PTT | M G F P | — |
+

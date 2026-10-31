@@ -14,6 +14,19 @@ Every [[../databases/promotion-catalogues|Promotion Catalogues]] page (a Thai re
 
 ## Months
 
+### November 2026 — researched 2026-11-01
+
+Pages: `Makro — Nov 2026`, `GO Wholesale — Nov 2026`, `Shopee — Nov 2026`, `The 1 — Nov 2026`, and two new merchants, `Shell — Nov 2026` and `PTT — Nov 2026` (petrol stations; the household's fills are ฿450–800, so per-slip minimums decide the plan); `AIS Bill Payment — Nov 2026` the same day.
+
+- [[2026-11/krungsri-group]] — Krungsri Card, First Choice, XU, Lotus's: SU1 / SU2 (GO and Tops, no Makro), CRC (฿2,000 at ฿10,000 in Central Retail stores, first 2,200), PaySave II (PTT 5% at ≥ ฿1,000), NW4's new Makro wording, Lotus's ดีต่อใจ fuel code, Lotus's coins leave fuel on 1 Dec
+- [[2026-11/the1]] — The 1 membership, the Central The 1 card (184 promotions: GWS4, SE11, SO11, RBS1, CPN Year End, Super Burn Day, TYE, EVT3), GO Wholesale's own deals and point burns, network offers at Central Retail
+- [[2026-11/kbank-cardx-uob-ttb]] — KBank TSU (HYP's successor), DBD 10–12 Nov, BLUE card at PTT; CardX OEC and HYP full; UOB SPW109 (Shell / Caltex) and YPW847; ttb so smart's Makro exclusion, Shopee codes
+- [[2026-11/ktc-aeon-other-banks-networks]] — KTC × PTT (3%, JCB ฿45, PTP 15%), KTC Shopee codes, AEON Makro in-store 1.2%, AEONNOV, BSUP ended, UnionPay QR November, Visa / JCB / UnionPay at the six merchants
+- [[2026-11/merchants-wallets]] — Makro PRO's partnership hub, Instant Discount, ShopeePay at Makro, Shopee 11.11 dates, TrueMoney, 60/40
+- [[2026-11/fuel-stations]] — Shell and PTT themselves: operators, slip descriptors (`SHELL 0583F CO …`, `PTTST.C` / `PTTST.D` / `PTTRM_`), Shell GO+, blueplus+, own offers, prices, logos
+- [[2026-11/all-spend]] — offers that name no merchant; every household card × merchant table; the points notices that end earning at Makro; the ฿500 fill at Shell and PTT; welcome offers
+- [[2026-11/ais-bill-payment]] — AIS bills (myAIS, auto-debit, wallets) and every card that pays on them
+
 ### October 2026 — researched 2026-10-01
 
 Pages: `Makro — Oct 2026`, `GO Wholesale — Oct 2026`, `Shopee — Oct 2026`, `The 1 — Oct 2026`; on 2 Oct, `Sriphat Medical Center — Oct 2026` and `Yunomori Onsen & Spa — Oct 2026`; on 3 Oct, `Thaiticketmajor — Oct 2026` and `Apple Products — Oct 2026`; on 5 Oct, `UNIQLO — Oct 2026`; on 6 Oct, `Jampha — Oct 2026`; on 22 Oct, `CMU Tuition — Nov 2026` (dated November because CMU's payment window opens on 30 Nov).

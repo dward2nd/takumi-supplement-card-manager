@@ -167,3 +167,46 @@ A university's fee page, not a shop: the work was finding how CMU takes money an
 - **CardX** rebuilt its site (Next.js, `/th-TH/…`): the Meili search key is read at runtime and no longer in a bundle, and old `/credit-card/promotion/<slug>` links 404. The catalogue `/th-TH/credit-card/promotion` loads tiles client-side: click a category (`การศึกษา`) over CDP and read `document.body.innerText` and the `a[href*="promotion/"]` links. Tier tables and institution logos are in banners on `cdx-prod-ssc-frontend.cardx.co.th` (curl works).
 - **Central The 1 `ED1`**: the `gcspromotion` item `education-202608` carries last year's dates in its description; the 2026 dates, tiers and SMS code are only on its poster.
 - **Wikimedia rate-limits this machine** (HTTP 429 on the API and `upload.wikimedia.org`): take the logo from the merchant's own site (CMU's wordmark: `www1.reg.cmu.ac.th/scbqr/reg-portal/images/cmu-logo-sub.png`, 1920×960 PNG).
+
+## November 2026 (1 Nov)
+
+Six researchers in parallel for Makro, GO Wholesale, Shopee, The 1, Shell and PTT, plus one for AIS bill payment. Reports: [[2026-11/krungsri-group]] · [[2026-11/the1]] · [[2026-11/kbank-cardx-uob-ttb]] · [[2026-11/ktc-aeon-other-banks-networks]] · [[2026-11/merchants-wallets]] · [[2026-11/fuel-stations]] · [[2026-11/all-spend]].
+
+- **Read the points-programme exclusions first each month.** They are dated items in the issuers' terms, not campaigns:
+  - Krungsri: `/th/krungsri-point` §2.3 (Makro item (7) from 1 Nov 2026).
+  - First Choice: PDFs linked from `/firstchoice-rewards` (`exemption-of-accumulated-points-mcc-5199.pdf`).
+  - Central The 1: modals on `/th/news-updates` (find `_openCustomModal('<id>')`); the text is only in the image.
+  - Lotus's: `/announcement-corporate/<slug>`, listed in the sitemap; also images.
+  - KTC: PDFs under `/upload/announcement-document/`; a Thai web search finds them faster than the site.
+- **GO Wholesale posts bank campaigns before the banks do.** Krungsri SU1 / SU2 (`kcc-cashback-nov26`) and KBank TSU were on GO's WordPress list (`/wp-json/wp/v2/promotions?per_page=100&search=…`, read inside headless Chrome) before krungsricard.com had them. GO's API also lists pages its own list page doesn't link to (Super Burn Weekend).
+- **makro.pro**:
+  - The homepage banners are in `props.pageProps.dehydratedState.queries[0].state.data.flexiPage.components[*].data`; the `_flexiPage` copy is now `null`.
+  - The **bank and wallet hub** is `/th/fp/partnership`. Its static T&C pages (`/th/static/<handle>`) carry the HTML in `props.pageProps.cmsData.attributes.description`.
+  - Makro PRO's own copy of a bank's terms can add lines the bank's page lacks (First Choice NW4: "for Makro, only a card linked in TrueMoney at a branch").
+- **CardX's rebuilt site renders in headless Chrome now**:
+  - The catalogue `/th-TH/credit-card/promotion` has 17 pages; click through them over CDP and collect `a[href*="/credit-card/promotion/"]`.
+  - Detail pages carry the full T&C in `innerText` after about 15 s.
+- **KBank's T&C accordions are hidden** from `innerText`; strip the saved `outerHTML` instead.
+- **ttb**: headless reached `__NEXT_DATA__` without a warm-up on 1 Nov. A card page's Thai exclusion list can be ahead of the English one (so smart's "รายการใช้จ่ายผ่าน Makro").
+- **UOB's older-path pages** (`/personal/promotions/credit-cards/<slug>/<slug>.page`) have their JSON at `…/promotions/v1/<slug>.json` (SPW109). SMS codes are on the `-d.webp` poster.
+- **bangkokbank.com was rebuilt** (Adobe AEM Edge Delivery). Every promotion is in one JSON, fetched from inside a page on the site: `/apiaem/content/bangkokbank/en/personal/cards/credit-cards/promotions.allpromo.th.json` (232 items). Curl still gets reset; headless Chrome over CDP works.
+- **Visa perks API** needs the page's own body: `POST /offers/api/portal/portal/perks/` with `{"siteId":"www.visa.co.th","perkTypeRequests":[{"requestIdentifier":null,"perkType":"OFFERS","locale":"th_TH","pageRequest":{"index":0,"limit":1000},"perkArguments":{"offerType":"U"}}]}`.
+- **KTC reuses a campaign's URL for the next round** (`ptt-station-cashback`, Jul–Oct → Nov–Feb). The Wayback capture of the same URL gives the previous round; `/web/<ts>id_/` returns gzip. "สิทธิ์ครบจำนวนแล้ว" on a quota box dates when the quota filled.
+- **AEON**: read every index tile whose period overlaps the month, not only new ones. AEON Makro started 11 Oct and was missed in October.
+- **UnionPay `flushProcess`** also returns `totalCount`, so the pool size is readable, not only the share left.
+- **Shell (shell.co.th, Adobe AEM)**:
+  - Append `.model.json` to any page path for its content as JSON; `/th_th/customer/_jcr_content/root/header/inherited_copy.model.json` lists every page.
+  - Fuel prices are an XLSX linked from the fuel-price page model.
+  - The help-centre FAQ is a JS widget that doesn't render headless.
+- **OR (PTT)**:
+  - Prices: SOAP `POST https://orapiweb.pttor.com/oilservice/OilPrice.asmx` (`CurrentOilPrice`, `GetOilPriceProvincial` per province).
+  - Promotions: `https://www.pttor.com/th/promotion` with plain curl; `/wp-json/` shows a maintenance page.
+  - blueplus.com reads through r.jina.ai (`/benefit/point/list`, `/faqs`, `/news-and-promotion/promotion/list`).
+- **Shopee campaign dates**: the App Store lookup JSON (`itunes.apple.com/lookup?id=959841453&country=th`) has the campaign text in `description`.
+- **Logos**:
+  - The Shell pecten is an English-Wikipedia local file, not on Commons: `upload.wikimedia.org/wikipedia/en/thumb/e/e8/Shell_logo.svg/960px-Shell_logo.svg.png`. Thumbnails only come in standard widths (`960px-` works, `800px-` returns 400).
+  - PTT is `commons:PTT-01.svg`; GO is `commons:GO Wholesale Logo.svg`.
+- **The household's ledgers show which payments a merchant takes.** KTC UnionPay rows at 94% of a whole price (฿629.80 = ฿670 × 0.94) show a Shell station took UnionPay QR with the 6% off. Use `fetch-transactions` with `name_contains`, then map `card_ids` with `lib.cards.card_titles_by_id`.
+- **Reuse the other researchers' dumps.** KBank's campaign list, UOB's `data-promotion.json`, Central The 1's `gcspromotion` list and Krungsri's listing JSON were all in the session scratchpad within minutes.
+- **A network drop kills a researcher mid-run** (ENOTFOUND). Resume it with SendMessage rather than starting over; its report file keeps what it wrote.
+
