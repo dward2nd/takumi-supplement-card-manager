@@ -32,12 +32,13 @@ Points are taken 1 for each baht of the slip ("ใช้คะแนนสะส
 The credit prints on Takumi's UOB statement as a `PWP: <merchant>` line. Book it with the pay-with-points pattern (and, when it lands after a statement, the "Bank credits that post after the cut-off" rule under [[../databases/takumi-bills#Payments|Takumi's Bills → Payments]]):
 
 - **Takumi's share** of the slip: the bank's `PWP: …` line in his ledger, `×0`, `% cb` unset. His points come off through a ฿0 `แลกคะแนนแทนค่าใช้จ่าย <n> คะแนน` row with `ใช้คะแนน` n.
+- **Trackers at registration** (user, 2026-11-01: "I didn't find the expected 20% cashback … in the cashback tracker DB"). PWP isn't a Bureau campaign, so no sync makes trackers for it. When a slip is registered, add a tracker row by hand for each holder with a share of the slip: `PWP20 UOB World 20% <merchant> <d Mon>`, `Transaction Date` the meal date, `Card` that holder's UOB World, `Promotion` empty, `Expected Cashback` = rate × that holder's share of the slip. Link the credit row in `Slip Transaction` and tick when it posts ([[../databases/cashback-trackers|cashback trackers]]).
 - **A friend's `[บัตรหลัก]` share**: her credit goes in her ledger (`[หักลบหนี้เก่า] PWP: …` in the meal's cycle, then `PWP: …` and a cancelling `[ยกยอดมาจาก <YYYY-MM>]` in the cycle that prints it). Whoever's points pay for her share get a ฿0 `แลกคะแนนแทนค่าใช้จ่าย` row in their own ledger. Ask how the points and the credit are split when the user hasn't said.
 
 ## Uses
 
 | Meal | Slip | Code | Rows | Points | Credit | Status |
 |---|---|---|---|---|---|---|
-| Fri 30 Oct 2026, `SUSHIRO GH(TH)C.CHIANG BANGKOK TH` (UOB World) | ฿1,760 | `PWP20` | Takumi ฿1,155 + Baiboon `[บัตรหลัก]` ฿605 | 1,760 | ฿352 | Registered (user, 2026-10-30). Credit due by 30 Dec 2026. Split of points and credit not yet decided. |
+| Fri 30 Oct 2026, `SUSHIRO GH(TH)C.CHIANG BANGKOK TH` (UOB World) | ฿1,760 | `PWP20` | Takumi ฿1,155 + Baiboon `[บัตรหลัก]` ฿605 | 1,760 | ฿352 | Registered (user, 2026-10-30). Credit due by 30 Dec 2026. Credit split by share: trackers Takumi ฿231 + Baiboon ฿121 (2026-11-01). Points assumed the same way (1,155 + 605), to confirm when UOB takes them. |
 
 The two rows add up to the one slip: Takumi's ฿1,155 alone is under PWP20's ฿1,500 floor.
