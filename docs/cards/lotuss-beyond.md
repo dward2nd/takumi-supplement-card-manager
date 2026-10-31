@@ -59,6 +59,19 @@ From the card's coin terms (8 Jul 2025 – 31 Dec 2027, <https://www.lotussmoney
 
 Phone bills earn no coins but count toward [[../promotions/lotuss-smp1|SMP1 / SMT2]] (`AMP*AIS SERVICESPaymen BANGKOK TH`, 1 Oct 2026).
 
+**Fuel coins end on 1 Dec 2026**: from then, no coins at any MCC 5541 / 5542 station, Shell and PTT included (Lotus's notice of 25 Oct 2026, [[../catalogues/2026-11/krungsri-group]]). Not encoded yet: `auto_classify` still gives coins at non-Bangchak stations.
+
+## Bangchak 3% cashback
+
+A standing card benefit, separate from the coins. Source: the card page <https://www.lotussmoney.com/credit-card/platinum-beyond> (read 2026-11-01; the user pointed to it the same day).
+- **3% on fuel at participating Bangchak stations, no minimum, no registration.**
+- Counted on at most ฿700 a slip, and on at most 3 slips per primary-account cycle, by posting date. So the most is ฿63 a cycle.
+- Platinum Rewards gets 2%.
+- No coins on those slips. LPG and non-fuel items don't count.
+- Lotus's matches the station by the name on the slip and in its own system. A `BSRC-…` (ex-Esso) slip may not be recognised, so prefer a `BANGCHAK…` station.
+- Not encoded: no promotion YAML or Bureau class yet. The ฿700-a-slip and 3-a-cycle caps aren't a flat rate, so a row's `% cb` can't express them on its own.
+- Catalogue: [[../catalogues/2026-11/bangchak]].
+
 ## Campaigns
 
 - [[../promotions/lotuss-lbs3|LBS3]] — big-ticket categories, Sep–Dec 2026.
