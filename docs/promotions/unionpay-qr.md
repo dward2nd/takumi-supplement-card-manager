@@ -56,6 +56,7 @@ A sighting that came late shows up as warnings: a slip before `Quotas Exceeded D
 |---|---|---|---|
 | Sep 2026 | ฿200.04: Takumi ฿121.74, Baiboon ฿78.30 (of ฿3,797.96) | ฿124.32 (of ฿7,756.68) | gone **12 Sep** (UnionPay's Facebook post that day: "สิทธิ์ UnionPay QR เดือนก.ย. 69 เต็มแล้ว … เติมสิทธิ์อีกครั้ง 1 ต.ค. 69") |
 | Oct 2026 | ฿225: Takumi ฿165, Baiboon ฿60 | ฿225.48 | gone **10 Oct** (user, that afternoon; offer `260723112620`. UnionPay's offer page still showed 0.86% left at 16:48, so the page lags the pool) |
+| Nov 2026 | registered for offer `260723112621` (user, 2026-11-01; which card numbers wasn't said). Bureau rows for both cards ready, nothing spent yet | (same) | live, 99.82% left at 05:16 on 1 Nov |
 
 September, as synced 2026-09-30 (Bureau rows created for September and October on both cards):
 - …1346: BANGCHAK ฿940 (฿60), BSRC ฿686.20 (฿43.80), Bonchon ฿478.46 (฿30.54: Takumi ฿17.94, Baiboon ฿12.60), Baiboon's `[บัตรหลัก]` Savemart ฿1,604 (฿60, assumed: over ฿940), AUFU ฿89.30 (฿5.70).
