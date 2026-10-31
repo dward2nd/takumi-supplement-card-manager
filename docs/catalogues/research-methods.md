@@ -209,4 +209,9 @@ Six researchers in parallel for Makro, GO Wholesale, Shopee, The 1, Shell and PT
 - **The household's ledgers show which payments a merchant takes.** KTC UnionPay rows at 94% of a whole price (฿629.80 = ฿670 × 0.94) show a Shell station took UnionPay QR with the 6% off. Use `fetch-transactions` with `name_contains`, then map `card_ids` with `lib.cards.card_titles_by_id`.
 - **Reuse the other researchers' dumps.** KBank's campaign list, UOB's `data-promotion.json`, Central The 1's `gcspromotion` list and Krungsri's listing JSON were all in the session scratchpad within minutes.
 - **A network drop kills a researcher mid-run** (ENOTFOUND). Resume it with SendMessage rather than starting over; its report file keeps what it wrote.
+- **AIS** (for the AIS Bill Payment page, [[2026-11/ais-bill-payment]]):
+  - The **AIS Knowledge Center** (`aiscallcenter.ais.co.th/ikm/acc/index.php?kmid=KM…`) reads with plain curl and holds the payment-channel tables and AIS Points rules.
+  - **ais.th** (Adobe AEM) gives the full page to curl, but the body is buried in navigation, so anchor on a figure from the offer. `/consumers/promotions/bank-financial` is AIS's bank-deal hub.
+- **KBank PDFs** (`/SiteCollectionDocuments/…pdf`) are 403 to curl: `fetch()` them from inside any KBank page in headless Chrome. The LINE POINTS booklet's Thai text layer is garbled; render the pages with `pdftoppm` and read the images.
+- **mitihoon.com** sits behind a Cloudflare challenge; **droidsans.com** reads with curl and often carries the same press release.
 
