@@ -16,6 +16,8 @@ Every [[../databases/promotion-catalogues|Promotion Catalogues]] page (a Thai re
 
 ### November 2026 — researched 2026-11-01
 
+> **Correction (2026-11-01, after the pages went up):** these reports give `HTTPS://WWW.MAKRO.PRO/` as MCC 5411 and `WWW.MAKRO.PRO` as MCC 5199. That split came from a misreading of the user, and neither string's MCC is known. Krungsri's and KBank's pages call Makro and Makro PRO 5199. Read each "(5411)" / "(5199)" after a Makro PRO string as unknown. MCC points exclusions don't take a slip out of a cashback campaign: AEON World 5% and NTW1 pay on both strings. NW4 now leaves out every Makro channel except `TMN MAKRO` (user). `Makro — Nov 2026` was corrected the same day. See [[../cards/aeon-world-mastercard#AEON's MCC exclusions (from 11 Nov 2025)|AEON World]], [[../promotions/first-choice-2026h2|First Choice 2026 H2]] and [[../cards/lotuss-beyond#Coin exclusions|Lotus's coins]].
+
 Pages: `Makro — Nov 2026`, `GO Wholesale — Nov 2026`, `Shopee — Nov 2026`, `The 1 — Nov 2026`, and two new merchants, `Shell — Nov 2026` and `PTT — Nov 2026` (petrol stations; the household's fills are ฿450–800, so per-slip minimums decide the plan); `AIS Bill Payment — Nov 2026` and `Bangchak — Nov 2026` the same day.
 
 - [[2026-11/krungsri-group]] — Krungsri Card, First Choice, XU, Lotus's: SU1 / SU2 (GO and Tops, no Makro), CRC (฿2,000 at ฿10,000 in Central Retail stores, first 2,200), PaySave II (PTT 5% at ≥ ฿1,000), NW4's new Makro wording, Lotus's ดีต่อใจ fuel code, Lotus's coins leave fuel on 1 Dec

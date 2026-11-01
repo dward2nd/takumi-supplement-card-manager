@@ -69,7 +69,7 @@ How a card earns beyond its promotions is code, one class per card family in `sc
 ```yaml
 points_excluded_merchants:    # optional — merchant strings that earn no points from a date on
   - prefix: "WWW.MAKRO.PRO "  #   prefix match, after dropping a leading `[บัตรหลัก] `; "*" = every merchant
-    mcc: "5199"               #   informational: the excluded MCC the string bills under
+    mcc: "5199"               #   informational: the excluded MCC the string is taken to bill under
     effective_from: 2025-11-11
     note: "..."               #   written into the row's Note
 ```

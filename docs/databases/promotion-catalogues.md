@@ -65,10 +65,11 @@ From October the Central The 1 page is **`The 1 — <Mon YYYY>`**. It covers the
   - CardX's HY1 has no scan rule.
   - KTC cards can't be used at Makro stores at all. KTC's own article says so; its points offer counts only through a KTC Mobile scan or TrueMoney.
   - AEON, GSB and Krungsri NOW's 5% count Makro PRO only.
-- **Makro PRO posts under two strings, and the card doesn't choose.** `HTTPS://WWW.MAKRO.PRO/` is MCC 5411 and `WWW.MAKRO.PRO` is MCC 5199; the same First Choice card got both in Aug 2026.
-  - First Choice NW4 excludes 5199.
-  - AEON gives no points on 5199.
+- **Makro PRO posts under two strings, and the card doesn't choose.** `HTTPS://WWW.MAKRO.PRO/` and `WWW.MAKRO.PRO`; the same First Choice card got both in Aug 2026. Which MCC each posts under isn't known. A 5411/5199 split was written here from a misreading of the user (corrected 2026-11-01). Krungsri's and KBank's pages call Makro and Makro PRO MCC 5199.
+  - First Choice NW4 excludes "MCC 5199 อาทิ Makro และ Makro PRO". The household reads that as every Makro channel except `TMN MAKRO` (user, 2026-11-01).
+  - AEON gives no points on 5199, and the household treats `WWW.MAKRO.PRO` as 5199 there. That is points only: AEON World's 5% and NTW1 paid on `WWW.MAKRO.PRO`-only spend (11 Jul – 10 Aug 2026).
   - Krungsri NOW's 5% paid on both.
+  - A points exclusion doesn't take a slip out of a cashback campaign. Write each one where it applies, never as "5% only on one string".
 - **Some quotas are shared across pages.** Krungsri SUP1 (per card per month), CardX HY1, NW4's ฿30,000 supermarket allowance, AEON NTW1 and AEON World's 5% (Makro PRO and Tops) all count Makro and GO Wholesale (and Tops) together, so each page that uses them says so.
 - **GO Wholesale posts as `CFW-<BRANCH> …`** (Central Food Wholesale), e.g. `CFW-CHIANGMAI 1 CHIANGMAI TH`.
 - **Hospitals and spas are paid by category campaigns, not named deals** (Oct 2026). No bank names Sriphat for cashback (only KTC's 0.69% public-hospital installment), and only KTC and JCB name Yunomori. The money is in:

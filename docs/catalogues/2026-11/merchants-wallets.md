@@ -8,6 +8,8 @@ researched: 2026-11-01
 
 # Merchants & wallets — November 2026 (Makro · Shopee · Shell · PTT · wallets)
 
+> **Correction (2026-11-01):** the MCCs this report gives the two Makro PRO strings (5411 / 5199) came from a misreading and aren't known. See [[../index#November 2026 — researched 2026-11-01|the index's correction]].
+
 Researcher: `merchants-wallets`. Read Sun 1 Nov 2026 (1 พ.ย. 69) from about 01:40 local time; egress Hong Kong. Read-only; no Notion.
 Confidence labels: **V** verified on the official page today · **R** my reading of official terms · **T** third-party only · **U** unverified.
 Last month's report: [[../2026-10/merchants-wallets]].

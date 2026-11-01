@@ -8,6 +8,8 @@ researched: 2026-11-01
 
 # Krungsri Consumer group (except the Central The 1 card): November 2026
 
+> **Correction (2026-11-01):** the MCCs this report gives the two Makro PRO strings (5411 / 5199) came from a misreading and aren't known. See [[../index#November 2026 — researched 2026-11-01|the index's correction]].
+
 Researcher: `krungsri-group` · read 2026-11-01 (1 พ.ย. 69), 01:30–02:30 local · read-only. Last month: [[../2026-10/krungsri-group]].
 
 Confidence: **V** verified on the official page today · **R** my reading of official terms · **T** third-party only · **U** unverified.

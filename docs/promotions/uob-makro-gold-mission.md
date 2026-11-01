@@ -29,7 +29,7 @@ UOB Makro's 26th-anniversary campaign, for **UOB Makro cardholders only**, 1 Oct
   - EasyBills (MCC 5999);
   - annual fees, interest, tax refunds and cancellations;
   - cigarettes, alcohol, infant formula and medicines.
-- **Reading — MCC 5411**: the exclusion sits in one list shared by all three missions and the draw. Missions 1 and 2 name Makro and Makro PRO outright, so it's applied only to mission 3 (and the draw). `HTTPS://WWW.MAKRO.PRO/` posts as 5411.
+- **Reading — MCC 5411**: the exclusion sits in one list shared by all three missions and the draw. Missions 1 and 2 name Makro and Makro PRO outright, so it's applied only to mission 3 (and the draw). Which MCC each Makro PRO string posts under isn't known (an earlier "`HTTPS://WWW.MAKRO.PRO/` posts as 5411" here came from a misreading, corrected 2026-11-01).
 - **Reading — app only**: mission 2 counts Makro PRO *app* orders. The statement string can't tell app from web, and the household orders in the app, so every Makro PRO row counts.
 - **Crediting**: within 60 days after 31 Dec 2026, to the principal card. Not combinable with other promotions. Whether that touches the card's ×2 points on the 16th (`MMID`) isn't stated.
 - **Rows keep `% cb` unset.** The amounts are fixed (`marks_rows = False`); the credit lives in the Bureau shares and the trackers.

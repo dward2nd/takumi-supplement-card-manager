@@ -8,6 +8,8 @@ researched: 2026-11-01
 
 # Offers that name no merchant, card earning and fuel — November 2026 (พ.ย. 69)
 
+> **Correction (2026-11-01):** the MCCs this report gives the two Makro PRO strings (5411 / 5199) came from a misreading and aren't known. See [[../index#November 2026 — researched 2026-11-01|the index's correction]].
+
 Continues [[../2026-10/all-spend|October's all-spend report]] (partial) and [[../2026-10/all-spend-jampha|the Jampha card-by-MCC table]].
 
 **Confidence labels**: **V** verified on the official page today · **R** my reading of official terms · **T** third-party only · **U** unverified. **repo** = the repo's card YAML, promotion note or Bureau class (built from the bank's page earlier); **household** = the ledger or a reconciled statement shows it.

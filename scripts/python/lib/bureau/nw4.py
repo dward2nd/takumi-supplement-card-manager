@@ -16,8 +16,14 @@ What changed in what counts:
     primary account. The part past ฿30,000 is left out of the ladder; the part
     up to it counts as usual (NW3 dropped single charges over ฿10,000 / ฿3,000
     instead). `split` caps them first come, first served.
-  - MCC 5199 is out. `WWW.MAKRO.PRO` posts under 5199; `HTTPS://WWW.MAKRO.PRO/`
-    is 5411, a supermarket (see the AEON World card YAML).
+  - MCC 5199 is out, and the page words it "หมวดการใช้จ่ายใน MCC code 5199
+    อาทิ Makro และ Makro PRO" (spend in MCC 5199, such as Makro and Makro PRO).
+    Read literally (user, 2026-11-01): no Makro spend counts — both Makro PRO
+    strings (`HTTPS://WWW.MAKRO.PRO/`, `WWW.MAKRO.PRO`), a card at a Makro store
+    (`MAKRO_<branch>`) and Makro's in-store QR (`CP AXTRA PUBLIC CO. L`). Which
+    MCC each string posts under isn't known. Makro PRO's copy of the terms says
+    Makro counts only through a card linked in TrueMoney at a branch, so
+    `TMN MAKRO` still counts. UCHOOSE's eligible list for October will settle it.
   - The campaigns NW4 points marketplaces, delivery, travel and insurance to
     are now ON4, DLV3, TR3 and IS4.
 
@@ -44,7 +50,8 @@ RATE = Decimal("0.02")
 STEP_CAP = Decimal(100_000)    # 10 steps × ฿200 = the ฿2,000 monthly cap
 CATEGORY_CAP = Decimal(30_000)
 
-_MCC_5199 = re.compile(r"^WWW\.MAKRO\.PRO")
+# "MCC 5199 อาทิ Makro และ Makro PRO": Makro PRO, Makro stores and their QR; not `TMN MAKRO`.
+_MAKRO = re.compile(r"MAKRO\.PRO|^MAKRO_|^CP AXTRA")
 _SUPERMARKET = re.compile(r"BIG ?C\b|BIGC|LOTUS|\bTOPS\b|VILLA|GOURMET|HOME FRESH|MAX ?VALU|FOODLAND|"
                           r"RIMPING|\bCFW-|GO ?WHOLESALE|MAKRO|CP AXTRA")
 
@@ -147,8 +154,9 @@ class NW4Promotion(NW3Promotion):
              r"AGODA|BOOKING\.COM|EXPEDIA|TRAVELOKA|TRIP\.COM|CTRIP|AIR ?ASIA|AIRWAYS|AIRLINES|"
              r"NOK ?AIR|VIETJET|LION AIR|HOTEL|RESORT|AIRBNB|KING ?POWER|DUTY ?FREE|HERTZ|\bAVIS\b"),
         Rule("Insurance of any kind (IS4)", r"INSURANCE|ASSURANCE|\bAIA\b|\bFWD\b|ALLIANZ|ประกัน"),
-        Rule("MCC 5199 — `WWW.MAKRO.PRO` (Makro PRO's `HTTPS://WWW.MAKRO.PRO/` is 5411 and counts)",
-             _MCC_5199.pattern),
+        Rule("MCC 5199, \"such as Makro and Makro PRO\": both Makro PRO strings, a card or QR at a Makro "
+             "store (`MAKRO_…`, `CP AXTRA …`). Paying through TrueMoney at a branch (`TMN MAKRO`) counts",
+             _MAKRO.pattern),
         Rule("Utilities: electricity, water, landline (MCC 4900, 9402)",
              r"\b(MEA|PEA|MWA|PWA)\b|ELECTRICITY|WATERWORKS|การไฟฟ้า|การประปา"),
         Rule("Government bodies — taxes, state fees, some public hospitals (MCC 9399, 9405, 7800) — "

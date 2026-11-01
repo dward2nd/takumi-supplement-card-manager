@@ -6,12 +6,16 @@ statement_numbers:            # last 4 digits on the statement → holder (seen 
 points_excluded_merchants:
   # AEON withholds reward points on a list of MCCs from 2025-11-11, on every AEON
   # credit card except Big C (https://www.aeon.co.th/aeon/news-events/notification-aeon-credit-cards-2025).
-  # 5199 is on the list and 5411 (supermarkets) isn't. The two Makro PRO strings
-  # bill under different codes (user, 2026-09-28), so only the bare one is listed.
+  # 5199 is on the list and 5411 (supermarkets) isn't. The household treats
+  # `WWW.MAKRO.PRO` as 5199 for points; which MCC each Makro PRO string posts under
+  # isn't known (a 5411/5199 split once written here was a misreading, corrected
+  # 2026-11-01). Points only (user, 2026-11-01: "MCC 5199 gains no points but is still
+  # eligible for cashback promotions"): AEON World 5% and NTW1 paid ฿500 + ฿120 on
+  # 11 Jul – 10 Aug 2026, whose spend was all `WWW.MAKRO.PRO`.
   - prefix: "WWW.MAKRO.PRO "
     mcc: "5199"
     effective_from: 2025-11-11
-    note: "MCC 5199 — AEON gives no reward points on this MCC since 11 Nov 2025 (HTTPS://WWW.MAKRO.PRO/ bills as 5411 and still earns)."
+    note: "MCC 5199 — AEON gives no reward points on this MCC since 11 Nov 2025. Points only: AEON World 5% and NTW1 still count this row."
 notes: |
   The same notification also withholds points on some foreign-registered
   merchants (EU/EEA, China, UK) from 2025-12-11 and on 0% installments from

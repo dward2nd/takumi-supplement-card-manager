@@ -24,6 +24,6 @@ Lotus's credit card cashback on big-ticket categories: home décor and building 
 - **Registration** counts from the registration day (UCHOOSE or SMS `LBS3`).
 - **LMK2** isn't tracked: ฿5,000 for the first 100 accounts past ฿800,000 at Makro PRO.
 - **`% cb` is left unset**, as on every Lotus's row. The money goes in the Bureau and trackers.
-- **Coins vs cashback**: `WWW.MAKRO.PRO` (MCC 5199) earns no Lotus's coins, but does count toward LBS3.
+- **Coins vs cashback**: Lotus's withholds coins on MCC 5199 from 20 Feb 2026, and Krungsri and KBank call Makro and Makro PRO 5199, so a Makro slip may earn no coins ([[../cards/lotuss-beyond#Coin exclusions|card note]]). That doesn't touch LBS3: Makro counts in every channel.
 
 Source, read 2026-09-29: <https://www.lotussmoney.com/promotion/credit-card/shopping/cashback-nationwide-bigticket>.

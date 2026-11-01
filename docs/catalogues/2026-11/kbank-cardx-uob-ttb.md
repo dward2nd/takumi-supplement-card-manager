@@ -8,6 +8,8 @@ researched: 2026-11-01
 
 # KBank, CardX / SCB, UOB and ttb — November 2026 (พ.ย. 69)
 
+> **Correction (2026-11-01):** the MCCs this report gives the two Makro PRO strings (5411 / 5199) came from a misreading and aren't known. See [[../index#November 2026 — researched 2026-11-01|the index's correction]].
+
 Read 2026-11-01, 01:40–03:30 ICT, from the issuers' own pages only (no Notion reads or writes).
 
 **How the sources were read**

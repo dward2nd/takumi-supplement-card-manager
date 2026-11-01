@@ -28,7 +28,7 @@ the card account, so neither is tracked here. Credited within 60 days after
 UOB lists hypermarkets and supermarkets (MCC 5411) among the spend it doesn't
 count, in a list shared by all three missions and the draw. Missions 1 and 2
 name Makro and Makro PRO outright, so the exclusion is read as applying to
-mission 3 and the draw (a reading; `HTTPS://WWW.MAKRO.PRO/` posts as 5411).
+mission 3 and the draw (a reading; neither Makro PRO string's MCC is known).
 Mission 2 counts the Makro PRO *app*; the statement string can't tell app from
 web, and the household orders in the app, so every Makro PRO row counts.
 

@@ -19,14 +19,16 @@ AEON's [notification](https://www.aeon.co.th/aeon/news-events/notification-aeon-
 | 2025-12-11 | Some foreign-registered merchants (EU/EEA, China, UK) |
 | 2026-01-11 | 0% installment transactions |
 
-A merchant string doesn't show its MCC, so only strings known to bill under an excluded code are encoded (user, 2026-09-28):
+A merchant string doesn't show its MCC. The household treats one Makro PRO string as 5199:
 
-| Merchant string | MCC | Points |
+| Merchant string | Points | AEON World 5%, NTW1 |
 |---|---|---|
-| `WWW.MAKRO.PRO BANGKOK TH` | 5199 | **`×0`**, with Note |
-| `HTTPS://WWW.MAKRO.PRO/ BANGKOK TH` | 5411 | earns normally (`×1`) |
+| `WWW.MAKRO.PRO BANGKOK TH` | **`×0`**, with Note (taken as MCC 5199) | count |
+| `HTTPS://WWW.MAKRO.PRO/ BANGKOK TH` | earns normally (`×1`) | count |
 
-The two strings are both Makro PRO, but the bank files them under different codes. Encoded as `points_excluded_merchants` in `scripts/repositories/cards/aeon-world.yaml`, so `auto_classify` and `/record-statement` apply it. On 2026-09-28 five past rows (Baiboon, 27 Jul–12 Aug 2026) were set to `×0`. The foreign-merchant and installment exclusions are not encoded yet.
+Encoded as `points_excluded_merchants` in `scripts/repositories/cards/aeon-world.yaml`, so `auto_classify` and `/record-statement` apply it. On 2026-09-28 five past rows (Baiboon, 27 Jul–12 Aug 2026) were set to `×0`. They stay `×0` (user, 2026-11-01). The foreign-merchant and installment exclusions are not encoded yet.
+
+**The MCC exclusion is about points only** (user, 2026-11-01: "MCC 5199 gains no points but is still eligible for cashback promotions"). AEON's notice withholds reward points. AEON World's 5% and NTW1 name Makro PRO and pay on both strings: AEON paid ฿500 (2 Oct) and ฿120 (2 Sep) for 11 Jul–10 Aug 2026, whose ฿29,574 was all `WWW.MAKRO.PRO`, and ฿120 (2 Oct) for 11 Aug–10 Sep on `WWW.MAKRO.PRO` alone. Neither string's MCC is known for sure. The table once gave them as 5199 and 5411, attributed to the user on 2026-09-28. That was a misreading of "AEON doesn't give points to transactions with MCC 5199". The `Makro — Nov 2026` catalogue then put a points rule onto the 5% ("5% only on `HTTPS://WWW.MAKRO.PRO/`"), and it was corrected on 2026-11-01. Krungsri's and KBank's pages call Makro and Makro PRO MCC 5199. The AEON app is the only place AEON shows points, since its statements print none.
 
 ## Cancelled orders, late posting and credit balances
 
