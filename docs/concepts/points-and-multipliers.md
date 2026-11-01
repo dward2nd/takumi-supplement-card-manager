@@ -67,6 +67,19 @@ So the multiplier set is a **lossy projection** of the underlying rules. Where t
   - Krungsri NOW printed 0 points on all five statements, Jun–Oct 2026, with nothing outstanding, though the classifier gives its non-online lines points (`HTTPS://WWW.MAKRO.PRO/`, `AMP*AIS`). The ledger already has them at `×0`.
 - **KTC** has the longest exclusion list; see [[../promotions/ktc-forever]].
 
+## Points transfers between card numbers
+
+KTC keeps points per card number and lets a holder move them between card numbers in the app (`โอนคะแนน`). Each transfer is recorded as a pair of ฿0 rows, `×0`, `% cb` unset, one in each card's ledger (user, 2026-11-02):
+
+| Ledger, card | `Name` | `ใช้คะแนน` (points used) |
+|---|---|---:|
+| sender's, e.g. Takumi's `KTC Digital VISA` (…0581) | `ปรับคะแนน: โอนคะแนนไปบัตร <card> …<to> (<holder>)` | +N (takes points off) |
+| receiver's, e.g. Baiboon's `KTC UnionPay` (…2310) | `ปรับคะแนน: รับโอนคะแนนจากบัตร <card> …<from> (<holder>)` | −N (adds points) |
+
+They're dated on the slip and billed on that day's cycle; the Note gives the app's reference number and names the other row. The bare `ปรับคะแนน` prefix, with no bracket, is deliberate. `/audit-rewards` counts such rows as hand adjustments, which it doesn't compare with the bank. KTC prints a transfer in the statement's `adjusted` column, not as a redemption. Named any other way, the row would count as a redemption and open a `delta_redeemed` gap. A bracketed `[ปรับคะแนน]` would count toward points earned. A ฿0 row prints no statement line, so `/record-statement` doesn't flag it.
+
+First pair: 51 points, …0581 → …2310, 2 Nov 2026 02:44, ref 099657559. Earlier transfers (2,000 points …0581 → …5549 and 22 points …1346 → …2310, Sep 2026; [[../promotions/ktc-forever|ktc-forever]]) have no rows: `/sync-points-balance` absorbed them into each card's statement balance.
+
 ## Statement balance rows
 
 A card's `คะแนนสะสม` is the sum of its ledger rows, and each ledger only goes back so far. Takumi's reset rows (2026-09-22, [[ledger-reset]]) zeroed his cards, and the friends' ledgers never held the whole account. So on **2026-09-29** each card's running points were set to what the bank prints, with one row per card and statement. [[../../.claude/skills/sync-points-balance/SKILL|`/sync-points-balance`]] writes and maintains these rows:
