@@ -23,6 +23,7 @@ scripts/python/
 │   ├── earning/                     # Card, one class per card family (UOBCard, KrungsriFamilyCard, AEONCard …)
 │   ├── bill_cycle.py                # BillCycle, one class per issuer's cycle rule
 │   ├── crediting/                   # Crediting, one class per card that gets credit rows (UOBOneCrediting)
+│   ├── trackers/                    # settling a cashback tracker: Basis per case (exact, pooled, cycles, zero)
 │   ├── points_account.py            # PointsAccount (pooled / principal card / supplement card) + PointsPeriod (posting / cycle)
 │   ├── rewards_audit.py, points_balance.py  # statement points vs ledgers; balance rows to the printed figure
 │   ├── icons/                       # page icons for new rows (create_page asks here); backfill for old ones
@@ -78,6 +79,7 @@ echo '{"holder":"nuta","card":"First Choice","limit":5}' \
 | `fetch-transactions` | `fetch-transactions/cli.py` | filter spec on stdin | JSON results to stdout |
 | `add-transaction` | `add-transaction/cli.py` | write spec on stdin | created-page envelope to stdout |
 | `add-transaction` (rollback) | `add-transaction/archive.py` | page IDs via `--ids` or stdin | archive confirmations |
+| `settle-tracker` | `settle-tracker/cli.py` | tracker + credit rows on stdin | links `Slip Transaction`, ticks when settled; plan envelope to stdout |
 | `release` | `release/cli.py` | positional `type` arg (`major\|minor\|patch`) | bumps VERSION, commits, tags, pushes; JSON envelope to stdout |
 
 ## Why uv
