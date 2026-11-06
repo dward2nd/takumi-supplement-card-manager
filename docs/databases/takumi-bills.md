@@ -125,7 +125,7 @@ First case, the 2026-11-05 Krungsri-family bills plus a new card, all paid 6 Nov
 | Krungsri Lady | 3,270.50 | 3,270.50 | `ชำระบิลเต็มจำนวน` |
 | Krungsri NOW | 475.00 | 475.00 | `ชำระบิลเต็มจำนวน` |
 | Central The 1 Redz | 824.00 | 834.00 | `ชำระบิลเต็มจำนวน`: paid what the app billed; ฿10 open |
-| Lotus's Beyond | 2,214.25 | 2,176.00 | `ชำระบิลเต็มจำนวน`: ฿38.25 open (user: "I might have missed some records") |
+| Lotus's Beyond | 2,214.25 | 2,176.00 | `ชำระบางส่วน`: not the whole bill (user, the same day: "the bill payment to Lotus's wasn't full … I'll clarify later once the statement arrives"); written as full at first, then renamed |
 | CardX UP2ME | 2,194.11 | placeholder | `ชำระบิลเต็มจำนวน`: card added the same day, statement to come |
 
 **Paid before the cycle closes** (user, 2026-10-25: "Why aren't my advance payment recorded?"). Waiting only applies to a slip that comes after the cycle has closed but before the PDF arrives. A slip paid **on or before the closing date** is an advance payment, so its row is written straight away. That's one `ชำระบิลล่วงหน้า` row per slip (`lib.payments.PAYMENT_LABELS["advance"]`, the label the friends' ledgers have used since February):
