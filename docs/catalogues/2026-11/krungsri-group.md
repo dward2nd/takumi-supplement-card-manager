@@ -40,10 +40,12 @@ Sources read: the Krungsri Card listing JSON (`/th/promotion`, 532 items, every 
 
 **No supermarket campaign at Makro in November.** SUP1 (which counted Makro via UCHOOSE scan and Makro PRO) ended 31 Oct. Its successor SU1/SU2 lists only GO Wholesale and Tops (§3.1). Krungsri hasn't published its own SU1 page, so whether Makro or Big C are added there is **U**. CRC (§3.1) doesn't include Makro.
 
-**Krungsri NOW 5% online** (card benefit), 1 Jan – 31 Dec 2026, unchanged, **V**
+**Krungsri NOW 5% online** (card benefit), 1 Jan – 31 Dec 2026, ~~unchanged~~ **no longer at Makro, see the correction below**, **V**
 - ฿25 per whole ฿500 on each online slip (web/app), cap ฿300 a month (reached at ฿6,000). **QR-code payments excluded**, so a Makro store paid by UCHOOSE scan doesn't count; Makro PRO app/web does. No points on those rows.
 - Without SUP1, the October "NOW + SUP1 = 8% on a ฿4,000 slip" stack is gone. If SU1 does turn out to cover Makro PRO, it stacks (SU1 says "สามารถใช้ร่วมกับรายการส่งเสริมการขายอื่น ๆ ได้"). **R**
 - https://www.krungsricard.com/th/product/creditcard/now
+
+> **Correction (2026-11-06):** NOW's 5% **no longer pays at Makro or through TrueMoney** (user). The card page, read again on 2026-11-06, lists MCC **5199** among the exclusions (`รายการใช้จ่ายในหมวดผู้จัดจำหน่ายขายส่งสินค้าไม่คงทน (MCC 5199)`), and Krungsri says Makro and Makro PRO are 5199. The page also now excludes utilities, public transport, fuel, government, charities, fees and easyBills. TrueMoney isn't named on the page; that exclusion is the user's word. Makro PRO earned through September (`CB HTTPS://WWW.MAKRO.PRO/ BANGKOK` −฿200, 7 Sep). The household's Bureau rules start on 1 Nov 2026 (`krungsri_now.py`). Shopee and the AIS bill in myAIS still count. `Makro — Nov 2026` was corrected the same day.
 
 **Points at Makro**
 - **Makro e-voucher ฿100 for 1,100 points** (≈ ฿0.091/pt), UCHOOSE → คะแนนสะสม → สินค้าและบัตรกำนัล → "ช้อปห้าง ซูเปอร์ แลกคุ้มทุกวัน"; valid 30 days; usable "ที่แอป/เว็บที่ร่วมรายการเท่านั้น" (so Makro PRO, **R**). 1 Jan – 31 Dec 2026, unchanged. **V** · https://www.krungsricard.com/th/promotion/department-store-supermarket

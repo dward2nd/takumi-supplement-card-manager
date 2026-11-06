@@ -19,7 +19,7 @@ Krungsri rows never carry `% cb`. The bank credits each campaign as its own stat
 | **Bangchak** 1% (card benefit, no registration) | VISA, JCB, Lady (NOW excluded) | 1 Jun – 30 Sep | ฿8 per whole ฿800 on each Bangchak slip ("1%"), BSRC stations included | ฿32/**statement cycle** |
 | **BC3P** (Bangchak ต่อ 2) | VISA, JCB, Lady | 1 Jun – 30 Sep | ฿24 per whole ฿800 on each Bangchak slip | ฿48/month |
 | **J Dining** | JCB | 1 Jan – 30 Sep | ฿30 per whole ฿1,000 on each restaurant slip, worldwide | ฿150/month |
-| **NOW** online (card benefit) | NOW | 1 Jan – 31 Dec | ฿25 per whole ฿500 on each online slip | ฿300/month |
+| **NOW** online (card benefit) | NOW | 1 Jan – 31 Dec | ฿25 per whole ฿500 on each online slip; **from Nov 2026 not at Makro / Makro PRO (MCC 5199) or through TrueMoney** (user, 2026-11-06; [[../catalogues/2026-11/krungsri-group#2.1 Krungsri Card (VISA, JCB, Lady, NOW)\|research]]) | ฿300/month |
 
 SUP2 (฿700 at ฿60,000 a month) isn't registered on any card (user).
 
@@ -61,7 +61,7 @@ GO Wholesale's statement name is `CFW-<branch> …` (Central Food Wholesale, e.g
 - **Fixed amounts per slip.** SUP1, PTT2, BC3P, the Bangchak 1%, J Dining and NOW pay per slip, never on a sum (`SlipCreditPromotion`); the month's cap is claimed first come, first served. EAT counts slips (`SlipCountPromotion`): the first and third qualifying slips of the month earn ฿100 each.
 - **Restaurants and online shops.** Neither can always be told from the merchant string. EAT, J Dining and NOW link only names they recognise. A row the household links by hand counts, as long as it clears the minimum slip.
 - **Bangchak comes in two parts, both from ฿800 a slip.** The card's own "1%" is ฿8 per whole ฿800 of a slip, so a ฿600 fill-up earns nothing. The bank's `BANGCHAK SPECIAL DISCOUNT OF 1 %` lines show it: ฿800 gave −฿8, and ฿970 gave −฿8 rather than ฿9.70. It's capped per statement cycle, not per month, and credited within the cycle. BC3P is capped per calendar month. Both withhold the card's normal points, as `KrungsriPetrolCampaign` already does. BSRC-branded stations count: August's `CB12_BC3P` ฿24 on Baiboon's JCB came from `BSRC-PHAAPOOM` ฿800.
-- **Stacking.** SUP1 and NOW both paid on Baiboon's ฿4,159 Makro PRO slip on Krungsri NOW (฿120 + ฿200). J Dining and EAT both paid on the ฿1,342 Sushiro slip (฿30 + ฿100).
+- **Stacking.** SUP1 and NOW both paid on Baiboon's ฿4,159 Makro PRO slip on Krungsri NOW (฿120 + ฿200). Makro PRO left NOW's 5% from November 2026. J Dining and EAT both paid on the ฿1,342 Sushiro slip (฿30 + ฿100).
 
 ## September 2026 (reconciled with Baiboon's hand-made trackers)
 

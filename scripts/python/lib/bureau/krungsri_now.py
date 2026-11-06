@@ -13,6 +13,17 @@ Sep 2026; Takumi's AIS bill paid in the app, `AMP*AIS SERVICESPaymen BANGKOK TH`
 ฿2,000 → `CB AMP*AIS SERVICESPaymen BANGKOK` −฿100, 8 Sep 2026). The household books that line as a separate row and never sets
 `% cb` (scripts/repositories/cards/krungsri-now.yaml); rows that earn it earn
 no points (×0).
+
+From November 2026 neither Makro nor TrueMoney earns it (user, 2026-11-06). The
+page read again on 2026-11-06 adds MCC 5199 to the exclusions, along with
+utilities, public transport, fuel, government, charities, fees and easyBills.
+Krungsri files Makro and Makro PRO under 5199 (NW4's page and the points notice
+from 1 Nov 2026). The page doesn't name TrueMoney; that exclusion is the user's
+word. Neither the page nor the user gives a start date. The October reading
+didn't list 5199. The household's NOW slips at Makro PRO earned through
+September (`CB HTTPS://WWW.MAKRO.PRO/ BANGKOK` −฿200, 7 Sep) and its `TMN …` slips
+earned in 2025. It has no Makro or TrueMoney slip on NOW in October, so the
+rules below start on 1 Nov 2026, the day Krungsri's Makro points notice began.
 """
 
 from __future__ import annotations
@@ -32,6 +43,7 @@ BLOCK, PER_BLOCK = Decimal(500), Decimal(25)
 _ONLINE = re.compile(r"WWW\.|HTTPS?:|\.COM\b|\.CO\.TH|\.PRO\b|SHOPEE|LAZADA|TIKTOK|2C2P|OMISE|GBPRIME|"
                      r"ANTHROPIC|OPENAI|GOOGLE|APPLE\.COM|NETFLIX|SPOTIFY|YOUTUBE|STEAM|AMAZON|AIS ONLINE|"
                      r"AMP\*AIS SERVICES")
+_FROM_NOV_2026 = "2026-11-01"   # see the module docstring: no earlier date is known
 _TRAVEL_ETC = re.compile(r"AGODA|BOOKING|EXPEDIA|TRAVELOKA|TRIP\.COM|CTRIP|KLOOK|AIR ?ASIA|AIRWAYS|AIRLINES|"
                          r"NOK ?AIR|VIETJET|HOTEL|RESORT|AIRBNB|HERTZ|\bAVIS\b|INSURANCE|ASSURANCE|\bAIA\b|"
                          r"\bFUND\b|FACEBK|FACEBOOK ADS|GOOGLE ADS")
@@ -74,6 +86,11 @@ class KrungsriNOWOnline(SlipCreditPromotion):
     rules: ClassVar = (
         Rule("Insurance, funds, travel (hotels, tickets, car rental, travel agencies), online "
              "advertising", _TRAVEL_ETC.pattern),
+        Rule("MCC 5199, which Krungsri says covers Makro and Makro PRO (from Nov 2026)", r"MAKRO",
+             test=lambda tx: tx.date[:10] >= _FROM_NOV_2026),
+        Rule("Card payments through TrueMoney (from Nov 2026; user, 2026-11-06)", r"^TMN[ *]",
+             test=lambda tx: tx.date[:10] >= _FROM_NOV_2026),
+        Rule("Utilities, public transport, fuel, government, charities, fees, easyBills"),
         Rule("QR-code payments", r"^TMN\*?PROMPTPAY|PROMPTPAY|\bQR\b", level=UNCERTAIN,
              hint="QR payments don't count; a TrueMoney or PromptPay row may be one"),
         Rule("Krungsri Smart Plan installments", test=lambda tx: promotions.is_installment(tx.name)),

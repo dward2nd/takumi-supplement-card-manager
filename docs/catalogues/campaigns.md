@@ -40,7 +40,7 @@ The payment campaigns found while writing the [[../databases/promotion-catalogue
 | SUP1 | per slip ฿35 / ฿120 at Makro (UCHOOSE scan) + Makro PRO, GO, Big C, Tops | 1 Aug – 31 Oct | **last month** | M G T | [[../promotions/krungsri-card-2026]] · `sup1.py` |
 | SUP2 | ฿700 at ฿60,000 a month (not registered) | 1 Aug – 31 Oct | last month | M G | — |
 | ONQ3 | online ladder ฿40 / ฿170 / ฿350 (VISA, JCB, Lady) | 7 Aug – 30 Nov | continues; at Jampha only by paying its PromptPay QR in TrueMoney with Krungsri VISA (unconfirmed) | S L K J C | `onq3.py` |
-| NOW 5% online | ฿25 per ฿500 online slip, ฿300/month; QR excluded | standing | continues; a card payment on thaiticketmajor.com counts (reading: the travel exclusion names only travel tickets) | M S E C | `krungsri_now.py` |
+| NOW 5% online | ฿25 per ฿500 online slip, ฿300/month; QR excluded | standing | continues; a card payment on thaiticketmajor.com counts (reading: the travel exclusion names only travel tickets). **From Nov 2026 no longer at Makro / Makro PRO (MCC 5199 now excluded) or through TrueMoney** (user, 2026-11-06) | M S E C | `krungsri_now.py` |
 | PTT2 · EAT | fuel per slip · dining ฿100 + ฿100 | 1 Jul – 31 Oct | last month | T | `ptt2.py` · `eat.py` |
 | Bangchak 1% + BC3P → **Bangchak700 1% + BXP** | Bangchak per whole ฿800 → per whole ฿700 | ended 30 Sep | 1 Oct 2026 – 31 May 2027; BXP rounds 1 Oct–31 Jan, 1 Feb–31 May | — | `bangchak.py` · `bxp.py` |
 | **LADY'S FASHIONISTA** (Krungsri Lady only) | ฿140 per whole ฿2,000 slip at ZARA, H&M, JASPAL, Pomelo, SEPHORA, EVEANDBOY, Adidas; ฿560/month; no points on what earns it | 1 Jan 2025 – 31 Dec 2026 | continues to 31 Dec | — | `lady_fashionista.py` |
@@ -465,7 +465,7 @@ From [[2026-11/ais-bill-payment]]. A monthly bill, so per-slip campaigns rarely 
 
 | Campaign | Issuer | Pays on an AIS bill | Period | Chain |
 |---|---|---|---|---|
-| Krungsri NOW 5% online | Krungsri Card | ฿25 per whole ฿500 a slip in myAIS; ≤ ฿300 a month per account, **shared with Makro PRO and Shopee** | 2026 | card benefit |
+| Krungsri NOW 5% online | Krungsri Card | ฿25 per whole ฿500 a slip in myAIS; ≤ ฿300 a month per account, **shared with Shopee** (Makro PRO until Oct 2026; no longer counts from Nov) | 2026 | card benefit |
 | KTC `BIL` (`ais-pointredemption`) | KTC | 399 points → ฿50 per bill ≥ ฿399 (myAIS or AIS Shop); `BIL` → 061-384-5000 | 1 Jul 2026 – 31 Mar 2027 | `ais-pointredemption-1` (Jan–Jun 2026) → this |
 | KBank Smart Bill Pay `ACCS260499` | KBank | ฿100 per new auto-debit provider (AIS, AIS Fibre …) after 3 debits, ≤ ฿900 | apply 1 Oct – 31 Dec 2026 | — |
 | AEON Next Gen 5% online | AEON | ≤ ฿50 a transaction (AEON Rabbit's LINE Pay 5% excludes mobile-operator bills, user 2026-11-01) | standing | card benefit |
