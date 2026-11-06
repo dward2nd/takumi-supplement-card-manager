@@ -111,7 +111,22 @@ Takumi pays the banks **himself, from his own accounts**, and the transfer slips
 
 Then attach the slip(s) with `/update-bill` and set `จ่ายแล้ว` once the slips sum to `ยอดชำระ`. Since 2026-09-28, `/update-bill` also writes these rows when given the slip's `payment_amount`, plus `payment_covers` when the slip pays friends' shares. It picks the name from what the bill already has paid.
 
-**Slip before statement** (user, 2026-09-28: "put the payment slips to new drafted bills; I'll bring the statements later"). When he pays before the PDF arrives, `/update-bill` creates a placeholder for the slip: `[DRAFT] <Card> <YYYY-MM>`, with no `ยอดชำระ` and a Note naming the slips (`lib.bill_draft.draft_statement_bill`). `/record-statement` later fills in that same row (title, `ยอดชำระ`, Note) instead of creating a second one. The payment rows wait for it, because full vs partial depends on the bill total. First case: KTC Digital VISA (฿20.00), KTC Mastercard …5549 (฿1,545.30) and KTC UnionPay …1346 (฿967.26 + ฿940.00), all cycle 2026-09-27 and paid 28 Sep.
+**Slip before statement** (user, 2026-09-28: "put the payment slips to new drafted bills; I'll bring the statements later"). When he pays before the PDF arrives, `/update-bill` creates a placeholder for the slip: `[DRAFT] <Card> <YYYY-MM>`, with no `ยอดชำระ` and a Note naming the slips (`lib.bill_draft.draft_statement_bill`). `/record-statement` later fills in that same row (title, `ยอดชำระ`, Note) instead of creating a second one. First case: KTC Digital VISA (฿20.00), KTC Mastercard …5549 (฿1,545.30) and KTC UnionPay …1346 (฿967.26 + ฿940.00), all cycle 2026-09-27 and paid 28 Sep.
+
+**Payment rows don't wait for the statement** (user, 2026-11-06: "you should add payment rows and attach the slips now. But leave the bills as draft for now since we can adjust later"). This replaces the earlier rule that a slip paid after the cycle closed waited for `/record-statement`. Attach the slip and write the payment row straight away, whether the bill is a ledger estimate or a placeholder. Leave the bill `[DRAFT]` and `จ่ายแล้ว` alone until the statement arrives. The label follows what the slip paid:
+- **The bank app's whole bill** → `ชำระบิลเต็มจำนวน`, even when the draft's estimate differs. The gap is then a ledger lead for `/record-statement`, not a reason to call the payment partial. Through the CLI, a draft estimate higher than the slip would make it `ชำระบางส่วน`, so call `lib.payments.record_primary_payment` with `bill_total` set to the slip amount. A placeholder with no `ยอดชำระ` already gives `ชำระบิลเต็มจำนวน`.
+- **Only his own share of a card the friends also use** → `ชำระบางส่วน`, then `ชำระเพิ่มบางส่วนจนครบ` for the payment that completes the bill.
+
+First case, the 2026-11-05 Krungsri-family bills plus a new card, all paid 6 Nov from KBank:
+
+| Bill | Slip | Draft estimate | Row |
+|---|---:|---:|---|
+| First Choice | 4,951.75 | 82,371.27 (เว็บ 4,951.75) | `ชำระบางส่วน`: his share only |
+| Krungsri Lady | 3,270.50 | 3,270.50 | `ชำระบิลเต็มจำนวน` |
+| Krungsri NOW | 475.00 | 475.00 | `ชำระบิลเต็มจำนวน` |
+| Central The 1 Redz | 824.00 | 834.00 | `ชำระบิลเต็มจำนวน`: paid what the app billed; ฿10 open |
+| Lotus's Beyond | 2,214.25 | 2,176.00 | `ชำระบิลเต็มจำนวน`: ฿38.25 open (user: "I might have missed some records") |
+| CardX UP2ME | 2,194.11 | placeholder | `ชำระบิลเต็มจำนวน`: card added the same day, statement to come |
 
 **Paid before the cycle closes** (user, 2026-10-25: "Why aren't my advance payment recorded?"). Waiting only applies to a slip that comes after the cycle has closed but before the PDF arrives. A slip paid **on or before the closing date** is an advance payment, so its row is written straight away. That's one `ชำระบิลล่วงหน้า` row per slip (`lib.payments.PAYMENT_LABELS["advance"]`, the label the friends' ledgers have used since February):
 - the negative slip amount, dated on the slip

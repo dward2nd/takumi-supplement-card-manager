@@ -1,0 +1,19 @@
+name: CardX UP2ME
+issuer: CardX
+bill_cycle_pattern: krungsri      # ASSUMED from CardX JCB (day 5, +20d): no UP2ME statement seen yet
+statement_numbers:                # last 4 digits on the statement → holder (CardX prints one PDF per card number)
+  "2726": takumi                  # from the slip memo `2726 — CardX UP2ME` (6 Nov 2026); confirm on the first statement
+# CardX is SCB X group, not Krungsri: lib.earning gives it the plain `Card`
+# class (promotions only), like CardX JCB.
+notes: |
+  Takumi's own card, added 2026-11-06 from his first payment slip:
+  ฿2,194.11 on 6 Nov 2026 by KBank bill payment to `CARDX/SCB WEALTH/FLEX/
+  SPEEDY CASH CARD` (reference …5800), memo `2726 — CardX UP2ME`. That slip
+  sits on the placeholder bill `[DRAFT] CardX UP2ME 2026-11`; its payment row
+  waits for the statement (docs/databases/takumi-bills.md, Slip before
+  statement).
+
+  Open until the first statement: card network and tier, points rate
+  (`บาทต่อ 1 คะแนน` is empty in Notion), the cycle and due dates, whether
+  anyone else holds a supplement, and the PDF password (CardX uses each
+  holder's own DOB).

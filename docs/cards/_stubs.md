@@ -24,6 +24,7 @@ The two sources diverge most sharply on Nuta: her Bills DB offers **13** card op
 | AEON UnionPay                        | AEON              |         |  ✓   |        |
 | [[aeon-world-mastercard\|AEON World Mastercard]] | AEON        |    ✓    |      |        |
 | CardX JCB                            | CardX             |         |  ✓   |        |
+| CardX UP2ME                          | CardX             |         |      |   ✓    |
 | Central The 1 Redz                   | Krungsri          |    ✓    |      |   ✓    |
 | First Choice                         | Krungsri          |    ✓    |  ✓   |        |
 | Grab PayLater                        | Grab              |         |      |   ✓    |
