@@ -73,9 +73,18 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
             write(f"Bureau {store.RIGHTS}={rights}", store.write_numbers, row.id, {store.RIGHTS: Decimal(rights)})
 
     body = [] if sync.is_stand_in(row) else store.body_block_ids(row.id)
-    if not body or spec.get("replace_summary"):
+    summary_written = not body or bool(spec.get("replace_summary"))
+    if summary_written:
         write(f"{'replace' if body else 'write'} page summary", store.write_body, row.id,
               promo.summary_blocks(), replace=bool(body))
+    changes = promo.changes_report() if summary_written else None
+    # A campaign's first period is when it's being registered; later months repeat its page.
+    first_period = row.start <= promo.campaign[0] + dt.timedelta(days=31)
+    if summary_written and first_period and not promo.changes:
+        warnings.append(
+            f"{promo.code} has no `changes`: compare its terms with "
+            f"{', '.join(promo.compared_with()) or 'the campaign it replaces or sits next to'} "
+            f"and declare them on {type(promo).__name__} (/sync-promotion → New campaign)")
 
     out = {
         "promotion": {"name": row.name, "url": row.url, "class": type(promo).__name__,
@@ -87,6 +96,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         "held_back": held_back,
         "boundary": report.boundary(alloc),
         **({"quota": observed} if observed is not None else {}),
+        **({"changes": changes} if changes else {}),
         "field_mismatches": mismatched,
         "flagged": flagged,
         "unlinked_candidates": candidates,

@@ -86,7 +86,8 @@ How the issuer pays the cashback back (periods, dates, caps) is a `Crediting` cl
 3. **Build the JSON spec.** Skip optional blocks if the user hasn't specified them; better to leave defaults than to invent rules.
 4. **Run `--dry-run` first** for any non-trivial promo so the user can see the resolved YAML before disk write.
 5. **Run the script.** Read the envelope, surface `{id, path, status}` back to the user.
-6. **Reciprocal-link the narrative doc.** If a `docs/promotions/<id>.md` exists or should exist, point at the repo file as the source of truth (don't duplicate structured data into the narrative).
+6. **Compare it with what came before** (user, 2026-11-07). When the promo replaces one on the same card (a new year's UOB One, a renewed tier table) or sits next to a related one, read both terms and list every difference in the promo's doc under `## Changes from <previous id>`: rates and tiers, caps, exclusions, installment treatment, **crediting schedule**, effective dates. Name the old and the new rule in each bullet, and lead the reply to the user with them. A campaign paid through the Promotion Bureau declares the same list on its class: see [[../sync-promotion/SKILL.md|/sync-promotion]] → *New campaign*.
+7. **Reciprocal-link the narrative doc.** If a `docs/promotions/<id>.md` exists or should exist, point at the repo file as the source of truth (don't duplicate structured data into the narrative).
 
 ## What this skill does NOT do
 

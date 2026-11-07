@@ -52,3 +52,8 @@ Which food rows those are can't be pinned down without MCCs, so the ledger is le
   - The descriptor doesn't say Bonchon (`BC`), so the classifier can't see it. Mark it by hand if it recurs.
 - **Takumi's …5549 (Mastercard) and …0581 (Digital VISA):** exact (61 and 0). KTC also moved 2,000 points from 0581 to 5549 and 22 from 1346 to 2310 (`adjusted` on each summary). `/sync-points-balance` set every card to its printed balance.
 - **Baiboon's …2310:** KTC paid 50; her rows give 77 once the three lines missing from her ledger were added (BCM LAMPHUN HOSPITAL ฿50, BCM CHAING KAN ฿380 + ฿84). Still open, like August. The Lamphun Hospital rows (฿30, ฿67.68, ฿50) are likely MCC 8062; the rest needs MCCs.
+
+## Oct 2026 statements (audited 2026-11-07)
+
+- **Takumi's …1346:** KTC paid 65 and the ledger gave 101. Leaving out `AIAUN BAKERY CITY THA` ฿940 (3 Oct) gives exactly 65: ฿1,645 ÷ 25. A bakery is MCC 5462, which rule (16) excludes. The row went to `×0` with a Note, and the cycle's `[ปรับคะแนน]` rounding row went from +2 to +1. The card now matches (user, 2026-11-07). `BANGCHAK BGN-CHANGPHUE` ฿940 earned again, so petrol still earns.
+- **Baiboon's …2310:** KTC paid 66. Her rows give 76 one by one and 78 rounded once. Every statement line is in her ledger, so ฿287.53–312.52 of the ฿1,962.52 that earns in the ledger earned nothing at the bank. The four food stalls (`KHAWPEIK` ฿50, `PADTHAIYAYKAEA` ฿50, `MAD ROASTERY` ฿65, `ORGANIC VEGETABLES BAN` ฿50: likely MCC 5814 / 5499 / 5411) make ฿215. Either `BCM BUENG KHONG LONG B` ฿82.72 or `DIRECT MINIMAL` ฿95 would complete it, and the totals can't tell which. Still open, like August and September. Left as it is until the MCCs are known.

@@ -191,6 +191,28 @@ class BasePromotion(ABC):
     crediting: ClassVar[tuple[str, ...]] = ()
     split_text: ClassVar[tuple[str, ...]] = ()           # how the household shares it (page text)
 
+    # How the campaign differs from the one it replaces and the ones it sits next
+    # to (user, 2026-11-07, after NW4 quietly moved its crediting from NW3's "30
+    # business days" to "60 days"). Written from both campaigns' terms when the
+    # campaign is added; shown at the top of its Bureau pages and returned by the
+    # sync that writes a page, so the user sees what changed before relying on the
+    # old habits. One bullet per difference, each naming the old and the new rule.
+    predecessor: ClassVar[str | None] = None             # code of the campaign it replaces, e.g. "NW3"
+    related: ClassVar[tuple[str, ...]] = ()              # codes it was compared with besides the predecessor
+    changes: ClassVar[tuple[str, ...]] = ()
+
+    @classmethod
+    def compared_with(cls) -> tuple[str, ...]:
+        """Every campaign `changes` compares this one with, predecessor first."""
+        return ((cls.predecessor,) if cls.predecessor else ()) + tuple(cls.related)
+
+    @classmethod
+    def changes_report(cls) -> dict[str, Any] | None:
+        """`changes` for a sync envelope, or None when the campaign names nothing to compare."""
+        if not cls.compared_with():
+            return None
+        return {"compared_with": list(cls.compared_with()), "changes": list(cls.changes)}
+
     @classmethod
     def issuer(cls) -> str:
         """Who issues the cards the campaign covers: the cards' `brand` in
@@ -450,6 +472,11 @@ class BasePromotion(ABC):
         blocks = [
             nb.callout((f"{self.title} ({self.code})", "b"), f" · {span} · {', '.join(self.cards)} · ",
                        ("bank's terms", "", self.source_url)),
+        ]
+        if self.changes:
+            blocks += [nb.heading(f"Changes from {', '.join(self.compared_with())}"),
+                       *(nb.bullet(c) for c in self.changes)]
+        blocks += [
             nb.heading(self.ladder_title),
             nb.table(list(self.ladder_header), [list(r) for r in self.ladder_rows]),
         ]

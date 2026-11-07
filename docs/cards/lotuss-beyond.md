@@ -81,6 +81,10 @@ A standing card benefit, separate from the coins. Source: the card page <https:/
 - [[../promotions/lotuss-lan|LAN]] — spend at Lotus's itself (stores and Lotus's Shop Online, no e-wallet), Oct–Dec 2026; registered by 2 Oct.
 - [[../promotions/lotuss-qrt4|QRT4]] — ฿10 per ฿100 slip at restaurants and four other categories by QR / TrueMoney, ฿40 a month, Jul–Dec 2026. Its credits are the `CB TMN QR QRT4<MON><YY>` lines in Takumi's ledger.
 
+## Coin balance
+
+The 5 Nov 2026 statement printed 10.25 normal + 51.25 special coins earned, an adjustment of **−425** coins, and 12.50 outstanding. The −425 has no row in the ledger: coins used or expired, not known which. `/sync-points-balance` wrote `[ปรับคะแนน] ยอดคะแนนคงเหลือตามใบแจ้งยอด 2026-11-05` (−305.25: the ledger's 317.75 down to the printed 12.50) on 2026-11-07, at the user's request. The same statement billed the card's **annual fee**, `ค่าธรรมเนียมรายปี` ฿1,200 + VAT ฿84, which the household left unpaid ([[../databases/takumi-bills|takumi-bills]]).
+
 ## See also
 
 - [[_stubs|Card stub index]]

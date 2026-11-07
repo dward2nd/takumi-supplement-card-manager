@@ -60,7 +60,7 @@ The issuers' campaign notes: [[../promotions/first-choice-2026h2]], [[../promoti
 
 **A hand-made tracker is linked, not duplicated.** A sync finds a holder's tracker row through its `Promotion` link or by the exact title it would give. Baiboon's hand-made trackers use other titles (`SUP1 3% 1—30 Sep`, `Everyday with AEON 10 Sep`). So when a campaign got its first Bureau row, each matching hand-made tracker was linked to it first (2026-09-29). A ticked tracker is never changed; if it disagrees with the split, the sync only warns.
 
-A campaign class states the bank's terms in code: cards, dates, what counts (`qualifies`, `rules`), the payout, and the page text. Screening, the split and the Bureau page summary read those declarations, so the page and the screening can't drift apart. [[../../.claude/skills/sync-promotion/SKILL.md|/sync-promotion]] drives it.
+A campaign class states the bank's terms in code: cards, dates, what counts (`qualifies`, `rules`), the payout, and the page text. Screening, the split and the Bureau page summary read those declarations, so the page and the screening can't drift apart. A class also names the campaign it replaces and the ones it was compared with (`predecessor`, `related`) and lists how its terms differ (`changes`). That list is the first section of its Bureau page and comes back from the sync that writes the page (user, 2026-11-07, after NW4's slower crediting went unnoticed). [[../../.claude/skills/sync-promotion/SKILL.md|/sync-promotion]] drives it.
 
 ## One row, several campaigns — same bank only
 

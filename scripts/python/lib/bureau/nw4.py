@@ -71,6 +71,26 @@ class NW4Promotion(NW3Promotion):
     source_url = "https://www.firstchoice.co.th/promotion/firstchoice-cashback"
     headline = "2%"
 
+    # NW3's terms (nw3.py) against this page, re-read 2026-11-07.
+    predecessor = "NW3"
+    changes: ClassVar = (
+        "Crediting: within 60 days after each month-end (NW3: within 30 business days, and it paid on "
+        "the 6th of the next month in Aug and Sep). October's credit can come as late as 30 Dec, "
+        "November's 29 Jan 2027, December's 1 Mar 2027. October's was still missing on 7 Nov.",
+        "Top of the ladder: NW3's +฿500 at ฿200,000 is gone, so the cap is ฿2,000 a month and ฿6,000 "
+        "for the campaign (NW3: ฿2,500 and ฿7,500). The steps below it are unchanged.",
+        "Supermarket and fuel spend each count up to ฿30,000 a month per primary account, and only the "
+        "part above that is left out (NW3: a single supermarket charge over ฿10,000 or fuel charge over "
+        "฿3,000 was left out whole).",
+        "MCC 5199, \"such as Makro and Makro PRO\", is out: every Makro channel except TMN MAKRO "
+        "(NW3 counted Makro as a supermarket, charges up to ฿10,000 each).",
+        "Enrolment: registrants with over ฿10,000 of NW3 spend in both Jul and Aug were enrolled for "
+        "Oct–Dec; registering is otherwise as NW3 (UCHOOSE or SMS, counting from confirmation).",
+        "New second part: a cashback on cash advances, up to ฿600 a month (not modelled: the household "
+        "takes none).",
+        "The sister campaigns are now ON4, DLV3, TR3 and IS4 (NW3's were ON3, DLV2, TR2 and IS3).",
+    )
+
     # Spend a category can bring to the ladder each month, per primary account.
     category_caps: ClassVar = (("supermarkets", _supermarket, CATEGORY_CAP), ("fuel", _fuel, CATEGORY_CAP))
 
