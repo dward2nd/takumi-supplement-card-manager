@@ -49,4 +49,6 @@ Takumi's ledger has `CB MLO_Promotion 1 - 31 JUL'26`, `… AUG'26` and `CB MLO_P
 |---|---|---|
 | `2026M10 — LAN cb 2%` | 2026-10-05 | ฿119 linked (2 Oct); ฿0 until October reaches ฿2,000 |
 
+**October paid ฿40** (`CB LAN_Promotion 1-31 OCT'26`, 7 Nov 2026, booked −฿40 `×0` in Takumi's 2026-12 cycle). The Bureau's linked rows stayed under ฿2,000 (Takumi's own Lotus's spend that month was ฿216), so it had no share and no tracker for it. The …6524 supplement took the pool past the first step: its October lines on the 5 Nov statement alone come to ฿1,881.25, which with his ฿216 makes ฿2,097.25. This is the case described under *What counts*, and it's the same ฿40 a month that MLO paid.
+
 Source, read 2026-10-05: <https://www.lotussmoney.com/promotion/credit-card/shopping/lotuss-shopping-online>.
