@@ -225,6 +225,11 @@ With the transfers in place, every paid card nets to zero. First batch, same day
 | Krungsri Visa 2026-09 | 4,170.00 | |
 | Krungsri NOW 2026-09 | 630.42 | |
 
+**A friend's transfer larger than their bill** (user, 2026-11-08). The excess counts toward that friend's next bill, so it is not refunded and not carried forward on the overpaid card. Their ledger gets two rows from the one slip. The overpaid bill gets a payment row for exactly what is left on it, so it nets to ฿0 and can be marked paid. The next bill gets a `ชำระบางส่วน` row for the excess, dated on the slip. Attach the slip to both bills with `record_payment: false`. Takumi's `โอนยอดจาก<friend>` on the overpaid card is still their remaining statement-line share. First case: UOB One 2026-10.
+- Takumi paid UOB the last ฿13,011.83 on 8 Nov (`ชำระเพิ่มบางส่วนจนครบ`). That brought the bank payments to the full ฿36,582.81: his ฿3,145.63, the ฿20,000 UNITRIP loan, Baiboon's ฿425.35 and this slip. His `โอนยอดจากนุตา` was ฿12,824.18, her ฿32,824.18 section less the ฿20,000.
+- Nuta sent ฿16,582.81 the same day. That is the statement total less ฿20,000, so it also paid for Takumi's and Baiboon's lines and for her own ฿464.04 cashback.
+- In Nuta's ledger, ฿12,360.14 closed UOB One 2026-10. The remaining ฿4,222.67 went to First Choice 2026-11, which now stands at ฿9,032.90 of ฿13,255.57.
+
 **Unmonitored supplements** get the same treatment under the name `โอนยอดจากบัตรเสริม`, again `×0` and positive (user, 2026-09-27; the name comes from his 2025 ledger, 3,052.16 on 2025-04-05). The 6524 card on Lotus's Beyond (P. PETCHKULJINDA) is billed but not tracked in any ledger, so its share isn't a friend's debt. First row: Lotus's Beyond 2026-09, 2,363.00.
 
 ### Cashback moved to the friends (2026-09-27)
