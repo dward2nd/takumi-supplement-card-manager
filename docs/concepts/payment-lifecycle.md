@@ -41,7 +41,7 @@ A `Credit Return = true` transaction is left in the database — it isn't delete
 
 - The three boolean flags collapse into one `Transaction.status` enum: `pending` → `processed` → `paid`, or terminal `refunded`. The `Bill.paid` flag and per-transaction "paid" signal unify too.
 - **A refund creates a new negative-amount `Transaction` row** (the "adjustment row") **and** flips the original transaction's status to `refunded`. Both representations co-exist deliberately — the negative row preserves bank-statement reality; the status flip lets reporting find "transactions that were refunded" without re-joining.
-- **Cross-cycle refunds** — when the refund posts in a bill cycle later than the original transaction's cycle, the adjustment row's `billCycleDate` is set to the **next** cycle, treating it as an advance payment that reduces the next bill. Banks commonly handle late refunds this way; the model expresses it directly.
+- **Cross-cycle refunds** — when the refund posts in a bill cycle later than the original transaction's cycle, the adjustment row's `billCycleDate` is set to the **next** cycle, treating it as an advance payment that reduces the next bill. Banks commonly handle late refunds this way; the model expresses it directly. **The statement that prints the refund decides its cycle** (user, 2026-11-08). A refund posted on the closing date itself is printed on that cycle's statement, so it stays on that bill. First case: Nuta's First Choice `HTTPS://WWW.MAKRO.PRO/ BANGKOK TH` −฿72, refunded 1 Nov and posted 5 Nov. It had been booked on the 2026-12-05 cycle and was moved back to 2026-11-05, where it is printed.
 
 ## How the flags interact with rollups
 
