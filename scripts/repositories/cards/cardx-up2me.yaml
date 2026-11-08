@@ -1,8 +1,8 @@
 name: CardX UP2ME
 issuer: CardX
-bill_cycle_pattern: krungsri      # ASSUMED from CardX JCB (day 5, +20d): no UP2ME statement seen yet
+bill_cycle_pattern: krungsri      # day 5, due +20d: confirmed by the first statement (5 Nov 2026, due 25 Nov)
 statement_numbers:                # last 4 digits on the statement → holder (CardX prints one PDF per card number)
-  "2726": takumi                  # from the slip memo `2726 — CardX UP2ME` (6 Nov 2026); confirm on the first statement
+  "2726": takumi                  # `5414 96XX XXXX 2726`, confirmed on the 5 Nov 2026 statement
 # CardX is SCB X group, not Krungsri: lib.earning gives it the plain `Card`
 # class (promotions only), like CardX JCB.
 notes: |
@@ -13,7 +13,14 @@ notes: |
   waits for the statement (docs/databases/takumi-bills.md, Slip before
   statement).
 
-  Open until the first statement: card network and tier, points rate
-  (`บาทต่อ 1 คะแนน` is empty in Notion), the cycle and due dates, whether
-  anyone else holds a supplement, and the PDF password (CardX uses each
-  holder's own DOB).
+  First statement (5 Nov 2026, due 25 Nov, recorded 2026-11-08): ฿2,194.11 =
+  `NOZAWAHOSTEL AND ONSEN CHIANGMAI 004/004` ฿750.00 + `AGODA.COM Internet
+  SGP 004/004` ฿1,444.11, the last terms of plans that predate the ledger.
+  Points: 17 outstanding, 0 earned on those terms. Credit limit ฿94,000,
+  shared with Nuta's CardX JCB (her statement prints the same ฿94,000 total).
+  The PDF opens with Takumi's DOB as DDMMYYYY, the format every CardX PDF uses
+  (`issuers.CardX.default` in statement-passwords.yaml since 2026-11-08).
+
+  Still open: card network and tier, points rate (`บาทต่อ 1 คะแนน` is empty
+  in Notion, so rows earn nothing in the ledger), and whether anyone else
+  holds a supplement.
