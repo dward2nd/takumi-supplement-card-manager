@@ -51,6 +51,8 @@ the row the quota ends in        → keeps ×5; ใช้คะแนน = ⌊ov
 
 `lib.promotions.classify` still returns ×5 for every UOB World row (this promo has no tiers), so `/add-transaction`'s `auto_classify` over-reports on non-bonus merchants and past the quota. The Bureau sync is what corrects it.
 
+**What the bank actually counts** (25 Oct 2026 statement, [[../cards/uob-world#Points|card note]]): the ฿20,000 of spend *posted* in the statement period, and the bonus on that ฿20,000 as a whole (20,000 ÷ 25 × 3 = 2,400 on top of each row's ×2). The Bureau counts by bill cycle and row by row, so it can miss a quota that fills by posting date, and its per-row split lands about 30 points under the bank. October 2026 is held by one `[ปรับคะแนน] โบนัส ×5 เกินโควต้า 20k รอบบิล 2026-10` row (`ใช้คะแนน` 246), the user's choice for that cycle (2026-11-09).
+
 ## Exclusions
 
 The promo does not override the project-wide exclusions:
