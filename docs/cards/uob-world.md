@@ -28,6 +28,12 @@ The base is `×2`, not `×1` — an unboosted UOB World row still earns double. 
 
 Per account (Takumi + Baiboon together), counting every transaction, first come, first served; ×5 only on the bank's bonus categories (online, e-wallet, dining, travel, foreign currency). Enforced since 2026-09-28 by the Promotion Bureau (one row per cycle). The row the quota ends in keeps ×5 and gives back its over-quota part through `ใช้คะแนน`. Full detail in [[../promotions/uob-world-points]].
 
+**The 25 Oct 2026 statement points to a different count** (`/audit-rewards`, 2026-11-08). The statement printed 4,164 earned, and the ledger gives 4,410 (+246). The printed figure is exactly the ledger's `×5` rows with their bonus capped at **2,400 points**: 1,764 base + min(2,646 bonus, 2,400) = 4,164. 2,400 is ฿20,000 × (5 − 2) / 25. Two things differ from the Bureau's model:
+- **Which rows.** UOB applies the quota to the rows *posted* in the statement period, the same period `/audit-rewards` uses. `ANTHROPIC* CLAUDE SUB SAN FRANCISCO` ฿3,669.72 is dated 24 Sep, posted 25 Sep and billed on 2026-09-25, and it took October's quota. The Bureau's `2026M10 — UOB World ×5` row groups by bill cycle (25 Sep – 21 Oct), finds ฿18,811.25, and leaves every row at ×5.
+- **How rows are counted.** Each row's points are floored per line, then the bonus is capped. That is the same as the household's "give the over-quota part back" only when the quota ends neatly inside one row.
+
+Baiboon's `WWW.MAKRO.PRO BANGKOK TH` ฿16,850 (11 Oct) earned the full bonus up to the cap, so UOB has no Makro PRO exclusion. Nothing has been changed yet: re-basing the Bureau on posting dates, and adding a `ใช้คะแนน` 246 row for October, wait for the user.
+
 ## Exclusions
 
 - **Petrol** → `×0`. A rule of `UOBCard` (`lib/earning`); UOB carries this across its whole range. See [[../concepts/promotions]].

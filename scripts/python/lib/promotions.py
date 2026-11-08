@@ -358,12 +358,21 @@ def looks_transport_or_toll(merchant_name: str) -> bool:
     return bool(_TRANSPORT_TOLL.search(merchant_name.upper()))
 
 
+def looks_truemoney(merchant_name: str) -> bool:
+    """True for a payment through TrueMoney (`TMN `/`TMN*` prefix)."""
+    upper = merchant_name.strip().upper()
+    return any(upper.startswith(p) for p in _TRUEMONEY_PREFIXES)
+
+
+def looks_711(merchant_name: str) -> bool:
+    """True for 7-Eleven in any channel, through TrueMoney included (`TMN 7-11 …`)."""
+    upper = merchant_name.strip().upper()
+    return any(tok in upper for tok in _SEVEN_ELEVEN_TOKENS)
+
+
 def looks_truemoney_or_711(merchant_name: str) -> bool:
     """True for TrueMoney (`TMN `/`TMN*` prefix) or 7-Eleven merchant strings."""
-    upper = merchant_name.strip().upper()
-    if any(upper.startswith(p) for p in _TRUEMONEY_PREFIXES):
-        return True
-    return any(tok in upper for tok in _SEVEN_ELEVEN_TOKENS)
+    return looks_truemoney(merchant_name) or looks_711(merchant_name)
 
 
 def matches_tier(merchant_name: str, tier: Tier) -> bool:

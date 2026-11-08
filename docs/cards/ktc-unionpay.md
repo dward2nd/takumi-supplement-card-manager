@@ -39,7 +39,7 @@ Both slips attach to Baiboon's one `KTC UnionPay <YYYY-MM>` bill, each with its 
 
 ## Notion / classification encoding
 
-`scripts/repositories/cards/ktc-unionpay.yaml` and the `KTCUnionPay` class (`scripts/python/lib/earning/families.py`) encode what the merchant string shows: supermarket names, 7-Eleven / TrueMoney, transport and tolls. MCC-only exclusions (fast food, bakeries, public hospitals) still go `×0` **by hand** with a Note.
+`scripts/repositories/cards/ktc-unionpay.yaml` and the `KTCUnionPay` class (`scripts/python/lib/earning/families.py`) encode what the merchant string shows: supermarket names, 7-Eleven in any channel (`TMN 7-11` included; other TrueMoney payments earn, 2026-11-08), transport and tolls. MCC-only exclusions (fast food, bakeries, public hospitals) still go `×0` **by hand** with a Note.
 
 ## See also
 

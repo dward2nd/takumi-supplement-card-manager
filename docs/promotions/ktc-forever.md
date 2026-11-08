@@ -25,13 +25,15 @@ KTC's points programme for every KTC card: Takumi's KTC Digital VISA, KTC JCB an
 | (11)–(12) | Visa / Mastercard / UnionPay | merchants in the 31 EEA countries; merchants registered in mainland China |
 | (16) | **KTC UnionPay** | MCC 8398 charities, 8661 religious bodies, 4899 pay TV, 4900 utilities, **5411 supermarkets and grocers**, 9211/9222/9223/9311/9399/9402/9405 government, 1520 contractors, 4121 taxis, 4215 couriers, 4814 telecom, 5399 general merchandise, **5462 bakeries**, **5499 miscellaneous food shops**, **5814 fast food**, 7832 cinemas, 7999 recreation, **8062 public hospitals**, education (8211, 8220, 8241, 8244, 8249, 8299) |
 | (17) | all | public transport and tolls: MCC 4111 (BTS, MRT, ferries), 4112 (SRT), 4131 (BMTA buses), 4784 (Easy Pass / M-Pass expressway tolls); credit card on delivery |
-| (2), (4)–(8), (13)–(15) | Mastercard / Visa / Senior | government MCCs, Lotus's go fresh, Makro, TrueMoney-linked cards, payment agents, New Zealand and Japanese travel MCCs, B2B suppliers. None of these are household cards |
+| (2), (4)–(8), (13)–(15) | Mastercard / Visa / Senior | government MCCs, Lotus's go fresh, Makro, TrueMoney-linked cards, payment agents, New Zealand and Japanese travel MCCs, B2B suppliers. Takumi's KTC Digital VISA and KTC Mastercard carry these. The VISA Makro clause (5) dates from 1 Sep 2026, and the TrueMoney-bound clause (6) from 1 May 2026 ([[../concepts/makro-truemoney-exclusions]]) |
 
 ## What the classifier knows
 
 The ledger has no MCCs, so only rules that show in the merchant string are encoded (`KTCCard`, `KTCUnionPay` in `lib/earning/families.py`):
-- **All KTC cards:** 7-Eleven and TrueMoney (`TMN …`); tolls and public transport (`EXPRESSWAY`, `EASY PASS`, `M-PASS`, `BTS`, `MRT`).
+- **All KTC cards:** 7-Eleven in any channel, `TMN 7-11 …` included; tolls and public transport (`EXPRESSWAY`, `EASY PASS`, `M-PASS`, `BTS`, `MRT`).
 - **KTC UnionPay:** supermarket names (Savemart, Lotus's, Big C, Tops, Rimping and others).
+- **KTC Digital VISA and KTC Mastercard** (`KTCTrueMoneyBound`, 2026-11-08): every `TMN …` row from 1 May 2026, since a card paying through TrueMoney is bound to a TrueMoney Wallet. Plus, on the VISA, Makro stores and Makro PRO from 1 Sep 2026 (`points_excluded_merchants` in `ktc-digital-visa.yaml`).
+- **Other TrueMoney payments earn on KTC JCB and UnionPay.** The 27 Aug 2026 KTC JCB statement printed 10 points, which needs `TMN LOTUS HYPER` ฿91 to earn 3. Until 2026-11-08 `KTCCard` zeroed every `TMN …` row.
 
 The rest (bakeries, fast food, public hospitals, cinemas, …) depends on the MCC, so those rows get `×0` by hand with a Note, as Baiboon's Savemart rows already have.
 

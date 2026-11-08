@@ -9,7 +9,8 @@ code, one class per family (families.py):
 
   withholds_fuel()   does fuel earn nothing, on both axes?        (UOB, ttb)
   withholds_top_ups()  do e-wallet top-ups earn nothing, on both axes?  (UOB)
-  after_rules()      points-only rules layered on top, in order   (Krungsri family, AEON)
+  after_rules()      points-only rules layered on top, in order   (Krungsri family, KTC, Lotus's;
+                     every card ends with its YAML's points_excluded_merchants)
 
 Classification order (unchanged from lib.promotions before 2026-09-28):
   no active promotion: foreign-in-THB → ×0; withheld fuel → ×0; else the
@@ -27,6 +28,7 @@ from collections.abc import Callable
 
 from .. import promotions as promos
 from ..card_repo import CardRepo
+from ..ledger import PRIMARY_PREFIX
 from ..promotions import Classification, Promotion
 
 AfterRule = Callable[[Classification, dt.date, str, bool], Classification]
@@ -51,7 +53,23 @@ class Card:
         return False
 
     def after_rules(self) -> list[AfterRule]:
-        return []
+        # Every card honours its YAML's `points_excluded_merchants` (AEON's MCC list
+        # since 2025-11-11; the Krungsri family's Makro / MCC 5199 rule since
+        # 2026-11-01). A family puts its own rules before this one via super().
+        return [self._merchant_points_exclusions]
+
+    def _merchant_points_exclusions(self, result: Classification, date: dt.date, merchant: str,
+                                    inst: bool) -> Classification:
+        """Issuers withhold points by MCC, which a merchant string doesn't carry, so
+        the card YAML lists the strings known to bill under an excluded code
+        (`points_excluded_merchants`: prefix, date, note); `*` means every merchant."""
+        if not self.repo or result.points_override == "×0":
+            return result
+        name = merchant.strip().removeprefix(PRIMARY_PREFIX).strip().upper()
+        for ex in self.repo.points_excluded_merchants:
+            if date >= ex.effective_from and (ex.prefix == "*" or name.startswith(ex.prefix.upper())):
+                return with_points_withheld(result, ex.note, "merchant-points-exclusion")
+        return result
 
     # -- the template ------------------------------------------------------------
 

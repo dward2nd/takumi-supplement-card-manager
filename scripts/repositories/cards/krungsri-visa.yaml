@@ -5,3 +5,35 @@ bill_cycle_pattern: krungsri
 statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; supplements named on the statement)
   "7679": takumi
   "4493": baiboon
+points_excluded_merchants:
+  # Krungsri Point terms item 2.3 (7), https://www.krungsricard.com/th/krungsri-point (read 2026-11-01):
+  # "ทุกการใช้จ่ายที่แม็คโคร ทุกช่องทางการจำหน่ายและการใช้จ่ายภายใต้ MCC 5199 … โดยมีผลตั้งแต่วันที่ 1 พฤศจิกายน 2569".
+  # Every Makro channel the ledger has seen: both Makro PRO strings, a card at a store
+  # (`MAKRO_…`), Makro's in-store QR (`CP AXTRA …`) and TrueMoney at Makro (already ×0
+  # under the 7-Eleven/TrueMoney rule). Other MCC 5199 merchants aren't known by name.
+  # Encoded 2026-11-08 (user: "Krungsri Card (and First Choice …) has stopped giving reward
+  # points to Makro").
+  - prefix: "WWW.MAKRO.PRO"
+    mcc: "5199"
+    effective_from: 2026-11-01
+    note: "Makro — no Krungsri Point at Makro, every channel, nor on MCC 5199, from 1 Nov 2026 (Krungsri Card). Points only: cashback campaigns are separate."
+  - prefix: "HTTPS://WWW.MAKRO.PRO/"
+    mcc: "5199"
+    effective_from: 2026-11-01
+    note: "Makro — no Krungsri Point at Makro, every channel, nor on MCC 5199, from 1 Nov 2026 (Krungsri Card). Points only: cashback campaigns are separate."
+  - prefix: "MAKRO_"
+    mcc: "5199"
+    effective_from: 2026-11-01
+    note: "Makro — no Krungsri Point at Makro, every channel, nor on MCC 5199, from 1 Nov 2026 (Krungsri Card). Points only: cashback campaigns are separate."
+  - prefix: "CP AXTRA"
+    mcc: "5199"
+    effective_from: 2026-11-01
+    note: "Makro — no Krungsri Point at Makro, every channel, nor on MCC 5199, from 1 Nov 2026 (Krungsri Card). Points only: cashback campaigns are separate."
+  - prefix: "TMN MAKRO"
+    mcc: "5199"
+    effective_from: 2026-11-01
+    note: "Makro — no Krungsri Point at Makro, every channel, nor on MCC 5199, from 1 Nov 2026 (Krungsri Card). Points only: cashback campaigns are separate."
+  - prefix: "TMN*MAKRO"
+    mcc: "5199"
+    effective_from: 2026-11-01
+    note: "Makro — no Krungsri Point at Makro, every channel, nor on MCC 5199, from 1 Nov 2026 (Krungsri Card). Points only: cashback campaigns are separate."

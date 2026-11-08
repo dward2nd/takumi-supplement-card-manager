@@ -17,7 +17,7 @@ from __future__ import annotations
 from .. import card_repo
 from .base import Card
 from .families import (AEONCard, CashCard, FirstChoice, KrungsriFamilyCard, KrungsriJCB, KrungsriPetrolCampaign, KTCCard,
-                       KTCUnionPay, LotussBeyond, TTBCard, UOBCard)
+                       KTCTrueMoneyBound, KTCUnionPay, LotussBeyond, TTBCard, UOBCard)
 
 # Cards whose rules differ from their issuer's family.
 BY_NAME: dict[str, type[Card]] = {
@@ -25,6 +25,8 @@ BY_NAME: dict[str, type[Card]] = {
     "Krungsri JCB": KrungsriPetrolCampaign,     # points-only petrol campaign
     "Krungsri Lady": KrungsriPetrolCampaign,    # same campaign (Sep 2026 statement)
     "KTC UnionPay": KTCUnionPay,                # its own exclusion list (supermarkets …)
+    "KTC Digital VISA": KTCTrueMoneyBound,      # no points through a TrueMoney-bound card (from 2026-05-01)
+    "KTC Mastercard": KTCTrueMoneyBound,        # same clause (6)
     "Lotus's Beyond": LotussBeyond,  # Krungsri partner card, not the family: CP ALL keeps earning; ×6 at Lotus's
     "UOB Cash Plus": CashCard,       # a cash card, not a credit card: no points, no cashback
 }
@@ -46,5 +48,5 @@ def card_for(name: str) -> Card:
 
 
 __all__ = ["AEONCard", "BY_ISSUER", "BY_NAME", "Card", "CashCard", "FirstChoice", "KrungsriFamilyCard", "KrungsriJCB",
-           "KrungsriPetrolCampaign", "KTCCard", "KTCUnionPay",
+           "KrungsriPetrolCampaign", "KTCCard", "KTCTrueMoneyBound", "KTCUnionPay",
            "LotussBeyond", "TTBCard", "UOBCard", "card_for"]

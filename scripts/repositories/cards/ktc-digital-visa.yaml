@@ -3,6 +3,24 @@ issuer: KTC
 bill_cycle_pattern: ktc
 statement_numbers:            # last 4 digits on the statement → holder (seen 2026-09-27; KTC prints one PDF per card number)
   "0581": takumi
+points_excluded_merchants:
+  # KTC FOREVER clause (5), https://www.ktc.co.th/rewards (read 2026-11-08): "ยอดใช้จ่ายผ่านบัตรเครดิต KTC VISA
+  # ทุกประเภท ที่ร้านค้า Makro และร้านค้าออนไลน์ Makro PRO ในประเทศไทย", since 1 Sep 2026
+  # (https://www.ktc.co.th/upload/announcement-document/Makro-CPAXT-KTCVisa-Notice-changes-Points-and-Cashback-Earning-t.pdf).
+  # The B2B MCCs, 5199 among them, earn nothing on KTC VISA from 1 May 2026. Encoded 2026-11-08;
+  # TrueMoney-bound spend is the KTCTrueMoneyBound class (lib/earning).
+  - prefix: "WWW.MAKRO.PRO"
+    effective_from: 2026-09-01
+    note: "Makro — no KTC FOREVER points or cashback on KTC VISA at Makro stores or Makro PRO from 1 Sep 2026 (KTC notice); MCC 5199 earns nothing on KTC VISA since 1 May 2026."
+  - prefix: "HTTPS://WWW.MAKRO.PRO/"
+    effective_from: 2026-09-01
+    note: "Makro — no KTC FOREVER points or cashback on KTC VISA at Makro stores or Makro PRO from 1 Sep 2026 (KTC notice); MCC 5199 earns nothing on KTC VISA since 1 May 2026."
+  - prefix: "MAKRO_"
+    effective_from: 2026-09-01
+    note: "Makro — no KTC FOREVER points or cashback on KTC VISA at Makro stores or Makro PRO from 1 Sep 2026 (KTC notice); MCC 5199 earns nothing on KTC VISA since 1 May 2026."
+  - prefix: "CP AXTRA"
+    effective_from: 2026-09-01
+    note: "Makro — no KTC FOREVER points or cashback on KTC VISA at Makro stores or Makro PRO from 1 Sep 2026 (KTC notice); MCC 5199 earns nothing on KTC VISA since 1 May 2026."
 notes: |
   Takumi's card; no supplements. Baiboon pays with Takumi's own card (…0581) at
   times: her rows carry the `[บัตรหลัก]` prefix and sit on a `KTC Digital VISA` row

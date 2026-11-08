@@ -128,30 +128,21 @@ class FirstChoice(KrungsriFamilyCard):
 
 
 class AEONCard(Card):
-    """AEON withholds points by MCC from 2025-11-11. A merchant string doesn't
-    carry its MCC, so the card YAML lists the strings known to bill under an
-    excluded code (`points_excluded_merchants`: prefix, date, note); `*` means
-    every merchant (AEON Rabbit)."""
-
-    def after_rules(self) -> list[AfterRule]:
-        return [*super().after_rules(), self._merchant_points_exclusions]
-
-    def _merchant_points_exclusions(self, result: Classification, date: dt.date, merchant: str,
-                                    inst: bool) -> Classification:
-        if not self.repo or result.points_override == "×0":
-            return result
-        name = merchant.strip().removeprefix(PRIMARY_PREFIX).strip().upper()
-        for ex in self.repo.points_excluded_merchants:
-            if date >= ex.effective_from and (ex.prefix == "*" or name.startswith(ex.prefix.upper())):
-                return with_points_withheld(result, ex.note, "merchant-points-exclusion")
-        return result
+    """AEON withholds points by MCC from 2025-11-11. The strings known to bill under
+    an excluded code are the card YAML's `points_excluded_merchants` (prefix, date,
+    note; `*` means every merchant, AEON Rabbit), which the base `Card` applies to
+    every card since 2026-11-08, when the Krungsri family's Makro rule joined it."""
 
 
 class KTCCard(Card):
     """KTC FOREVER (docs/promotions/ktc-forever.md; KTC's terms, 2026-09-28): no
-    points at 7-Eleven in any channel or through TrueMoney (rule 3), nor on public
-    transport and expressway tolls (rule 17). Only what the merchant string shows is
-    encoded; MCC-only exclusions are marked by hand."""
+    points at 7-Eleven in any channel, paying through TrueMoney included (rule 3),
+    nor on public transport and expressway tolls (rule 17). Other TrueMoney
+    payments earn: `TMN LOTUS HYPER` ฿91 earned its 3 points on the 27 Aug 2026
+    KTC JCB statement (audit 2026-11-08; until then every TrueMoney row was ×0
+    here). Only what the merchant string shows is encoded; MCC-only exclusions are
+    marked by hand. Makro and MCC 5199 per card: the card YAML's
+    `points_excluded_merchants`."""
 
     def after_rules(self) -> list[AfterRule]:
         return [*super().after_rules(), self._ktc_exclusions]
@@ -160,16 +151,29 @@ class KTCCard(Card):
                         inst: bool) -> Classification:
         if result.points_override == "×0":
             return result
-        reason = self.excluded(merchant.removeprefix(PRIMARY_PREFIX).strip())
+        reason = self.excluded(merchant.removeprefix(PRIMARY_PREFIX).strip(), date)
         return with_points_withheld(result, f"{reason} — no KTC FOREVER points.", "ktc-points-exclusion") \
             if reason else result
 
-    def excluded(self, merchant: str) -> str | None:
-        if promos.looks_truemoney_or_711(merchant):
-            return "7-Eleven / TrueMoney"
+    def excluded(self, merchant: str, date: dt.date) -> str | None:
+        if promos.looks_711(merchant):
+            return "7-Eleven (any channel, TrueMoney included)"
         if promos.looks_transport_or_toll(merchant):
             return "Public transport or expressway toll"
         return None
+
+
+class KTCTrueMoneyBound(KTCCard):
+    """KTC VISA and KTC MASTERCARD earn nothing on spend through a card bound to a
+    TrueMoney Wallet account (KTC FOREVER clause (6); the 1 Mar 2026 notice item 4,
+    from 1 May 2026). Every `TMN …` row on these cards is such spend."""
+
+    TRUEMONEY_FROM = dt.date(2026, 5, 1)
+
+    def excluded(self, merchant: str, date: dt.date) -> str | None:
+        if date >= self.TRUEMONEY_FROM and promos.looks_truemoney(merchant):
+            return "Card bound to TrueMoney Wallet (KTC VISA / MASTERCARD)"
+        return super().excluded(merchant, date)
 
 
 class KTCUnionPay(KTCCard):
@@ -177,10 +181,10 @@ class KTCUnionPay(KTCCard):
     fast food, public hospitals, cinemas, education, government… Supermarkets
     show in the name (user, 2026-07: JAMPHA SAVEMART); the others need the MCC."""
 
-    def excluded(self, merchant: str) -> str | None:
+    def excluded(self, merchant: str, date: dt.date) -> str | None:
         if promos.looks_supermarket(merchant):
             return "Supermarket (KTC UnionPay)"
-        return super().excluded(merchant)
+        return super().excluded(merchant, date)
 
 
 class LotussBeyond(Card):
@@ -218,6 +222,12 @@ class LotussBeyond(Card):
             return "E-wallet top-up"
         return next((label for label, rx in self.COIN_EXCLUSIONS if rx and rx.search(name)), None)
 
+    # Lotus's letter of 25 Oct 2026 (lotussmoney.com/announcement-corporate/
+    # lotus-money-coin-fuel-station-exclusion, researched 2026-11-08): no coins at fuel
+    # stations, MCC 5541 / 5542, on spend recorded from 1 Dec 2026. Before that only
+    # Bangchak was out (COIN_EXCLUSIONS).
+    FUEL_FROM = dt.date(2026, 12, 1)
+
     def _coin_exclusions(self, result: Classification, date: dt.date, merchant: str,
                          inst: bool) -> Classification:
         if result.points_override == "×0":
@@ -225,6 +235,8 @@ class LotussBeyond(Card):
         if inst:
             return with_points_withheld(result, "Installment — no Lotus's coins (card terms).", "lotus-coins-exclusion")
         reason = self.coin_exclusion(merchant)
+        if not reason and date >= self.FUEL_FROM and promos.looks_petrol(merchant):
+            reason = "Fuel station (MCC 5541/5542, from 1 Dec 2026)"
         return with_points_withheld(result, f"{reason} — no Lotus's coins (card terms).", "lotus-coins-exclusion") \
             if reason else result
 

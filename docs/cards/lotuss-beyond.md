@@ -61,7 +61,7 @@ From the card's coin terms (8 Jul 2025 – 31 Dec 2027, <https://www.lotussmoney
 
 Phone bills earn no coins but count toward [[../promotions/lotuss-smp1|SMP1 / SMT2]] (`AMP*AIS SERVICESPaymen BANGKOK TH`, 1 Oct 2026).
 
-**Fuel coins end on 1 Dec 2026**: from then, no coins at any MCC 5541 / 5542 station, Shell and PTT included (Lotus's notice of 25 Oct 2026, [[../catalogues/2026-11/krungsri-group]]). Not encoded yet: `auto_classify` still gives coins at non-Bangchak stations.
+**Fuel coins end on 1 Dec 2026**: from then, no coins at any MCC 5541 / 5542 station, Shell and PTT included (Lotus's notice of 25 Oct 2026, [[../catalogues/2026-11/krungsri-group]]). Encoded 2026-11-08: `LotussBeyond.FUEL_FROM` makes every fuel row dated from 1 Dec 2026 `×0` (`lib.promotions.looks_petrol`). The user confirmed the same day that Lotus's withholds coins on MCC 5199 but has no Makro- or TrueMoney-specific rule ([[../concepts/makro-truemoney-exclusions]]).
 
 ## Bangchak 3% cashback
 

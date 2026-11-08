@@ -30,6 +30,13 @@ Encoded as `points_excluded_merchants` in `scripts/repositories/cards/aeon-world
 
 **The MCC exclusion is about points only** (user, 2026-11-01: "MCC 5199 gains no points but is still eligible for cashback promotions"). AEON's notice withholds reward points. AEON World's 5% and NTW1 name Makro PRO and pay on both strings: AEON paid ฿500 (2 Oct) and ฿120 (2 Sep) for 11 Jul–10 Aug 2026, whose ฿29,574 was all `WWW.MAKRO.PRO`, and ฿120 (2 Oct) for 11 Aug–10 Sep on `WWW.MAKRO.PRO` alone. Neither string's MCC is known for sure. The table once gave them as 5199 and 5411, attributed to the user on 2026-09-28. That was a misreading of "AEON doesn't give points to transactions with MCC 5199". The `Makro — Nov 2026` catalogue then put a points rule onto the 5% ("5% only on `HTTPS://WWW.MAKRO.PRO/`"), and it was corrected on 2026-11-01. Krungsri's and KBank's pages call Makro and Makro PRO MCC 5199. The AEON app is the only place AEON shows points, since its statements print none.
 
+**AEON caps supermarket and fuel points** (found 2026-11-08, [[../concepts/makro-truemoney-exclusions]]): from 11 Aug 2025, MCC 5541, 5542, 5411 and 5310 earn points on at most ฿10,000 each per card per cycle. The ledger doesn't apply the cap. That leaves three possible answers for Baiboon's 10 Oct `HTTPS://WWW.MAKRO.PRO/` ฿16,068.50 order, which bills on the 2026-11-10 cycle and is 535 of the 559 points Notion gives her card:
+- the app adds 535 points on 11 Nov: the string is ordinary spend;
+- it adds 333: the string is 5411 under the cap;
+- it adds 0: the string is 5199.
+
+On 2026-11-08 the user saw fewer points in the app than in Notion. That alone can't separate the three answers, because AEON credits a cycle's points the day after it closes. Compare the app on 11 Nov and fix the row then.
+
 ## Cancelled orders, late posting and credit balances
 
 A cancelled order's refund doesn't name the merchant: it reads `REFUND TRANSACTION`, for the order's amount. The 10 Oct 2026 statement shows three quirks at once:
