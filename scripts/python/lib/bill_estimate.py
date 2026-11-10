@@ -26,18 +26,35 @@ What counts, per holder:
 
 The estimate assumes the previous statement was paid in full. A previous
 bill not marked paid is reported, since the bank would carry its balance.
+
+The one exception it handles is a previous statement that closed on a credit
+(user, 2026-11-10). Nothing is paid against it, so the bank prints it as the
+next statement's BALANCE BROUGHT FORWARD and the total due falls by that much.
+The estimate adds it as its own `brought_forward` part. The figure is Takumi's
+bill for the previous cycle when there is one. A credit cycle gets no bill, so
+otherwise the previous cycle is estimated the same way, going back at most
+`CARRY_DEPTH` cycles. A friend's `[ยอดยกมาจากรอบ …]` ± pair records the same
+credit in their ledger and stays household bookkeeping: counting it as well
+would count the credit twice, and an overpayment pair has the same shape but
+the bank never prints it.
+(First case: Baiboon's AEON World, 10 Oct 2026 closed at −฿15,701.78.)
 """
 
 from __future__ import annotations
 
+import datetime as _dt
 from dataclasses import dataclass, field
 
 from . import card_repo, notion_client
+from .bill_cycle import PatternNotFoundError, pattern_for_card
+from .bills import bills_for
 from .cards import CardNotFoundError, find_card
 from .holders import HOLDERS, primary
 from .ledger import PRIMARY_PREFIX, cycle_rows, is_cashback_row
 
 UNMONITORED = "unmonitored"   # a statement_numbers value: billed, never recorded
+BROUGHT_FORWARD = "brought_forward"   # split key: the previous statement's credit balance
+CARRY_DEPTH = 3   # cycles to look back for an unbilled credit balance
 NAMES = {h.key: h.thai_name for h in HOLDERS.values()}
 
 
@@ -49,10 +66,11 @@ class BillEstimateError(ValueError):
 class BillEstimate:
     card: str
     bill_cycle: str
-    # holder key (or UNMONITORED) → that section's subtotal, in HOLDERS order
+    # holder key (or UNMONITORED, BROUGHT_FORWARD) → that part's subtotal, in HOLDERS order
     split: dict[str, float] = field(default_factory=dict)
     lines: int = 0                      # ledger rows counted
     unmonitored_numbers: tuple[str, ...] = ()
+    brought_forward_from: str | None = None   # the credit cycle, when BROUGHT_FORWARD is set
     warnings: list[str] = field(default_factory=list)
 
     @property
@@ -64,6 +82,8 @@ class BillEstimate:
         for key, amount in self.split.items():
             if key == UNMONITORED:
                 label = "unmonitored supplement " + ", ".join(f"…{n}" for n in self.unmonitored_numbers)
+            elif key == BROUGHT_FORWARD:
+                label = f"credit brought forward from the {self.brought_forward_from} statement"
             else:
                 label = NAMES[key]
             out.append(f"{label} ฿{amount:,.2f}")
@@ -100,7 +120,13 @@ def estimate(card: str, bill_cycle: str, *, unmonitored: float | None = None) ->
     `card` is the card YAML name or a Cards page title; each holder's own page
     for it is looked up by name. `unmonitored` is required for a card with an
     unmonitored supplement (0 if it spent nothing) and refused for any other.
+    A credit balance on the previous statement is added (see the module note).
     """
+    return _estimate(card, bill_cycle, unmonitored=unmonitored, depth=CARRY_DEPTH)
+
+
+def _estimate(card: str, bill_cycle: str, *, unmonitored: float | None, depth: int,
+              strict: bool = True) -> BillEstimate:
     from .statements import separate_card_statements   # late: see counts_toward
 
     repo = card_repo.get(card)
@@ -118,14 +144,42 @@ def estimate(card: str, bill_cycle: str, *, unmonitored: float | None = None) ->
             est.split[key] = round(sum(float(r["amount"]) for r in rows), 2)
             est.lines += len(rows)
     if est.unmonitored_numbers:
-        if unmonitored is None:
+        if unmonitored is None and strict:
             raise BillEstimateError(
                 f"{name} has an unmonitored supplement ({', '.join('…' + n for n in est.unmonitored_numbers)}) "
                 f"that no ledger holds: pass its total for {bill_cycle} as `unmonitored` (0 if it spent nothing)")
-        est.split[UNMONITORED] = round(float(unmonitored), 2)
+        est.split[UNMONITORED] = round(float(unmonitored or 0), 2)
     elif unmonitored is not None:
         raise BillEstimateError(f"{name} has no unmonitored supplement in its card YAML's statement_numbers")
+    if depth > 0 and (carried := _brought_forward(name, bill_cycle, depth)) is not None:
+        est.brought_forward_from, est.split[BROUGHT_FORWARD] = carried
     return est
+
+
+def _brought_forward(card: str, bill_cycle: str, depth: int) -> tuple[str, float] | None:
+    """(previous BC, its closing balance) when the previous statement closed on a credit.
+
+    Takumi's bill for the previous cycle settles it when there is one: below
+    zero is the credit, anything else was due and is assumed paid. With no
+    bill, the previous cycle is estimated from the ledgers (its own carry
+    included, `depth` cycles back at most). An unmonitored supplement counts
+    as ฿0 there, since nobody supplied its figure.
+    """
+    try:
+        prev = pattern_for_card(card).closed(_dt.date.fromisoformat(bill_cycle))[0].isoformat()
+    except PatternNotFoundError:
+        return None
+    holder = primary()
+    try:
+        page = find_card(holder.cards_ds, card)
+    except CardNotFoundError:
+        return None
+    bills = bills_for(holder.bills_ds, page["id"], prev) if holder.bills_ds else []
+    if bills:
+        balance = bills[0]["properties"]["ยอดชำระ"]["number"] or 0.0
+    else:
+        balance = _estimate(card, prev, unmonitored=None, depth=depth - 1, strict=False).total
+    return (prev, round(balance, 2)) if balance < -0.005 else None
 
 
 def previous_bill_warning(bills_ds: str, card_page_id: str, bill_cycle: str) -> str | None:
