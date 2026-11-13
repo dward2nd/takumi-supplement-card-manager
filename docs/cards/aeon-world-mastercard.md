@@ -19,12 +19,12 @@ AEON's [notification](https://www.aeon.co.th/aeon/news-events/notification-aeon-
 | 2025-12-11 | Some foreign-registered merchants (EU/EEA, China, UK) |
 | 2026-01-11 | 0% installment transactions |
 
-A merchant string doesn't show its MCC. The household treats one Makro PRO string as 5199:
+A merchant string doesn't show its MCC. The household treats **both** Makro PRO strings as 5199 for AEON points. The second was added on 2026-11-13: the AEON app, updated after the 10 Nov cycle closed, gave no points on any `HTTPS://WWW.MAKRO.PRO/` order (user):
 
 | Merchant string | Points | AEON World 5%, NTW1 |
 |---|---|---|
 | `WWW.MAKRO.PRO BANGKOK TH` | **`×0`**, with Note (taken as MCC 5199) | count |
-| `HTTPS://WWW.MAKRO.PRO/ BANGKOK TH` | earns normally (`×1`) | count |
+| `HTTPS://WWW.MAKRO.PRO/ BANGKOK TH` | **`×0`**, with Note (taken as MCC 5199 since 2026-11-13; it earned `×1` before) | count |
 
 Encoded as `points_excluded_merchants` in `scripts/repositories/cards/aeon-world.yaml`, so `auto_classify` and `/record-statement` apply it. On 2026-09-28 five past rows (Baiboon, 27 Jul–12 Aug 2026) were set to `×0`. They stay `×0` (user, 2026-11-01). The foreign-merchant and installment exclusions are not encoded yet.
 
@@ -35,7 +35,7 @@ Encoded as `points_excluded_merchants` in `scripts/repositories/cards/aeon-world
 - it adds 333: the string is 5411 under the cap;
 - it adds 0: the string is 5199.
 
-On 2026-11-08 the user saw fewer points in the app than in Notion. That alone can't separate the three answers, because AEON credits a cycle's points the day after it closes. Compare the app on 11 Nov and fix the row then.
+On 2026-11-08 the user saw fewer points in the app than in Notion. That alone couldn't separate the three answers, because AEON credits a cycle's points the day after it closes. **Settled 2026-11-13: it added 0.** The app shows no points on any `HTTPS://WWW.MAKRO.PRO/` order, so the string is treated as 5199 like the other one. The ฿16,068.50 order (10 Oct) and the 11 and 12 Nov orders (฿8,649, ฿2,392) went to `×0` with the Note, which takes 902 points (535 + 288 + 79) off her card in Notion. The cancelled ฿15,982.50 order was already `×0`. The 5% and NTW1 shares didn't change.
 
 ## Cancelled orders, late posting and credit balances
 

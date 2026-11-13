@@ -16,6 +16,13 @@ points_excluded_merchants:
     mcc: "5199"
     effective_from: 2025-11-11
     note: "MCC 5199 — AEON gives no reward points on this MCC since 11 Nov 2025. Points only: AEON World 5% and NTW1 still count this row."
+  # The other Makro PRO string too (user, 2026-11-13): the AEON app, updated after
+  # the 10 Nov 2026 cycle closed, gave no points on any `HTTPS://WWW.MAKRO.PRO/`
+  # order, so both strings are treated as 5199.
+  - prefix: "HTTPS://WWW.MAKRO.PRO/"
+    mcc: "5199"
+    effective_from: 2025-11-11
+    note: "MCC 5199 — AEON gives no reward points on this MCC since 11 Nov 2025 (the AEON app showed none on this string, 2026-11-13). Points only: AEON World 5% and NTW1 still count this row."
 notes: |
   The same notification also withholds points on some foreign-registered
   merchants (EU/EEA, China, UK) from 2025-12-11 and on 0% installments from
