@@ -17,6 +17,9 @@ calendar month, supplements included. Takumi registered both before his
         conditions say ฿10,400 for the campaign, one banner line ฿14,000.
   SMT2  ฿200 once at ฿2,000 in October, for the first 500 accounts that
         registered before spending and reach it ("รูดก่อน ได้ก่อน").
+  SMT3  the same ฿200 at ฿2,000 again for 11–30 Nov 2026 ("รูดก่อน ได้ก่อน รับเครดิต
+        เงินคืน คุ้มแบบ Double", 11.11), registered in UCHOOSE only. Read from the
+        same page and its banner image on 2026-11-13.
 
 The joint terms bar spend that counts in another Lotus's promotion, but SMP1
 and SMT2 share those terms and stack (the app shows both). Lotus's rows keep
@@ -165,4 +168,48 @@ class SMT2Promotion(LadderPromotion):
     )
 
 
-PROMOTIONS = (SMP1Promotion, SMT2Promotion)
+class SMT3Promotion(SMT2Promotion):
+    """SMT2 again for 11.11: ฿200 once at ฿2,000 of SMP1's categories, 11–30 Nov 2026.
+
+    The threshold and the ฿200 are only in the banner image
+    (`…-Smallshopping-Detailpro-3-11-11.webp`). Its "/เดือน" and the conditions'
+    "ตลอดรายการ" agree, since the campaign is a single month.
+    """
+
+    code = "SMT3"
+    title = "รูดก่อน ได้ก่อน รับเครดิตเงินคืน คุ้มแบบ Double"
+    campaign = (dt.date(2026, 11, 11), dt.date(2026, 11, 30))
+
+    ladder_rows: ClassVar = (
+        ("under ฿2,000", "nothing"),
+        ("฿2,000 or more, 11–30 Nov", "฿200, once"),
+    )
+    inclusions: ClassVar = (
+        "SMP1's categories (below), from 11 to 30 Nov 2026.",
+        *_INCLUSIONS,
+        "Register before spending, in UCHOOSE only (search \"SMT3\"). Spend before the registration "
+        "doesn't count. Supplements of every type count with the primary card.",
+        "Only the first 500 accounts to register and reach ฿2,000 are paid. Check the rights left in "
+        "UCHOOSE before every purchase. Registering only asks to join.",
+    )
+    crediting: ClassVar = (
+        "Within 30 days after November ends (by 30 Dec 2026), on the primary account's statement.",
+        "Cap: ฿200 per right per primary account.",
+        "Shares SMP1's joint terms and stacks with it, as SMT2 did.",
+    )
+
+    # SMT2's terms as recorded in SMT2Promotion (the page now shows SMT3), read 2026-11-13.
+    predecessor = "SMT2"
+    related = ("SMP1",)
+    changes: ClassVar = (
+        "Period: 11–30 Nov 2026, 20 days from 11.11 (SMT2: the whole of October). A purchase on "
+        "1–10 Nov doesn't count, so the 1 Nov AIS bill is SMP1's only.",
+        "Registration: UCHOOSE only (SMT2: UCHOOSE or SMS \"SMT2 <card no.>\" to 081-250-7777).",
+        "The ฿2,000 threshold and the ฿200 are now only in the banner image; the text gives just the "
+        "฿200 cap (SMT2's page stated both in text).",
+        "Unchanged: ฿200 once at ฿2,000, the first 500 accounts, register before spending, SMP1's "
+        "categories and exclusions, credited within 30 days after the month ends, stacks with SMP1.",
+    )
+
+
+PROMOTIONS = (SMP1Promotion, SMT2Promotion, SMT3Promotion)

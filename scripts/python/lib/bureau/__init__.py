@@ -43,7 +43,7 @@ Modules:
   nw4 / on4 / is4   First Choice Q4 2026: NW3, ON3, IS3's successors (NW4 caps supermarket and fuel spend)
   bxp        Krungsri Card at Bangchak from Oct 2026: the card's 1% and BXP, per ฿700 a slip — per card account
   lotus_exclusive  Krungsri Card LOTA / LOTB at Lotus's, per slip, Aug–Oct 2026 — per card account
-  lotus_shopping  Lotus's SMP1 shopping ladder (Sep–Dec 2026) and SMT2 ฿200 at ฿2,000 (Oct 2026)
+  lotus_shopping  Lotus's SMP1 shopping ladder (Sep–Dec 2026), SMT2 ฿200 at ฿2,000 (Oct 2026) and SMT3 (11–30 Nov 2026)
   lotus_store  Lotus's LAN ladder at Lotus's and Lotus's Shop Online, Oct–Dec 2026
   lotus_qr   Lotus's QRT4 ฿10 per ฿100 slip in five categories by QR / TrueMoney, ฿40 a month, Jul–Dec 2026
   uniqlo     UNIQLO per slip, Oct 2026 – Feb 2027: UOB UNO, Krungsri UNQ (per card account), KBank UQN (per card), ttb UQCB,
@@ -122,7 +122,8 @@ PROMOTIONS: tuple[type[BasePromotion], ...] = (
     CardXHypermarketPromotion, CardXHypermarketBonus,
     # Read 2026-10-03: UOB Makro's 26th-anniversary Gold Mission (registered that day).
     *uob_makro.PROMOTIONS,
-    # Read 2026-10-05: Lotus's SMP1 and SMT2 (both registered before Takumi's 1 Oct AIS bill).
+    # Read 2026-10-05: Lotus's SMP1 and SMT2 (both registered before Takumi's 1 Oct AIS bill);
+    # SMT3 read 2026-11-13 (registered before his 13 Nov AIS bill).
     *lotus_shopping.PROMOTIONS,
     # Read 2026-10-05: Lotus's LAN at Lotus's (registered by 2 Oct) and QRT4 per ฿100 slip (paying since Sep).
     *lotus_store.PROMOTIONS, *lotus_qr.PROMOTIONS,

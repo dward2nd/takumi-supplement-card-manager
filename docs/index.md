@@ -86,7 +86,7 @@ Notion stores formula bodies behind `formulaCode://` URLs. These notes decode th
 - [[promotions/first-choice-privilege-2026]] — First Choice BLUE PLUS status: ฿400,000 accumulated over calendar 2026, primary + supplements; how to count it from the statements, and the 2026-10-01 reckoning.
 - [[promotions/krungsri-card-2026]] — Krungsri Card ONQ3, SUP1, PTT2, EAT, Bangchak/BC3P (BXP and Bangchak700 from Oct 2026), LOTA/LOTB, J Dining, NOW online and Krungsri Lady's Fashionista, one Bureau row per card account.
 - [[promotions/lotuss-lbs3]] — Lotus's LBS3 big-ticket cashback (Sep–Dec 2026).
-- [[promotions/lotuss-smp1]] — Lotus's SMP1 shopping ladder (Sep–Dec 2026) and SMT2 ฿200 at ฿2,000 (Oct 2026); registered.
+- [[promotions/lotuss-smp1]] — Lotus's SMP1 shopping ladder (Sep–Dec 2026), SMT2 ฿200 at ฿2,000 (Oct 2026) and SMT3 (11–30 Nov 2026); registered.
 - [[promotions/lotuss-lan]] — Lotus's LAN ladder on spend at Lotus's itself, no e-wallet (Oct–Dec 2026); registered.
 - [[promotions/lotuss-qrt4]] — Lotus's QRT4: ฿10 per ฿100 slip at restaurants and four other categories by QR / TrueMoney, ฿40 a month (Jul–Dec 2026); the `CB TMN QR` credits.
 - [[promotions/aeon-2026]] — AEON Rabbit 5%, AEON World 5% supermarkets, Everyday with AEON (NTW1), AEON UnionPay 3%, per AEON cycle.

@@ -59,6 +59,7 @@ The page **body** carries the campaign summary: ladder, what counts, exclusions,
 | `2026M10 — HY1 cb ฿40/200/720` | `CardXHypermarketPromotion` | created 2026-10-01; Nuta's CardX JCB; [[../promotions/cardx-hypermarket]] |
 | `2026M10 — UQC cb ฿120–700` | `CardXUniqloPromotion` | created 2026-10-05 (user); Nuta's CardX JCB, not registered yet; [[../promotions/uniqlo-2026]] |
 | `2026M10 — SMP1 cb 2%` · `2026M10 — SMT2 cb ฿200` | `SMP1Promotion` · `SMT2Promotion` | created 2026-10-05 (user: "SMT1 / SMT2"); Lotus's Beyond, registered before the 1 Oct AIS bill; [[../promotions/lotuss-smp1]] |
+| `2026M11 — SMT3 cb ฿200` (11–30 Nov) | `SMT3Promotion` | created 2026-11-13 (user); Lotus's Beyond, registered before the 13 Nov AIS bill; [[../promotions/lotuss-smp1]] |
 | `2026M10 — LAN cb 2%` | `LANPromotion` | created 2026-10-05; Lotus's Beyond, registered by 2 Oct; [[../promotions/lotuss-lan]] |
 | `2026M9`/`2026M10 — QRT4 cb 10%` | `QRT4Promotion` | created 2026-10-05; Lotus's Beyond; September settled by the bank's two `QRT4SEP26` credits; [[../promotions/lotuss-qrt4]] |
 | `2026M10`/`2026M11 — Fashionista Krungsri Lady cb 7%` | `LadyFashionistaKrungsriLady` (`CardAccount`) | created 2026-10-28; Krungsri Lady's own benefit (no registration), ฿140 per whole ฿2,000 slip, ticks `×0` on the slips that earn; [[../promotions/krungsri-card-2026]] |

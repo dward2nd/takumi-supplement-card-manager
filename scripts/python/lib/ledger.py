@@ -40,13 +40,14 @@ CANCELLED_PREFIX_RE = re.compile(r"^\[ยกเลิก[^\]]*\]\s*")
 # Bank credits under a Latin name that no merchant gave back: rebates and
 # discounts (`CASH REBATE 1 POINTS`, `BANGCHAK SPECIAL DISCOUNT OF 2 %`), a typo'd
 # campaign credit (`CP12_BC3P CAMPAIGN …`), adjustments, payments, points
-# redemptions (`PWP: …`), interest, the ledger reset, and Krungsri's reversal of a
+# redemptions (`PWP: …`), interest, the ledger reset, Krungsri's reversal of a
 # charge re-split into installments on the card line (`REV-FC PLAN ON DEMAND: …`,
 # U PLAN): the charge still happened and the bank's spend campaigns still count it
-# (user, 2026-10-03). Cashback has its own test.
+# (user, 2026-10-03), and fee waivers (`ANNUAL FEE CANCELLATION`, `VAT WAIVE ON
+# ANNUAL FEE CANCELLATION`, Lotus's Beyond, 6 Nov 2026). Cashback has its own test.
 _BANK_CREDIT_RE = re.compile(
     r"REBATE|SPECIAL DISCOUNT|^CP\d+_|ADJUSTMENT|^PAYMENT\b|PAYMENT THANK YOU|DIRECT DEBIT|"
-    r"\bPWP\b|^INTEREST\b|^RESET\b|^REV-\w+ PLAN ON DEMAND\b")
+    r"\bPWP\b|^INTEREST\b|^RESET\b|^REV-\w+ PLAN ON DEMAND\b|FEE CANCELLATION|\bWAIVE\b")
 
 
 def title_text(page: dict) -> str:

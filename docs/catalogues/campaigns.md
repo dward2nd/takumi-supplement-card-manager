@@ -425,7 +425,7 @@ Krungsri Card and First Choice (from 1 Nov), Central The 1 (1 Nov), ttb (points 
 | Lotus's ดีต่อใจ (`CDP11`, `CRS11`, **`CGS11` fuel**) | Lotus's (invited) | ฿100 on one ≥ ฿500 slip per category | Nov round, register monthly | T F P | monthly |
 | Lotus's coins at fuel | Lotus's | — | **none from 1 Dec** | F P | — |
 | LOTA / LOTB → **LOA / LOB** | Krungsri Card | Lotus's stores | 1 Nov – 31 Jan | — | LOTA → LOA |
-| SMT2 | Lotus's | — | ended, no SMT3 | T | — |
+| SMT2 → **SMT3** | Lotus's | ฿200 once at ≥ ฿2,000 in SMP1's categories; first 500; UCHOOSE only, before spending | 11–30 Nov (posted 11 Nov, after this research); **registered** | T | SMT2 → SMT3 |
 | GWS3 → **GWS4** · **GWSE** · **GWNY** | Central The 1 | GO per slip; +฿300 at ฿50,000; hampers | GWS4 to 31 Jan; GWSE to 24 Nov | G T | GWS3 → GWS4 |
 | SE10 → **SE11** · SO10 → **SO11** | Central The 1 | Shell ฿100 on ≥ ฿100 · Starbucks ฿100 coupon; first 1,500 a month | Dec: SE12 / SO12 | F T | monthly |
 | EVT2 → **EVT3** · TNL → **TYE** | Central The 1 | EV charging (EV Station PluZ counts) · online ladder (Makro excluded) | to 28 Feb | P S T | — |

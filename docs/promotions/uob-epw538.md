@@ -33,7 +33,7 @@ A `TMN 7-11` row on UOB One earns UOB One's 1% *and* counts here (same bank; use
 
 | Month | Bureau row | Pooled (so far) | Credit |
 |---|---|---|---|
-| Sep 2026 | `2026M9 — EPW538 cb 2%` | ฿8,026 (synced after Takumi's statement was recorded) | ฿100 posted 9 Nov 2026 on UOB One as `CB-020 E-WALLET AND E-COMMERCE SEP26`: Takumi ฿72.27, Baiboon ฿7.94, Nuta ฿19.79. Takumi's tracker linked and ticked 2026-11-13 |
+| Sep 2026 | `2026M9 — EPW538 cb 2%` | ฿8,026 (synced after Takumi's statement was recorded) | ฿100 posted 9 Nov 2026 on UOB One as `CB-020 E-WALLET AND E-COMMERCE SEP26`: Takumi ฿72.27, Baiboon ฿7.94, Nuta ฿19.79. all three trackers ticked 2026-11-13 (Takumi's linked to the credit, the friends' with his transfer slips) |
 
 July and August have no Bureau rows. They were backfilled into the trackers with the earlier quarters (see below): July earns nothing, and August has tracker rows. Don't create Bureau rows for them. `/sync-promotion` would find August's tracker rows by title and re-split them first come, first served.
 
@@ -83,4 +83,4 @@ Nobody had tracked these credits. The household's rules for the backfill:
 | Jul 2026 | EPW538 | ฿4,975.23 | 2,103.98 / 0 / 2,871.25 | ฿0 (฿24.77 short) | — |
 | Aug 2026 | EPW538 | ฿5,480.35 | 2,217.35 / 294.00 / 2,969.00 | ฿100 (World, 9 Nov 2026) | 40.46 / 5.36 / 54.18 |
 
-Totals: Takumi ฿541.49, Baiboon ฿419.63, Nuta ฿338.88 (฿1,300). The Q3 credits posted on 9 Nov 2026, `AUG26` ฿100 on UOB World and `SEP26` ฿100 on UOB One. They matched the ladder, so nothing was rescaled. Takumi's August tracker is linked to the `AUG26` row and ticked (2026-11-13). The friends' August and September rows wait for his transfer slips. July earned nothing, so no `JUL26` line comes.
+Totals: Takumi ฿541.49, Baiboon ฿419.63, Nuta ฿338.88 (฿1,300). The Q3 credits posted on 9 Nov 2026, `AUG26` ฿100 on UOB World and `SEP26` ฿100 on UOB One. They matched the ladder, so nothing was rescaled. Takumi's August tracker is linked to the `AUG26` row and ticked (2026-11-13). He paid the friends the same evening (KBank, 13 Nov): Nuta ฿54.18 + ฿19.79, Baiboon ฿5.36 + ฿7.94. The slips are on their August and September trackers, and all four are ticked. EPW538 is fully settled. July earned nothing, so no `JUL26` line comes.
