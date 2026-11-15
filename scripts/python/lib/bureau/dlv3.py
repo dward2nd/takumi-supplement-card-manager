@@ -30,7 +30,13 @@ HIGH_FROM = HIGH_STEP = Decimal(10_000)
 HIGH_PAY, HIGH_STEPS = Decimal(200), 2
 
 # Everything in the Grab app counts (food, rides, mart, express), as do the other four.
-_APPS = re.compile(r"GRAB|LINE ?MAN|LINEMAN|_LM_|\bLM\b|\bBOLT\b|SHOPEE ?FOOD|ROBINHOOD")
+# NW4 leaves the same apps out (`nw4.py` imports this).
+DELIVERY_APPS = re.compile(r"GRAB|LINE ?MAN|LINEMAN|_LM_|\bLM\b|\bBOLT\b|SHOPEE ?FOOD|ROBINHOOD")
+
+# LINE MAN through LINE Pay prints `LPTH*PF_LM_<shop>` or `LINEPAY*PF_LINE MAN WON…`. `PF_` is
+# "Platform": LINE MAN's own merchant, which counts (user, 2026-11-15: "`PF_LM` stands for
+# 'Platform_Line Man'"). Any other `LINEPAY*` / `LPTH*` / `TMN` charge is wallet-routed and only maybe.
+_WALLET_ROUTED = r"^(?:LINEPAY|LPTH)\*(?!PF_)|^TMN"
 
 
 class DLV3Promotion(LadderPromotion):
@@ -50,7 +56,7 @@ class DLV3Promotion(LadderPromotion):
         return [Tranche(Decimal(0), steps * HIGH_STEP, steps * HIGH_PAY)]
 
     def qualifies(self, tx: Tx) -> bool:
-        return bool(_APPS.search(tx.merchant))
+        return bool(DELIVERY_APPS.search(tx.merchant))
 
     ladder_rows: ClassVar = (
         ("under ฿2,000", "nothing"),
@@ -70,7 +76,8 @@ class DLV3Promotion(LadderPromotion):
     )
     rules: ClassVar = (
         Rule("Paid through a wallet (LINE Pay, TrueMoney …): the charge carries the wallet's MCC, "
-             "not the app's", r"^LINEPAY\*|^LPTH\*|^TMN", level=UNCERTAIN,
+             "not the app's. LINE MAN's platform strings (`LPTH*PF_LM_…`, `LINEPAY*PF_LINE MAN …`) "
+             "count", _WALLET_ROUTED, level=UNCERTAIN,
              hint="the bank matches on the app's MCC; a wallet-routed charge may not carry it"),
         Rule("Installments: only full-amount spend counts",
              test=lambda tx: promotions.is_installment(tx.name)),

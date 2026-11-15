@@ -42,6 +42,7 @@ from typing import ClassVar
 
 from .. import promotions
 from .base import Allocation, Rule, Tx, TxCredit
+from .dlv3 import DELIVERY_APPS
 from .ladder import Tranche
 from .nw3 import NW3Promotion, _foreign
 
@@ -168,8 +169,8 @@ class NW4Promotion(NW3Promotion):
              "original charge: sure for 0% plans, not yet confirmed for plans with interest",
              test=lambda tx: promotions.is_installment(tx.name)),
         Rule("Marketplaces: Shopee, Lazada, TikTok (ON4 covers them)", r"SHOPEE(?! ?FOOD)|LAZADA|TIKTOK"),
-        Rule("Food delivery: LINE MAN, ShopeeFood, Robinhood, Bolt, and everything in the Grab app "
-             "(DLV3)", r"LINE ?MAN|SHOPEE ?FOOD|ROBINHOOD|\bBOLT\b|GRAB"),
+        Rule("Food delivery: LINE MAN (`LPTH*PF_LM_…` included), ShopeeFood, Robinhood, Bolt, and "
+             "everything in the Grab app (DLV3)", DELIVERY_APPS.pattern),
         Rule("Travel: flights, hotels, travel agencies, car booking & rental, duty-free (TR3)",
              r"AGODA|BOOKING\.COM|EXPEDIA|TRAVELOKA|TRIP\.COM|CTRIP|AIR ?ASIA|AIRWAYS|AIRLINES|"
              r"NOK ?AIR|VIETJET|LION AIR|HOTEL|RESORT|AIRBNB|KING ?POWER|DUTY ?FREE|HERTZ|\bAVIS\b"),
