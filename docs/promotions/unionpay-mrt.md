@@ -47,5 +47,5 @@ One row per calendar month for Takumi's AEON UnionPay …2918: `2026M10 — Unio
 | Month | …2918 | Pool |
 |---|---|---|
 | Oct 2026 | ฿21.15 on ฿119.85 of fares: ฿50.15 (฿8.85 off) and ฿14.45 (฿2.55) on 9 Oct, ฿38.25 (฿6.75) on 10 Oct, ฿17 (฿3) on 11 Oct | not used up on 9 Oct (user) |
-| Nov 2026 | row created 2026-11-01, nothing yet | |
+| Nov 2026 | ฿20.85 on ฿118.15 of fares: ฿80.75 (฿95 less ฿14.25) on 3 Nov, ฿37.40 (฿44 less ฿6.60) on 4 Nov | gone **15 Nov** (user, that day). `Quotas Exceeded Date` set with `quota_gone`. A settlement posting from then until December's pool opens on 1 Dec is a whole fare |
 
