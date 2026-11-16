@@ -39,3 +39,11 @@ The term amount ฿1,748.94 is the amortised payment for ฿20,000 at 8.99% ÷ 1
 - whether it prints on the bundled UOB statement, and its card number (`statement_numbers` is empty).
 
 Later terms come from `/populate-installment` as each cycle closes.
+
+## Second loan (2026-11-16)
+
+Nuta's `UNITHAI TRIP CO.,LTD. BANGKOK TH` ฿15,976 (UOB One, 16 Nov 2026, cycle 2026-11-25, 1% cashback) went the same way: a ฿16,000 Cash Plus loan over 12 months at 8.99% a year, drawn the same day (user). The same amortisation formula gives **฿1,399.15 a term** (฿16,789.80 in all, ฿789.80 interest). The user expects term 1 in the same cycle as the first loan's, so `[บัตรหลัก] CASH LOAN INSTALLMENT 01/12` ฿1,399.15 is filed on BC 2026-11-25, due 2026-12-15, next to the first plan's ฿1,748.94.
+
+The two plans share the line name. `/populate-installment` tells them apart by per-term amount (`lib/installments.py` clusters a `(base, total)` group within 2%), so each gets its own `02/12` and later terms. If the statement prints the two loans under different names, rename the rows to match. The first statement also settles whether a loan drawn on 16 Nov, before the 25 Nov close, really bills its first term that cycle.
+
+The payment that moves the charge off UOB One (the first loan's `ชำระบางส่วน` rows) waits on Takumi's slip: its amount (฿16,000 or ฿15,976) and date.
