@@ -42,7 +42,10 @@ BONUS, BASE = 5, 2
 BONUS_MARK, BASE_MARK, ZERO_MARK = "×5", "×2", "×0"
 
 _ZERO = re.compile(r"^MAKRO_|\b(MEA|PEA|MWA)\b")              # Makro in-store, utility bills
-_BONUS = re.compile(r"^TMN[ *]|LINE ?PAY|^LPTH\*|SHOPEE|LAZADA|TIKTOK|TRUE ?MONEY|GRAB|RABBIT")
+# Online and e-wallet strings, then dining the string can't show: KALM VILLAGE is a café
+# (user, 2026-11-17).
+_BONUS = re.compile(r"^TMN[ *]|LINE ?PAY|^LPTH\*|SHOPEE|LAZADA|TIKTOK|TRUE ?MONEY|GRAB|RABBIT|"
+                    r"KALM VILLAGE")
 _BASE = re.compile(r"LOTUS|BIG ?C\b|TOPS\b|RIMPING|\bVILLA\b|GOURMET|MAX ?VALU|FOODLAND|CP FRESH|"
                    r"CLINIC|DENT|HOSPITAL|PHARMA")
 _FX_NOTE = re.compile(r"\b(USD|JPY|CNY|EUR|SGD|HKD|KRW|TWD|GBP|AUD|MYR|VND|MOP|CHF)\b")
