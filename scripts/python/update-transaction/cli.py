@@ -25,6 +25,8 @@ Recognized convenience keys per update:
   - cashback_percent → writes Notion `% cb` (raw fraction); `null` clears
   - note            → writes Notion `Note`; `""` (empty string) clears
   - multiplier      → writes one of `×0`/`×2`/`×3`/`×4`/`×5`/`×6`/`÷4` to true
+                      and unticks any other box the page has ticked (read
+                      from the page, also under --dry-run)
   - points_redeemed → writes Notion `ใช้คะแนน`; `null` clears.
                       Positive = deduct from lifetime, negative = add back.
   - bill_cycle      → writes `Bill Cycle Date` (ISO date). Re-cycle a row
@@ -43,7 +45,7 @@ back and every Promotion Bureau row they count toward is re-synced, and linked
 rows' `% cb` / multiplier / `ใช้คะแนน` set to what the split expects — which can
 put back a value this update just wrote (lib.bureau.follow).
 
---dry-run prints the resolved properties payloads without calling Notion
+--dry-run prints the resolved properties payloads without writing to Notion
 (`promotions` then only names the Bureau rows it would re-sync).
 """
 
@@ -58,7 +60,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib import notion_client
 from lib.bureau import follow
-from lib.transaction_write import build_update_properties
+from lib.transaction_write import VALID_MULTIPLIERS, build_update_properties
+
+
+def _untick_other_multipliers(page_id: str, keep: str) -> dict:
+    """Clear every other ticked multiplier box, so the page keeps exactly one.
+
+    Notion's points formula takes the first ticked box, so a stray one left
+    beside the new box silently wins (`×2` over `×5`, 2026-11-17). Read from
+    the page because the boxes differ by holder (`×3` is Takumi's only).
+    """
+    props = notion_client.get_page(page_id)["properties"]
+    return {m: {"checkbox": False} for m in VALID_MULTIPLIERS
+            if m != keep and (props.get(m) or {}).get("checkbox")}
 
 
 def run(spec: dict, *, dry_run: bool = False) -> dict:
@@ -74,6 +88,8 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
         if not isinstance(page_id, str) or not page_id:
             raise ValueError(f"each update needs a string `id`; got {u!r}")
         props = build_update_properties(u)
+        if u.get("multiplier") is not None:
+            props.update(_untick_other_multipliers(page_id, u["multiplier"]))
         if dry_run:
             out.append({"id": page_id, "dry_run": True, "properties": props})
             continue
@@ -89,7 +105,7 @@ def run(spec: dict, *, dry_run: bool = False) -> dict:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--input", "-i", type=Path, help="JSON spec file (default: stdin)")
-    ap.add_argument("--dry-run", action="store_true", help="Resolve payloads without calling Notion")
+    ap.add_argument("--dry-run", action="store_true", help="Resolve payloads without writing to Notion")
     args = ap.parse_args(argv)
 
     raw = args.input.read_text(encoding="utf-8") if args.input else sys.stdin.read()

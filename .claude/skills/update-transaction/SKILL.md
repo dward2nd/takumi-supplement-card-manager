@@ -48,7 +48,7 @@ Recognized convenience keys per update entry:
 |---------------------|-----------------|-----------------------------------------------------------------------|
 | `cashback_percent`  | `% cb`          | Raw fraction in `[0, 1]`. `0.05` → displays as `5%`. Pass `null` to **clear** an existing value. All three holders (Takumi's since 2026-09-28). |
 | `note`              | `Note`          | Free-form string. Replaces the existing `Note`.                       |
-| `multiplier`        | one of `×0`/`×2`/`×3`/`×4`/`×5`/`×6`/`÷4` | Sets the named checkbox to `true`. **Mutually exclusive** — only one multiplier per page; the CLI will not unset other multipliers, so don't use this to flip from one tier to another without first thinking about which checkbox is currently on. `×3` is Takumi-only. |
+| `multiplier`        | one of `×0`/`×2`/`×3`/`×4`/`×5`/`×6`/`÷4` | Sets the named checkbox to `true` and unticks any other ticked multiplier, so the page keeps exactly one (see rule 3). `×3` is Takumi-only. |
 | `points_redeemed`   | `ใช้คะแนน`       | Numeric. **Positive** deducts points from the lifetime balance (a redemption row, e.g. `1400` for "Major Combo set 1 ชุด"). **Negative** adds points back (refund of a prior redemption, or a manual adjustment). Pass `null` to **clear**. Field exists on all three holders' DSes. |
 | `bill_cycle` + `due_date` | `Bill Cycle Date` / `Due Date` | Re-cycle a row — both **backdate** (move to a closed cycle) and **foredate** (move to an upcoming cycle) are supported. ISO date strings. Must be passed **together**; one without the other is a spec error. Use the issuer's pattern from [[../../docs/concepts/bill-cycle-patterns]] to pick a consistent pair. |
 | `properties`        | (raw)           | Escape hatch: merge an arbitrary Notion `properties` payload. Use sparingly — prefer a convenience key. |
@@ -79,10 +79,9 @@ The CLI takes Notion page UUIDs. If the user pastes a full URL, strip it down to
 
 ### 3. Multipliers stay mutually exclusive
 
-The CLI sets the named checkbox to `true` but does **not** unset other multiplier checkboxes. That means: if a page already has `×2` and you set `multiplier: "×5"`, the page ends up with **both** checked, which makes Notion's earning formula double-count. If you need to *change* a multiplier:
+The CLI sets the named checkbox to `true` and unticks every other multiplier box the page has ticked, in the same write (since 2026-11-17). It reads the page first, even under `--dry-run`, because the boxes differ by holder (`×3` is Takumi's only). So `multiplier: "×5"` on a `×2` row leaves only `×5`.
 
-1. Fetch the page and see which multiplier (if any) is currently `true`.
-2. If a different one is checked, use the `properties` escape hatch to set the old one to `false` and the new one to `true` in the same update.
+Before then it left the old box ticked. Notion's points formula takes the first ticked box (`×0`, `÷4`, `×2`, `×3`, `×4`, `×5`, `×6`), so the stray `×2` won and the row kept earning `×2`. If a page shows two ticked boxes, setting the right one with this CLI clears the other.
 
 ### 4. Cashback raw fraction, not percentage
 
