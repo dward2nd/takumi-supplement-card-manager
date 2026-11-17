@@ -72,6 +72,8 @@ class EPW538Promotion(LadderPromotion):
         "Rewards+ in UOB TMRW. UOB Reserve and Infinite don't need to register.",
     )
     rules: ClassVar = (
+        # Not `SPPFOOD`: `SHOPEE *SPPFOOD SERVIC` is a Shopee payment at a restaurant, outside
+        # ShopeeFood, and counts (user, 2026-11-17; docs/promotions/uob-epw538.md).
         Rule("LINE MAN food delivery via LINE Pay, and ShopeeFood via ShopeePay",
              r"LINE ?MAN|_LM_|PF_LM|SHOPEE ?FOOD"),
         Rule("Bill payments, insurance, tax, utilities, Easy Pass",

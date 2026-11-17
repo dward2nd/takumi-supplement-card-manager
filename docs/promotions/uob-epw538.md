@@ -21,6 +21,8 @@ UOB runs the same campaign every quarter under a new code. Q4 2026 is **SPW796**
 
 Full-amount spend through Shopee, Lazada, TikTok, LINE Pay, LINE Shopping, Central App, King Power, ShopeePay and TrueMoney. TrueMoney counts at its partner stores (7-Eleven, McDonald's, Boots, Major Cineplex …), so `TMN 7-11` rows count. **Not**: LINE MAN via LINE Pay (`LINEPAY*PF_LINE MAN`, `LPTH*PF_LM_…`), ShopeeFood, bill payments, insurance, tax, utilities, Easy Pass, fuel through a wallet, Makro through TrueMoney, wallet top-ups, installments, cancelled charges.
 
+`SHOPEE *SPPFOOD SERVIC BANGKOK TH` is not ShopeeFood, despite the name. It is a Shopee payment made at a restaurant, outside the ShopeeFood platform, so the household counts it (user, 2026-11-17: "might count"). Takumi's ฿726.93 on 17 Nov 2026 is the first one. The exclusion pattern (`SHOPEE ?FOOD`) doesn't match it, so the Bureau links it. UOB's credit for November will show whether the bank agrees.
+
 ## How the credit arrives, and why it looks random
 
 Within 60 days after 30 Sep 2026, into **one** of Takumi's UOB cards; the bank picks which. The household split doesn't depend on which card: it's first come, first served over the pooled rows like NW3. Each holder's tracker row points at the UOB card carrying most of their eligible spend.
