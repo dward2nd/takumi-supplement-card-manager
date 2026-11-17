@@ -97,7 +97,7 @@ class NW3Promotion(LadderPromotion):
         Rule("Insurance of any kind (IS3)", r"INSURANCE|ASSURANCE|\bAIA\b|\bFWD\b|ALLIANZ|ประกัน"),
         Rule("Supermarket charges of ฿10,001 or more each — Big C, Lotus's, Tops, Villa Market, "
              "Gourmet Market, Home Fresh Mart, MaxValu, Foodland, Makro, online stores included",
-             r"BIG ?C\b|LOTUS|TOPS\b|VILLA|GOURMET|HOME FRESH|MAX ?VALU|FOODLAND|MAKRO|CP AXTRA",
+             r"BIG ?C\b|LOTUS|TOPS\b|\bVILLA\b|GOURMET|HOME FRESH|MAX ?VALU|FOODLAND|MAKRO|CP AXTRA",
              over=Decimal(10_000)),
         Rule("Fuel charges of ฿3,001 or more each", over=Decimal(3_000),
              test=lambda tx: promotions.looks_petrol(tx.merchant)),

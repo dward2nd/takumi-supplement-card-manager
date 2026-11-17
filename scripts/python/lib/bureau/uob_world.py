@@ -43,7 +43,7 @@ BONUS_MARK, BASE_MARK, ZERO_MARK = "×5", "×2", "×0"
 
 _ZERO = re.compile(r"^MAKRO_|\b(MEA|PEA|MWA)\b")              # Makro in-store, utility bills
 _BONUS = re.compile(r"^TMN[ *]|LINE ?PAY|^LPTH\*|SHOPEE|LAZADA|TIKTOK|TRUE ?MONEY|GRAB|RABBIT")
-_BASE = re.compile(r"LOTUS|BIG ?C\b|TOPS\b|RIMPING|VILLA|GOURMET|MAX ?VALU|FOODLAND|CP FRESH|"
+_BASE = re.compile(r"LOTUS|BIG ?C\b|TOPS\b|RIMPING|\bVILLA\b|GOURMET|MAX ?VALU|FOODLAND|CP FRESH|"
                    r"CLINIC|DENT|HOSPITAL|PHARMA")
 _FX_NOTE = re.compile(r"\b(USD|JPY|CNY|EUR|SGD|HKD|KRW|TWD|GBP|AUD|MYR|VND|MOP|CHF)\b")
 _QUOTA_NOTE = re.compile(r"โควต้า|quota", re.I)

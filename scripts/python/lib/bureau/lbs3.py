@@ -88,7 +88,7 @@ class LBS3Promotion(LadderPromotion):
     )
     rules: ClassVar = (
         Rule("Anything sold by Lotus's, and every supermarket, hypermarket and convenience store "
-             "(Makro excepted)", r"LOTUS|BIG ?C\b|\bTOPS\b|7-?ELEVEN|FAMILYMART|VILLA|FOODLAND"),
+             "(Makro excepted)", r"LOTUS|BIG ?C\b|\bTOPS\b|7-?ELEVEN|FAMILYMART|\bVILLA\b|FOODLAND"),
         Rule("Marketplaces and wallets: Lazada, Shopee, ShopeePay, Konvy, TikTok, True Select, Top "
              "Value, easyBills, AirPay, Alibaba, AliExpress, All Online, LINE Pay",
              r"LAZADA|SHOPEE|KONVY|TIKTOK|TRUE ?SELECT|TOP ?VALUE|EASY ?BILLS|AIRPAY|ALIBABA|ALIEXPRESS|"

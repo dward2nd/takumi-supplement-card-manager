@@ -65,7 +65,7 @@ _MAKRO_PRO = re.compile(r"MAKRO\.PRO")
 _WALLET = r"^TMN[ *]|TRUE ?MONEY|^LINEPAY\*|^LPTH\*|SHOPEEPAY|RABBIT"
 # Supermarkets the merchant string shows (MCC 5411); GO Wholesale posts as `CFW-<branch>`.
 _GROCERS = re.compile(r"BIG ?C\b|BIGC|GO ?WHOLESALE|\bCFW-|DON ?DON ?DONKI|FOODLAND|GOURMET|HOME ?FRESH|"
-                      r"RIMPING|VILLA|MAX ?VALU|FRESHKET|SAVEMART|CP FRESH")
+                      r"RIMPING|\bVILLA\b|MAX ?VALU|FRESHKET|SAVEMART|CP FRESH")
 
 _COMMON_RULES = (
     Rule("Paid through an e-wallet (TrueMoney, Rabbit LINE Pay …)", _WALLET),

@@ -37,7 +37,7 @@ BANDS = ((Decimal(10_000), Decimal(150)), (Decimal(4_000), Decimal(50)))
 # In store and the listed online shops. GO Wholesale posts as `CFW-<branch> …`.
 _STORES = re.compile(r"BIG ?C\b|BIGC|DON ?DON ?DONKI|\bDONKI\b|FOODLAND|GOURMET|GO ?WHOLESALE|\bCFW-|"
                      r"HOME ?FRESH|LOTUS'?S|LOTUS GO ?FRESH|MITSUKOSHI|DEPACHIKA|NO ?BRAND|RIMPING|"
-                     r"\bTOPS\b|VILLA|FRESHKET")
+                     r"\bTOPS\b|\bVILLA\b|FRESHKET")
 _WALLET = r"^TMN[ *]|TRUE ?MONEY|^LINEPAY\*|^LPTH\*|SHOPEEPAY|RABBIT"
 
 

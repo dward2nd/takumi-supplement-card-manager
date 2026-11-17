@@ -71,7 +71,7 @@ _INCLUSIONS = (
 
 _RULES = (
     Rule("Anything sold by Lotus's, and every supermarket, hypermarket and convenience store",
-         r"LOTUS|BIG ?C\b|\bTOPS\b|MAKRO|7-?ELEVEN|^7-11|FAMILYMART|VILLA|FOODLAND|CENTRAL ?FOOD"),
+         r"LOTUS|BIG ?C\b|\bTOPS\b|MAKRO|7-?ELEVEN|^7-11|FAMILYMART|\bVILLA\b|FOODLAND|CENTRAL ?FOOD"),
     Rule("Power Buy and Power Mall", r"POWER ?BUY|POWER ?MALL"),
     Rule("Marketplaces and wallets: Lazada, Shopee, ShopeePay, Konvy, TikTok, True Select, Top Value, "
          "easyBills, AirPay, Alibaba, AliExpress, All Online by 7-Eleven",

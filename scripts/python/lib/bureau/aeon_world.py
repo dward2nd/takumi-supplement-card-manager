@@ -32,7 +32,7 @@ from .base import UNCERTAIN, Rule, Tx
 from .capped import CreditCapPromotion
 
 RATE = Decimal("0.05")
-_STORES = re.compile(r"BIG ?C\b|BIGC|LOTUS|FOODLAND|VILLA|\bTOPS\b|GOURMET|HOME FRESH|CENTRAL FOOD ?HALL|"
+_STORES = re.compile(r"BIG ?C\b|BIGC|LOTUS|FOODLAND|\bVILLA\b|\bTOPS\b|GOURMET|HOME FRESH|CENTRAL FOOD ?HALL|"
                      r"MAKRO")
 
 

@@ -53,7 +53,7 @@ CATEGORY_CAP = Decimal(30_000)
 
 # "MCC 5199 อาทิ Makro และ Makro PRO": Makro PRO, Makro stores and their QR; not `TMN MAKRO`.
 _MAKRO = re.compile(r"MAKRO\.PRO|^MAKRO_|^CP AXTRA")
-_SUPERMARKET = re.compile(r"BIG ?C\b|BIGC|LOTUS|\bTOPS\b|VILLA|GOURMET|HOME FRESH|MAX ?VALU|FOODLAND|"
+_SUPERMARKET = re.compile(r"BIG ?C\b|BIGC|LOTUS|\bTOPS\b|\bVILLA\b|GOURMET|HOME FRESH|MAX ?VALU|FOODLAND|"
                           r"RIMPING|\bCFW-|GO ?WHOLESALE|MAKRO|CP AXTRA")
 
 
