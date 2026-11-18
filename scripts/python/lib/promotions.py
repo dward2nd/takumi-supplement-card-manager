@@ -342,6 +342,13 @@ def looks_wallet_top_up(merchant_name: str) -> bool:
     return bool(_WALLET_TOP_UP.search(merchant_name.upper()))
 
 
+# A LINE MAN order, however the wallet prints it: `LINEPAY*PF_LINE MAN WO…`, `LPTH*PF_LM_<shop>`,
+# `LINEPAY*PF LINE <shop>` (Nov 2026 on), and bare `PF_LINE MAN WONGNAI` on CardX. `PF` is
+# "Platform", LINE MAN's own merchant (user, 2026-11-15; `PF LINE DAO LU` 2026-11-18: "came from
+# LINE MAN, obviously"). A regex fragment, so campaigns can join it with their other apps.
+LINE_MAN = r"LINE ?MAN|LINEMAN|_LM_|PF_LM|\*PF[ _]"
+
+
 # Supermarkets and grocers (MCC 5411) whose names show it. KTC UnionPay earns no
 # points there (docs/promotions/ktc-forever.md, rule 16).
 _SUPERMARKET = re.compile(r"SAVEMART|LOTUS'?S|BIG ?C\b|\bTOPS\b|RIMPING|VILLA MARKET|GOURMET MARKET|MAX ?VALU|"

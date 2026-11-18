@@ -75,7 +75,7 @@ class EPW538Promotion(LadderPromotion):
         # Not `SPPFOOD`: `SHOPEE *SPPFOOD SERVIC` is a Shopee payment at a restaurant, outside
         # ShopeeFood, and counts (user, 2026-11-17; docs/promotions/uob-epw538.md).
         Rule("LINE MAN food delivery via LINE Pay, and ShopeeFood via ShopeePay",
-             r"LINE ?MAN|_LM_|PF_LM|SHOPEE ?FOOD"),
+             rf"{promotions.LINE_MAN}|SHOPEE ?FOOD"),
         Rule("Bill payments, insurance, tax, utilities, Easy Pass",
              r"BILL|INSURANCE|\bAIA\b|\bTAX\b|\b(MEA|PEA|MWA)\b|EASY ?PASS|EXPRESSWAY|ISERVICE"),
         Rule("Fuel paid through any wallet", test=lambda tx: promotions.looks_petrol(tx.merchant)),

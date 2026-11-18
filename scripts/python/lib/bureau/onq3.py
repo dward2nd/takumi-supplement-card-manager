@@ -30,7 +30,7 @@ from .ladder import LadderPromotion, Tranche
 BANDS = ((Decimal(30_000), Decimal(350)), (Decimal(15_000), Decimal(170)), (Decimal(3_000), Decimal(40)))
 
 _ONLINE = re.compile(r"LAZADA|SHOPEE|TIKTOK|LINE SHOPPING|^TMN[ *]|TRUE ?MONEY|LINE ?PAY|^LPTH\*")
-_DELIVERY = re.compile(r"GRAB|LINE ?MAN|_LM_|PF_LM|SHOPEE ?FOOD|ROBINHOOD|\bBOLT\b")
+_DELIVERY = re.compile(rf"GRAB|{promotions.LINE_MAN}|SHOPEE ?FOOD|ROBINHOOD|\bBOLT\b")
 
 
 class ONQ3Promotion(LadderPromotion):

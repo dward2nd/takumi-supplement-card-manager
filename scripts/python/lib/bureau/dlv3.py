@@ -31,12 +31,13 @@ HIGH_PAY, HIGH_STEPS = Decimal(200), 2
 
 # Everything in the Grab app counts (food, rides, mart, express), as do the other four.
 # NW4 leaves the same apps out (`nw4.py` imports this).
-DELIVERY_APPS = re.compile(r"GRAB|LINE ?MAN|LINEMAN|_LM_|\bLM\b|\bBOLT\b|SHOPEE ?FOOD|ROBINHOOD")
+DELIVERY_APPS = re.compile(rf"GRAB|{promotions.LINE_MAN}|\bLM\b|\bBOLT\b|SHOPEE ?FOOD|ROBINHOOD")
 
-# LINE MAN through LINE Pay prints `LPTH*PF_LM_<shop>` or `LINEPAY*PF_LINE MAN WON…`. `PF_` is
-# "Platform": LINE MAN's own merchant, which counts (user, 2026-11-15: "`PF_LM` stands for
-# 'Platform_Line Man'"). Any other `LINEPAY*` / `LPTH*` / `TMN` charge is wallet-routed and only maybe.
-_WALLET_ROUTED = r"^(?:LINEPAY|LPTH)\*(?!PF_)|^TMN"
+# LINE MAN through LINE Pay prints `LPTH*PF_LM_<shop>`, `LINEPAY*PF_LINE MAN WON…` or
+# `LINEPAY*PF LINE <shop>`. `PF` is "Platform": LINE MAN's own merchant, which counts (user,
+# 2026-11-15: "`PF_LM` stands for 'Platform_Line Man'"; `PF LINE` 2026-11-18). Any other
+# `LINEPAY*` / `LPTH*` / `TMN` charge is wallet-routed and only maybe.
+_WALLET_ROUTED = r"^(?:LINEPAY|LPTH)\*(?!PF[ _])|^TMN"
 
 
 class DLV3Promotion(LadderPromotion):

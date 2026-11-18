@@ -35,7 +35,7 @@ MERCHANT_RULES: tuple[IconRule, ...] = (
     IconRule("🛣️", r"EXPRESSW|EASY ?PASS|\bM-?PASS\b"),
     IconRule("👛", r"^LINEPAY\*(LP_)?LINEPAY|^LP_LINEPAY", test=promotions.looks_wallet_top_up),
     IconRule("⛽", r"PTTRM|SUSCO", test=promotions.looks_petrol),
-    IconRule("🛵", r"LINE ?MAN|\bLM_|PF_LM|SHOPEEFOOD|FOODPANDA|ROBINHOOD|GRAB ?FOOD"),
+    IconRule("🛵", rf"{promotions.LINE_MAN}|\bLM_|SHOPEEFOOD|FOODPANDA|ROBINHOOD|GRAB ?FOOD"),
     IconRule("🚗", r"GRAB|BOLT|\bRIDE\b|INDRIVE|TAXI|MUVMI"),
     IconRule("🏪", r"7-11|7-ELEVEN|SEVEN ELEVEN|FAMILYMART|LAWSON|MINI BIG|CJ MORE"),
     IconRule("🧾", r"ISERVICE|COUNTER ?SERVICE"),
