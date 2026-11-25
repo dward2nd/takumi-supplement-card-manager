@@ -16,6 +16,8 @@ Rule, applied per card:
 
 A transaction posted today lands on that bill. The cut-off day itself already belongs to *its own* cycle (so on day-5 of the month, the cycle closing day-5 is still the active one — it closes at end-of-day).
 
+**Once the statement is in hand, it decides** (user, 2026-11-25: "We'll stick with the statement"). A charge made on the closing day goes in the cycle of the statement that prints it, whatever was guessed at entry. Nuta's AEON UnionPay `Alipay Shanghai` ฿2,525.40 of 10 Nov 2026 had been booked on the 2026-12-10 cycle. AEON printed it on the 10 Nov statement, so it was moved to 2026-11-10 (due 2026-12-02). Refunds follow the same rule ([[payment-lifecycle]]). UOB is the exception before the statement arrives: it bills BC-day spend on the next statement (see [[promotion-bureau]]).
+
 Concretely, to find the active cycle:
 
 1. Compute this month's bill-cycle date for the card.
