@@ -201,7 +201,8 @@ Only case so far: AEON World Mastercard, 10 Oct 2026, at −฿15,701.78 after B
 
 See [[../cards/aeon-world-mastercard#Cancelled orders, late posting and credit balances|aeon-world-mastercard]].
 
-- **The 10 Oct PDF now sits only on the archived bills** (Takumi `400cb755-f0f1-81d1-8db5-f6e7dd3b4642`, Baiboon `3f5cb755-f0f1-81ff-805e-d17c12a9f043`; both are in Notion's trash, which empties after 30 days). Attach it to the AEON World Mastercard 2026-11 bills next to the 10 Nov statement.
+- **The 10 Oct PDF** (`E-Statement November 2026.pdf`) was left only on the archived bills when they were trashed. It was attached to both AEON World Mastercard 2026-11 bills, next to the 10 Nov statement, on 2026-11-25.
+- **The next statement prints the credit as `OPENING BALANCE 0.00`.** The 10 Nov statement then lists the three cashback credits (฿1,120) and `BALANCE BROUGHT FORWARD -16,821.78`. The AEON parser takes the previous balance as brought-forward minus the opening block (−฿15,701.78, since 2026-11-25). Before that change its self-check refused the statement.
 - **/record-statement doesn't know this yet.** `lib/statements/record.py` still files a signed bill on a credit balance. Re-running it on the 10 Oct statement would bring Takumi's 2026-10 bill back. It would find Baiboon's four lines in their own cycle and not book them again. Archive such a bill by hand until the code changes.
 
 ### Friends' balances are debts to Takumi, not to the bank

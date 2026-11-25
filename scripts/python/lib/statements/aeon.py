@@ -15,6 +15,11 @@ A credit balance prints as `0.00 Baht` (nothing due). The 10 Oct 2026
 statement's AEON World closed at −15,701.78 after a ฿15,807.50 refund. The
 signed figures are `BALANCE BROUGHT FORWARD` and the card's `SUBTOTAL`, so the
 account's total is their sum in that case, still checked against the lines.
+
+The next statement prints that credit as `OPENING BALANCE 0.00` too (10 Nov 2026:
+`OPENING BALANCE 0.00`, three cashback credits of ฿1,120, then `BALANCE BROUGHT
+FORWARD -16,821.78`). The previous balance is then the brought-forward figure less
+the opening block's lines: −15,701.78.
 """
 
 from __future__ import annotations
@@ -75,6 +80,7 @@ def parse(text: str) -> Statement:
             continue
         if (m := _BROUGHT_FORWARD.match(ln)):
             cur["open"] = False
+            cur["opening_lines"] = len(cur["lines"])
             if m.group(1):
                 cur["forward"] = parse_amount(m.group(1))
             continue
@@ -124,6 +130,12 @@ def parse(text: str) -> Statement:
         if c["total"] is None:
             raise StatementParseError(f"AEON: no total balance found for card {num}")
         total = c["total"]
+        if c["forward"] is not None and not c["prev"]:
+            # A credit carried from the previous statement prints as OPENING BALANCE 0.00.
+            opening = sum(l.amount for l in c["lines"][: c.get("opening_lines", 0)])
+            carried = round(c["forward"] - opening, 2)
+            if carried < -0.005:
+                c["prev"] = carried
         if not total and c["forward"] is not None and c["subtotal"] is not None:
             closing = round(c["forward"] + c["subtotal"], 2)
             if closing < 0:
