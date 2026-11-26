@@ -31,10 +31,7 @@ Nuta's `UNITHAI TRIP CO.,LTD. BANGKOK TH` ฿20,000 (5 Oct 2026) was charged to 
 
 The slip (27 Oct 16:02, Takumi's One Account → UOB One card …4672) is attached to both UOB One 2026-10 bills, Nuta's and Takumi's. On Nuta's side it stands for her payment, settled by taking on the loan. On Takumi's side it is a bank payment like any other ([[../databases/takumi-bills#Payments|payments]]). Her bill still owes ฿12,360.14, and Takumi's next UOB One slip covers `nuta: 12,824.18`: her statement-line share of ฿32,824.18 less this ฿20,000.
 
-The term amount ฿1,748.94 is the amortised payment for ฿20,000 at 8.99% ÷ 12 a month over 12 months. The single-line placeholder was replaced on 2026-11-26 by what the UOB app shows: see [[#Statement lines: principal and interest (UOB app, 2026-11-26)|statement lines]]. Still open until the first statement PDF:
-
-- whether it prints on the bundled UOB statement, and its card number (`statement_numbers` is empty);
-- the last term's amounts.
+The term amount ฿1,748.94 is the amortised payment for ฿20,000 at 8.99% ÷ 12 a month over 12 months. The single-line placeholder was replaced on 2026-11-26 by what the UOB app shows: see [[#Statement lines: principal and interest (UOB app, 2026-11-26)|statement lines]]. The first statement settled where it prints and its card number ([[#First statement (25 Nov 2026)|below]]). Still open: the last term's amounts.
 
 ## Statement lines: principal and interest (UOB app, 2026-11-26)
 
@@ -67,4 +64,12 @@ Takumi paid **฿15,976** into UOB One on 26 Nov 2026, 12:17, from his One Accou
 | Takumi | UOB One | `ชำระบางส่วน`, Note `Slip memo: ทัวร์จีนนุตา` | −15,976.00 | 2026-11-25 |
 | Takumi | UOB One | `โอนยอดจากนุตา`, `×0` | +15,976.00 | 2026-11-25 |
 
-The slip is attached to both UOB One 2026-11 bills, and both stay `[DRAFT]` and unpaid. Nuta's bill (฿30,536.06) still owes ฿14,560.06.
+The slip is attached to both UOB One 2026-11 bills, and both stay unpaid. Nuta's bill (฿30,536.06) still owes ฿14,560.06. Hers was finalized when the 25 Nov statement was attached (2026-11-27). Takumi's stays `[DRAFT]` until /record-statement completes it.
+
+## First statement (25 Nov 2026)
+
+Cash Plus has a **statement of its own**, not a section of the bundled UOB credit-card PDF. It is a separate account (`816-…`; the credit cards' bundle is `810-…`), printed on the same day with the same due date: dated 25 Nov 2026, due 18 Dec 2026. The `uob` cycle pattern gives 15 Dec, and the credit cards printed 18 Dec too. The summary table heads its column `CASHPLUS NUMBER` instead of `CARD NUMBER (S)`. The card is `4043 65XX XXXX 5024`, now `"5024": takumi` in the card's `statement_numbers`.
+
+The lines are the four the app showed, to the satang: `MPFCDM00002 MONTHLY INT 01/12` ฿39.41, `MPFCDM00001 MONTHLY INT 01/12` ฿147.78, `MPFCDM00002 MONTHLY PRIN 01/12` ฿1,279.28, `MPFCDM00001 MONTHLY PRIN 01/12` ฿1,599.11. `SUB TOTAL` / `TOTAL BALANCE` ฿3,065.58, minimum payment the same, no fee. Page 2 splits the balance as principal ฿2,878.39 + interest ฿187.19. Nuta's four `[บัตรหลัก]` rows matched it with no drift ([[../../.claude/skills/audit-bill/SKILL|/audit-bill]], 2026-11-27).
+
+**/record-statement can't read it yet.** `lib/statements/uob.py` expects the product heading on the line before the card number and a `TOTAL BALANCE - <PRODUCT>` line. Here both differ: `UOB CASH PLUS 4043 65XX XXXX 5024` sits on one line and the total is a bare `TOTAL BALANCE 3,065.58`, so the parser finds no account. Takumi's `UOB Cash Plus 2026-11` bill was filed by hand with [[../../.claude/skills/update-bill/SKILL|/update-bill]] instead: ฿3,065.58 (= นุตา ฿3,065.58), finalized, PDF attached. His estimate had been ฿3,148.09, drafted before her placeholder rows became the PRIN/INT lines. Nuta's bill took the same PDF and was finalized at ฿3,065.58.

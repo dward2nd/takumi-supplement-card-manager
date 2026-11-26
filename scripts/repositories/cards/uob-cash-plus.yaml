@@ -1,7 +1,8 @@
 name: UOB Cash Plus
 issuer: UOB
-bill_cycle_pattern: uob       # ASSUMED from the UOB credit cards: no Cash Plus statement seen yet
-statement_numbers: {}         # card number unknown until the first statement (2026-11)
+bill_cycle_pattern: uob       # confirmed by the first statement: dated 25 Nov 2026, due 18 Dec, like the credit cards
+statement_numbers:            # last 4 digits on the statement → holder (first statement, 25 Nov 2026)
+  "5024": takumi              # a cash card has no supplements: friends' lines are their [บัตรหลัก] rows
 points_default: "×0"
 notes: |
   A cash card (บัตรกดเงินสด), not a credit card: a personal-loan line in
@@ -26,5 +27,8 @@ notes: |
   vary every month, so /populate-installment can't copy them: enter each from
   the app or statement. See docs/cards/uob-cash-plus.md.
 
-  Open: whether it bundles into the UOB statement PDF, and the card number
-  for `statement_numbers`.
+  First statement (25 Nov 2026): a PDF of its own (account 816-…, the credit
+  cards' bundle is 810-…), card 4043 65XX XXXX 5024, the four MPFCDM lines
+  exactly as the app showed them (฿3,065.58). lib/statements/uob.py can't
+  read it yet: the heading shares a line with the card number and the total
+  is a bare `TOTAL BALANCE`, so its bill is filed by hand with /update-bill.
