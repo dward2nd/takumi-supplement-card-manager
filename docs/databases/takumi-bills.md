@@ -64,7 +64,7 @@ UOB Makro 2026-10 was ฿0.00 in the app (user: the waived fee and the points). 
   - Her −฿117 Shopee refund is dated 19 Nov in the ledger but printed 11 Nov, so the recording doesn't pair it. The cycle and amount are right.
 - **UOB Makro**: Baiboon's row became `[บัตรหลัก] MAKRO_MAE RIM CHIANG MAI TH`.
 - **UOB Cash Plus** has its own PDF (see [[../cards/uob-cash-plus|uob-cash-plus]]). The estimate predated Nuta's PRIN/INT rows.
-- The two `CB-020` credits are open: the statement puts `SEP26` on World and `AUG26` on One, the reverse of the ledger (see [[../promotions/uob-epw538|uob-epw538]]).
+- The two `CB-020` credits were the reverse of the statement, which puts `SEP26` on World and `AUG26` on One. The rows' cards were swapped to match (user, 2026-11-27; see [[../promotions/uob-epw538|uob-epw538]]).
 
 First batch, 2026-10-06, BC 2026-10-05:
 
