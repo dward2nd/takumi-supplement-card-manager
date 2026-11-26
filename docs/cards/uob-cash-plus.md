@@ -38,12 +38,12 @@ The term amount ฿1,748.94 is the amortised payment for ฿20,000 at 8.99% ÷ 1
 
 ## Statement lines: principal and interest (UOB app, 2026-11-26)
 
-The UOB app shows each loan's term as **two lines**, a principal (`PRIN`) and an interest (`INT`) line, both under the same name `MPFCDM00002` for both loans. Term 01/12 of each, in the cycle closing **2026-11-25**, which confirms the assumed `uob` cycle:
+The UOB app shows each loan's term as **two lines**, a principal (`PRIN`) and an interest (`INT`) line, named by loan: `MPFCDM00001` for the ฿20,000 loan, `MPFCDM00002` for the ฿16,000 one (numbered in drawing order). Term 01/12 of each, in the cycle closing **2026-11-25**, which confirms the assumed `uob` cycle:
 
 | Loan | Row in Nuta's ledger | ยอดชำระ | How the bank gets it |
 |---|---|---:|---|
-| ฿20,000 (drawn 27 Oct) | `[บัตรหลัก] MPFCDM00002 MONTHLY PRIN 01/12` | 1,599.11 | ฿1,748.94 instalment − 20,000 × 8.99% ÷ 12 (฿149.83) |
-| | `[บัตรหลัก] MPFCDM00002 MONTHLY INT 01/12` | 147.78 | 20,000 × 8.99% × 30/365 (27 Oct–25 Nov, both ends counted) |
+| ฿20,000 (drawn 27 Oct) | `[บัตรหลัก] MPFCDM00001 MONTHLY PRIN 01/12` | 1,599.11 | ฿1,748.94 instalment − 20,000 × 8.99% ÷ 12 (฿149.83) |
+| | `[บัตรหลัก] MPFCDM00001 MONTHLY INT 01/12` | 147.78 | 20,000 × 8.99% × 30/365 (27 Oct–25 Nov, both ends counted) |
 | ฿16,000 (drawn 16 Nov) | `[บัตรหลัก] MPFCDM00002 MONTHLY PRIN 01/12` | 1,279.28 | ฿1,399.15 instalment − 16,000 × 8.99% ÷ 12 (฿119.87) |
 | | `[บัตรหลัก] MPFCDM00002 MONTHLY INT 01/12` | 39.41 | 16,000 × 8.99% × 10/365 (16–25 Nov) |
 
@@ -57,7 +57,7 @@ The two placeholder rows (`[บัตรหลัก] CASH LOAN INSTALLMENT 01/1
 
 Nuta's `UNITHAI TRIP CO.,LTD. BANGKOK TH` ฿15,976 (UOB One, 16 Nov 2026, cycle 2026-11-25, 1% cashback) went the same way: a ฿16,000 Cash Plus loan over 12 months at 8.99% a year, drawn the same day (user). The same amortisation formula gives **฿1,399.15 a term** (฿16,789.80 in all, ฿789.80 interest). The user expects term 1 in the same cycle as the first loan's, so `[บัตรหลัก] CASH LOAN INSTALLMENT 01/12` ฿1,399.15 is filed on BC 2026-11-25, due 2026-12-15, next to the first plan's ฿1,748.94.
 
-The app shows both loans under the same name, `MPFCDM00002`, and the 16 Nov loan does bill its first term in the 25 Nov cycle, for 10 days' interest ([[#Statement lines: principal and interest (UOB app, 2026-11-26)|above]]).
+The app names this loan `MPFCDM00002` (the first is `MPFCDM00001`), so the two plans no longer share a line name, and the 16 Nov loan does bill its first term in the 25 Nov cycle, for 10 days' interest ([[#Statement lines: principal and interest (UOB app, 2026-11-26)|above]]).
 
 Takumi paid **฿15,976** into UOB One on 26 Nov 2026, 12:17, from his One Account to card …4672 with memo `ทัวร์จีนนุตา`. He paid the charge, not the ฿16,000 loan. The rows follow the first loan's:
 

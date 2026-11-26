@@ -19,8 +19,8 @@ notes: |
   payment. Second loan 16 Nov: ฿16,000 for UNITHAI TRIP ฿15,976 (slip
   26 Nov, memo `ทัวร์จีนนุตา`).
 
-  The UOB app (2026-11-26) shows each term as two lines, both loans named
-  `MPFCDM00002`: `MONTHLY PRIN NN/12` (fixed instalment − balance × 8.99%/12,
+  The UOB app (2026-11-26) shows each term as two lines, named per loan
+  (`MPFCDM00001` = ฿20,000, `MPFCDM00002` = ฿16,000): `MONTHLY PRIN NN/12` (fixed instalment − balance × 8.99%/12,
   rising monthly) and `MONTHLY INT NN/12` (balance × 8.99% × actual days/365).
   Term 01/12 sat in the 2026-11-25 cycle, so the `uob` pattern holds. Terms
   vary every month, so /populate-installment can't copy them: enter each from
