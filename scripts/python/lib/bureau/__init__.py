@@ -50,6 +50,8 @@ Modules:
              CardX UQC
   ttb_shopping  ttb MUJI (MUJC) and Big C / GO Wholesale (BGO), Oct–Dec 2026, one quota per campaign
   cardx_hypermarket  CardX HY1 per hypermarket slip (monthly) and HYP ฿3,000 at ฿300k (campaign), Oct–Dec 2026
+  bbl_unionpay  Bangkok Bank UnionPay 2% all spend once the month reaches ฿2,000, ฿1,000 a month (credit cap), Jul 2026 –
+             Jun 2027
   central_invite  Central The 1 "T1 Invite" (by invitation): ฿200 per whole ฿10,000 over 16 Nov 2026 – 15 Jan 2027,
              ฿400 per primary account (one campaign quota)
   kbank_makro  KBank MKR at Makro (฿100/240 bands, and ฿1,500 per ฿300,000), Oct–Dec 2026 — per card
@@ -83,6 +85,7 @@ from .aeon_unionpay import AEONUnionPayCashback
 from .aeon_world import AEONWorldCashback
 from .base import (CASHBACK, ELIGIBLE, EXCLUDED, POINTS, RIGHTS, UNCERTAIN, Allocation, BasePromotion,
                    CashbackPromotion, Rule, Tx, TxCredit)
+from .bbl_unionpay import BBLUnionPayCashback
 from .bts import BTSDrawPromotion
 from .capped import CreditCapPromotion
 from .cardx_hypermarket import CardXHypermarketBonus, CardXHypermarketPromotion
@@ -136,6 +139,8 @@ PROMOTIONS: tuple[type[BasePromotion], ...] = (
     *unionpay_mrt.ACCOUNTS,
     # 2026-11-26: Central The 1's invitation-only ฿200 per ฿10,000 (16 Nov – 15 Jan), terms typed in by the user.
     CentralInvitePromotion,
+    # 2026-11-26: Takumi's new Bangkok Bank UnionPay (with Baiboon's supplement), 2% all-spend cashback.
+    BBLUnionPayCashback,
 )
 
 
@@ -151,7 +156,7 @@ def promotion_for(bureau_name: str, start: dt.date, end: dt.date) -> BasePromoti
 
 
 __all__ = ["CASHBACK", "ELIGIBLE", "EXCLUDED", "POINTS", "RIGHTS", "UNCERTAIN", "Allocation",
-           "AEONRabbitCashback", "AEONUnionPayCashback", "AEONWorldCashback", "BTSDrawPromotion", "BasePromotion", "CardAccount",
+           "AEONRabbitCashback", "AEONUnionPayCashback", "AEONWorldCashback", "BBLUnionPayCashback", "BTSDrawPromotion", "BasePromotion", "CardAccount",
            "CardXHypermarketBonus", "CardXHypermarketPromotion", "CentralInvitePromotion",
            "CardNumber", "CashbackPromotion", "CreditCapPromotion", "DLV3Promotion", "DrawRightsPromotion",
            "EPW538Promotion", "IS3Promotion", "IS4Promotion", "InstantDiscountPromotion", "LBS3Promotion", "LadderPromotion", "NTW1Promotion",

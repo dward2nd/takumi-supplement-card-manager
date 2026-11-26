@@ -38,6 +38,7 @@ For UOB this comparison uses the *shifted* bill-cycle date (see UOB below), not 
 | ~~Lotus~~ *(historical)*  | day **28**      | bill cycle **+ 20 days**          | **retired 2026-08-08** — see below |
 | SPayLater                 | day **15**      | bill cycle **+ 10 days**          | consistent, no shifts          |
 | Grab                      | day **1**       | bill cycle **+ 6 days** (⇒ day 7) | Takumi-only; labelled a day *after* the bank's cut — see below |
+| Bangkok Bank (BBL)        | day **10**      | bill cycle **+ 15 days** (⇒ day 25) | user, 2026-11-26, before the first statement; shifts unknown |
 | UOB                       | day **25**      | bill cycle **+ 20 days**          | see *UOB exceptions* below     |
 
 ### Card → pattern mapping (by name prefix, case-insensitive)
@@ -54,6 +55,7 @@ For UOB this comparison uses the *shifted* bill-cycle date (see UOB below), not 
 | `Lotus's Beyond`     | Krungsri/etc   |
 | `SPayLater`          | SPayLater      |
 | `Grab PayLater`      | Grab           |
+| `BBL …`              | Bangkok Bank   |
 | `UOB …`              | UOB            |
 
 ### Grab PayLater is labelled a day after the bank's cut

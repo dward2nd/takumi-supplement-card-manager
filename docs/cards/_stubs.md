@@ -23,6 +23,7 @@ The two sources diverge most sharply on Nuta: her Bills DB offers **13** card op
 | [[aeon-rabbit\|AEON Rabbit]]                          | AEON              |         |      |   ✓    |
 | AEON UnionPay                        | AEON              |         |  ✓   |        |
 | [[aeon-world-mastercard\|AEON World Mastercard]] | AEON        |    ✓    |      |        |
+| BBL UnionPay                         | Bangkok Bank      |    ✓    |      |   ✓    |
 | CardX JCB                            | CardX             |         |  ✓   |        |
 | CardX UP2ME                          | CardX             |         |      |   ✓    |
 | Central The 1 Redz                   | Krungsri          |    ✓    |      |   ✓    |

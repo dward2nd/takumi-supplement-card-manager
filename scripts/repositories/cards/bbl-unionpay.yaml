@@ -1,0 +1,18 @@
+name: BBL UnionPay
+issuer: Bangkok Bank
+bill_cycle_pattern: bbl       # day 10, due +15 (the 25th): user, 2026-11-26, before the first statement
+statement_numbers: {}         # card numbers unknown until the first statement
+notes: |
+  Bangkok Bank's UnionPay credit card (UnionPay Platinum, the UnionPay credit
+  card on the bank's site; the name stays short, without the tier). Opened by
+  Takumi in Nov 2026 with a supplement for Baiboon (user, 2026-11-26); Nuta
+  holds none. No transactions yet at registration.
+
+  Earning: Thank You Rewards, 1 point per ฿25 at home and abroad (bank page,
+  read 2026-10-01), so `บาทต่อ 1 คะแนน` = 25 and the plain `Card` earning class.
+  The card's standing 2% all-spend cashback (฿2,000+ a month, principal and
+  supplement pooled) is a Promotion Bureau campaign, `lib/bureau/bbl_unionpay.py`.
+
+  Open until the first statement: whether the cycle or due date moves off
+  weekends and holidays, whether points are worked per slip or per cycle,
+  the card numbers, and the statement PDF's password format.

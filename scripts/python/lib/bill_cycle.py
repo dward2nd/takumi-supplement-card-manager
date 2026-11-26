@@ -188,6 +188,14 @@ class GrabCycle(DueAfterDays):
     description = "Grab PayLater — bill cycle day 1, due day 7 of the same month"
 
 
+class BBLCycle(DueAfterDays):
+    """Bangkok Bank — day 10, due 15 days later (the 25th). From the user, 2026-11-26, before
+    the first statement: whether either date moves off a weekend or holiday isn't known yet."""
+
+    key, bill_day, due_days = "bbl", 10, 15
+    description = "Bangkok Bank — bill cycle day 10, due +15 days"
+
+
 class UOBCycle(DueAfterDays):
     key, bill_day, due_days = "uob", 25, 20
     description = ("UOB — bill cycle day 25 (shift earlier on weekend/Thai holiday), "
@@ -209,7 +217,8 @@ class UOBCycle(DueAfterDays):
 
 
 PATTERNS: dict[str, BillCycle] = {c.key: c() for c in (
-    KrungsriCycle, KTCCycle, TTBCycle, AEONCycle, KBankCycle, LotusCycle, SPayLaterCycle, GrabCycle, UOBCycle)}
+    KrungsriCycle, KTCCycle, TTBCycle, AEONCycle, KBankCycle, LotusCycle, SPayLaterCycle, GrabCycle, BBLCycle,
+    UOBCycle)}
 
 BillCyclePattern = BillCycle   # the name callers have typed against
 
