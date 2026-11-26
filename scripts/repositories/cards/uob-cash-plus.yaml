@@ -16,10 +16,15 @@ notes: |
   (5 Oct, her UOB One, cycle 2026-10-22) became a 12-month cash loan at 8.99%
   a year. Takumi drew ฿20,000 on this card and paid it into UOB One (slip
   27 Oct, memo `นุตาผ่อนจ่าย UNITRIP`), so Nuta's UOB One books a ฿20,000
-  payment and her ledger carries `[บัตรหลัก] CASH LOAN INSTALLMENT NN/12`
-  at ฿1,748.94 a term (amortised: 20,000 at 8.99%/12 a month over 12 months).
-  The bank's line name and the first and last terms' amounts are unconfirmed
-  until the first statement.
+  payment. Second loan 16 Nov: ฿16,000 for UNITHAI TRIP ฿15,976 (slip
+  26 Nov, memo `ทัวร์จีนนุตา`).
 
-  Open: the statement's cycle and due dates, whether it bundles into the UOB
-  statement PDF, and the card number for `statement_numbers`.
+  The UOB app (2026-11-26) shows each term as two lines, both loans named
+  `MPFCDM00002`: `MONTHLY PRIN NN/12` (fixed instalment − balance × 8.99%/12,
+  rising monthly) and `MONTHLY INT NN/12` (balance × 8.99% × actual days/365).
+  Term 01/12 sat in the 2026-11-25 cycle, so the `uob` pattern holds. Terms
+  vary every month, so /populate-installment can't copy them: enter each from
+  the app or statement. See docs/cards/uob-cash-plus.md.
+
+  Open: whether it bundles into the UOB statement PDF, and the card number
+  for `statement_numbers`.

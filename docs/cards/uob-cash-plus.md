@@ -31,19 +31,40 @@ Nuta's `UNITHAI TRIP CO.,LTD. BANGKOK TH` ฿20,000 (5 Oct 2026) was charged to 
 
 The slip (27 Oct 16:02, Takumi's One Account → UOB One card …4672) is attached to both UOB One 2026-10 bills, Nuta's and Takumi's. On Nuta's side it stands for her payment, settled by taking on the loan. On Takumi's side it is a bank payment like any other ([[../databases/takumi-bills#Payments|payments]]). Her bill still owes ฿12,360.14, and Takumi's next UOB One slip covers `nuta: 12,824.18`: her statement-line share of ฿32,824.18 less this ฿20,000.
 
-The term amount ฿1,748.94 is the amortised payment for ฿20,000 at 8.99% ÷ 12 a month over 12 months. The bank may round the first and last terms differently. Everything here waits on the first statement:
+The term amount ฿1,748.94 is the amortised payment for ฿20,000 at 8.99% ÷ 12 a month over 12 months. The single-line placeholder was replaced on 2026-11-26 by what the UOB app shows: see [[#Statement lines: principal and interest (UOB app, 2026-11-26)|statement lines]]. Still open until the first statement PDF:
 
-- the bank's name for the line (`CASH LOAN INSTALLMENT` is a placeholder);
-- the first and last terms' amounts;
-- the statement cycle. The card YAML assumes the UOB credit cards' `uob` pattern (cycle on the 25th, shifted earlier off weekends and holidays; due 20 days later), so term 1 is filed on 2026-11-25, due 2026-12-15. The loan was drawn after the 22 Oct close;
-- whether it prints on the bundled UOB statement, and its card number (`statement_numbers` is empty).
+- whether it prints on the bundled UOB statement, and its card number (`statement_numbers` is empty);
+- the last term's amounts.
 
-Later terms come from `/populate-installment` as each cycle closes.
+## Statement lines: principal and interest (UOB app, 2026-11-26)
+
+The UOB app shows each loan's term as **two lines**, a principal (`PRIN`) and an interest (`INT`) line, both under the same name `MPFCDM00002` for both loans. Term 01/12 of each, in the cycle closing **2026-11-25**, which confirms the assumed `uob` cycle:
+
+| Loan | Row in Nuta's ledger | ยอดชำระ | How the bank gets it |
+|---|---|---:|---|
+| ฿20,000 (drawn 27 Oct) | `[บัตรหลัก] MPFCDM00002 MONTHLY PRIN 01/12` | 1,599.11 | ฿1,748.94 instalment − 20,000 × 8.99% ÷ 12 (฿149.83) |
+| | `[บัตรหลัก] MPFCDM00002 MONTHLY INT 01/12` | 147.78 | 20,000 × 8.99% × 30/365 (27 Oct–25 Nov, both ends counted) |
+| ฿16,000 (drawn 16 Nov) | `[บัตรหลัก] MPFCDM00002 MONTHLY PRIN 01/12` | 1,279.28 | ฿1,399.15 instalment − 16,000 × 8.99% ÷ 12 (฿119.87) |
+| | `[บัตรหลัก] MPFCDM00002 MONTHLY INT 01/12` | 39.41 | 16,000 × 8.99% × 10/365 (16–25 Nov) |
+
+So principal follows the 30/360 amortisation table: the fixed instalment less a flat month's interest on the opening balance, rising each month. Interest is charged on the **actual days** since the last statement (from the draw date for term 1). A term is therefore never the nominal instalment: term 1 came to ฿1,746.89 and ฿1,318.69, ฿3,065.58 in all against the ฿3,148.09 first estimated. Both formulas reproduce the app to the satang, but they are inferred from one month. Check them against the next term.
+
+The two placeholder rows (`[บัตรหลัก] CASH LOAN INSTALLMENT 01/12` ฿1,748.94 and ฿1,399.15) were archived and the four rows above written in their place. `[DRAFT] UOB Cash Plus 2026-11` on Nuta's Bills DB was refreshed to ฿3,065.58.
+
+**`/populate-installment` can't produce later terms.** It copies the seed term's amount into the next term, and it tells plans apart by amount within 2%. Both PRIN lines grow every month, and the INT lines change with the balance and the day count: the ฿16,000 loan's interest jumps from ฿39.41 (10 days) to about ฿108.77 (30 days to 25 Dec), out of its own cluster. By the formulas above, term 02/12 should be PRIN ฿1,611.09 + INT ≈ ฿135.96 on the ฿20,000 loan and PRIN ฿1,288.87 + INT ≈ ฿108.77 on the ฿16,000 one. Until a cash-loan class computes the schedule, enter each term from the app or the statement, and pass `skip_populate_installments: true` to `/prepare-bill` for a Cash Plus bill.
 
 ## Second loan (2026-11-16)
 
 Nuta's `UNITHAI TRIP CO.,LTD. BANGKOK TH` ฿15,976 (UOB One, 16 Nov 2026, cycle 2026-11-25, 1% cashback) went the same way: a ฿16,000 Cash Plus loan over 12 months at 8.99% a year, drawn the same day (user). The same amortisation formula gives **฿1,399.15 a term** (฿16,789.80 in all, ฿789.80 interest). The user expects term 1 in the same cycle as the first loan's, so `[บัตรหลัก] CASH LOAN INSTALLMENT 01/12` ฿1,399.15 is filed on BC 2026-11-25, due 2026-12-15, next to the first plan's ฿1,748.94.
 
-The two plans share the line name. `/populate-installment` tells them apart by per-term amount (`lib/installments.py` clusters a `(base, total)` group within 2%), so each gets its own `02/12` and later terms. If the statement prints the two loans under different names, rename the rows to match. The first statement also settles whether a loan drawn on 16 Nov, before the 25 Nov close, really bills its first term that cycle.
+The app shows both loans under the same name, `MPFCDM00002`, and the 16 Nov loan does bill its first term in the 25 Nov cycle, for 10 days' interest ([[#Statement lines: principal and interest (UOB app, 2026-11-26)|above]]).
 
-The payment that moves the charge off UOB One (the first loan's `ชำระบางส่วน` rows) waits on Takumi's slip: its amount (฿16,000 or ฿15,976) and date.
+Takumi paid **฿15,976** into UOB One on 26 Nov 2026, 12:17, from his One Account to card …4672 with memo `ทัวร์จีนนุตา`. He paid the charge, not the ฿16,000 loan. The rows follow the first loan's:
+
+| Ledger | Card | Row | Amount | Cycle |
+|---|---|---|---:|---|
+| Nuta | UOB One | `ชำระบางส่วน`, dated 26 Nov | −15,976.00 | 2026-11-25 |
+| Takumi | UOB One | `ชำระบางส่วน`, Note `Slip memo: ทัวร์จีนนุตา` | −15,976.00 | 2026-11-25 |
+| Takumi | UOB One | `โอนยอดจากนุตา`, `×0` | +15,976.00 | 2026-11-25 |
+
+The slip is attached to both UOB One 2026-11 bills, and both stay `[DRAFT]` and unpaid. Nuta's bill (฿30,536.06) still owes ฿14,560.06.
