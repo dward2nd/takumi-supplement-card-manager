@@ -50,6 +50,8 @@ Modules:
              CardX UQC
   ttb_shopping  ttb MUJI (MUJC) and Big C / GO Wholesale (BGO), Oct–Dec 2026, one quota per campaign
   cardx_hypermarket  CardX HY1 per hypermarket slip (monthly) and HYP ฿3,000 at ฿300k (campaign), Oct–Dec 2026
+  central_invite  Central The 1 "T1 Invite" (by invitation): ฿200 per whole ฿10,000 over 16 Nov 2026 – 15 Jan 2027,
+             ฿400 per primary account (one campaign quota)
   kbank_makro  KBank MKR at Makro (฿100/240 bands, and ฿1,500 per ฿300,000), Oct–Dec 2026 — per card
   lady_fashionista  Krungsri Lady's LADY'S FASHIONISTA, ฿140 per whole ฿2,000 slip at seven fashion brands, Jan 2025 –
              Dec 2026 — per card account; ×0 on the slips that earn
@@ -84,6 +86,7 @@ from .base import (CASHBACK, ELIGIBLE, EXCLUDED, POINTS, RIGHTS, UNCERTAIN, Allo
 from .bts import BTSDrawPromotion
 from .capped import CreditCapPromotion
 from .cardx_hypermarket import CardXHypermarketBonus, CardXHypermarketPromotion
+from .central_invite import CentralInvitePromotion
 from .dlv3 import DLV3Promotion
 from .epw538 import EPW538Promotion
 from .instant import InstantDiscountPromotion
@@ -131,6 +134,8 @@ PROMOTIONS: tuple[type[BasePromotion], ...] = (
     *lady_fashionista.ACCOUNTS,
     # 2026-11-01: UnionPay 15% off MRT fares (16 Mar – 31 Dec 2026, no registration), on Takumi's AEON UnionPay.
     *unionpay_mrt.ACCOUNTS,
+    # 2026-11-26: Central The 1's invitation-only ฿200 per ฿10,000 (16 Nov – 15 Jan), terms typed in by the user.
+    CentralInvitePromotion,
 )
 
 
@@ -147,7 +152,7 @@ def promotion_for(bureau_name: str, start: dt.date, end: dt.date) -> BasePromoti
 
 __all__ = ["CASHBACK", "ELIGIBLE", "EXCLUDED", "POINTS", "RIGHTS", "UNCERTAIN", "Allocation",
            "AEONRabbitCashback", "AEONUnionPayCashback", "AEONWorldCashback", "BTSDrawPromotion", "BasePromotion", "CardAccount",
-           "CardXHypermarketBonus", "CardXHypermarketPromotion",
+           "CardXHypermarketBonus", "CardXHypermarketPromotion", "CentralInvitePromotion",
            "CardNumber", "CashbackPromotion", "CreditCapPromotion", "DLV3Promotion", "DrawRightsPromotion",
            "EPW538Promotion", "IS3Promotion", "IS4Promotion", "InstantDiscountPromotion", "LBS3Promotion", "LadderPromotion", "NTW1Promotion",
            "NW3Promotion", "NW4Promotion", "ON3Promotion", "ON4Promotion", "PROMOTIONS", "Rule", "SlipCountPromotion", "SlipCreditPromotion", "SPW592Promotion", "SPW796Promotion", "TTBBangchakPromotion", "TTBBigCGoPromotion", "TTBCaltexPromotion",
