@@ -29,6 +29,6 @@ notes: |
 
   First statement (25 Nov 2026): a PDF of its own (account 816-…, the credit
   cards' bundle is 810-…), card 4043 65XX XXXX 5024, the four MPFCDM lines
-  exactly as the app showed them (฿3,065.58). lib/statements/uob.py can't
-  read it yet: the heading shares a line with the card number and the total
-  is a bare `TOTAL BALANCE`, so its bill is filed by hand with /update-bill.
+  exactly as the app showed them (฿3,065.58). Its heading shares a line with
+  the card number and the total is a bare `TOTAL BALANCE`. lib/statements/uob.py
+  reads both since 2026-11-27, so /record-statement records it like the cards.

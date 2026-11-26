@@ -14,6 +14,11 @@ glued to its description (`… SAN FRANCISCO USD107.00`); it moves to the note.
 The printed STATEMENT DATE can sit off the cycle (27 Sep 2026 for the cycle
 that closed 25 Sep): the parser keeps what's printed, and /record-statement
 maps it onto the card's cycle (`lib.statements.record.ledger_cycle`).
+
+UOB Cash Plus (the cash card) comes as a PDF of its own (first seen 25 Nov
+2026) with a single product: the heading shares a line with the card number
+(`UOB CASH PLUS 4043 65XX XXXX 5024`) and the total is a bare
+`TOTAL BALANCE 3,065.58`, with no `- <PRODUCT>`. Both forms are read here.
 """
 
 from __future__ import annotations
@@ -32,6 +37,10 @@ _LINE = re.compile(
     r"^(\d\d) ([A-Z]{3}) (\d\d) ([A-Z]{3}) (.+?) ([\d,]+\.\d\d)(?: (CR)| [\d,]+\.\d\d)?$"
 )
 _TOTAL = re.compile(r"^TOTAL BALANCE - (.+?) (-?[\d,]+\.\d\d)( CR)?$")
+# Single-product statements (UOB Cash Plus, 25 Nov 2026): heading and card number
+# on one line, and a total with no product name.
+_HEADING_WITH_CARD = re.compile(r"^(UOB [A-Z ]+?) \d{4} \d\dXX XXXX (\d{4})$")
+_BARE_TOTAL = re.compile(r"^TOTAL BALANCE (-?[\d,]+\.\d\d)( CR)?$")
 # A page break can fall between a product heading and its first card number
 # (`UOB ONE` / `Page 3/9` / the column header / `5432 15XX XXXX 4672`, 26 Jul 2026).
 _PAGE_BREAK = re.compile(r"^(Page \d+/\d+|POST DATE TRANS DATE DESCRIPTION.*)$")
@@ -73,10 +82,19 @@ def parse(text: str) -> Statement:
             for s in sections
         )
 
+    def close_account(total: float) -> None:
+        nonlocal product, sections
+        accounts.append(CardAccount(product=product, total=total, sections=close_section_list()))
+        product, sections = None, []
+
     for i, ln in enumerate(lines):
         nxt = next((l for l in lines[i + 1:] if l and not _PAGE_BREAK.match(l)), "")
         if _HEADING.match(ln) and _CARD.match(nxt):
             product, sections = ln, []
+            continue
+        if (m := _HEADING_WITH_CARD.match(ln)):
+            product = m.group(1)
+            sections = [{"number": m.group(2), "prev": 0.0, "lines": []}]
             continue
         if product is None:
             continue
@@ -90,9 +108,10 @@ def parse(text: str) -> Statement:
         if (m := _TOTAL.match(ln)):
             if m.group(1) != product:
                 raise StatementParseError(f"UOB: total for {m.group(1)!r} inside {product!r}")
-            total = parse_amount(m.group(2)) * (-1 if m.group(3) else 1)
-            accounts.append(CardAccount(product=product, total=total, sections=close_section_list()))
-            product, sections = None, []
+            close_account(parse_amount(m.group(2)) * (-1 if m.group(3) else 1))
+            continue
+        if (m := _BARE_TOTAL.match(ln)):
+            close_account(parse_amount(m.group(1)) * (-1 if m.group(2) else 1))
             continue
         if (m := _LINE.match(ln)) and sections:
             name, credit, note = m.group(5), bool(m.group(7)), None

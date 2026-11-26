@@ -45,6 +45,27 @@ The friends' bills are drafted when a cycle closes. Takumi asked for his own to 
 
 UOB Makro 2026-10 was ฿0.00 in the app (user: the waived fee and the points). The waived `CR CARD MEMBERSHIP FEE - INC OF VAT` −฿2,033.00 and Baiboon's `PWP: MAKRO_CHIANGMAI 2` −฿171.43 print on this statement, but both had already paid the 2026-09 bill (see *Payments*). The ledger estimate gave −฿2,204.43 because it counts those credits again. It skips their `[ยกยอดมาจาก 2026-09]` cancelling rows as household brackets. The draft was set to the app's ฿0.00.
 
+**The 25 Nov 2026 UOB statements** (due 18 Dec) were audited and recorded on 2026-11-27. All 164 of Takumi's lines were already in his ledger, so nothing was created:
+
+| Bill | Printed | Split | Estimate | Off by |
+|---|---:|---|---:|---:|
+| UOB World 2026-11 | 8,478.79 | เว็บ 6,966.86 + ใบบุญ 1,706.93 − 195.00 carried | 8,673.79 | −195.00 |
+| UOB One 2026-11 | 34,607.62 | เว็บ 725.18 + ใบบุญ 164.00 + นุตา 33,718.44 | 32,165.90 | +2,441.72 |
+| UOB Makro 2026-11 | 400.00 | เว็บ 138.00 + ใบบุญ 262.00 | 400.00 | 0 |
+| UOB Cash Plus 2026-11 | 3,065.58 | นุตา 3,065.58 | 3,148.09 | −82.51 |
+
+- **UOB World**: the −฿195.00 is October's overpayment ([[#Overpayments]]), printed as a credit. The statement nets it.
+- **UOB One**:
+  - Nuta's section had six lines nobody had recorded, ฿2,785 in all. Grab ฿31 (31 Oct), ฿90 (2 Nov) and ฿100 (11 Nov), and in Chonburi `(M300)M.K.SUKI -C.CHON` ฿1,038, `UNIQLO-C.PLAZA CHONBUR` ฿1,472 (10 Nov) and `LINEPAY*PF LINE 362249` ฿54 (11 Nov). They were added from the statement (user).
+  - Two of her 24 Nov rows weren't printed, Grab ฿163 and a Shopee refund −฿134. They post on the 25 Dec statement, so they moved to cycle 2026-12-25.
+  - Takumi's estimate predated the bank's `UOB One Cashback 1%` −฿314.28, which posts on the statement date.
+  - With posting dates stamped, Bureau `2026M11 — UOB One cb 1%` came to exactly ฿314.28. Nuta's 23 Nov Shopee ฿452 posted on 25 Nov and moved to December.
+  - Her household credits were recomputed in place, keeping the tracker link: 1% ฿292.48 → ฿313.60, 5% ฿133.90 → ฿144.95. Her bill was refreshed from ฿30,536.06 to ฿33,259.89.
+  - Her −฿117 Shopee refund is dated 19 Nov in the ledger but printed 11 Nov, so the recording doesn't pair it. The cycle and amount are right.
+- **UOB Makro**: Baiboon's row became `[บัตรหลัก] MAKRO_MAE RIM CHIANG MAI TH`.
+- **UOB Cash Plus** has its own PDF (see [[../cards/uob-cash-plus|uob-cash-plus]]). The estimate predated Nuta's PRIN/INT rows.
+- The two `CB-020` credits are open: the statement puts `SEP26` on World and `AUG26` on One, the reverse of the ledger (see [[../promotions/uob-epw538|uob-epw538]]).
+
 First batch, 2026-10-06, BC 2026-10-05:
 
 | Draft | `ยอดชำระ` | Split |
