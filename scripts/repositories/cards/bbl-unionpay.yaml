@@ -9,7 +9,12 @@ notes: |
   holds none. No transactions yet at registration.
 
   Earning: Thank You Rewards, 1 point per ฿25 at home and abroad (bank page,
-  read 2026-10-01), so `บาทต่อ 1 คะแนน` = 25 and the plain `Card` earning class.
+  read 2026-10-01, confirmed by its PDF 2026-11-27), so `บาทต่อ 1 คะแนน` = 25
+  and the plain `Card` earning class. Points convert to miles: 3,000 → 1,000
+  ROP, 1,500 → 500 FlyerBonus, 1 → 1 AirAsia point.
+
+  Annual fee: waived in the first year, and in later years once the card is
+  used for ฿5,000 in a year.
   The card's standing 2% all-spend cashback (฿2,000+ a month, principal and
   supplement pooled) is a Promotion Bureau campaign, `lib/bureau/bbl_unionpay.py`.
 
